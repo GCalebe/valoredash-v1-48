@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // Import components
 import DashboardHeader from "@/components/metrics/DashboardHeader";
 import ChatMetricsTab from "@/components/metrics/ChatMetricsTab";
-import UTMMetricsTab from "@/components/metrics/UTMMetricsTab";
+// import UTMMetricsTab from "@/components/metrics/UTMMetricsTab";
 // PageTest removido conforme solicitado
 
 const MetricsDashboard = () => {
@@ -43,15 +43,15 @@ const MetricsDashboard = () => {
 
         {/* Tabs for Chat and UTM Metrics */}
         <Tabs defaultValue="chat" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className="grid w-full grid-cols-1 mb-8">
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageCircle className="h-4 w-4" />
               Métricas de Chat
             </TabsTrigger>
-            <TabsTrigger value="utm" className="flex items-center gap-2">
+            {/* <TabsTrigger value="utm" className="flex items-center gap-2">
               <Share2 className="h-4 w-4" />
               Métricas UTM
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           {/* Chat Metrics Tab */}
@@ -60,14 +60,14 @@ const MetricsDashboard = () => {
           </TabsContent>
 
           {/* UTM Metrics Tab */}
-          <TabsContent value="utm">
+          {/* <TabsContent value="utm">
             <UTMMetricsTab
               utmMetrics={utmMetrics}
               utmLoading={utmLoading}
               selectedCampaign={selectedCampaign}
               onCampaignChange={setSelectedCampaign}
             />
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
         
         {/* Componente de teste removido */}
