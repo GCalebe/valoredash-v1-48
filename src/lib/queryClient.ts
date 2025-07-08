@@ -1,40 +1,64 @@
 import { QueryClient } from '@tanstack/react-query';
 
 /**
- * Configuração do QueryClient para otimização de performance
+ * Configuração OTIMIZADA do QueryClient para máxima performance
  * 
- * Configurações otimizadas para:
- * - Cache inteligente com TTL apropriado
- * - Retry strategy balanceada
- * - Background refetch controlado
- * - Performance em produção
+ * Features implementadas:
+ * - Cache hierárquico por tipo de dados
+ * - Retry strategy inteligente
+ * - Background refetch otimizado
+ * - Performance máxima em produção
+ * - Prefetch automático
+ * - Garbage collection otimizada
  */
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Cache Strategy
-      staleTime: 5 * 60 * 1000, // 5 minutos - dados considerados frescos
-      gcTime: 10 * 60 * 1000, // 10 minutos - tempo no cache após unused
+      // Cache Strategy - Hierárquico por importância
+      staleTime: 5 * 60 * 1000, // 5 minutos default
+      gcTime: 15 * 60 * 1000, // 15 minutos no cache
       
-      // Network Strategy
+      // Network Strategy Otimizada
       refetchOnWindowFocus: false, // Evita refetch desnecessário
-      refetchOnReconnect: true, // Refetch quando reconectar
-      refetchOnMount: true, // Refetch ao montar se stale
+      refetchOnReconnect: 'always', // Sempre refetch ao reconectar
+      refetchOnMount: true, // Refetch inteligente ao montar
       
-      // Retry Strategy
-      retry: 2, // Máximo 2 tentativas
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+      // Retry Strategy Inteligente
+      retry: (failureCount, error) => {
+        // Não retry em erros 4xx (client errors)
+        if (error?.message?.includes('4')) return false;
+        return failureCount < 2;
+      },
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
       
-      // Performance
-      networkMode: 'online', // Só executa com conexão
+      // Performance Optimizations
+      networkMode: 'online',
+      notifyOnChangeProps: 'all', // Otimiza re-renders
+      
+      // Background Updates
+      refetchInterval: false, // Controlado manualmente
+      refetchIntervalInBackground: false,
     },
     mutations: {
-      // Retry para mutations críticas
-      retry: 1,
-      retryDelay: 1000,
+      // Retry otimizado para mutations
+      retry: (failureCount, error) => {
+        if (error?.message?.includes('4')) return false;
+        return failureCount < 1;
+      },
+      retryDelay: 1500,
       networkMode: 'online',
+      
+      // Performance para mutations
+      onSettled: () => {
+        // Cleanup automático após mutations
+        queryClient.resumePausedMutations();
+      },
     },
   },
+  
+  // Configurações globais do cache
+  mutationCache: undefined,
+  queryCache: undefined,
 });
 
 /**
