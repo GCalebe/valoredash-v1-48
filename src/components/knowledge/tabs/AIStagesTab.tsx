@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Edit,
@@ -28,12 +28,13 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAIStagesQuery, useCreateAIStageMutation, useUpdateAIStageMutation, useDeleteAIStageMutation, useReorderAIStagesMutation } from "@/hooks/useAIStagesQuery";
+import type { AIStage } from "@/hooks/useAIStagesQuery";
 
 const AIStagesTab = () => {
   const { toast } = useToast();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingStage, setEditingStage] = useState<any>(null);
+  const [editingStage, setEditingStage] = useState<AIStage | null>(null);
 
   // Use Supabase hooks
   const { data: stages = [], isLoading, error } = useAIStagesQuery();
@@ -41,65 +42,6 @@ const AIStagesTab = () => {
   const updateStageMutation = useUpdateAIStageMutation();
   const deleteStageMutation = useDeleteAIStageMutation();
   const reorderStagesMutation = useReorderAIStagesMutation();
-
-  const [localStages, setLocalStages] = useState<any[]>([
-    {
-      id: 1,
-      name: "Saudação Inicial",
-      description: "Primeira interação com o usuário",
-      trigger: "Início da conversa",
-      actions: ["Cumprimentar o usuário", "Perguntar como pode ajudar"],
-      nextStage: "Identificação da Necessidade",
-      order: 1,
-      isActive: true,
-    },
-    {
-      id: 2,
-      name: "Identificação da Necessidade",
-      description: "Entender o que o usuário precisa",
-      trigger: "Usuário responde à saudação",
-      actions: [
-        "Fazer perguntas qualificadoras",
-        "Identificar o tipo de solicitação",
-      ],
-      nextStage: "Fornecimento de Informações",
-      order: 2,
-      isActive: true,
-    },
-    {
-      id: 3,
-      name: "Fornecimento de Informações",
-      description: "Fornecer respostas baseadas na base de conhecimento",
-      trigger: "Necessidade identificada",
-      actions: ["Buscar informações relevantes", "Fornecer resposta detalhada"],
-      nextStage: "Confirmação de Satisfação",
-      order: 3,
-      isActive: true,
-    },
-    {
-      id: 4,
-      name: "Confirmação de Satisfação",
-      description: "Verificar se a necessidade foi atendida",
-      trigger: "Informação fornecida",
-      actions: ["Perguntar se ajudou", "Oferecer ajuda adicional"],
-      nextStage: "Encerramento",
-      order: 4,
-      isActive: true,
-    },
-    {
-      id: 5,
-      name: "Encerramento",
-      description: "Finalizar a conversa de forma cordial",
-      trigger: "Usuário satisfeito ou não precisa de mais ajuda",
-      actions: [
-        "Agradecer pela interação",
-        "Deixar canal aberto para futuras dúvidas",
-      ],
-      nextStage: "Fim",
-      order: 5,
-      isActive: true,
-    },
-  ]);
 
   const [newStage, setNewStage] = useState({
     name: "",
@@ -125,7 +67,7 @@ const AIStagesTab = () => {
       trigger: newStage.trigger,
       actions: newStage.actions.split("\n").filter((action) => action.trim()),
       next_stage: newStage.nextStage,
-      order_position: stages.length + 1,
+      order: stages.length + 1,
       is_active: true,
     };
 
@@ -222,24 +164,40 @@ const AIStagesTab = () => {
     }
   };
 
-  const handleToggleStage = (id: number) => {
-    setStages(
-      stages.map((stage) =>
-        stage.id === id ? { ...stage, is_active: !stage.is_active } : stage,
-      ),
-    );
+  const handleToggleStage = async (id: number) => {
+    const stage = stages.find(s => s.id === id);
+    if (!stage) return;
+
+    try {
+      await updateStageMutation.mutateAsync({
+        id,
+        is_active: !stage.is_active,
+      });
+      toast({
+        title: "Etapa atualizada",
+        description: `Etapa ${stage.is_active ? 'desativada' : 'ativada'} com sucesso!`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar etapa.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleMoveStage = (id: number, direction: "up" | "down") => {
-    const stageIndex = stages.findIndex((stage) => stage.id === id);
+  const handleMoveStage = async (id: number, direction: "up" | "down") => {
+    const sortedStages = [...stages].sort((a, b) => a.order - b.order);
+    const stageIndex = sortedStages.findIndex((stage) => stage.id === id);
+    
     if (
       (direction === "up" && stageIndex === 0) ||
-      (direction === "down" && stageIndex === stages.length - 1)
+      (direction === "down" && stageIndex === sortedStages.length - 1)
     ) {
       return;
     }
 
-    const newStages = [...stages];
+    const newStages = [...sortedStages];
     const swapIndex = direction === "up" ? stageIndex - 1 : stageIndex + 1;
 
     [newStages[stageIndex], newStages[swapIndex]] = [
@@ -248,14 +206,27 @@ const AIStagesTab = () => {
     ];
 
     // Update order numbers
-    newStages.forEach((stage, index) => {
-      stage.order_position = index + 1;
-    });
+    const reorderData = newStages.map((stage, index) => ({
+      id: stage.id,
+      order: index + 1,
+    }));
 
-    setStages(newStages);
+    try {
+      await reorderStagesMutation.mutateAsync(reorderData);
+      toast({
+        title: "Etapas reordenadas",
+        description: "Ordem das etapas atualizada com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao reordenar etapas.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const sortedStages = [...stages].sort((a, b) => a.order_position - b.order_position);
+  const sortedStages = [...stages].sort((a, b) => a.order - b.order);
 
   if (isLoading) {
     return (

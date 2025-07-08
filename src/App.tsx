@@ -24,7 +24,7 @@ import { QueryProviderWithErrorBoundary } from "./providers/QueryProvider";
 
 const App = () => (
   <QueryProviderWithErrorBoundary>
-    <ThemeProvider defaultTheme="light">
+    <ThemeProvider defaultTheme="dark">
       <ThemeSettingsProvider>
         <TooltipProvider>
           <Toaster />

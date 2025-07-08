@@ -113,7 +113,7 @@ const AIPersonalityTab = () => {
 
   const handleSave = async () => {
     try {
-      const personalityData = {
+      const personalityPayload = {
         name: settings.name,
         description: settings.description,
         tone: settings.tone,
@@ -130,15 +130,16 @@ const AIPersonalityTab = () => {
         response_time: settings.responseTime,
         audio_response: settings.audioResponse,
         response_creativity: settings.responseCreativity,
+        is_active: true,
       };
 
       if (personalityData && personalityData.length > 0) {
         await updatePersonalityMutation.mutateAsync({
           id: personalityData[0].id,
-          ...personalityData
+          ...personalityPayload
         });
       } else {
-        await createPersonalityMutation.mutateAsync(personalityData);
+        await createPersonalityMutation.mutateAsync(personalityPayload);
       }
 
       toast({

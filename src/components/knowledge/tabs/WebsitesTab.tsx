@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Plus, Search, Eye, RefreshCw, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Search, Eye, RefreshCw, Trash2, ExternalLink, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -276,12 +276,12 @@ const WebsitesTab = () => {
 
       {/* Websites List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {websitesQuery.isLoading ? (
+        {isLoading ? (
           // Loading skeletons
           Array.from({ length: 6 }).map((_, index) => (
             <WebsiteCardSkeleton key={index} />
           ))
-        ) : websitesQuery.isError ? (
+        ) : error ? (
           // Error state
           <div className="col-span-full text-center py-12 text-red-500">
             <Globe className="h-16 w-16 mx-auto mb-4 opacity-30" />
@@ -289,12 +289,12 @@ const WebsitesTab = () => {
               Erro ao carregar websites
             </h3>
             <p className="text-sm">
-              {websitesQuery.error?.message || "Ocorreu um erro inesperado."}
+              {error?.message || "Ocorreu um erro inesperado."}
             </p>
             <Button 
               variant="outline" 
               className="mt-4"
-              onClick={() => websitesQuery.refetch()}
+              onClick={() => window.location.reload()}
             >
               Tentar novamente
             </Button>
