@@ -1,0 +1,58 @@
+import React from 'react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
+import FilterComponent, { FilterComponentProps } from './FilterComponent';
+
+export interface FilterSidePanelProps extends Omit<FilterComponentProps, 'className'> {
+  /**
+   * Define se o painel lateral está aberto
+   */
+  isOpen: boolean;
+
+  /**
+   * Função chamada quando o painel é fechado
+   */
+  onClose: () => void;
+
+  /**
+   * Título do painel lateral
+   * @default 'Filtros'
+   */
+  title?: string;
+
+  /**
+   * Descrição do painel lateral
+   * @default 'Filtre os clientes por diferentes critérios'
+   */
+  description?: string;
+}
+
+/**
+ * Componente que adapta o FilterComponent para exibição em um painel lateral
+ */
+export const FilterSidePanel: React.FC<FilterSidePanelProps> = ({
+  isOpen,
+  onClose,
+  title = 'Filtros',
+  description = 'Filtre os clientes por diferentes critérios',
+  ...filterProps
+}) => {
+  return (
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="overflow-y-auto">
+        <SheetHeader className="mb-4">
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription>{description}</SheetDescription>
+        </SheetHeader>
+        <FilterComponent {...filterProps} />
+      </SheetContent>
+    </Sheet>
+  );
+};
+
+export default FilterSidePanel;

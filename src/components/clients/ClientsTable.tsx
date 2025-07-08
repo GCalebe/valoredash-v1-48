@@ -1,0 +1,236 @@
+import React, { useState, useEffect } from "react";
+import { Contact } from "@/types/client";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
+import { isDateInPeriod } from "@/utils/dateUtils";
+import { ColumnConfig, getColumnConfig } from "@/config/columnConfig";
+import ColumnConfigDialog from "./ColumnConfigDialog";
+import ClientTableRow from "./ClientTableRow";
+
+import { CustomFieldFilter } from "@/hooks/useClientsFilters";
+
+interface ClientsTableProps {
+  contacts: Contact[];
+  isLoading: boolean;
+  searchTerm: string;
+  statusFilter: string;
+  segmentFilter: string;
+  lastContactFilter: string;
+  customFieldFilters?: CustomFieldFilter[];
+  onViewDetails: (contact: Contact) => void;
+  onSendMessage: (contactId: string) => void;
+  onEditClient: (contact: Contact) => void;
+  displayConfig?: {
+    showTags?: boolean;
+    showConsultationStage?: boolean;
+    showCommercialInfo?: boolean;
+    showCustomFields?: boolean;
+  };
+}
+
+/**
+ * Componente de tabela para exibição de clientes
+ */
+const ClientsTable: React.FC<ClientsTableProps> = ({
+  contacts,
+  isLoading,
+  searchTerm,
+  statusFilter,
+  segmentFilter,
+  lastContactFilter,
+  customFieldFilters = [],
+  onViewDetails,
+  onSendMessage,
+  onEditClient,
+  displayConfig = {
+    showTags: true,
+    showConsultationStage: true,
+    showCommercialInfo: false,
+    showCustomFields: false,
+  },
+}: ClientsTableProps) => {
+  const [columnConfig, setColumnConfig] =
+    useState<ColumnConfig[]>(getColumnConfig());
+  const [isColumnConfigOpen, setIsColumnConfigOpen] = useState(false);
+
+  const filteredContacts = contacts.filter((contact) => {
+    // Filtro de busca por texto
+    const matchesSearch =
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contact.email &&
+        contact.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (contact.clientName &&
+        contact.clientName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (contact.clientType &&
+        contact.clientType.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (contact.phone && contact.phone.includes(searchTerm));
+
+    // Filtro de status
+    const matchesStatus =
+      statusFilter === "all" || contact.status === statusFilter;
+
+    // Filtro de segmento (kanban stage)
+    const matchesSegment =
+      segmentFilter === "all" || contact.kanbanStage === segmentFilter;
+
+    // Filtro de último contato
+    const matchesLastContact =
+      lastContactFilter === "all" ||
+      isDateInPeriod(contact.lastContact, lastContactFilter);
+
+    // Filtro de campos personalizados
+    const matchesCustomFields =
+      customFieldFilters.length === 0 ||
+      customFieldFilters.every((filter) => {
+        // Se o contato não tiver valores de campos personalizados, não corresponde ao filtro
+        if (!contact.customValues) return false;
+
+        const customValue = contact.customValues[filter.fieldId];
+        if (customValue === undefined) return false;
+
+        // Para campos de texto, verifica se o valor contém o texto do filtro
+        if (
+          typeof filter.value === "string" &&
+          typeof customValue === "string"
+        ) {
+          return customValue.toLowerCase().includes(filter.value.toLowerCase());
+        }
+
+        // Para campos de seleção única, verifica se o valor é igual
+        if (typeof filter.value === "string" && !Array.isArray(customValue)) {
+          return customValue === filter.value;
+        }
+
+        // Para campos de seleção múltipla, verifica se o valor está incluído
+        if (typeof filter.value === "string" && Array.isArray(customValue)) {
+          return customValue.includes(filter.value);
+        }
+
+        // Se o tipo de valor não corresponder, não corresponde ao filtro
+        return false;
+      });
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesSegment &&
+      matchesLastContact &&
+      matchesCustomFields
+    );
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-t-transparent border-blue-600 rounded-full animate-spin mx-auto"></div>
+          <p className="mt-2 text-gray-500">Carregando clientes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (filteredContacts.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">
+          {searchTerm ||
+          statusFilter !== "all" ||
+          segmentFilter !== "all" ||
+          lastContactFilter !== "all"
+            ? "Nenhum cliente encontrado com os filtros aplicados."
+            : "Nenhum cliente disponível. Adicione seu primeiro cliente!"}
+        </p>
+      </div>
+    );
+  }
+
+  // Obtém as colunas visíveis e ordenadas por prioridade
+  const visibleColumns = columnConfig
+    .filter((column) => column.isVisible)
+    .sort((a, b) => a.priority - b.priority)
+    .map((column) => column.id);
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg border">
+      <div className="flex justify-end p-2 border-b">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsColumnConfigOpen(true)}
+          className="flex items-center gap-1"
+        >
+          <Settings className="h-4 w-4" />
+          <span>Configurar Colunas</span>
+        </Button>
+      </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {/* Coluna de nome/cliente sempre visível */}
+            <TableHead>Cliente</TableHead>
+
+            {/* Colunas configuráveis */}
+            {visibleColumns.includes("email") && <TableHead>Email</TableHead>}
+            {visibleColumns.includes("clientName") && (
+              <TableHead>Nome da Empresa</TableHead>
+            )}
+            {visibleColumns.includes("status") && <TableHead>Status</TableHead>}
+            {visibleColumns.includes("kanbanStage") && (
+              <TableHead>Estágio</TableHead>
+            )}
+            {visibleColumns.includes("lastMessage") && (
+              <TableHead>Última Mensagem</TableHead>
+            )}
+            {visibleColumns.includes("tags") && <TableHead>Tags</TableHead>}
+            {visibleColumns.includes("consultationStage") && (
+              <TableHead>Consulta</TableHead>
+            )}
+            {visibleColumns.includes("budget") && (
+              <TableHead>Orçamento</TableHead>
+            )}
+            {visibleColumns.includes("clientObjective") && (
+              <TableHead>Objetivo</TableHead>
+            )}
+            {visibleColumns.includes("responsibleUser") && (
+              <TableHead>Responsável</TableHead>
+            )}
+
+            {/* Coluna de ações sempre visível */}
+            <TableHead className="w-[80px]">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredContacts.map((contact) => (
+            <ClientTableRow
+              key={contact.id}
+              contact={contact}
+              onViewDetails={onViewDetails}
+              onSendMessage={onSendMessage}
+              onEditClient={onEditClient}
+              columns={visibleColumns}
+            />
+          ))}
+        </TableBody>
+      </Table>
+
+      <ColumnConfigDialog
+        isOpen={isColumnConfigOpen}
+        onOpenChange={setIsColumnConfigOpen}
+        columnConfig={columnConfig}
+        onColumnConfigChange={setColumnConfig}
+      />
+    </div>
+  );
+};
+
+export default ClientsTable;
