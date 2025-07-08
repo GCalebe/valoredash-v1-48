@@ -64,10 +64,9 @@ const LeadsByArrivalFunnelChart: React.FC<LeadsByArrivalFunnelChartProps> = ({
         <FunnelChartSettings
           selectedStages={selectedStages}
           onStagesChange={setSelectedStages}
-          customDate={customDate}
-          setCustomDate={setCustomDate}
           showNoShowRate={showNoShowRate}
           onShowNoShowRateChange={setShowNoShowRate}
+          showDateFilters={false}
         />
       </CardHeader>
       <CardContent>

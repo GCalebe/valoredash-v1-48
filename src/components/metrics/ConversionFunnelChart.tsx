@@ -99,14 +99,9 @@ const ConversionFunnelChart: React.FC<ConversionFunnelChartProps> = ({
         <FunnelChartSettings
           selectedStages={selectedStages}
           onStagesChange={setSelectedStages}
-          customDate={customDate}
-          setCustomDate={setCustomDate}
-          selectedPeriod={selectedPeriod}
-          onPeriodChange={setSelectedPeriod}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
           showNoShowRate={showNoShowRate}
           onShowNoShowRateChange={setShowNoShowRate}
+          showDateFilters={false}
         />
       </CardHeader>
       <CardContent>

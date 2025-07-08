@@ -23,14 +23,15 @@ type DateRange = {
 interface FunnelChartSettingsProps {
   selectedStages: string[];
   onStagesChange: (stages: string[]) => void;
-  customDate: Date | null;
-  setCustomDate: (date: Date) => void;
+  customDate?: Date | null;
+  setCustomDate?: (date: Date) => void;
   selectedPeriod?: string;
   onPeriodChange?: (period: string) => void;
   dateRange?: DateRange | null;
   onDateRangeChange?: (range: DateRange | null) => void;
   showNoShowRate?: boolean;
   onShowNoShowRateChange?: (show: boolean) => void;
+  showDateFilters?: boolean;
 }
 
 export function FunnelChartSettings({
@@ -44,6 +45,7 @@ export function FunnelChartSettings({
   onDateRangeChange,
   showNoShowRate = false,
   onShowNoShowRateChange,
+  showDateFilters = false,
 }: FunnelChartSettingsProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { stages, loading } = useKanbanStages();
@@ -114,19 +116,21 @@ export function FunnelChartSettings({
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-6">
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">Período de Análise</h4>
-              <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
-                <MetricsFilters
-                  selectedPeriod={localPeriod}
-                  onPeriodChange={setLocalPeriod}
-                  selectedDateRange={localDateRange}
-                  onDateRangeChange={setLocalDateRange}
-                  showPeriodSelector={true}
-                  showDateRange={false}
-                />
+            {showDateFilters && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Período de Análise</h4>
+                <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
+                  <MetricsFilters
+                    selectedPeriod={localPeriod}
+                    onPeriodChange={setLocalPeriod}
+                    selectedDateRange={localDateRange}
+                    onDateRangeChange={setLocalDateRange}
+                    showPeriodSelector={true}
+                    showDateRange={false}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
