@@ -158,9 +158,9 @@ export function useDynamicFields(clientId: string | null) {
         });
       }
 
-      // Optimistically update the UI
-      setDynamicFields((prev) => {
-        const updated = { ...prev };
+      // Helper function to update a field in the dynamic fields state
+      const updateDynamicFieldValue = (prevFields: typeof dynamicFields, fieldId: string, newValue: any) => {
+        const updated = { ...prevFields };
 
         // Find and update the field in the appropriate category
         Object.keys(updated).forEach((category) => {
@@ -177,7 +177,10 @@ export function useDynamicFields(clientId: string | null) {
         });
 
         return updated;
-      });
+      };
+
+      // Optimistically update the UI
+      setDynamicFields(prev => updateDynamicFieldValue(prev, fieldId, newValue));
 
       try {
         // Save the value to the database

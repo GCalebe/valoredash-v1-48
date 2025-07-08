@@ -77,6 +77,16 @@ const CustomFieldRenderer = ({
 
       case "multi_select":
         const selectedValues = Array.isArray(value) ? value : [];
+        
+        // Função extraída para reduzir o aninhamento
+        const handleCheckboxChange = (option: string, isChecked: boolean) => {
+          if (isChecked) {
+            onChange([...selectedValues, option]);
+          } else {
+            onChange(selectedValues.filter((v: string) => v !== option));
+          }
+        };
+        
         return (
           <div
             className={`space-y-2 ${
@@ -90,15 +100,7 @@ const CustomFieldRenderer = ({
                   <input
                     type="checkbox"
                     checked={selectedValues.includes(option)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        onChange([...selectedValues, option]);
-                      } else {
-                        onChange(
-                          selectedValues.filter((v: string) => v !== option),
-                        );
-                      }
-                    }}
+                    onChange={(e) => handleCheckboxChange(option, e.target.checked)}
                     className="rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700"
                   />
                   <span className="text-sm text-gray-900 dark:text-white">

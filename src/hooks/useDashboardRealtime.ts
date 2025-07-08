@@ -1,15 +1,9 @@
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useClientStats } from "./useClientStats";
-import { useConversations } from "./useConversations";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface UseDashboardRealtimeProps {
-  refetchScheduleData?: () => Promise<void>;
-}
-
-export function useDashboardRealtime(props?: UseDashboardRealtimeProps) {
-  const { fetchConversations } = useConversations();
-  const { refetchStats } = useClientStats();
+export function useDashboardRealtime() {
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     console.log("Setting up dashboard-wide realtime updates");
@@ -27,8 +21,9 @@ export function useDashboardRealtime(props?: UseDashboardRealtimeProps) {
         async (payload) => {
           console.log("Client data changed:", payload);
           try {
-            await refetchStats();
-            await fetchConversations();
+            // Invalidate client stats queries
+            queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
           } catch (error) {
             console.error("Error refreshing data after client change:", error);
           }
@@ -49,7 +44,9 @@ export function useDashboardRealtime(props?: UseDashboardRealtimeProps) {
         async (payload) => {
           console.log("Chat history changed:", payload);
           try {
-            await fetchConversations();
+            // Invalidate conversation metrics queries
+            queryClient.invalidateQueries({ queryKey: ['conversation-metrics'] });
+            queryClient.invalidateQueries({ queryKey: ['conversation-metrics'] });
           } catch (error) {
             console.error(
               "Error refreshing conversations after chat change:",
@@ -73,10 +70,9 @@ export function useDashboardRealtime(props?: UseDashboardRealtimeProps) {
         async (payload) => {
           console.log("Schedule data changed:", payload);
           try {
-            await refetchStats();
-            if (props?.refetchScheduleData) {
-              await props.refetchScheduleData();
-            }
+            // Invalidate schedule and stats queries
+            queryClient.invalidateQueries({ queryKey: ['schedule'] });
+            queryClient.invalidateQueries({ queryKey: ['client-stats'] });
           } catch (error) {
             console.error(
               "Error refreshing stats after schedule change:",
@@ -100,10 +96,37 @@ export function useDashboardRealtime(props?: UseDashboardRealtimeProps) {
         async (payload) => {
           console.log("Services data changed:", payload);
           try {
-            await refetchStats();
+            // Invalidate services and stats queries
+            queryClient.invalidateQueries({ queryKey: ['services'] });
+            queryClient.invalidateQueries({ queryKey: ['client-stats'] });
           } catch (error) {
             console.error(
               "Error refreshing stats after services change:",
+              error,
+            );
+          }
+        },
+      )
+      .subscribe();
+
+    // Subscribe to changes in UTM tracking
+    const utmSubscription = supabase
+      .channel("dashboard_utm_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "utm_tracking",
+        },
+        async (payload) => {
+          console.log("UTM data changed:", payload);
+          try {
+            // Invalidate UTM metrics queries
+            queryClient.invalidateQueries({ queryKey: ['utm-metrics'] });
+          } catch (error) {
+            console.error(
+              "Error refreshing UTM data after change:",
               error,
             );
           }
@@ -117,6 +140,7 @@ export function useDashboardRealtime(props?: UseDashboardRealtimeProps) {
       chatSubscription.unsubscribe();
       scheduleSubscription.unsubscribe();
       servicesSubscription.unsubscribe();
+      utmSubscription.unsubscribe();
     };
-  }, [refetchStats, fetchConversations, props?.refetchScheduleData]);
+  }, [queryClient]);
 }

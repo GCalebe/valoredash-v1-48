@@ -1,8 +1,7 @@
-
 import { useCallback } from "react";
 
 export function useCalendarNavigation(
-  calendarViewType: "mes" | "semana" | "dia" | "agenda",
+  calendarViewType: "mes" | "semana" | "dia" | "lista",
   currentMonth: Date,
   selectedDate: Date | undefined,
   setCurrentMonth: (date: Date) => void,
@@ -28,10 +27,8 @@ export function useCalendarNavigation(
         setSelectedDate(prevDay);
         break;
       }
-      case "agenda": {
-        const prevMonth = new Date(currentMonth);
-        prevMonth.setMonth(prevMonth.getMonth() - 1);
-        setCurrentMonth(prevMonth);
+      case "lista": {
+        // No navigation needed for list view as it shows all events
         break;
       }
     }
@@ -57,10 +54,8 @@ export function useCalendarNavigation(
         setSelectedDate(nextDay);
         break;
       }
-      case "agenda": {
-        const nextMonth = new Date(currentMonth);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        setCurrentMonth(nextMonth);
+      case "lista": {
+        // No navigation needed for list view as it shows all events
         break;
       }
     }

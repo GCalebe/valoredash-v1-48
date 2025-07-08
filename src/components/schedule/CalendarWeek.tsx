@@ -22,7 +22,7 @@ export const CalendarWeek = React.memo(function CalendarWeek({
 }: CalendarWeekProps) {
   return (
     <div
-      className="grid grid-cols-7 border-b last:border-b-0 border-gray-200 dark:border-gray-700 flex-1 min-h-[90px]"
+      className="grid grid-cols-7 border-b last:border-b-0 border-gray-700 flex-1 min-h-[90px]"
       style={{ minHeight: 0 }}
     >
       {week.map((day) => {

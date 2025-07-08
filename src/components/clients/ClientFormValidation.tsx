@@ -6,12 +6,11 @@ interface ValidationResult {
   errors: { [key: string]: string };
 }
 
-export const validateClientForm = (
+// Funções auxiliares de validação para reduzir complexidade cognitiva
+const validateRequiredFields = (
   contact: Partial<Contact>,
-): ValidationResult => {
-  const errors: { [key: string]: string } = {};
-
-  // Validações obrigatórias
+  errors: { [key: string]: string }
+): void => {
   if (!contact.name?.trim()) {
     errors.name = "Nome é obrigatório";
   }
@@ -19,37 +18,64 @@ export const validateClientForm = (
   if (!contact.phone?.trim()) {
     errors.phone = "Telefone é obrigatório";
   }
+};
 
-  // Validação de email (se preenchido)
-  if (contact.email && contact.email.trim()) {
+const validateEmail = (
+  email: string | undefined,
+  errors: { [key: string]: string }
+): void => {
+  if (email && email.trim()) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(contact.email)) {
+    if (!emailRegex.test(email)) {
       errors.email = "Email deve ter um formato válido";
     }
   }
+};
 
-  // Validação de telefone (formato básico)
-  if (contact.phone && contact.phone.trim()) {
+const validatePhone = (
+  phone: string | undefined,
+  errors: { [key: string]: string }
+): void => {
+  if (phone && phone.trim()) {
     const phoneRegex = /^[\d\s\(\)\-\+]+$/;
-    if (!phoneRegex.test(contact.phone)) {
+    if (!phoneRegex.test(phone)) {
       errors.phone = "Telefone deve conter apenas números e caracteres válidos";
     }
   }
+};
 
-  // Validação de CPF/CNPJ (formato básico)
-  if (contact.cpfCnpj && contact.cpfCnpj.trim()) {
-    const cleanCpfCnpj = contact.cpfCnpj.replace(/\D/g, "");
+const validateCpfCnpj = (
+  cpfCnpj: string | undefined,
+  errors: { [key: string]: string }
+): void => {
+  if (cpfCnpj && cpfCnpj.trim()) {
+    const cleanCpfCnpj = cpfCnpj.replace(/\D/g, "");
     if (cleanCpfCnpj.length !== 11 && cleanCpfCnpj.length !== 14) {
       errors.cpfCnpj = "CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos";
     }
   }
+};
 
-  // Validação de orçamento (se preenchido)
-  if (contact.budget !== undefined && contact.budget !== null) {
-    if (contact.budget < 0) {
-      errors.budget = "Orçamento não pode ser negativo";
-    }
+const validateBudget = (
+  budget: number | undefined | null,
+  errors: { [key: string]: string }
+): void => {
+  if (budget !== undefined && budget !== null && budget < 0) {
+    errors.budget = "Orçamento não pode ser negativo";
   }
+};
+
+export const validateClientForm = (
+  contact: Partial<Contact>,
+): ValidationResult => {
+  const errors: { [key: string]: string } = {};
+
+  // Aplicar validações separadas
+  validateRequiredFields(contact, errors);
+  validateEmail(contact.email, errors);
+  validatePhone(contact.phone, errors);
+  validateCpfCnpj(contact.cpfCnpj, errors);
+  validateBudget(contact.budget, errors);
 
   return {
     isValid: Object.keys(errors).length === 0,

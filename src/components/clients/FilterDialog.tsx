@@ -31,21 +31,24 @@ import {
 } from "@/components/ui/select";
 import { CustomFieldFilter } from "@/hooks/useClientsFilters";
 
-interface FilterDialogProps {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  statusFilter: string;
-  segmentFilter: string;
-  lastContactFilter: string;
-  customFieldFilters: CustomFieldFilter[];
-  onStatusFilterChange: (value: string) => void;
-  onSegmentFilterChange: (value: string) => void;
-  onLastContactFilterChange: (value: string) => void;
-  onAddCustomFieldFilter: (filter: CustomFieldFilter) => void;
-  onRemoveCustomFieldFilter: (fieldId: string) => void;
-  onClearFilters: () => void;
-  onClearCustomFieldFilters: () => void;
-  hasActiveFilters: boolean;
+// Simple interface that avoids complex type inference
+interface ClientRecord {
+  asaas_customer_id?: string | null;
+  client_name?: string | null;
+  client_size?: string | null;
+  client_type?: string | null;
+  cpf_cnpj?: string | null;
+  created_at?: string;
+  email?: string | null;
+  id: number;
+  kanban_stage?: string | null;
+  nome?: string | null;
+  nome_pet?: string | null;
+  payments?: any;
+  porte_pet?: string | null;
+  raca_pet?: string | null;
+  session_id?: string | null;
+  telefone?: string | null;
 }
 
 // Lista estática de propriedades do cliente para filtros
@@ -57,7 +60,7 @@ const clientProperties = [
     id: "status",
     name: "Status",
     type: "select",
-    options: ["Ativo", "Inativo", "Pendente"],
+    options: ["Ganhos", "Perdidos"],
   },
   {
     id: "consultationStage",
@@ -493,18 +496,18 @@ const QuickFilters = ({
             Todos
           </Badge>
           <Badge
-            variant={statusFilter === "Active" ? "default" : "outline"}
+            variant={statusFilter === "Ganhos" ? "default" : "outline"}
             className="cursor-pointer"
-            onClick={() => onStatusFilterChange("Active")}
+            onClick={() => onStatusFilterChange("Ganhos")}
           >
-            Ativos
+            Ganhos
           </Badge>
           <Badge
-            variant={statusFilter === "Inactive" ? "default" : "outline"}
+            variant={statusFilter === "Perdidos" ? "default" : "outline"}
             className="cursor-pointer"
-            onClick={() => onStatusFilterChange("Inactive")}
+            onClick={() => onStatusFilterChange("Perdidos")}
           >
-            Inativos
+            Perdidos
           </Badge>
         </div>
       </div>

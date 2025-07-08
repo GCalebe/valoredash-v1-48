@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Save,
   RotateCcw,
@@ -15,8 +15,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
+import { useAIPersonalityQuery, useCreateAIPersonalityMutation, useUpdateAIPersonalityMutation } from "@/hooks/useAIPersonalityQuery";
 
 interface PersonalitySettings {
   name: string;
@@ -39,6 +41,12 @@ interface PersonalitySettings {
 
 const AIPersonalityTab = () => {
   const { toast } = useToast();
+  
+  // Use Supabase hooks
+  const { data: personalityData, isLoading, error } = useAIPersonalityQuery();
+  const createPersonalityMutation = useCreateAIPersonalityMutation();
+  const updatePersonalityMutation = useUpdateAIPersonalityMutation();
+  
   const [settings, setSettings] = useState<PersonalitySettings>({
     name: "Assistente Virtual",
     description: "Assistente especializado em atendimento ao cliente",
@@ -60,6 +68,31 @@ const AIPersonalityTab = () => {
     responseCreativity: 3,
   });
 
+  // Load data from Supabase when available
+  useEffect(() => {
+    if (personalityData && personalityData.length > 0) {
+      const data = personalityData[0];
+      setSettings({
+        name: data.name || "Assistente Virtual",
+        description: data.description || "Assistente especializado em atendimento ao cliente",
+        tone: data.tone || "amigável e profissional",
+        personality: data.personality || "Sou um assistente virtual dedicado a ajudar você da melhor forma possível.",
+        formality: data.formality || 3,
+        empathy: data.empathy || 4,
+        creativity: data.creativity || 3,
+        directness: data.directness || 3,
+        greeting: data.greeting || "Olá! Como posso ajudá-lo hoje?",
+        farewell: data.farewell || "Foi um prazer ajudá-lo! Tenha um ótimo dia!",
+        specialInstructions: data.special_instructions || "Sempre seja cordial e tente resolver o problema do cliente.",
+        maxResponses: data.max_responses || 3,
+        messageSize: data.message_size || 3,
+        responseTime: data.response_time || 3,
+        audioResponse: data.audio_response || false,
+        responseCreativity: data.response_creativity || 3,
+      });
+    }
+  }, [personalityData]);
+
   const [hasChanges, setHasChanges] = useState(false);
 
   const handleInputChange = (
@@ -78,16 +111,49 @@ const AIPersonalityTab = () => {
     setHasChanges(true);
   };
 
-  const handleSave = () => {
-    // Here you would normally save to a backend
-    console.log("Saving personality settings:", settings);
+  const handleSave = async () => {
+    try {
+      const personalityData = {
+        name: settings.name,
+        description: settings.description,
+        tone: settings.tone,
+        personality: settings.personality,
+        formality: settings.formality,
+        empathy: settings.empathy,
+        creativity: settings.creativity,
+        directness: settings.directness,
+        greeting: settings.greeting,
+        farewell: settings.farewell,
+        special_instructions: settings.specialInstructions,
+        max_responses: settings.maxResponses,
+        message_size: settings.messageSize,
+        response_time: settings.responseTime,
+        audio_response: settings.audioResponse,
+        response_creativity: settings.responseCreativity,
+      };
 
-    toast({
-      title: "Configurações salvas",
-      description: "A personalidade da IA foi atualizada com sucesso!",
-    });
+      if (personalityData && personalityData.length > 0) {
+        await updatePersonalityMutation.mutateAsync({
+          id: personalityData[0].id,
+          ...personalityData
+        });
+      } else {
+        await createPersonalityMutation.mutateAsync(personalityData);
+      }
 
-    setHasChanges(false);
+      toast({
+        title: "Configurações salvas",
+        description: "A personalidade da IA foi atualizada com sucesso!",
+      });
+
+      setHasChanges(false);
+    } catch (error) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar as configurações. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleReset = () => {
@@ -119,6 +185,33 @@ const AIPersonalityTab = () => {
     return labels[value - 1] || "Moderado";
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-64" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-96" />
+          <Skeleton className="h-96" />
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-8">
+          <p className="text-red-600">Erro ao carregar configurações da personalidade</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Tentar novamente
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-start">
@@ -132,13 +225,13 @@ const AIPersonalityTab = () => {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleReset}>
+          <Button variant="outline" onClick={handleReset} disabled={!hasChanges || createPersonalityMutation.isPending || updatePersonalityMutation.isPending}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Resetar
           </Button>
-          <Button onClick={handleSave} disabled={!hasChanges}>
+          <Button onClick={handleSave} disabled={!hasChanges || createPersonalityMutation.isPending || updatePersonalityMutation.isPending}>
             <Save className="h-4 w-4 mr-2" />
-            Salvar
+            {(createPersonalityMutation.isPending || updatePersonalityMutation.isPending) ? "Salvando..." : "Salvar"}
           </Button>
         </div>
       </div>

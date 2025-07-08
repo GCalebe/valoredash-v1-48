@@ -3,7 +3,9 @@ import {
   Plus,
   Edit,
   Trash2,
+  GripVertical,
   Save,
+  X,
   ArrowRight,
   ArrowUp,
   ArrowDown,
@@ -14,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -24,25 +27,22 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-
-interface AIStage {
-  id: number;
-  name: string;
-  description: string;
-  trigger: string;
-  actions: string[];
-  nextStage: string;
-  order: number;
-  isActive: boolean;
-}
+import { useAIStagesQuery, useCreateAIStageMutation, useUpdateAIStageMutation, useDeleteAIStageMutation, useReorderAIStagesMutation } from "@/hooks/useAIStagesQuery";
 
 const AIStagesTab = () => {
   const { toast } = useToast();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingStage, setEditingStage] = useState<AIStage | null>(null);
+  const [editingStage, setEditingStage] = useState<any>(null);
 
-  const [stages, setStages] = useState<AIStage[]>([
+  // Use Supabase hooks
+  const { data: stages = [], isLoading, error } = useAIStagesQuery();
+  const createStageMutation = useCreateAIStageMutation();
+  const updateStageMutation = useUpdateAIStageMutation();
+  const deleteStageMutation = useDeleteAIStageMutation();
+  const reorderStagesMutation = useReorderAIStagesMutation();
+
+  const [localStages, setLocalStages] = useState<any[]>([
     {
       id: 1,
       name: "Saudação Inicial",
@@ -109,41 +109,48 @@ const AIStagesTab = () => {
     nextStage: "",
   });
 
-  const handleAddStage = () => {
+  const handleAddStage = async () => {
     if (!newStage.name || !newStage.description) {
       toast({
-        title: "Campos obrigatórios",
+        title: "Erro",
         description: "Nome e descrição são obrigatórios.",
         variant: "destructive",
       });
       return;
     }
 
-    const stage: AIStage = {
-      id: Date.now(),
+    const stageData = {
       name: newStage.name,
       description: newStage.description,
       trigger: newStage.trigger,
       actions: newStage.actions.split("\n").filter((action) => action.trim()),
-      nextStage: newStage.nextStage,
-      order: stages.length + 1,
-      isActive: true,
+      next_stage: newStage.nextStage,
+      order_position: stages.length + 1,
+      is_active: true,
     };
 
-    setStages([...stages, stage]);
-    setNewStage({
-      name: "",
-      description: "",
-      trigger: "",
-      actions: "",
-      nextStage: "",
-    });
-    setIsAddDialogOpen(false);
+    try {
+      await createStageMutation.mutateAsync(stageData);
+      setNewStage({
+        name: "",
+        description: "",
+        trigger: "",
+        actions: "",
+        nextStage: "",
+      });
+      setIsAddDialogOpen(false);
 
-    toast({
-      title: "Etapa adicionada",
-      description: "Nova etapa criada com sucesso!",
-    });
+      toast({
+        title: "Etapa adicionada",
+        description: "Nova etapa criada com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao criar etapa.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditStage = (stage: AIStage) => {
@@ -153,58 +160,72 @@ const AIStagesTab = () => {
       description: stage.description,
       trigger: stage.trigger,
       actions: stage.actions.join("\n"),
-      nextStage: stage.nextStage,
+                        nextStage: stage.next_stage,
     });
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateStage = () => {
+  const handleUpdateStage = async () => {
     if (!editingStage || !newStage.name || !newStage.description) return;
 
-    const updatedStage: AIStage = {
-      ...editingStage,
+    const updatedData = {
       name: newStage.name,
       description: newStage.description,
       trigger: newStage.trigger,
       actions: newStage.actions.split("\n").filter((action) => action.trim()),
-      nextStage: newStage.nextStage,
+      next_stage: newStage.nextStage,
     };
 
-    setStages(
-      stages.map((stage) =>
-        stage.id === editingStage.id ? updatedStage : stage,
-      ),
-    );
+    try {
+      await updateStageMutation.mutateAsync({
+        id: editingStage.id,
+        ...updatedData,
+      });
 
-    setNewStage({
-      name: "",
-      description: "",
-      trigger: "",
-      actions: "",
-      nextStage: "",
-    });
-    setEditingStage(null);
-    setIsEditDialogOpen(false);
+      setNewStage({
+        name: "",
+        description: "",
+        trigger: "",
+        actions: "",
+        nextStage: "",
+      });
+      setEditingStage(null);
+      setIsEditDialogOpen(false);
 
-    toast({
-      title: "Etapa atualizada",
-      description: "Etapa atualizada com sucesso!",
-    });
+      toast({
+        title: "Etapa atualizada",
+        description: "Etapa atualizada com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar etapa.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteStage = (id: number) => {
-    setStages(stages.filter((stage) => stage.id !== id));
-    toast({
-      title: "Etapa excluída",
-      description: "Etapa removida com sucesso!",
-      variant: "destructive",
-    });
+  const handleDeleteStage = async (id: number) => {
+    try {
+      await deleteStageMutation.mutateAsync(id);
+      toast({
+        title: "Etapa excluída",
+        description: "Etapa removida com sucesso!",
+        variant: "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir etapa.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleToggleStage = (id: number) => {
     setStages(
       stages.map((stage) =>
-        stage.id === id ? { ...stage, isActive: !stage.isActive } : stage,
+        stage.id === id ? { ...stage, is_active: !stage.is_active } : stage,
       ),
     );
   };
@@ -228,13 +249,39 @@ const AIStagesTab = () => {
 
     // Update order numbers
     newStages.forEach((stage, index) => {
-      stage.order = index + 1;
+      stage.order_position = index + 1;
     });
 
     setStages(newStages);
   };
 
-  const sortedStages = [...stages].sort((a, b) => a.order - b.order);
+  const sortedStages = [...stages].sort((a, b) => a.order_position - b.order_position);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-64" />
+        <div className="space-y-4">
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-8">
+          <p className="text-red-600">Erro ao carregar etapas</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Tentar novamente
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -330,10 +377,16 @@ const AIStagesTab = () => {
               <Button
                 variant="outline"
                 onClick={() => setIsAddDialogOpen(false)}
+                disabled={createStageMutation.isPending}
               >
                 Cancelar
               </Button>
-              <Button onClick={handleAddStage}>Adicionar</Button>
+              <Button 
+                onClick={handleAddStage}
+                disabled={createStageMutation.isPending}
+              >
+                {createStageMutation.isPending ? "Adicionando..." : "Adicionar"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -353,12 +406,12 @@ const AIStagesTab = () => {
         ) : (
           sortedStages.map((stage, index) => (
             <div key={stage.id} className="relative">
-              <Card className={`${!stage.isActive ? "opacity-50" : ""}`}>
+              <Card className={`${!stage.is_active ? "opacity-50" : ""}`}>
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
-                        {stage.order}
+                        {stage.order_position}
                       </div>
                       <div>
                         <CardTitle className="text-base">
@@ -398,6 +451,7 @@ const AIStagesTab = () => {
                         size="sm"
                         onClick={() => handleDeleteStage(stage.id)}
                         className="text-red-500 hover:text-red-600"
+                        disabled={deleteStageMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -431,23 +485,23 @@ const AIStagesTab = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Badge
-                          variant={stage.isActive ? "default" : "secondary"}
-                        >
-                          {stage.isActive ? "Ativa" : "Inativa"}
-                        </Badge>
+                        variant={stage.is_active ? "default" : "secondary"}
+                      >
+                        {stage.is_active ? "Ativa" : "Inativa"}
+                      </Badge>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleToggleStage(stage.id)}
                         >
-                          {stage.isActive ? "Desativar" : "Ativar"}
+                          {stage.is_active ? "Desativar" : "Ativar"}
                         </Button>
                       </div>
 
-                      {stage.nextStage && stage.nextStage !== "Fim" && (
+                      {stage.next_stage && stage.next_stage !== "Fim" && (
                         <div className="flex items-center text-sm text-gray-500">
                           <ArrowRight className="h-4 w-4 mr-1" />
-                          Próxima: {stage.nextStage}
+                          Próxima: {stage.next_stage}
                         </div>
                       )}
                     </div>
@@ -537,10 +591,16 @@ const AIStagesTab = () => {
             <Button
               variant="outline"
               onClick={() => setIsEditDialogOpen(false)}
+              disabled={updateStageMutation.isPending}
             >
               Cancelar
             </Button>
-            <Button onClick={handleUpdateStage}>Atualizar</Button>
+            <Button 
+              onClick={handleUpdateStage}
+              disabled={updateStageMutation.isPending}
+            >
+              {updateStageMutation.isPending ? "Atualizando..." : "Atualizar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

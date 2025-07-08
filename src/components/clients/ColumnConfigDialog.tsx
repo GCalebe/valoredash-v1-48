@@ -12,11 +12,64 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { GripVertical, Eye, EyeOff } from "lucide-react";
-import {
-  ColumnConfig,
-  defaultColumnConfig,
-  saveColumnConfig,
-} from "@/config/columnConfig";
+import { ColumnConfig, defaultColumnConfig, saveColumnConfig } from "@/config/columnConfig";
+
+interface DraggableColumnItemProps {
+  column: ColumnConfig;
+  provided: any;
+  toggleColumnVisibility: (id: string) => void;
+}
+
+// Componente extraído para reduzir o aninhamento de funções
+const DraggableColumnItem: React.FC<DraggableColumnItemProps> = ({ column, provided, toggleColumnVisibility }) => {
+  return (
+    <div
+      ref={provided.innerRef}
+      {...provided.draggableProps}
+      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md border"
+    >
+      <div className="flex items-center gap-3">
+        <div
+          {...provided.dragHandleProps}
+          className="cursor-grab"
+        >
+          <GripVertical className="h-5 w-5 text-gray-400" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-medium">
+            {column.label}
+          </span>
+          <span className="text-xs text-gray-500">
+            {column.isVisible ? (
+              <span className="flex items-center gap-1">
+                <Eye className="h-3 w-3" /> Visível
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                <EyeOff className="h-3 w-3" /> Oculto
+              </span>
+            )}
+          </span>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch
+          id={`column-${column.id}`}
+          checked={column.isVisible}
+          onCheckedChange={() =>
+            toggleColumnVisibility(column.id)
+          }
+        />
+        <Label
+          htmlFor={`column-${column.id}`}
+          className="sr-only"
+        >
+          {column.label}
+        </Label>
+      </div>
+    </div>
+  );
+};
 
 interface ColumnConfigDialogProps {
   isOpen: boolean;
@@ -96,51 +149,11 @@ const ColumnConfigDialog: React.FC<ColumnConfigDialogProps> = ({
                       index={index}
                     >
                       {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md border"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              {...provided.dragHandleProps}
-                              className="cursor-grab"
-                            >
-                              <GripVertical className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                {column.label}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {column.isVisible ? (
-                                  <span className="flex items-center gap-1">
-                                    <Eye className="h-3 w-3" /> Visível
-                                  </span>
-                                ) : (
-                                  <span className="flex items-center gap-1">
-                                    <EyeOff className="h-3 w-3" /> Oculto
-                                  </span>
-                                )}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              id={`column-${column.id}`}
-                              checked={column.isVisible}
-                              onCheckedChange={() =>
-                                toggleColumnVisibility(column.id)
-                              }
-                            />
-                            <Label
-                              htmlFor={`column-${column.id}`}
-                              className="sr-only"
-                            >
-                              {column.label}
-                            </Label>
-                          </div>
-                        </div>
+                        <DraggableColumnItem 
+                          column={column} 
+                          provided={provided} 
+                          toggleColumnVisibility={toggleColumnVisibility} 
+                        />
                       )}
                     </Draggable>
                   ))}

@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { ShipWheel, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
-import { supabase } from "@/integrations/supabase/client";
 
 const signupSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -82,23 +81,42 @@ const SignupForm = ({ onSuccess }: { onSuccess: () => void }) => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            name: formData.name,
-          },
-        },
-      });
-
-      if (error) {
-        console.error("Signup error:", error);
-        toast.error(error.message || "Erro ao criar conta. Tente novamente.");
-      } else {
-        toast.success("Conta criada com sucesso!");
-        onSuccess();
+      console.log("Signing up with:", formData.email);
+      
+      // In mock mode, we'll simulate a successful signup
+      // Create a mock user ID
+      const mockUserId = `mock-user-${Date.now()}`;
+      
+      // Check if this is the first user
+      const isFirstUser = localStorage.getItem('userCount') === null;
+      if (isFirstUser) {
+        localStorage.setItem('userCount', '1');
       }
+      
+      // Create a mock user profile
+      const mockProfile = {
+        id: mockUserId,
+        full_name: formData.name,
+        email: formData.email,
+        role: isFirstUser ? 'admin' : 'user',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      // Store the user in localStorage for demonstration
+      const existingUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
+      existingUsers.push({
+        id: mockUserId,
+        email: formData.email,
+        password: formData.password, // Note: In a real app, never store passwords in plain text
+        profile: mockProfile
+      });
+      localStorage.setItem('mockUsers', JSON.stringify(existingUsers));
+      
+      console.log("Signup successful:", mockUserId);
+      
+      toast.success("Conta criada com sucesso!");
+      onSuccess();
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("Erro ao criar conta. Tente novamente.");

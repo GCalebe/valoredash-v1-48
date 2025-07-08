@@ -22,6 +22,11 @@ interface ConversionFunnelChartProps {
   noShowRate?: number;
 }
 
+type DateRange = {
+  from: Date;
+  to: Date;
+};
+
 const ConversionFunnelChart: React.FC<ConversionFunnelChartProps> = ({
   data,
   loading = false,
@@ -30,6 +35,8 @@ const ConversionFunnelChart: React.FC<ConversionFunnelChartProps> = ({
 }) => {
   const [customDate, setCustomDate] = useState<Date>(new Date());
   const [selectedStages, setSelectedStages] = useState<string[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("last7days");
+  const [dateRange, setDateRange] = useState<DateRange | null>(null);
   const [showNoShowRate, setShowNoShowRate] = useState<boolean>(false);
   const [filteredData, setFilteredData] = useState<FunnelData[]>(data);
   const { stages } = useKanbanStages();
@@ -94,6 +101,10 @@ const ConversionFunnelChart: React.FC<ConversionFunnelChartProps> = ({
           onStagesChange={setSelectedStages}
           customDate={customDate}
           setCustomDate={setCustomDate}
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={setSelectedPeriod}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
           showNoShowRate={showNoShowRate}
           onShowNoShowRateChange={setShowNoShowRate}
         />

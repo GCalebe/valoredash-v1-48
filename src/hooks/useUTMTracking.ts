@@ -1,37 +1,62 @@
 import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { mockUTMMetrics } from "@/mocks/metricsMock";
+import { useUTMMetricsQuery, useMetricsByCampaignQuery } from "./useUTMMetricsQuery";
 
 export function useUTMTracking(
   selectedCampaign: string = "all",
   selectedDevice: string = "all",
 ) {
-  const [metrics, setMetrics] = useState(mockUTMMetrics);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  
+  // Use React Query hooks for UTM metrics
+  const { data: allMetrics = [], refetch: refetchAllMetrics } = useUTMMetricsQuery();
+  const { data: campaignMetrics = [], refetch: refetchCampaignMetrics } = useMetricsByCampaignQuery(
+    selectedCampaign !== "all" ? selectedCampaign : undefined
+  );
+  
+  // Calculate metrics based on current data
+  const currentMetrics = selectedCampaign !== "all" ? campaignMetrics : allMetrics;
+  const totalClicks = currentMetrics.reduce((sum, metric) => sum + (metric.clicks || 0), 0);
+  const totalConversions = currentMetrics.reduce((sum, metric) => sum + (metric.conversions || 0), 0);
+  const totalCost = currentMetrics.reduce((sum, metric) => sum + (metric.cost || 0), 0);
+  
+  const metrics = {
+    totalClicks,
+    totalConversions,
+    totalCost,
+    conversionRate: totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0,
+    costPerClick: totalClicks > 0 ? totalCost / totalClicks : 0,
+    costPerConversion: totalConversions > 0 ? totalCost / totalConversions : 0,
+    campaigns: [],
+    devices: [],
+    sources: [],
+    timeData: [],
+  };
 
   const refetchUTMData = useCallback(async () => {
     try {
       setLoading(true);
-      console.log("Using mock data for UTM tracking...");
+      console.log("Refetching UTM metrics...");
 
-      // Use mock data directly
-      setMetrics(mockUTMMetrics);
-
-      console.log("Mock UTM metrics loaded successfully");
+      if (selectedCampaign !== "all") {
+        await refetchCampaignMetrics();
+        console.log("Campaign UTM metrics refetched successfully");
+      } else {
+        await refetchAllMetrics();
+        console.log("All UTM metrics refetched successfully");
+      }
     } catch (error) {
-      console.error("Error loading UTM metrics:", error);
+      console.error("Error refetching UTM metrics:", error);
       toast({
         title: "Erro ao atualizar métricas UTM",
-        description:
-          "Problema ao buscar as métricas UTM. Usando dados de exemplo.",
+        description: "Problema ao buscar as métricas UTM. Tente novamente.",
         variant: "destructive",
       });
-      setMetrics(mockUTMMetrics);
     } finally {
       setLoading(false);
     }
-  }, [toast, selectedCampaign, selectedDevice]);
+  }, [toast, selectedCampaign, refetchAllMetrics, refetchCampaignMetrics]);
 
   return { metrics, loading, refetchUTMData };
 }

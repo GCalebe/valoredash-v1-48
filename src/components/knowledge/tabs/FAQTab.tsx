@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { Plus, Search, Download, Upload, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Download, Filter, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -13,64 +16,53 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-
-interface FAQItem {
-  id: number;
-  question: string;
-  answer: string;
-  category: string;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-}
+import { useFAQQuery, useCreateFAQMutation, useUpdateFAQMutation, useDeleteFAQMutation } from "@/hooks/useFAQQuery";
 
 const FAQTab = () => {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<FAQItem | null>(null);
-  const [faqItems, setFaqItems] = useState<FAQItem[]>([
-    {
-      id: 1,
-      question: "Como funciona o sistema de agendamento?",
-      answer:
-        "Nosso sistema permite agendar consultas de forma automática através do chatbot. O cliente escolhe a data e horário disponível.",
-      category: "Agendamento",
-      tags: ["agendamento", "consulta"],
-      createdAt: "2024-01-15",
-      updatedAt: "2024-01-15",
-    },
-    {
-      id: 2,
-      question: "Quais são os valores dos serviços?",
-      answer:
-        "Os valores variam conforme o tipo de consulta. Consulta simples: R$ 80, Consulta especializada: R$ 120, Exames: valores variados.",
-      category: "Valores",
-      tags: ["preço", "consulta", "valores"],
-      createdAt: "2024-01-10",
-      updatedAt: "2024-01-10",
-    },
-  ]);
+  const [editingFAQ, setEditingFAQ] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  // Use Supabase hooks
+  const { data: faqs = [], isLoading, error } = useFAQQuery();
+  const createFAQMutation = useCreateFAQMutation();
+  const updateFAQMutation = useUpdateFAQMutation();
+  const deleteFAQMutation = useDeleteFAQMutation();
 
   const [newFAQ, setNewFAQ] = useState({
     question: "",
     answer: "",
-    category: "",
+    category: "Geral",
     tags: "",
   });
 
-  const filteredFAQs = faqItems.filter(
-    (item) =>
-      item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  // Get unique categories
+  const categories = Array.from(new Set(faqs.map(faq => faq.category)));
 
-  const handleAddFAQ = () => {
+  // Filter FAQs
+  const filteredFAQs = faqs.filter((item) => {
+    const matchesSearch = 
+      item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const addFAQ = async () => {
     if (!newFAQ.question || !newFAQ.answer) {
       toast({
         title: "Campos obrigatórios",
@@ -80,94 +72,136 @@ const FAQTab = () => {
       return;
     }
 
-    const faqItem: FAQItem = {
-      id: Date.now(),
-      question: newFAQ.question,
-      answer: newFAQ.answer,
-      category: newFAQ.category || "Geral",
-      tags: newFAQ.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag),
-      createdAt: new Date().toISOString().split("T")[0],
-      updatedAt: new Date().toISOString().split("T")[0],
-    };
-
-    setFaqItems([...faqItems, faqItem]);
-    setNewFAQ({ question: "", answer: "", category: "", tags: "" });
-    setIsAddDialogOpen(false);
-
-    toast({
-      title: "FAQ adicionado",
-      description: "Item adicionado com sucesso!",
-    });
+    try {
+      await createFAQMutation.mutateAsync({
+        question: newFAQ.question,
+        answer: newFAQ.answer,
+        category: newFAQ.category || "Geral",
+        tags: newFAQ.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+      });
+      setNewFAQ({ question: "", answer: "", category: "Geral", tags: "" });
+      setIsAddDialogOpen(false);
+      toast({
+        title: "FAQ adicionado",
+        description: "Item de FAQ cadastrado com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar FAQ.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleEditFAQ = (item: FAQItem) => {
-    setEditingItem(item);
-    setNewFAQ({
-      question: item.question,
-      answer: item.answer,
-      category: item.category,
-      tags: item.tags.join(", "),
+  const editFAQ = (item: any) => {
+    setEditingFAQ({
+      ...item,
+      tags: Array.isArray(item.tags) ? item.tags.join(", ") : "",
     });
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateFAQ = () => {
-    if (!editingItem || !newFAQ.question || !newFAQ.answer) return;
+  const saveEditedFAQ = async () => {
+    if (!editingFAQ) return;
 
-    const updatedItem: FAQItem = {
-      ...editingItem,
-      question: newFAQ.question,
-      answer: newFAQ.answer,
-      category: newFAQ.category || "Geral",
-      tags: newFAQ.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag),
-      updatedAt: new Date().toISOString().split("T")[0],
-    };
-
-    setFaqItems(
-      faqItems.map((item) => (item.id === editingItem.id ? updatedItem : item)),
-    );
-
-    setNewFAQ({ question: "", answer: "", category: "", tags: "" });
-    setEditingItem(null);
-    setIsEditDialogOpen(false);
-
-    toast({
-      title: "FAQ atualizado",
-      description: "Item atualizado com sucesso!",
-    });
+    try {
+      await updateFAQMutation.mutateAsync({
+        id: editingFAQ.id,
+        question: editingFAQ.question,
+        answer: editingFAQ.answer,
+        category: editingFAQ.category,
+        tags: editingFAQ.tags.split(",").map((tag: string) => tag.trim()).filter(Boolean),
+      });
+      setEditingFAQ(null);
+      setIsEditDialogOpen(false);
+      toast({
+        title: "FAQ atualizado",
+        description: "Item de FAQ atualizado com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar FAQ.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteFAQ = (id: number) => {
-    setFaqItems(faqItems.filter((item) => item.id !== id));
-    toast({
-      title: "FAQ excluído",
-      description: "Item removido com sucesso!",
-      variant: "destructive",
-    });
+  const deleteFAQ = async (id: string) => {
+    try {
+      await deleteFAQMutation.mutateAsync(id);
+      toast({
+        title: "FAQ removido",
+        description: "Item de FAQ removido com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao remover FAQ.",
+        variant: "destructive",
+      });
+    }
   };
 
   const exportFAQs = () => {
-    const dataStr = JSON.stringify(faqItems, null, 2);
+    const dataStr = JSON.stringify(faqs, null, 2);
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-
     const exportFileDefaultName = "faqs.json";
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);
     linkElement.setAttribute("download", exportFileDefaultName);
     linkElement.click();
-
-    toast({
-      title: "FAQs exportados",
-      description: "Arquivo JSON baixado com sucesso!",
-    });
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <HelpCircle className="h-5 w-5" />
+            <h2 className="text-xl font-semibold">FAQ Perguntas Frequentes</h2>
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-3/4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-16 w-full mb-2" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center space-x-2">
+          <HelpCircle className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">FAQ Perguntas Frequentes</h2>
+        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <p className="text-destructive text-center">
+              Erro ao carregar FAQs. Tente novamente.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -182,14 +216,31 @@ const FAQTab = () => {
 
       {/* Search and Actions */}
       <div className="flex justify-between items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <Input
-            placeholder="Buscar FAQ..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder="Buscar FAQ..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-48">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Filtrar por categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex items-center gap-2">
@@ -265,7 +316,12 @@ const FAQTab = () => {
                 >
                   Cancelar
                 </Button>
-                <Button onClick={handleAddFAQ}>Adicionar</Button>
+                <Button 
+                  onClick={addFAQ}
+                  disabled={createFAQMutation.isPending}
+                >
+                  {createFAQMutation.isPending ? "Adicionando..." : "Adicionar"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -278,7 +334,7 @@ const FAQTab = () => {
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             <h3 className="text-lg font-medium mb-1">Nenhuma FAQ encontrada</h3>
             <p className="text-sm">
-              {searchQuery
+              {searchTerm
                 ? "Nenhuma FAQ corresponde à sua pesquisa."
                 : "Comece adicionando perguntas frequentes."}
             </p>
@@ -293,15 +349,16 @@ const FAQTab = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleEditFAQ(item)}
+                      onClick={() => editFAQ(item)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDeleteFAQ(item.id)}
+                      onClick={() => deleteFAQ(item.id)}
                       className="text-red-500 hover:text-red-600"
+                      disabled={deleteFAQMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -315,14 +372,14 @@ const FAQTab = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">{item.category}</Badge>
-                    {item.tags.map((tag, index) => (
+                    {(Array.isArray(item.tags) ? item.tags : []).map((tag, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {tag}
                       </Badge>
                     ))}
                   </div>
                   <span className="text-xs text-gray-500">
-                    Atualizado: {item.updatedAt}
+                    Atualizado: {new Date(item.updated_at).toLocaleDateString()}
                   </span>
                 </div>
               </CardContent>
@@ -346,9 +403,9 @@ const FAQTab = () => {
               <Textarea
                 id="edit-question"
                 placeholder="Digite a pergunta..."
-                value={newFAQ.question}
+                value={editingFAQ?.question || ''}
                 onChange={(e) =>
-                  setNewFAQ({ ...newFAQ, question: e.target.value })
+                  setEditingFAQ({ ...editingFAQ, question: e.target.value })
                 }
               />
             </div>
@@ -357,9 +414,9 @@ const FAQTab = () => {
               <Textarea
                 id="edit-answer"
                 placeholder="Digite a resposta..."
-                value={newFAQ.answer}
+                value={editingFAQ?.answer || ''}
                 onChange={(e) =>
-                  setNewFAQ({ ...newFAQ, answer: e.target.value })
+                  setEditingFAQ({ ...editingFAQ, answer: e.target.value })
                 }
               />
             </div>
@@ -368,9 +425,9 @@ const FAQTab = () => {
               <Input
                 id="edit-category"
                 placeholder="ex: Agendamento, Valores..."
-                value={newFAQ.category}
+                value={editingFAQ?.category || ''}
                 onChange={(e) =>
-                  setNewFAQ({ ...newFAQ, category: e.target.value })
+                  setEditingFAQ({ ...editingFAQ, category: e.target.value })
                 }
               />
             </div>
@@ -379,8 +436,8 @@ const FAQTab = () => {
               <Input
                 id="edit-tags"
                 placeholder="ex: agendamento, consulta, preço"
-                value={newFAQ.tags}
-                onChange={(e) => setNewFAQ({ ...newFAQ, tags: e.target.value })}
+                value={editingFAQ?.tags || ''}
+                onChange={(e) => setEditingFAQ({ ...editingFAQ, tags: e.target.value })}
               />
             </div>
           </div>
@@ -391,7 +448,12 @@ const FAQTab = () => {
             >
               Cancelar
             </Button>
-            <Button onClick={handleUpdateFAQ}>Atualizar</Button>
+            <Button 
+              onClick={saveEditedFAQ}
+              disabled={updateFAQMutation.isPending}
+            >
+              {updateFAQMutation.isPending ? "Salvando..." : "Atualizar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

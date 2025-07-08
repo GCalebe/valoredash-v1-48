@@ -42,68 +42,98 @@ export const formatMessageTime = (date: Date): string => {
   }
 };
 
-export const parseMessage = (chatHistory: N8nChatHistory): ChatMessage[] => {
+// Função auxiliar para criar uma mensagem de chat
+const createChatMessage = (role: string, content: string, timestamp: string, type?: string): ChatMessage => {
+  return {
+    role,
+    content,
+    timestamp,
+    ...(type && { type }),
+  };
+};
+
+// Função auxiliar para processar mensagem em formato string
+const parseStringMessage = (message: string, timestamp: string): ChatMessage[] => {
   const parsedMessages: ChatMessage[] = [];
-
+  
   try {
-    const timestamp = chatHistory.data
-      ? extractHourFromTimestamp(chatHistory.data)
-      : "";
-
-    if (typeof chatHistory.message === "string") {
-      try {
-        const jsonMessage = JSON.parse(chatHistory.message);
-        if (jsonMessage.type && jsonMessage.content) {
-          parsedMessages.push({
-            role: jsonMessage.type === "human" ? "user" : "assistant",
-            content: jsonMessage.content,
-            type: jsonMessage.type,
-            timestamp: timestamp,
-          });
-          return parsedMessages;
-        }
-      } catch (e) {
-        parsedMessages.push({
-          role: "unknown",
-          content: chatHistory.message,
-          timestamp: timestamp,
-        });
-        return parsedMessages;
-      }
+    const jsonMessage = JSON.parse(message);
+    if (jsonMessage.type && jsonMessage.content) {
+      const role = jsonMessage.type === "human" ? "user" : "assistant";
+      parsedMessages.push(createChatMessage(role, jsonMessage.content, timestamp, jsonMessage.type));
     }
+  } catch (e) {
+    parsedMessages.push(createChatMessage("unknown", message, timestamp));
+  }
+  
+  return parsedMessages;
+};
 
-    if (chatHistory.message && typeof chatHistory.message === "object") {
-      if (chatHistory.message.type && chatHistory.message.content) {
-        parsedMessages.push({
-          role: chatHistory.message.type === "human" ? "user" : "assistant",
-          type: chatHistory.message.type,
-          content: chatHistory.message.content,
-          timestamp: timestamp,
-        });
-      } else if (
-        chatHistory.message.messages &&
-        Array.isArray(chatHistory.message.messages)
-      ) {
-        chatHistory.message.messages.forEach((msg: any) => {
-          if (msg.role && msg.content) {
-            parsedMessages.push({
-              role: msg.role,
-              content: msg.content,
-              timestamp: timestamp,
-            });
-          }
-        });
-      } else if (chatHistory.message.role && chatHistory.message.content) {
-        parsedMessages.push({
-          role: chatHistory.message.role,
-          content: chatHistory.message.content,
-          timestamp: timestamp,
-        });
-      }
+// Função para processar mensagem com tipo e conteúdo
+const processTypeAndContent = (messageObj: any, timestamp: string): ChatMessage[] => {
+  const role = messageObj.type === "human" ? "user" : "assistant";
+  return [createChatMessage(role, messageObj.content, timestamp, messageObj.type)];
+};
+
+// Função para processar array de mensagens
+const processMessageArray = (messages: any[], timestamp: string): ChatMessage[] => {
+  const parsedMessages: ChatMessage[] = [];
+  
+  messages.forEach((msg: any) => {
+    if (msg.role && msg.content) {
+      parsedMessages.push(createChatMessage(msg.role, msg.content, timestamp));
     }
+  });
+  
+  return parsedMessages;
+};
+
+// Função para processar mensagem com role e conteúdo
+const processRoleAndContent = (messageObj: any, timestamp: string): ChatMessage[] => {
+  return [createChatMessage(messageObj.role, messageObj.content, timestamp)];
+};
+
+// Função auxiliar para processar mensagem em formato objeto
+const parseObjectMessage = (messageObj: any, timestamp: string): ChatMessage[] => {
+  if (messageObj.type && messageObj.content) {
+    return processTypeAndContent(messageObj, timestamp);
+  } 
+  
+  if (messageObj.messages && Array.isArray(messageObj.messages)) {
+    return processMessageArray(messageObj.messages, timestamp);
+  } 
+  
+  if (messageObj.role && messageObj.content) {
+    return processRoleAndContent(messageObj, timestamp);
+  }
+  
+  return [];
+};
+
+// Função para extrair timestamp do histórico de chat
+const extractTimestampFromHistory = (chatHistory: N8nChatHistory): string => {
+  return chatHistory.data ? extractHourFromTimestamp(chatHistory.data) : "";
+};
+
+// Função para processar mensagem com base em seu tipo
+const processMessageByType = (message: any, timestamp: string): ChatMessage[] => {
+  if (typeof message === "string") {
+    return parseStringMessage(message, timestamp);
+  }
+  
+  if (message && typeof message === "object") {
+    return parseObjectMessage(message, timestamp);
+  }
+  
+  return [];
+};
+
+export const parseMessage = (chatHistory: N8nChatHistory): ChatMessage[] => {
+  try {
+    const timestamp = extractTimestampFromHistory(chatHistory);
+    return processMessageByType(chatHistory.message, timestamp);
   } catch (error) {
     console.error("Error parsing message:", error, chatHistory);
+    return [];
   }
-
-  return parsedMessages;
 };

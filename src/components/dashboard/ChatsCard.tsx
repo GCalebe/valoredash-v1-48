@@ -9,8 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Users, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MessageSquare, Users, RefreshCw } from "lucide-react";
 import { useConversations } from "@/hooks/useConversations";
 
 const ChatsCard = () => {
@@ -41,13 +41,13 @@ const ChatsCard = () => {
 
   return (
     <Card
-      className="cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+      className="cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white h-full flex flex-col"
       onClick={handleClick}
     >
       <CardHeader className="pb-2 bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white rounded-t-lg">
         <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-6 w-6" />
+          <div className="flex items-center gap-2 text-sm">
+            <MessageSquare className="h-4 w-4" />
             Chats
           </div>
           <Button
@@ -55,62 +55,49 @@ const ChatsCard = () => {
             size="sm"
             onClick={handleRefresh}
             disabled={loading}
-            className="text-white hover:bg-white/20 h-8 w-8 p-0"
+            className="text-white hover:bg-white/20 h-6 w-6 p-0"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </CardTitle>
-        <CardDescription className="text-green-100">
+        <CardDescription className="text-green-100 text-xs">
           Conversas em tempo real
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6">
-        <div className="mb-4 flex justify-center">
-          <div className="bg-green-100 dark:bg-green-900/30 p-6 rounded-full">
-            <MessageSquare className="h-14 w-14 text-green-500 dark:text-green-400" />
+      <CardContent className="pt-2 flex-grow flex flex-col items-center justify-center">
+        <div className="mb-2 flex justify-center">
+          <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-full">
+            <MessageSquare className="h-8 w-8 text-green-500 dark:text-green-400" />
           </div>
         </div>
 
         {loading ? (
-          <p className="text-gray-600 dark:text-gray-300 text-center">
-            Carregando conversas...
+          <p className="text-gray-600 dark:text-gray-300 text-center text-xs">
+            Carregando...
           </p>
         ) : (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                Conversas ativas:
+          <div className="space-y-1 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Users className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+              <span className="text-xs text-gray-600 dark:text-gray-300">
+                {conversations.length} conversas ativas
               </span>
-              <Badge
-                variant="outline"
-                className="bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-300"
-              >
-                {conversations.length}
-              </Badge>
             </div>
 
             {unreadCount > 0 && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  Não lidas:
-                </span>
-                <Badge className="bg-red-500 text-white">{unreadCount}</Badge>
+              <div className="flex items-center justify-center">
+                <Badge className="bg-red-500 text-white text-xs">
+                  {unreadCount} não lidas
+                </Badge>
               </div>
-            )}
-
-            {conversations.length === 0 && (
-              <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
-                Nenhuma conversa encontrada
-              </p>
             )}
           </div>
         )}
       </CardContent>
-      <CardFooter className="bg-gray-50 dark:bg-gray-700/50 rounded-b-lg border-t dark:border-gray-700 flex justify-center py-3">
+      <CardFooter className="bg-gray-50 dark:bg-gray-700/50 rounded-b-lg border-t dark:border-gray-700 flex justify-center py-2 mt-auto">
         <Badge
           variant="outline"
-          className="bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800/50"
+          className="bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800/50 text-xs"
         >
           Acessar conversas
         </Badge>

@@ -15,8 +15,8 @@ export const DayEventsView = React.memo(function DayEventsView({
   onEventClick,
 }: DayEventsViewProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg min-h-[300px] border border-gray-100 dark:border-gray-700 p-2 flex-1">
-      <div className="text-lg font-bold my-2 text-blue-700 dark:text-blue-400">
+    <div className="bg-gray-800 rounded-lg min-h-[300px] border border-gray-700 p-2 flex-1">
+      <div className="text-lg font-bold my-2 text-blue-400">
         {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: pt })}
       </div>
       <div className="space-y-2">
@@ -25,9 +25,9 @@ export const DayEventsView = React.memo(function DayEventsView({
             key={event.id}
             onClick={(e) => onEventClick(event, e)}
             className={`
-              flex items-center px-3 py-2 rounded bg-blue-100
-              dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-900/70
-              text-blue-800 dark:text-blue-200 shadow-sm cursor-pointer
+              flex items-center px-3 py-2 rounded bg-blue-900/40 
+              hover:bg-blue-900/70
+              text-blue-200 shadow-sm cursor-pointer
             `}
             style={{
               maxWidth: "100%",

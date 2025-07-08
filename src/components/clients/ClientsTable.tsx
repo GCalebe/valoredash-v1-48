@@ -74,8 +74,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
       (contact.phone && contact.phone.includes(searchTerm));
 
     // Filtro de status
-    const matchesStatus =
-      statusFilter === "all" || contact.status === statusFilter;
+    let matchesStatus = statusFilter === "all";
+    
+    if (statusFilter === "Ganhos") {
+      matchesStatus = contact.consultationStage === "Fatura paga – ganho";
+    } else if (statusFilter === "Perdidos") {
+      matchesStatus = contact.consultationStage === "Projeto cancelado – perdido";
+    }
 
     // Filtro de segmento (kanban stage)
     const matchesSegment =

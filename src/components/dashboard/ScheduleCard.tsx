@@ -44,13 +44,13 @@ const ScheduleCard = () => {
 
   return (
     <Card
-      className="cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+      className="cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white h-full flex flex-col"
       onClick={handleClick}
     >
       <CardHeader className="pb-2 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-t-lg">
         <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-6 w-6" />
+          <div className="flex items-center gap-2 text-sm">
+            <Calendar className="h-4 w-4" />
             Agenda
           </div>
           <Button
@@ -58,80 +58,78 @@ const ScheduleCard = () => {
             size="sm"
             onClick={handleRefresh}
             disabled={refreshing}
-            className="text-white hover:bg-white/20 h-8 w-8 p-0"
+            className="text-white hover:bg-white/20 h-6 w-6 p-0"
           >
             <RefreshCw
-              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+              className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`}
             />
           </Button>
         </CardTitle>
-        <CardDescription className="text-blue-100">
+        <CardDescription className="text-blue-100 text-xs">
           Gerenciamento de agendamentos
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6">
-        <div className="mb-4 flex justify-center">
-          <div className="bg-blue-100 dark:bg-blue-900/30 p-6 rounded-full">
-            <Calendar className="h-14 w-14 text-blue-500 dark:text-blue-400" />
+      <CardContent className="pt-2 flex-grow flex flex-col items-center justify-center">
+        <div className="mb-2 flex justify-center">
+          <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full">
+            <Calendar className="h-8 w-8 text-blue-500 dark:text-blue-400" />
           </div>
         </div>
 
         {loading ? (
-          <p className="text-gray-600 dark:text-gray-300 text-center">
-            Carregando agendamentos...
+          <p className="text-gray-600 dark:text-gray-300 text-center text-xs">
+            Carregando...
           </p>
         ) : refreshing ? (
-          <p className="text-gray-600 dark:text-gray-300 text-center">
-            Atualizando agendamentos...
+          <p className="text-gray-600 dark:text-gray-300 text-center text-xs">
+            Atualizando...
           </p>
         ) : (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-300">
+          <div className="space-y-1 text-center">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-gray-600 dark:text-gray-300">
                 Hoje:
               </span>
               <Badge
                 variant="outline"
-                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300"
+                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs"
               >
-                {todayEvents.length}{" "}
-                {todayEvents.length === 1 ? "agendamento" : "agendamentos"}
+                {todayEvents.length}
               </Badge>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-gray-600 dark:text-gray-300">
                 Total:
               </span>
               <Badge
                 variant="outline"
-                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300"
+                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs"
               >
-                {events.length}{" "}
-                {events.length === 1 ? "agendamento" : "agendamentos"}
+                {events.length}
               </Badge>
             </div>
           </div>
         )}
 
         {todayEvents.length > 0 && !loading && !refreshing && (
-          <div className="mt-4 pt-4 border-t dark:border-gray-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+          <div className="mt-1 pt-1 border-t dark:border-gray-700 w-full">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
               Próximo hoje:
             </p>
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-blue-500" />
+            <div className="flex items-center gap-1 text-xs">
+              <Clock className="h-3 w-3 text-blue-500 flex-shrink-0" />
               <span className="font-medium">{todayEvents[0].time}</span>
-              <span className="text-gray-600 dark:text-gray-300">
+              <span className="text-gray-600 dark:text-gray-300 truncate">
                 - {todayEvents[0].clientName}
               </span>
             </div>
           </div>
         )}
       </CardContent>
-      <CardFooter className="bg-gray-50 dark:bg-gray-700/50 rounded-b-lg border-t dark:border-gray-700 flex justify-center py-3">
+      <CardFooter className="bg-gray-50 dark:bg-gray-700/50 rounded-b-lg border-t dark:border-gray-700 flex justify-center py-2 mt-auto">
         <Badge
           variant="outline"
-          className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800/50"
+          className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800/50 text-xs"
         >
           Acessar agenda
         </Badge>

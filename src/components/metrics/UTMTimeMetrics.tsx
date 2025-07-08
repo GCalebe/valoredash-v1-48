@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
 
 interface UTMTimeMetricsProps {
@@ -25,12 +19,12 @@ const UTMTimeMetrics: React.FC<UTMTimeMetricsProps> = ({
   if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Tempo para Conversão</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Tempo para Conversão</CardTitle>
           <CardDescription>Análise temporal das conversões</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[200px]">
+          <div className="flex items-center justify-center h-[100px]">
             <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         </CardContent>
@@ -83,26 +77,24 @@ const UTMTimeMetrics: React.FC<UTMTimeMetricsProps> = ({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>⏱️ Tempo para Conversão</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">⏱️ Tempo para Conversão</CardTitle>
         <CardDescription>
           Análise temporal das conversões (primeiro toque até conversão)
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {metrics.map((metric) => (
-            <div key={metric.title} className="text-center">
-              <div
-                className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${metric.bgColor} mb-2`}
-              >
+            <div key={metric.title} className="flex items-center gap-2">
+              <div className={`p-2 rounded-full ${metric.bgColor}`}>
                 <div className={metric.color}>{metric.icon}</div>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                {metric.value}
-              </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {metric.title}
+              <div>
+                <div className="text-sm font-medium">{metric.value}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {metric.title}
+                </div>
               </div>
             </div>
           ))}

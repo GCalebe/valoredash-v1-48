@@ -1,0 +1,31 @@
+# Ignorar diretórios de build e dependências
+node_modules/
+dist/
+
+# Ignorar arquivos de configuração de ferramentas de desenvolvimento
+.git/
+.pre-commit-config.yaml
+eslint.config.js
+postcss.config.js
+tsconfig.json
+tsconfig.app.json
+tsconfig.node.json
+vite-env.d.ts
+
+# Ignorar arquivos de gerenciamento de pacotes
+bun.lockb
+package-lock.json
+
+# Ignorar arquivos de documentação e controle de versão
+README.md
+.gitignore
+
+# Ignorar arquivos relacionados ao banco de dados (Supabase migrations e config)
+supabase/
+
+# Ignorar arquivos de utilitários e bibliotecas de baixo nível que não afetam diretamente o design
+src/utils/logger.ts
+src/hooks/utils/retryFetch.ts
+src/hooks/useDebouncedCallback.ts
+src/lib/memoryService.ts
+src/lib/chatService.ts

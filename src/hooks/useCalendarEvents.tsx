@@ -9,8 +9,11 @@ import {
   deleteCalendarEvent,
 } from "./calendarEventActions";
 import { toast } from "sonner";
+import { addDays, subDays } from "date-fns";
 
 type DateRange = { start: Date; end: Date };
+
+// Calendar events will be fetched from Supabase - mock data removed
 
 export function useCalendarEvents(
   selectedDate?: Date | null,
@@ -39,11 +42,12 @@ export function useCalendarEvents(
       const cacheKey = getCacheKey(selectedDate, dateRange);
 
       try {
-        const apiEvents = await fetchCalendarEvents(selectedDate, dateRange);
-        setEvents(apiEvents);
-        lastCacheEvents.current = apiEvents;
+        // Fetch events from Supabase or external calendar API
+        const events = await fetchCalendarEvents(selectedDate, dateRange);
+        setEvents(events || []);
+        lastCacheEvents.current = events || [];
         setLastUpdated(new Date());
-        saveToCache(cacheKey, apiEvents);
+        saveToCache(cacheKey, events || []);
         setError(null);
         if (isManualRefresh) {
           toast.success("Agenda atualizada com sucesso!");

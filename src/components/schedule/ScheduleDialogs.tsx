@@ -78,6 +78,7 @@ export function ScheduleDialogs({
         open={isEditEventDialogOpen}
         onOpenChange={setIsEditEventDialogOpen}
         onSubmit={onEditEvent}
+        onDelete={onDeleteEvent}
         isSubmitting={isSubmitting}
         event={selectedEvent || undefined}
         title="Editar Evento"

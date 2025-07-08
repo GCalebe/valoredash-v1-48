@@ -75,13 +75,13 @@ const UTMMetricsTab: React.FC<UTMMetricsTabProps> = ({
       </div>
 
       {/* Bloco 1: Visão Geral */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300 border-b pb-2">
           📊 Visão Geral
         </h4>
 
         {/* UTM KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <StatCard
             title="Campanhas Ativas"
             value={utmMetrics.totalCampaigns}
@@ -144,14 +144,14 @@ const UTMMetricsTab: React.FC<UTMMetricsTabProps> = ({
       </div>
 
       {/* Bloco 2: Gráficos */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300 border-b pb-2">
           📈 Gráficos e Análises
         </h4>
 
         <UTMCampaignChart data={utmMetrics.campaignData} loading={utmLoading} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
           <UTMSourceChart data={utmMetrics.sourceData} loading={utmLoading} />
           <UTMDeviceDistributionChart
             data={utmMetrics.deviceData}
@@ -159,7 +159,7 @@ const UTMMetricsTab: React.FC<UTMMetricsTabProps> = ({
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <UTMGeoHeatmap data={utmMetrics.geoData} loading={utmLoading} />
           <UTMCampaignRanking
             data={utmMetrics.topCampaigns}
@@ -169,12 +169,12 @@ const UTMMetricsTab: React.FC<UTMMetricsTabProps> = ({
       </div>
 
       {/* Bloco 3: Tabela Detalhada */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300 border-b pb-2">
           📋 Tabela Detalhada
         </h4>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4">
           <UTMTrackingTable
             data={utmMetrics.recentTracking}
             loading={utmLoading}

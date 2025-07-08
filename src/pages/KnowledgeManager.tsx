@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { ShipWheel, LogOut, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAIProductsQuery } from "@/hooks/useAIProductsQuery";
 
 // Import all tab components
 import ProductsTab from "@/components/knowledge/tabs/ProductsTab";
@@ -21,7 +22,29 @@ const KnowledgeManager = () => {
   const { user, signOut, isLoading: authLoading } = useAuth();
   const { settings } = useThemeSettings();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("documents");
+  const [selectedAIProduct, setSelectedAIProduct] = useState<string | null>(null);
+  const { data: aiProducts = [] } = useAIProductsQuery();
+
+  // AI products are automatically loaded by React Query
+
+  // Get the AI product ID from the URL query parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const aiProductId = searchParams.get("aiProduct");
+    if (aiProductId) {
+      setSelectedAIProduct(aiProductId);
+      
+      // Find the product to display its name
+      if (aiProducts && aiProducts.length > 0) {
+        const product = aiProducts.find(p => p.id === aiProductId);
+        if (product) {
+          console.log(`Loaded AI Product: ${product.name}`);
+        }
+      }
+    }
+  }, [location, aiProducts]);
 
   if (authLoading) {
     return (
@@ -65,7 +88,7 @@ const KnowledgeManager = () => {
               />
             )}
             <h1 className="text-2xl font-bold">{settings.brandName}</h1>
-            <span className="text-lg ml-2">- Conhecimento</span>
+            <span className="text-lg ml-2">Conhecimento</span>
           </div>
           <div className="flex items-center gap-3">
             <Badge
@@ -93,6 +116,21 @@ const KnowledgeManager = () => {
           <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
             Gerenciador de Conhecimento
           </h2>
+          {selectedAIProduct && (
+            <div className="mt-2 flex items-center">
+              <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                IA Selecionada: {aiProducts?.find(p => p.id === selectedAIProduct)?.name || selectedAIProduct}
+              </Badge>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="ml-2 text-sm text-blue-600 dark:text-blue-400"
+                onClick={() => navigate("/ai-store")}
+              >
+                Trocar IA
+              </Button>
+            </div>
+          )}
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Gerencie produtos, FAQ, websites e configurações da IA
           </p>

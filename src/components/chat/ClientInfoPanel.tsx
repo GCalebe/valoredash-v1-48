@@ -10,7 +10,8 @@ import { useDynamicFields } from "@/hooks/useDynamicFields";
 import TagsField from "./TagsField";
 import NotesField from "./NotesField";
 import ClientInfo from "@/components/clients/ClientInfo";
-import { mockClients } from "@/mocks/clientsMock";
+import { useContactsQuery } from "@/hooks/useContactsQuery";
+// Mock data removed - using Supabase integration
 
 interface ClientInfoPanelProps {
   selectedChat: string | null;
@@ -22,8 +23,12 @@ const ClientInfoPanel = ({
   selectedConversation,
 }: ClientInfoPanelProps) => {
   const { settings } = useThemeSettings();
+  const { data: contacts = [] } = useContactsQuery();
   const [clientData, setClientData] = useState<Contact | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Use contacts from React Query
+  const availableContacts = contacts;
 
   // Use the enhanced dynamic fields hook with validation
   const {
@@ -45,27 +50,27 @@ const ClientInfoPanel = ({
           selectedConversation.sessionId,
         );
 
-        // Encontrar o cliente mockup correspondente à sessão selecionada
-        const mockClient = mockClients.find(
+        // Encontrar o cliente correspondente à sessão selecionada
+        const client = availableContacts.find(
           (client) => client.sessionId === selectedConversation.sessionId,
         );
 
-        if (mockClient) {
-          console.log("Cliente mockup encontrado:", mockClient.name);
-          setClientData(mockClient);
+        if (client) {
+          console.log("Cliente encontrado:", client.name);
+          setClientData(client);
         } else {
           console.log(
-            "Cliente mockup não encontrado para a sessão:",
+            "Cliente não encontrado para a sessão:",
             selectedConversation.sessionId,
           );
 
           // Tentar encontrar por ID como fallback
-          const clientById = mockClients.find(
+          const clientById = availableContacts.find(
             (client) => client.id === selectedConversation.id,
           );
 
           if (clientById) {
-            console.log("Cliente mockup encontrado por ID:", clientById.name);
+            console.log("Cliente encontrado por ID:", clientById.name);
             const updatedClient = {
               ...clientById,
               sessionId: selectedConversation.sessionId,
@@ -73,7 +78,7 @@ const ClientInfoPanel = ({
             setClientData(updatedClient);
           } else {
             console.log(
-              "Cliente mockup não encontrado nem por ID. Usando dados da conversa como fallback.",
+              "Cliente não encontrado nem por ID. Usando dados da conversa como fallback.",
             );
             // Usar os dados da conversa selecionada como fallback
             const fallbackClient: Contact = {
@@ -117,7 +122,9 @@ const ClientInfoPanel = ({
     };
 
     fetchClientData();
-  }, [selectedConversation?.sessionId]);
+  }, [selectedConversation?.sessionId, availableContacts]);
+
+
 
   const handleFieldUpdate = (fieldId: string, newValue: any) => {
     updateField(fieldId, newValue);

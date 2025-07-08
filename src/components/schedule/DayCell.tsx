@@ -1,5 +1,5 @@
 import React from "react";
-import { isSameDay, isSameMonth, parseISO, format } from "date-fns";
+import { isSameDay, isSameMonth, parseISO } from "date-fns";
 import { CalendarEvent } from "@/types/calendar";
 
 interface DayCellProps {
@@ -23,37 +23,50 @@ export const DayCell = React.memo(function DayCell({
   const isCurrentMonth = isSameMonth(day, currentMonth);
   const isToday = isSameDay(day, new Date());
 
+  // Group events by salesperson to show one dot per salesperson
+  const uniqueSalespeople = new Map();
+  dayEvents.forEach(event => {
+    const hostName = event.hostName || "";
+    const attendeeEmail = event.attendees?.[0]?.email || "";
+    
+    let color = "#6b7280"; // Default gray
+    
+    // Determine color based on host or attendee
+    if (hostName.toLowerCase().includes("joão") || attendeeEmail.toLowerCase().includes("joao")) {
+      color = "#4f46e5"; // João - indigo
+    } else if (hostName.toLowerCase().includes("maria") || attendeeEmail.toLowerCase().includes("maria")) {
+      color = "#10b981"; // Maria - emerald
+    } else if (hostName.toLowerCase().includes("pedro") || attendeeEmail.toLowerCase().includes("pedro")) {
+      color = "#f59e0b"; // Pedro - amber
+    } else if (hostName.toLowerCase().includes("ana") || attendeeEmail.toLowerCase().includes("ana")) {
+      color = "#ef4444"; // Ana - red
+    } else if (hostName.toLowerCase().includes("arthur") || attendeeEmail.toLowerCase().includes("arthur")) {
+      color = "#8b5cf6"; // Arthur - purple
+    }
+    
+    const key = hostName || attendeeEmail;
+    if (key && !uniqueSalespeople.has(key)) {
+      uniqueSalespeople.set(key, { color });
+    }
+  });
+
   return (
     <div
-      key={day.toISOString()}
       onClick={() => onDateChange(day)}
       className={`
-        relative px-1 pt-1 pb-4 h-full min-h-[90px] cursor-pointer border-l first:border-l-0 border-gray-100 dark:border-gray-700
+        relative px-1 pt-1 pb-4 h-full min-h-[90px] cursor-pointer border-l first:border-l-0 border-gray-700
         group transition-colors
-        ${isToday ? "bg-blue-50 dark:bg-blue-900/20" : ""}
-        ${isSelected ? "ring-2 ring-blue-500 z-10" : ""}
-        ${
-          !isCurrentMonth
-            ? "bg-gray-50 dark:bg-gray-900/20 text-gray-400 dark:text-gray-500"
-            : ""
-        }
-        hover:bg-gray-100/60 dark:hover:bg-gray-700
+        ${isToday ? "bg-blue-900/20" : ""}
+        ${isSelected ? "bg-blue-500" : ""}
+        ${!isCurrentMonth ? "bg-gray-900/20 text-gray-500" : ""}
+        hover:bg-gray-800
       `}
       style={{ minWidth: 0 }}
     >
-      {isToday && (
-        <div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-r-full z-20 animate-fade-in"></div>
-      )}
       <div
         className={`
           flex items-center justify-between z-10 relative
-          ${
-            isToday
-              ? "text-blue-600 font-bold"
-              : isSelected
-                ? "text-blue-700 font-bold"
-                : ""
-          }
+          ${isToday ? "text-blue-400 font-bold" : isSelected ? "text-white font-bold" : ""}
           pl-2 pr-1
         `}
       >
@@ -66,38 +79,28 @@ export const DayCell = React.memo(function DayCell({
           {day.getDate()}
         </span>
       </div>
-      <div className="flex flex-col gap-1 mt-1">
-        {dayEvents.slice(0, 4).map((event) => (
-          <div
-            key={event.id}
-            title={event.summary}
-            onClick={(e) => onEventClick(event, e)}
-            className={`
-              truncate rounded px-2 py-1 text-xs font-medium cursor-pointer
-              mb-[2px]
-              bg-blue-100 text-blue-900
-              dark:bg-blue-800/60 dark:text-white
-              border border-blue-200 dark:border-blue-500/30
-              hover:bg-blue-300/70 dark:hover:bg-blue-700/90
-              transition
-              shadow-sm
-            `}
-            style={{
-              maxWidth: "100%",
-              width: "100%",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {format(parseISO(event.start), "HH:mm")} {event.summary}
+      
+      {/* Event indicators - colored dots for each salesperson */}
+      {uniqueSalespeople.size > 0 && (
+        <div className="flex justify-center mt-1 space-x-1">
+          {Array.from(uniqueSalespeople.values()).map((person, index) => (
+            <div 
+              key={index}
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: person.color }}
+            />
+          ))}
+        </div>
+      )}
+      
+      {/* Event count indicator */}
+      {dayEvents.length > 0 && (
+        <div className="flex justify-center mt-1">
+          <div className="w-5 h-5 text-xs font-medium text-white bg-green-500 rounded-full flex items-center justify-center">
+            {dayEvents.length}
           </div>
-        ))}
-        {dayEvents.length > 4 && (
-          <div className="text-[11px] text-gray-400 mt-1 pl-2">
-            +{dayEvents.length - 4} mais
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 });

@@ -1,84 +1,84 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Contact } from "@/types/client";
 import { toast } from "@/hooks/use-toast";
 import { generateFictitiousConversations } from "@/utils/fictitiousMessages";
+// Mock data removed - using Supabase integration
+import { useAuth } from "@/context/AuthContext";
+import { useContactsQuery, useUpdateContactMutation } from "./useContactsQuery";
 import { useContactsService } from "./useContactsService";
-import { generateMockClients } from "@/mocks/clientsMock";
 
 export const useContactsData = () => {
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [loadingContacts, setLoadingContacts] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { user } = useAuth();
+  const { data: contacts = [], isLoading: loadingContacts, refetch } = useContactsQuery();
+  const updateContactMutation = useUpdateContactMutation();
+  const { updateContactKanbanStage } = useContactsService();
+  
+  // For backward compatibility, provide setContacts function
+  const setContacts = () => {
+    // This is now handled by React Query cache
+    console.warn('setContacts is deprecated with React Query. Use mutations instead.');
+  };
 
-  const contactsService = useContactsService();
+  // Store contacts in localStorage to persist between page refreshes
+  const saveContactsToLocalStorage = (contacts: Contact[]) => {
+    try {
+      const userId = user?.id || 'anonymous';
+      localStorage.setItem(`contacts_${userId}`, JSON.stringify(contacts));
+    } catch (error) {
+      console.error("Error saving contacts to localStorage:", error);
+    }
+  };
+
+  // Load contacts from localStorage
+  const loadContactsFromLocalStorage = (): Contact[] | null => {
+    try {
+      const userId = user?.id || 'anonymous';
+      const storedContacts = localStorage.getItem(`contacts_${userId}`);
+      if (storedContacts) {
+        return JSON.parse(storedContacts);
+      }
+    } catch (error) {
+      console.error("Error loading contacts from localStorage:", error);
+    }
+    return null;
+  };
 
   const fetchClients = useCallback(async () => {
     try {
-      setLoadingContacts(true);
-
-      // Use mock data instead of real API calls
-      console.log("Using mock data for clients...");
-      const mockContactsFetched = generateMockClients();
-
-      // Gera conversas fictícias se necessário.
-      let contactsWithConversations =
-        generateFictitiousConversations(mockContactsFetched);
-
-      // Ensure all contacts have a valid kanban stage
-      contactsWithConversations = contactsWithConversations.map((contact) => ({
-        ...contact,
-        kanbanStage: contact.kanbanStage || "Entraram",
-      }));
-
-      setContacts(contactsWithConversations);
-
-      console.log(
-        "Mock clients loaded successfully:",
-        contactsWithConversations.length,
-        "clients",
-      );
+      setRefreshing(true);
+      console.log("Refetching clients from React Query");
+      await refetch();
     } catch (error) {
-      console.error("Error loading mock clients:", error);
-
+      console.error("Error refetching clients:", error);
       toast({
         title: "Erro ao carregar clientes",
-        description:
-          "Problema ao buscar os dados dos clientes. Usando dados de exemplo.",
+        description: "Problema ao buscar os dados dos clientes.",
         variant: "destructive",
       });
-
-      // Set mock data on error to prevent app crash
-      const fallbackData = generateMockClients();
-      setContacts(fallbackData);
     } finally {
-      setLoadingContacts(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [refetch]);
 
   const handleKanbanStageChange = async (
     contactId: string,
     newStage: string,
   ) => {
     try {
-      // Update local state immediately for better UX
-      setContacts((prevContacts) =>
-        prevContacts.map((contact) =>
-          contact.id === contactId
-            ? { ...contact, kanbanStage: newStage }
-            : contact,
-        ),
-      );
-
+      // Update using React Query mutation
+      await updateContactMutation.mutateAsync({
+        id: contactId,
+        data: { kanban_stage: newStage }
+      });
+      
       toast({
         title: "Etapa atualizada",
         description: `Cliente movido para ${newStage}.`,
       });
-
-      // In a real app, this would make an API call
-      console.log(`Updated contact ${contactId} to stage ${newStage}`);
     } catch (error) {
       console.error("Error updating kanban stage:", error);
+      
       toast({
         title: "Erro ao atualizar etapa",
         description: "Não foi possível atualizar a etapa do cliente.",
@@ -88,17 +88,12 @@ export const useContactsData = () => {
   };
 
   const handleRefresh = () => {
-    setRefreshing(true);
     fetchClients();
     toast({
       title: "Atualizando dados",
       description: "Os dados da tabela estão sendo atualizados.",
     });
   };
-
-  useEffect(() => {
-    fetchClients();
-  }, [fetchClients]);
 
   return {
     contacts,

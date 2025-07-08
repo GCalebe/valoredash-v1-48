@@ -2,8 +2,8 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 
 interface CalendarViewSwitcherProps {
-  view: "mes" | "semana" | "dia" | "agenda";
-  onChange: (view: "mes" | "semana" | "dia" | "agenda") => void;
+  view: "mes" | "semana" | "dia" | "lista";
+  onChange: (view: "mes" | "semana" | "dia" | "lista") => void;
 }
 
 export const CalendarViewSwitcher: React.FC<CalendarViewSwitcherProps> = ({
@@ -16,7 +16,7 @@ export const CalendarViewSwitcher: React.FC<CalendarViewSwitcherProps> = ({
         { key: "mes", label: "Mês" },
         { key: "semana", label: "Semana" },
         { key: "dia", label: "Dia" },
-        { key: "agenda", label: "Agenda" },
+        { key: "lista", label: "Lista" },
       ].map((item) => (
         <Button
           key={item.key}
@@ -24,16 +24,9 @@ export const CalendarViewSwitcher: React.FC<CalendarViewSwitcherProps> = ({
           variant={view === item.key ? "default" : "ghost"}
           className={
             view === item.key
-              ? "bg-white text-blue-700 shadow-md"
-              : "text-white hover:bg-white/20"
+              ? "bg-white text-blue-700 shadow-md h-7 px-2 text-xs"
+              : "text-white hover:bg-white/20 h-7 px-2 text-xs"
           }
-          style={{
-            minWidth: 60,
-            height: 32,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
           onClick={() => onChange(item.key as any)}
         >
           {item.label}

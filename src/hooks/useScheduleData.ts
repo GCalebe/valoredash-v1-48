@@ -1,8 +1,8 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import { mockScheduleData } from "@/mocks/scheduleMock";
 import { logger } from "@/utils/logger";
+import { useScheduleQuery } from "./useScheduleQuery";
 
 export interface ScheduleEvent {
   id: number;
@@ -17,55 +17,38 @@ export interface ScheduleEvent {
 }
 
 export function useScheduleData(hostFilter: string = "all") {
-  const [events, setEvents] = useState<ScheduleEvent[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Use React Query hook for schedule data
+  const { data: events = [], isLoading: loading, refetch } = useScheduleQuery();
 
   const fetchScheduleData = useCallback(async (showRefreshingState = false) => {
     try {
       if (showRefreshingState) {
         setRefreshing(true);
-      } else {
-        setLoading(true);
       }
 
-      logger.debug(`Fetching mock schedule data for filter: ${hostFilter}`);
-
-      // Simular delay de carregamento para parecer real
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // Buscar dados mockup baseado no filtro
-      const filteredEvents = mockScheduleData[hostFilter] || mockScheduleData.all;
-      
-      logger.debug(`Found ${filteredEvents.length} mock schedule events for ${hostFilter}`);
-
-      setEvents(filteredEvents);
+      logger.debug(`Refetching schedule data for filter: ${hostFilter}`);
+      await refetch();
 
       if (showRefreshingState) {
         toast.success("Dados atualizados", {
-          description: `${filteredEvents.length} eventos de agenda carregados com sucesso.`,
+          description: `Eventos de agenda carregados com sucesso.`,
         });
       }
     } catch (error) {
-      logger.error("Error fetching mock schedule data:", error);
+      logger.error("Error refetching schedule data:", error);
       toast.error("Erro ao carregar agenda", {
         description: "Ocorreu um erro ao carregar os eventos da agenda. Tente novamente.",
       });
-      setEvents([]);
     } finally {
-      setLoading(false);
       setRefreshing(false);
     }
-  }, [hostFilter]);
+  }, [hostFilter, refetch]);
 
   const refreshScheduleData = useCallback(async () => {
-    logger.debug("Manual refresh of mock schedule data requested");
+    logger.debug("Manual refresh of schedule data requested");
     await fetchScheduleData(true);
-  }, [fetchScheduleData]);
-
-  useEffect(() => {
-    logger.debug(`useScheduleData: Initial data fetch for ${hostFilter}`);
-    fetchScheduleData();
   }, [fetchScheduleData]);
 
   return {

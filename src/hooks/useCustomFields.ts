@@ -31,7 +31,8 @@ export function useCustomFields() {
       }
 
       // Transform the data to match our CustomField interface
-      const transformedFields: CustomField[] = data.map((field) => ({
+      // Ensure data is an array before calling map
+      const transformedFields: CustomField[] = (data || []).map((field) => ({
         id: field.id,
         field_name: field.field_name,
         field_type: field.field_type as

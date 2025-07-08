@@ -82,6 +82,20 @@ const ClientsHeader = ({
     return await handleAddContact();
   };
 
+  // Função para exibir o nome do status de forma amigável
+  const getStatusDisplayName = (status: string) => {
+    switch (status) {
+      case "Ganhos":
+        return "Ganhos";
+      case "Perdidos":
+        return "Perdidos";
+      case "all":
+        return "Todos";
+      default:
+        return status;
+    }
+  };
+
   return (
     <header
       className="shadow-md transition-colors duration-300 rounded-b-xl"
@@ -116,7 +130,7 @@ const ClientsHeader = ({
             {settings.brandName}{" "}
           </h1>
           <span className="text-base ml-1 opacity-80 text-white">
-            - Clientes
+            Clientes
           </span>
         </div>
 
@@ -203,6 +217,16 @@ const ClientsHeader = ({
           </div>
         </div>
       </div>
+      
+      {/* Status filter indicator */}
+      {statusFilter !== "all" && (
+        <div className="bg-white/10 py-1 px-6 text-white text-sm flex items-center">
+          <span className="mr-2">Filtro ativo:</span>
+          <Badge className="bg-blue-500 text-white">
+            Status: {getStatusDisplayName(statusFilter)}
+          </Badge>
+        </div>
+      )}
     </header>
   );
 };

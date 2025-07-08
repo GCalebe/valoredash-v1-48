@@ -23,7 +23,7 @@ import LeadsAverageByTimeChart from "./LeadsAverageByTimeChart";
 import LeadsBySourceChart from "./LeadsBySourceChart";
 import LeadsGrowthChart from "./LeadsGrowthChart";
 import LeadsByArrivalFunnelChart from "./LeadsByArrivalFunnelChart";
-import { mockClientStats } from "@/mocks/metricsMock";
+import { useClientStatsQuery } from "@/hooks/useClientStatsQuery";
 
 interface ChatMetricsTabProps {
   stats: any;
@@ -36,9 +36,25 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
   metrics,
   loading,
 }) => {
-  // Use mock data when real data is not available
-  const clientData = stats || mockClientStats;
+  const { stats: supabaseClientStats, loading: clientStatsLoading, isStale } = useClientStatsQuery();
+  
+  // Use Supabase data if available, fallback to props
+  const clientData = React.useMemo(() => {
+    if (supabaseClientStats && supabaseClientStats.length > 0) {
+      const latestStats = supabaseClientStats[0];
+      return {
+        totalClients: latestStats.total_clients || 0,
+        newClientsThisMonth: latestStats.new_clients_this_month || 0,
+        recentClients: []
+      };
+    }
+    return stats || { totalClients: 0, newClientsThisMonth: 0, recentClients: [] };
+  }, [supabaseClientStats, stats]);
+  
   const metricsData = metrics || {};
+  
+  // Combinar loading states
+  const isLoading = loading || clientStatsLoading;
 
   return (
     <div className="space-y-8">
@@ -53,18 +69,18 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
       </div>
 
       {/* Bloco 1: KPIs Principais */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-blue-200 dark:border-blue-700 pb-2">
-          📊 Indicadores Principais
+          📊 Indicadores de Atendimento
         </h4>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
             title="Total de Conversas"
             value={metricsData.totalConversations || 340}
             icon={<MessageCircle />}
             trend="Conversas iniciadas este período"
-            loading={loading}
+            loading={isLoading}
             iconBgClass="bg-blue-100 dark:bg-blue-900/30"
             iconTextClass="text-blue-600 dark:text-blue-400"
           />
@@ -74,7 +90,7 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             value={`${metricsData.responseRate || 85}%`}
             icon={<Percent />}
             trend="Conversas respondidas"
-            loading={loading}
+            loading={isLoading}
             iconBgClass="bg-green-100 dark:bg-green-900/30"
             iconTextClass="text-green-600 dark:text-green-400"
           />
@@ -84,7 +100,7 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             value={clientData.totalClients || 120}
             icon={<Users />}
             trend={`+${clientData.newClientsThisMonth || 15} este mês`}
-            loading={loading}
+            loading={isLoading}
             iconBgClass="bg-purple-100 dark:bg-purple-900/30"
             iconTextClass="text-purple-600 dark:text-purple-400"
           />
@@ -94,7 +110,7 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             value={`${metricsData.conversionRate || 30}%`}
             icon={<Target />}
             trend="De leads para clientes"
-            loading={loading}
+            loading={isLoading}
             iconBgClass="bg-orange-100 dark:bg-orange-900/30"
             iconTextClass="text-orange-600 dark:text-orange-400"
           />
@@ -102,74 +118,50 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
       </div>
 
       {/* Bloco 2: Métricas de Tempo */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-cyan-200 dark:border-cyan-700 pb-2">
           ⏱️ Métricas de Tempo
         </h4>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <AverageResponseStartCard
             avgStartTime={metricsData.avgResponseStartTime || 45}
-            loading={loading}
+            loading={isLoading}
             trend="Melhoria de 15% vs período anterior"
           />
 
           <AverageClosingTimeCard
             avgClosingTime={metricsData.avgClosingTime || 5}
-            loading={loading}
+            loading={isLoading}
             trend="Redução de 20% vs período anterior"
           />
         </div>
       </div>
 
-      {/* Bloco 3: Métricas Financeiras */}
-      <div className="space-y-6">
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-green-200 dark:border-green-700 pb-2">
-          💰 Métricas Financeiras
-        </h4>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <NegotiatedValueCard
-            totalValue={metricsData.negotiatedValue || 50000}
-            totalDeals={3}
-            averageValue={metricsData.averageNegotiatedValue || 16666}
-            loading={loading}
-            trend="Crescimento de 19% vs período anterior"
-            previousPeriodValue={metricsData.previousPeriodValue || 42000}
-          />
-
-          <NegotiatingValueCard
-            totalValue={metricsData.totalNegotiatingValue || 125000}
-            loading={loading}
-            trend="Em processo de fechamento"
-            activePipelines={8}
-          />
-        </div>
-      </div>
 
       {/* Bloco 4: Métricas Secundárias */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-purple-200 dark:border-purple-700 pb-2">
           📈 Métricas Detalhadas
         </h4>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SecondaryResponseRateCard
             value={metricsData.secondaryResponseRate || 70}
             totalRespondidas={metricsData.totalRespondidas || 289}
             totalSecondaryResponses={metricsData.totalSecondaryResponses || 200}
-            loading={loading}
+            loading={isLoading}
           />
 
           <ResponseTimeCard
             avgResponseTime={metricsData.avgResponseTime || 2}
-            loading={loading}
+            loading={isLoading}
           />
         </div>
       </div>
 
       {/* Bloco 5: Gráficos de Performance */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-yellow-200 dark:border-yellow-700 pb-2">
           📈 Análise de Performance
         </h4>
@@ -177,11 +169,11 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ConversationChart
             data={metricsData.conversationData || []}
-            loading={loading}
+            loading={isLoading}
           />
           <ConversionFunnelChart
             data={metricsData.funnelData || []}
-            loading={loading}
+            loading={isLoading}
             noShowRate={metricsData.noShowRate || 15}
             onFilterChange={(date, stages, showNoShow) => {
               console.log("Filtro aplicado no Funil de Conversão:", {
@@ -196,17 +188,17 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
 
         <ConversionByTimeChart
           data={metricsData.conversionByTimeData || []}
-          loading={loading}
+          loading={isLoading}
         />
 
         <LeadsAverageByTimeChart
           data={metricsData.leadsAverageByTimeData || []}
-          loading={loading}
+          loading={isLoading}
         />
       </div>
 
       {/* Bloco 6: Análise de Leads */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-red-200 dark:border-red-700 pb-2">
           🎯 Análise de Leads
         </h4>
@@ -214,17 +206,17 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <LeadsBySourceChart
             data={metricsData.leadsBySource || []}
-            loading={loading}
+            loading={isLoading}
           />
           <LeadsGrowthChart
             data={metricsData.leadsOverTime || []}
-            loading={loading}
+            loading={isLoading}
           />
         </div>
 
         <LeadsByArrivalFunnelChart
           data={metricsData.leadsByArrivalFunnel || []}
-          loading={loading}
+          loading={isLoading}
           noShowRate={metricsData.noShowRate || 12}
           onFilterChange={(date, stages, showNoShow) => {
             console.log("Filtro aplicado no Funil por Data de Chegada:", {
@@ -237,8 +229,33 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
         />
       </div>
 
+      {/* Bloco 3: Métricas Financeiras */}
+      <div className="space-y-4">
+        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-green-200 dark:border-green-700 pb-2">
+          💰 Métricas Financeiras
+        </h4>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <NegotiatedValueCard
+            totalValue={metricsData.negotiatedValue || 50000}
+            totalDeals={3}
+            averageValue={metricsData.averageNegotiatedValue || 16666}
+            loading={isLoading}
+            trend="Crescimento de 19% vs período anterior"
+            previousPeriodValue={metricsData.previousPeriodValue || 42000}
+          />
+
+          <NegotiatingValueCard
+            totalValue={metricsData.totalNegotiatingValue || 125000}
+            loading={loading}
+            trend="Em processo de fechamento"
+            activePipelines={8}
+          />
+        </div>
+      </div>
+      
       {/* Bloco 7: Tabelas Detalhadas */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-indigo-200 dark:border-indigo-700 pb-2">
           📋 Dados Detalhados
         </h4>
@@ -246,9 +263,9 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RecentClientsTable
             clients={clientData.recentClients || []}
-            loading={loading}
+            loading={isLoading}
           />
-          <LeadsTable leads={metricsData.leadsData || []} loading={loading} />
+          <LeadsTable leads={metricsData.leadsData || []} loading={isLoading} />
         </div>
       </div>
     </div>

@@ -4,11 +4,11 @@ import { ChatMessage, N8nChatHistory } from "@/types/chat";
 import { parseMessage } from "@/utils/chatUtils";
 import { fetchChatHistory, subscribeToChat } from "@/lib/chatService";
 import { logger } from "@/utils/logger";
-import { mockClients } from "@/mocks/clientsMock";
+import { useContactsQuery } from "@/hooks/useContactsQuery";
 
 // Mensagens mockup para demonstração
-const generateMockMessages = (sessionId: string): ChatMessage[] => {
-  const client = mockClients.find((c) => c.sessionId === sessionId);
+const generateMockMessages = (sessionId: string, availableContacts: any[]): ChatMessage[] => {
+  const client = availableContacts.find((c) => c.sessionId === sessionId);
   if (!client) return [];
 
   const messages: ChatMessage[] = [];
@@ -117,9 +117,13 @@ const generateMockMessages = (sessionId: string): ChatMessage[] => {
 };
 
 export function useChatMessages(selectedChat: string | null) {
+  const { data: contacts = [], isLoading: contactsLoading } = useContactsQuery();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  // Use contacts from React Query
+  const availableContacts = contacts || [];
 
   const fetchMessages = useCallback(
     async (conversationId: string) => {
@@ -131,14 +135,14 @@ export function useChatMessages(selectedChat: string | null) {
 
         // Desativando busca de mensagens reais e usando apenas mensagens mockup
         logger.debug("Usando apenas mensagens mockup conforme solicitado");
-        const mockMessages = generateMockMessages(conversationId);
+        const mockMessages = generateMockMessages(conversationId, availableContacts);
         setMessages(mockMessages);
         logger.debug("Generated mock messages:", mockMessages.length);
       } catch (error) {
         logger.error("Error fetching messages:", error);
 
         // Em caso de erro, sempre tenta usar dados mockup
-        const mockMessages = generateMockMessages(selectedChat || "");
+        const mockMessages = generateMockMessages(selectedChat || "", availableContacts);
         setMessages(mockMessages);
 
         toast({
@@ -149,7 +153,7 @@ export function useChatMessages(selectedChat: string | null) {
         setLoading(false);
       }
     },
-    [toast, selectedChat],
+    [toast, selectedChat, availableContacts],
   );
 
   // Assinatura em tempo real desativada para usar apenas dados mockup
@@ -178,6 +182,8 @@ export function useChatMessages(selectedChat: string | null) {
       setLoading(false);
     }
   }, [selectedChat, fetchMessages]);
+
+  // Contacts are automatically loaded by React Query
 
   const handleNewMessage = (message: ChatMessage) => {
     logger.debug("Adding new message to local state:", message);

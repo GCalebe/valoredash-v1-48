@@ -15,11 +15,20 @@ import { Label } from "@/components/ui/label";
 import { useKanbanStages } from "@/hooks/useKanbanStages";
 import MetricsFilters from "./MetricsFilters";
 
+type DateRange = {
+  from: Date;
+  to: Date;
+};
+
 interface FunnelChartSettingsProps {
   selectedStages: string[];
   onStagesChange: (stages: string[]) => void;
   customDate: Date | null;
   setCustomDate: (date: Date) => void;
+  selectedPeriod?: string;
+  onPeriodChange?: (period: string) => void;
+  dateRange?: DateRange | null;
+  onDateRangeChange?: (range: DateRange | null) => void;
   showNoShowRate?: boolean;
   onShowNoShowRateChange?: (show: boolean) => void;
 }
@@ -29,6 +38,10 @@ export function FunnelChartSettings({
   onStagesChange,
   customDate,
   setCustomDate,
+  selectedPeriod = "last7days",
+  onPeriodChange,
+  dateRange,
+  onDateRangeChange,
   showNoShowRate = false,
   onShowNoShowRateChange,
 }: FunnelChartSettingsProps) {
@@ -38,11 +51,19 @@ export function FunnelChartSettings({
     useState<string[]>(selectedStages);
   const [localShowNoShowRate, setLocalShowNoShowRate] =
     useState<boolean>(showNoShowRate);
+  const [localPeriod, setLocalPeriod] = useState<string>(selectedPeriod);
+  const [localDateRange, setLocalDateRange] = useState<DateRange | null>(dateRange || null);
 
   const handleSave = () => {
     onStagesChange(localSelectedStages);
     if (onShowNoShowRateChange) {
       onShowNoShowRateChange(localShowNoShowRate);
+    }
+    if (onPeriodChange) {
+      onPeriodChange(localPeriod);
+    }
+    if (onDateRangeChange) {
+      onDateRangeChange(localDateRange);
     }
     setIsDialogOpen(false);
   };
@@ -73,6 +94,8 @@ export function FunnelChartSettings({
         onClick={() => {
           setLocalSelectedStages(selectedStages);
           setLocalShowNoShowRate(showNoShowRate);
+          setLocalPeriod(selectedPeriod);
+          setLocalDateRange(dateRange || null);
           setIsDialogOpen(true);
         }}
         className="text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
@@ -93,10 +116,16 @@ export function FunnelChartSettings({
           <div className="py-4 space-y-6">
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Período de Análise</h4>
-              <MetricsFilters
-                selectedDate={customDate}
-                onDateChange={setCustomDate}
-              />
+              <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
+                <MetricsFilters
+                  selectedPeriod={localPeriod}
+                  onPeriodChange={setLocalPeriod}
+                  selectedDateRange={localDateRange}
+                  onDateRangeChange={setLocalDateRange}
+                  showPeriodSelector={true}
+                  showDateRange={false}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

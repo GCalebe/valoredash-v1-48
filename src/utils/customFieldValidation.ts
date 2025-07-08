@@ -24,65 +24,54 @@ export function validateCustomField(
   return null;
 }
 
+// Funções auxiliares para validação de regras específicas
+function validateRequiredRule(value: any, ruleValue: string): boolean {
+  return ruleValue === "true" && (value === null || value === undefined || value === "");
+}
+
+function validateMinLengthRule(value: any, ruleValue: string): boolean {
+  return typeof value === "string" && value.length < parseInt(ruleValue || "0");
+}
+
+function validateMaxLengthRule(value: any, ruleValue: string): boolean {
+  return typeof value === "string" && value.length > parseInt(ruleValue || "0");
+}
+
+function validatePatternRule(value: any, ruleValue: string): boolean {
+  if (typeof value === "string" && ruleValue) {
+    const regex = new RegExp(ruleValue);
+    return !regex.test(value);
+  }
+  return false;
+}
+
+function validateMinValueRule(value: any, ruleValue: string): boolean {
+  return typeof value === "number" && value < parseFloat(ruleValue || "0");
+}
+
+function validateMaxValueRule(value: any, ruleValue: string): boolean {
+  return typeof value === "number" && value > parseFloat(ruleValue || "0");
+}
+
+// Função principal de validação com complexidade reduzida
 function validateRule(
   fieldId: string,
   value: any,
   rule: ValidationRule,
 ): ValidationError | null {
-  switch (rule.rule_type) {
-    case "required":
-      if (
-        rule.rule_value === "true" &&
-        (value === null || value === undefined || value === "")
-      ) {
-        return { fieldId, message: rule.error_message };
-      }
-      break;
+  const validators = {
+    required: validateRequiredRule,
+    min_length: validateMinLengthRule,
+    max_length: validateMaxLengthRule,
+    pattern: validatePatternRule,
+    min_value: validateMinValueRule,
+    max_value: validateMaxValueRule,
+  };
 
-    case "min_length":
-      if (
-        typeof value === "string" &&
-        value.length < parseInt(rule.rule_value || "0")
-      ) {
-        return { fieldId, message: rule.error_message };
-      }
-      break;
-
-    case "max_length":
-      if (
-        typeof value === "string" &&
-        value.length > parseInt(rule.rule_value || "0")
-      ) {
-        return { fieldId, message: rule.error_message };
-      }
-      break;
-
-    case "pattern":
-      if (typeof value === "string" && rule.rule_value) {
-        const regex = new RegExp(rule.rule_value);
-        if (!regex.test(value)) {
-          return { fieldId, message: rule.error_message };
-        }
-      }
-      break;
-
-    case "min_value":
-      if (
-        typeof value === "number" &&
-        value < parseFloat(rule.rule_value || "0")
-      ) {
-        return { fieldId, message: rule.error_message };
-      }
-      break;
-
-    case "max_value":
-      if (
-        typeof value === "number" &&
-        value > parseFloat(rule.rule_value || "0")
-      ) {
-        return { fieldId, message: rule.error_message };
-      }
-      break;
+  const validator = validators[rule.rule_type as keyof typeof validators];
+  
+  if (validator && validator(value, rule.rule_value || "")) {
+    return { fieldId, message: rule.error_message };
   }
 
   return null;

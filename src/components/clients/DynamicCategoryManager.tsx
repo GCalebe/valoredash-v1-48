@@ -147,6 +147,22 @@ const DynamicCategoryManager = ({
         const selectedValues = Array.isArray(category.value)
           ? category.value
           : [];
+          
+        // Função extraída para reduzir o aninhamento
+        const handleMultiSelectChange = (option: string, isChecked: boolean) => {
+          if (isChecked) {
+            updateCategoryValue(category.id, [
+              ...selectedValues,
+              option,
+            ]);
+          } else {
+            updateCategoryValue(
+              category.id,
+              selectedValues.filter((v: string) => v !== option),
+            );
+          }
+        };
+        
         return (
           <div className="space-y-2 max-h-24 overflow-y-auto">
             {category.options?.map((option) => (
@@ -154,19 +170,7 @@ const DynamicCategoryManager = ({
                 <input
                   type="checkbox"
                   checked={selectedValues.includes(option)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      updateCategoryValue(category.id, [
-                        ...selectedValues,
-                        option,
-                      ]);
-                    } else {
-                      updateCategoryValue(
-                        category.id,
-                        selectedValues.filter((v: string) => v !== option),
-                      );
-                    }
-                  }}
+                  onChange={(e) => handleMultiSelectChange(option, e.target.checked)}
                   className="rounded border-gray-300"
                 />
                 <span className="text-sm">{option}</span>

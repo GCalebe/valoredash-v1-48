@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Clock } from "lucide-react";
 
 interface AverageResponseStartCardProps {
@@ -24,33 +24,32 @@ const AverageResponseStartCard: React.FC<AverageResponseStartCardProps> = ({
 
   return (
     <Card className="dark:bg-gray-800 transition-all duration-300 hover:shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-800 dark:text-white">
-          <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          Tempo Médio de Início
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="flex flex-col space-y-4">
-            <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-100 dark:bg-blue-900/30 rounded-full p-2 flex-shrink-0">
+            <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </div>
-        ) : (
-          <div className="flex flex-col space-y-2">
-            <div className="text-3xl font-bold text-gray-800 dark:text-white">
-              {formatTime(avgStartTime)}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+              Tempo Médio de Início
+            </h3>
+            <div className="text-xl font-bold text-gray-800 dark:text-white">
+              {loading ? (
+                <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              ) : (
+                formatTime(avgStartTime)
+              )}
             </div>
-            <div className="text-sm text-blue-600 dark:text-blue-400">
+            <div className="text-xs text-blue-600 dark:text-blue-400 truncate">
               Tempo para primeira resposta
             </div>
             {trend && (
-              <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+              <div className="text-xs text-gray-600 dark:text-gray-300 mt-1 truncate">
                 {trend}
               </div>
             )}
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -10,11 +10,10 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import ForgotPasswordForm from "@/components/ForgotPasswordForm";
 import SignupForm from "@/components/SignupForm";
 
+// Modified schema to make password optional
 const loginSchema = z.object({
-  email: z.string().email({ message: "Email inválido" }),
-  password: z
-    .string()
-    .min(6, { message: "Senha deve ter pelo menos 6 caracteres" }),
+  email: z.string().min(1, { message: "Nome de usuário obrigatório" }),
+  password: z.string().optional(),
 });
 
 type FormMode = "login" | "signup" | "forgot-password";
@@ -98,7 +97,8 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await signIn(formData.email, formData.password);
+      console.log("Attempting to sign in with:", formData.email);
+      const { error } = await signIn(formData.email, formData.password || "");
 
       if (error) {
         console.error("Login error:", error);
@@ -151,9 +151,9 @@ const Index = () => {
               <div className="relative group">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-5 w-5 group-hover:text-valore-gold transition-colors duration-300" />
                 <Input
-                  type="email"
+                  type="text"
                   name="email"
-                  placeholder="Email"
+                  placeholder="Nome de usuário"
                   value={formData.email}
                   onChange={handleChange}
                   className={`pl-10 h-12 bg-white/10 dark:bg-gray-700/50 border-white/20 text-white rounded-md transition-all duration-300 hover:border-valore-gold/50 ${
@@ -170,13 +170,11 @@ const Index = () => {
                 <Input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  placeholder="Senha"
+                  placeholder="Senha (opcional)"
                   value={formData.password}
                   onChange={handleChange}
                   className={`pl-10 h-12 bg-white/10 dark:bg-gray-700/50 border-white/20 text-white rounded-md transition-all duration-300 hover:border-valore-gold/50 ${
-                    errors.password
-                      ? "border-red-400"
-                      : "focus:border-valore-gold"
+                    errors.password ? "border-red-400" : "focus:border-valore-gold"
                   }`}
                 />
                 <button

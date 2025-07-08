@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useThemeSettings } from "@/context/ThemeSettingsContext";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import CalendarInterface from "@/components/calendar/CalendarInterface";
 import {
   useCalendarEvents,
   CalendarEvent,
@@ -8,18 +13,20 @@ import {
 } from "@/hooks/useCalendarEvents";
 import { useScheduleData } from "@/hooks/useScheduleData";
 import { useScheduleState } from "@/hooks/useScheduleState";
-import ScheduleHeader from "@/components/schedule/ScheduleHeader";
 import { ScheduleContent } from "@/components/schedule/ScheduleContent";
 import { ScheduleDialogs } from "@/components/schedule/ScheduleDialogs";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { CalendarViewSwitcher } from "@/components/schedule/CalendarViewSwitcher";
 
 const Schedule = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
+  const { settings } = useThemeSettings();
   const navigate = useNavigate();
-
+  
   // Estados para filtros
   const [statusFilter, setStatusFilter] = useState("all");
   const [hostFilter, setHostFilter] = useState("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const {
     selectedDate,
@@ -84,12 +91,13 @@ const Schedule = () => {
   const isAnyLoading = isEventsLoading || isScheduleLoading;
   const isAnyRefreshing = isSubmitting || isScheduleRefreshing;
 
-  const [calendarViewTab, setCalendarViewTab] = React.useState<
-    "mes" | "semana" | "dia" | "agenda"
+  const [calendarViewTab, setCalendarViewTab] = useState<
+    "mes" | "semana" | "dia" | "lista"
   >("mes");
 
   const handleRefreshAll = useCallback(async () => {
     console.log("Atualizando todos os dados...");
+    setIsRefreshing(true);
 
     const refreshPromises = [refreshEventsPost(), refreshScheduleData()];
 
@@ -98,6 +106,8 @@ const Schedule = () => {
       console.log("Todos os dados atualizados com sucesso");
     } catch (error) {
       console.error("Erro ao atualizar dados:", error);
+    } finally {
+      setIsRefreshing(false);
     }
   }, [refreshEventsPost, refreshScheduleData]);
 
@@ -171,55 +181,127 @@ const Schedule = () => {
     if (!isAuthLoading && !user) {
       navigate("/");
     }
+    
+    // Add overflow hidden to body when component is mounted
+    document.body.style.overflow = "hidden";
+    
+    // Restore overflow when component unmounts
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [user, isAuthLoading, navigate]);
 
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+      <div className="h-screen flex items-center justify-center bg-gray-900">
         <div className="h-16 w-16 border-4 border-t-transparent border-blue-600 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <ScheduleHeader
-        onAddEvent={() => setIsAddEventDialogOpen(true)}
-        onRefresh={handleRefreshAll}
-        isRefreshing={isAnyRefreshing}
-        lastUpdated={lastUpdated}
-        view={calendarViewTab}
-        onViewChange={setCalendarViewTab}
-        onOpenFilter={() => {}}
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
-        hostFilter={hostFilter}
-        onHostFilterChange={setHostFilter}
-      />
+    <div className="h-screen flex flex-col bg-gray-900 overflow-hidden">
+      <header
+        className="text-white shadow-md transition-colors duration-300 rounded-b-xl flex-shrink-0"
+        style={{ backgroundColor: settings.primaryColor }}
+      >
+        <div className="flex flex-row items-center justify-between h-16 w-full px-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/dashboard")}
+              className="text-white hover:bg-white/20 focus-visible:ring-white"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-xl font-bold">Calendário</h1>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-white text-sm font-medium">Vendedor:</span>
+              <select 
+                value={hostFilter} 
+                onChange={(e) => setHostFilter(e.target.value)}
+                className="h-8 border-slate-600 text-white bg-slate-700/50 hover:bg-slate-600 text-xs rounded-md w-[120px] px-2"
+              >
+                <option value="all">Todos</option>
+                <option value="corretor1">João Silva</option>
+                <option value="corretor2">Maria Santos</option>
+                <option value="corretor3">Pedro Costa</option>
+              </select>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-white text-sm font-medium">Status:</span>
+              <select 
+                value={statusFilter} 
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="h-8 border-slate-600 text-white bg-slate-700/50 hover:bg-slate-600 text-xs rounded-md w-[140px] px-2"
+              >
+                <option value="all">Todos</option>
+                <option value="confirmado">Confirmados</option>
+                <option value="pendente">Pendentes</option>
+                <option value="cancelado">Cancelados</option>
+              </select>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <CalendarViewSwitcher 
+                view={calendarViewTab} 
+                onChange={setCalendarViewTab} 
+              />
+            </div>
+            
+            <Button
+              variant="outline"
+              onClick={handleRefreshAll}
+              disabled={isRefreshing}
+              className="border-white text-white bg-transparent hover:bg-white/20 h-8 px-2"
+            >
+              <span className="flex items-center gap-1">
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                {isRefreshing ? "Atualizando..." : "Atualizar"}
+              </span>
+            </Button>
+            
+            <Button 
+              onClick={() => setIsAddEventDialogOpen(true)}
+              className="bg-white text-blue-600 hover:bg-blue-50 h-8 px-2"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Novo
+            </Button>
+          </div>
+        </div>
+      </header>
 
-      <ScheduleContent
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        events={events}
-        appointments={appointments}
-        selectedTab={selectedTab}
-        searchTerm={searchTerm}
-        isAnyLoading={isAnyLoading}
-        eventsError={eventsError}
-        lastUpdated={lastUpdated}
-        setSearchTerm={setSearchTerm}
-        setSelectedTab={setSelectedTab}
-        setIsAddEventDialogOpen={setIsAddEventDialogOpen}
-        openEditEventDialog={openEditEventDialog}
-        openDeleteEventDialog={openDeleteEventDialog}
-        openEventLink={openEventLink}
-        onPeriodChange={handlePeriodChange}
-        calendarViewType={calendarViewTab}
-        setCalendarViewType={setCalendarViewTab}
-        scheduleEvents={scheduleEvents}
-        statusFilter={statusFilter}
-        hostFilter={hostFilter}
-      />
+      <div className="flex-1 p-4 overflow-hidden">
+        <ScheduleContent
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          events={events}
+          appointments={appointments}
+          selectedTab={selectedTab}
+          searchTerm={searchTerm}
+          isAnyLoading={isAnyLoading}
+          eventsError={eventsError}
+          lastUpdated={lastUpdated}
+          setSearchTerm={setSearchTerm}
+          setSelectedTab={setSelectedTab}
+          setIsAddEventDialogOpen={setIsAddEventDialogOpen}
+          openEditEventDialog={openEditEventDialog}
+          openDeleteEventDialog={openDeleteEventDialog}
+          openEventLink={openEventLink}
+          onPeriodChange={handlePeriodChange}
+          calendarViewType={calendarViewTab}
+          setCalendarViewType={setCalendarViewTab}
+          scheduleEvents={scheduleEvents}
+          statusFilter={statusFilter}
+          hostFilter={hostFilter}
+        />
+      </div>
 
       <ScheduleDialogs
         isAddEventDialogOpen={isAddEventDialogOpen}

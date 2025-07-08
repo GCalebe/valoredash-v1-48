@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TrendingUp,
   TrendingDown,
@@ -44,8 +44,8 @@ const UTMAdvancedMetrics: React.FC<UTMAdvancedMetricsProps> = ({
   const metricsData = loading ? mockData : { ...mockData, ...data };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           title="CTR Médio"
           value={`${metricsData.ctr}%`}
@@ -87,7 +87,7 @@ const UTMAdvancedMetrics: React.FC<UTMAdvancedMetricsProps> = ({
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           title="Duração da Sessão"
           value={`${metricsData.sessionDuration}s`}
@@ -108,24 +108,19 @@ const UTMAdvancedMetrics: React.FC<UTMAdvancedMetricsProps> = ({
           iconTextClass="text-red-600 dark:text-red-400"
         />
 
-        <Card className="col-span-1 md:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-md font-medium text-gray-500 dark:text-gray-400">
-              Performance das Campanhas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="col-span-2">
+          <CardContent className="p-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Zap className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Melhor: </span>
+                <span className="text-sm font-medium">Melhor campanha: </span>
                 <span className="font-medium text-green-600">
                   {metricsData.topPerformingCampaign}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-4 w-4 text-red-500" />
-                <span className="text-sm">Pior: </span>
+                <span className="text-sm font-medium">Pior campanha: </span>
                 <span className="font-medium text-red-600">
                   {metricsData.worstPerformingCampaign}
                 </span>

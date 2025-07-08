@@ -48,7 +48,7 @@ const ChatHeader = ({ signOut }: ChatHeaderProps) => {
             />
           )}
           <h1 className="text-2xl font-bold">{settings.brandName}</h1>
-          <span className="text-lg ml-2">- Conversas</span>
+          <span className="text-lg ml-2">Conversas</span>
         </div>
         <div className="flex items-center gap-3">
           <Badge
