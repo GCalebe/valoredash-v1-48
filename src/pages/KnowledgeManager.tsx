@@ -14,7 +14,7 @@ import ProductsTab from "@/components/knowledge/tabs/ProductsTab";
 import FAQTab from "@/components/knowledge/tabs/FAQTab";
 import WebsitesTab from "@/components/knowledge/tabs/WebsitesTab";
 import AIPersonalityTab from "@/components/knowledge/tabs/AIPersonalityTab";
-import AIStagesTab from "@/components/knowledge/tabs/AIStagesTab";
+// import AIStagesTab from "@/components/knowledge/tabs/AIStagesTab";
 import AIMessagesTab from "@/components/knowledge/tabs/AIMessagesTab";
 import AITestTab from "@/components/knowledge/tabs/AITestTab";
 
@@ -142,7 +142,7 @@ const KnowledgeManager = () => {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-7 lg:grid-cols-7 bg-gray-100 dark:bg-gray-700 p-1 rounded-t-lg">
+            <TabsList className="grid w-full grid-cols-6 lg:grid-cols-6 bg-gray-100 dark:bg-gray-700 p-1 rounded-t-lg">
               <TabsTrigger value="documents" className="text-sm">
                 Produtos
               </TabsTrigger>
@@ -155,9 +155,9 @@ const KnowledgeManager = () => {
               <TabsTrigger value="ai-personality" className="text-sm">
                 Personalidade
               </TabsTrigger>
-              <TabsTrigger value="ai-stages" className="text-sm">
+              {/* <TabsTrigger value="ai-stages" className="text-sm">
                 Etapas
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger value="ai-messages" className="text-sm">
                 Mensagens
               </TabsTrigger>
@@ -183,9 +183,9 @@ const KnowledgeManager = () => {
                 <AIPersonalityTab />
               </TabsContent>
 
-              <TabsContent value="ai-stages" className="mt-0">
+              {/* <TabsContent value="ai-stages" className="mt-0">
                 <AIStagesTab />
-              </TabsContent>
+              </TabsContent> */}
 
               <TabsContent value="ai-messages" className="mt-0">
                 <AIMessagesTab />
