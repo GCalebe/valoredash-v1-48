@@ -86,13 +86,13 @@ const Schedule = () => {
     loading: isScheduleLoading,
     refreshing: isScheduleRefreshing,
     refetchScheduleData: refreshScheduleData,
-  } = useScheduleData(hostFilter);
+  } = useScheduleData();
 
   const isAnyLoading = isEventsLoading || isScheduleLoading;
   const isAnyRefreshing = isSubmitting || isScheduleRefreshing;
 
   const [calendarViewTab, setCalendarViewTab] = useState<
-    "mes" | "semana" | "dia" | "lista"
+    "mes" | "semana" | "dia" | "agenda"
   >("mes");
 
   const handleRefreshAll = useCallback(async () => {
@@ -249,8 +249,8 @@ const Schedule = () => {
             
             <div className="flex items-center gap-2">
               <CalendarViewSwitcher 
-                view={calendarViewTab} 
-                onChange={setCalendarViewTab} 
+                view={calendarViewTab as "mes" | "semana" | "dia" | "agenda"} 
+                onChange={(view) => setCalendarViewTab(view)} 
               />
             </div>
             

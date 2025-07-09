@@ -24,6 +24,7 @@ export interface PaymentMethod {
   id: string;
   type: 'credit_card' | 'pix' | 'boleto' | 'bank_transfer';
   last4?: string;
+  lastFour?: string; // Add for compatibility
   brand?: string;
   expiryMonth?: number;
   expiryYear?: number;
@@ -37,6 +38,7 @@ export interface Invoice {
   amount: number;
   status: 'paid' | 'open' | 'overdue' | 'void';
   dueDate: string;
+  date?: string; // Add for compatibility
   paidAt?: string;
   createdAt: string;
 }

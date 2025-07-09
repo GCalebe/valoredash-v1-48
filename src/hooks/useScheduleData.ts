@@ -7,6 +7,11 @@ export interface ScheduleEvent {
   start_time: string;
   end_time: string;
   status?: string;
+  date: Date;
+  clientName: string;
+  phone: string;
+  service: string;
+  notes?: string;
 }
 
 // Mock schedule data hook since the table structure is different

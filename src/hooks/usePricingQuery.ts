@@ -10,11 +10,16 @@ interface SimplePricingPlan {
   price: number;
   currency: string;
   billing_period: 'monthly' | 'yearly';
+  billingPeriod: 'monthly' | 'yearly'; // Add for compatibility
   features: string[];
   is_popular?: boolean;
+  popular?: boolean; // Add for compatibility
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  aiProducts: string[]; // Add for compatibility
+  instances?: number; // Add for compatibility  
+  messages?: number; // Add for compatibility
 }
 
 // Mock data since pricing_plans table doesn't exist in schema
@@ -26,9 +31,14 @@ const mockPricingPlans: SimplePricingPlan[] = [
     price: 29.99,
     currency: 'BRL',
     billing_period: 'monthly',
+    billingPeriod: 'monthly',
     features: ['Basic chat support', 'Up to 100 contacts', 'Email integration'],
     is_popular: false,
+    popular: false,
     is_active: true,
+    aiProducts: ['chat-basic', 'analytics-basic'],
+    instances: 1,
+    messages: 1000,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -39,9 +49,14 @@ const mockPricingPlans: SimplePricingPlan[] = [
     price: 79.99,
     currency: 'BRL',
     billing_period: 'monthly',
+    billingPeriod: 'monthly',
     features: ['Advanced chat support', 'Up to 1000 contacts', 'CRM integration', 'Analytics'],
     is_popular: true,
+    popular: true,
     is_active: true,
+    aiProducts: ['chat-pro', 'analytics-pro', 'crm-integration'],
+    instances: 5,
+    messages: 10000,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },

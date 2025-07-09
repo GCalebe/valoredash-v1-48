@@ -45,7 +45,7 @@ export const formatMessageTime = (date: Date): string => {
 // Função auxiliar para criar uma mensagem de chat
 const createChatMessage = (role: string, content: string, timestamp: string, type?: string): ChatMessage => {
   return {
-    role,
+    role: role as "user" | "assistant" | "human" | "ai" | "unknown",
     content,
     timestamp,
     ...(type && { type }),

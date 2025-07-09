@@ -301,7 +301,6 @@ interface AIProductCardProps {
 }
 
 const AIProductCard: React.FC<AIProductCardProps> = ({ product, onSelect }) => {
-  const Icon = product.icon;
   
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
@@ -330,7 +329,7 @@ const AIProductCard: React.FC<AIProductCardProps> = ({ product, onSelect }) => {
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-md bg-blue-100 dark:bg-blue-900/30">
-            <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </div>
           <CardTitle className="text-lg">{product.name}</CardTitle>
         </div>

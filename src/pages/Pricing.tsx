@@ -218,7 +218,7 @@ const Pricing = () => {
                   ) : (
                     <Button
                       className="w-full"
-                      onClick={() => handleSelectPlan(plan)}
+                      onClick={() => handleSelectPlan(plan as PricingPlan)}
                       disabled={processingPayment}
                     >
                       {processingPayment ? "Processando..." : "Assinar Plano"}
@@ -311,10 +311,10 @@ const Pricing = () => {
                   <span className="font-medium">{selectedPlan.name}</span>
                 </div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-gray-700 dark:text-gray-300">Período</span>
-                  <span className="font-medium">
-                    {selectedPlan.billingPeriod === "monthly" ? "Mensal" : "Anual"}
-                  </span>
+                   <span className="text-gray-700 dark:text-gray-300">Período</span>
+                   <span className="font-medium">
+                     {selectedPlan.billing_period === "monthly" ? "Mensal" : "Anual"}
+                   </span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
                   <span className="text-gray-700 dark:text-gray-300 font-medium">Total</span>

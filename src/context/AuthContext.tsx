@@ -8,6 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   userProfile?: any; // Add userProfile for compatibility
   isAdmin?: boolean; // Add isAdmin for compatibility
+  signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -38,6 +39,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -48,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     userProfile: null, // Mock value for now
     isAdmin: false, // Mock value for now
+    signIn,
     signOut,
   };
 

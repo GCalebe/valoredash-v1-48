@@ -18,8 +18,8 @@ const MetricsDashboard = () => {
   const [selectedDevice, setSelectedDevice] = useState("all");
 
   // React Query hooks - automatic data fetching and caching
-  const { data: stats = [], isLoading: statsLoading } = useClientStatsQuery();
-  const { data: metrics = [], isLoading: metricsLoading } = useConversationMetricsQuery();
+  const { stats, loading: statsLoading } = useClientStatsQuery();
+  const { metrics, loading: metricsLoading } = useConversationMetricsQuery();
   const { data: utmMetrics = [], isLoading: utmLoading } = useUTMMetricsQuery();
   
   // Initialize real-time updates for the metrics dashboard

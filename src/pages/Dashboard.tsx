@@ -22,7 +22,7 @@ const Dashboard = () => {
   const { refetchScheduleData } = useScheduleData();
 
   // Initialize real-time updates for the dashboard
-  useDashboardRealtimeQuery({ refetchScheduleData });
+  useDashboardRealtimeQuery({ refetchScheduleData: async () => refetchScheduleData() });
 
   useEffect(() => {
     if (!isLoading && !user) {
