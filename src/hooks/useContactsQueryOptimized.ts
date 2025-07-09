@@ -1,176 +1,99 @@
-import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { queryKeys, cacheConfig } from '@/lib/queryClient';
+import { toast } from '@/hooks/use-toast';
 
-// Import Contact from centralized types
-import type { Contact } from '@/types/client';
+// Simplified contact interface to avoid type issues
+interface SimpleContact {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  kanban_stage?: string;
+  created_at?: string;
+  updated_at?: string;
+  sales?: number;
+  budget?: number;
+}
 
 interface ContactFilters {
   search?: string;
   kanban_stage?: string;
-  lead_source?: string;
   dateRange?: {
     start: string;
     end: string;
   };
 }
 
-interface ContactsPage {
-  data: Contact[];
-  nextCursor?: string;
-  hasMore: boolean;
-  total: number;
-}
+// Fetch contacts with simplified typing
+const fetchContacts = async (filters: ContactFilters = {}): Promise<SimpleContact[]> => {
+  let query = supabase
+    .from('contacts')
+    .select('id, name, email, phone, kanban_stage, created_at, sales, budget')
+    .order('created_at', { ascending: false });
 
-/**
- * Hook otimizado para busca de contatos com paginação infinita
- * Utiliza cache inteligente e prefetch automático
- */
-export const useContactsInfiniteQuery = (filters: ContactFilters = {}, pageSize = 50) => {
-  return useInfiniteQuery({
-    queryKey: queryKeys.contacts(filters),
-    queryFn: async ({ pageParam = 0 }): Promise<ContactsPage> => {
-      const offset = typeof pageParam === 'string' ? parseInt(pageParam) : 0;
-      let query = supabase
-        .from('contacts')
-        .select('id, kanban_stage, created_at, sales, budget')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + pageSize - 1);
+  // Apply filters
+  if (filters.kanban_stage) {
+    query = query.eq('kanban_stage', filters.kanban_stage);
+  }
 
-      // Aplicar filtros
-      if (filters.search) {
-        query = query.or(`name.ilike.%${filters.search}%,email.ilike.%${filters.search}%,company.ilike.%${filters.search}%`);
-      }
+  if (filters.search) {
+    query = query.or(`name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+  }
 
-      if (filters.kanban_stage) {
-        query = query.eq('kanban_stage', filters.kanban_stage);
-      }
+  if (filters.dateRange) {
+    query = query
+      .gte('created_at', filters.dateRange.start)
+      .lte('created_at', filters.dateRange.end);
+  }
 
-      if (filters.lead_source) {
-        query = query.eq('lead_source', filters.lead_source);
-      }
+  const { data, error } = await query.limit(1000);
 
-      if (filters.dateRange) {
-        query = query
-          .gte('created_at', filters.dateRange.start)
-          .lte('created_at', filters.dateRange.end);
-      }
+  if (error) {
+    console.error('Error fetching contacts:', error);
+    throw new Error(`Failed to fetch contacts: ${error.message}`);
+  }
 
-      const { data, error } = await query;
-      const count = data?.length || 0;
+  return data || [];
+};
 
-      if (error) {
-        throw new Error(`Erro ao buscar contatos: ${error.message}`);
-      }
-
-      const contacts = data || [];
-      const total = count || 0;
-      const hasMore = (offset + pageSize) < total;
-      const nextCursor = hasMore ? (offset + pageSize).toString() : undefined;
-
-      return {
-        data: contacts,
-        nextCursor,
-        hasMore,
-        total,
-      };
-    },
-    initialPageParam: '0',
-    getNextPageParam: (lastPage: ContactsPage) => lastPage.nextCursor,
-    ...cacheConfig.dynamic,
-    staleTime: 2 * 60 * 1000, // 2 minutos para contatos
+// Hook for fetching contacts
+export const useContactsOptimizedQuery = (filters: ContactFilters = {}) => {
+  return useQuery({
+    queryKey: ['contacts-optimized', filters],
+    queryFn: () => fetchContacts(filters),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 };
 
-/**
- * Hook otimizado para busca de contatos com paginação tradicional
- */
-export const useContactsQuery = (filters: ContactFilters = {}, page = 1, pageSize = 20) => {
+// Hook for contacts by stage
+export const useContactsByStageOptimized = (stage: string) => {
   return useQuery({
-    queryKey: [...queryKeys.contacts(filters), 'page', page, pageSize],
-    queryFn: async (): Promise<ContactsPage> => {
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-
-      let query = supabase
-        .from('contacts')
-        .select('id, kanban_stage, created_at, sales, budget')
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      // Aplicar filtros
-      if (filters.search) {
-        query = query.or(`name.ilike.%${filters.search}%,email.ilike.%${filters.search}%,company.ilike.%${filters.search}%`);
-      }
-
-      if (filters.kanban_stage) {
-        query = query.eq('kanban_stage', filters.kanban_stage);
-      }
-
-      if (filters.lead_source) {
-        query = query.eq('lead_source', filters.lead_source);
-      }
-
-      if (filters.dateRange) {
-        query = query
-          .gte('created_at', filters.dateRange.start)
-          .lte('created_at', filters.dateRange.end);
-      }
-
-      const { data, error } = await query;
-      const count = data?.length || 0;
-
-      if (error) {
-        throw new Error(`Erro ao buscar contatos: ${error.message}`);
-      }
-
-      const contacts = data || [];
-      const total = count || 0;
-      const totalPages = Math.ceil(total / pageSize);
-      const hasMore = page < totalPages;
-
-      return {
-        data: contacts,
-        hasMore,
-        total,
-      };
-    },
-    ...cacheConfig.dynamic,
-    enabled: true,
-  });
-};
-
-/**
- * Hook para contatos por estágio do kanban (cache mais longo por ser menos dinâmico)
- */
-export const useContactsByStageQuery = (stage: string) => {
-  return useQuery({
-    queryKey: ['contacts', 'by-stage', stage],
-    queryFn: async (): Promise<Contact[]> => {
+    queryKey: ['contacts-optimized', 'stage', stage],
+    queryFn: async (): Promise<SimpleContact[]> => {
       const { data, error } = await supabase
         .from('contacts')
-        .select('*')
+        .select('id, name, email, phone, kanban_stage, created_at, sales, budget')
         .eq('kanban_stage', stage)
         .order('created_at', { ascending: false })
         .limit(100);
 
       if (error) {
-        throw new Error(`Erro ao buscar contatos por estágio: ${error.message}`);
+        throw new Error(`Error fetching contacts by stage: ${error.message}`);
       }
 
       return data || [];
     },
-    ...cacheConfig.static,
-    staleTime: 5 * 60 * 1000, // 5 minutos para dados por estágio
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!stage,
   });
 };
 
-/**
- * Hook para estatísticas rápidas de contatos
- */
-export const useContactsStatsQuery = () => {
+// Hook for contact stats
+export const useContactsStatsOptimized = () => {
   return useQuery({
-    queryKey: ['contacts', 'stats'],
+    queryKey: ['contacts-optimized', 'stats'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('contacts')
@@ -178,12 +101,11 @@ export const useContactsStatsQuery = () => {
         .limit(1000);
 
       if (error) {
-        throw new Error(`Erro ao buscar estatísticas: ${error.message}`);
+        throw new Error(`Error fetching contact stats: ${error.message}`);
       }
 
       const contacts = data || [];
       
-      // Calcular estatísticas de forma eficiente
       const stats = {
         total: contacts.length,
         byStage: contacts.reduce((acc, contact) => {
@@ -191,8 +113,6 @@ export const useContactsStatsQuery = () => {
           acc[stage] = (acc[stage] || 0) + 1;
           return acc;
         }, {} as Record<string, number>),
-        bySource: {}, // Removed since lead_source doesn't exist
-        avgConversion: 0, // Removed since conversion_probability doesn't exist
         thisMonth: contacts.filter(c => {
           const created = new Date(c.created_at);
           const thisMonth = new Date();
@@ -202,52 +122,51 @@ export const useContactsStatsQuery = () => {
 
       return stats;
     },
-    ...cacheConfig.metrics,
-    staleTime: 3 * 60 * 1000, // 3 minutos para stats
+    staleTime: 3 * 60 * 1000, // 3 minutes
   });
 };
 
-/**
- * Mutations otimizadas para contatos
- */
-export const useCreateContactMutation = () => {
+// Create contact mutation
+export const useCreateContactOptimized = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newContact: Omit<Contact, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (newContact: Omit<SimpleContact, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('contacts')
-        .insert(newContact)
+        .insert([newContact])
         .select()
         .single();
 
       if (error) {
-        throw new Error(`Erro ao criar contato: ${error.message}`);
+        throw new Error(`Error creating contact: ${error.message}`);
       }
 
       return data;
     },
-    onSuccess: (newContact) => {
-      // Invalidar queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ['contacts'] });
-      queryClient.invalidateQueries({ queryKey: ['contacts', 'stats'] });
-      
-      // Update otimista nas queries existentes
-      queryClient.setQueryData(['contacts', 'by-stage', newContact.kanban_stage], (old: Contact[] = []) => {
-        return [newContact, ...old];
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts-optimized'] });
+      toast({
+        title: "Success",
+        description: "Contact created successfully",
       });
     },
-    onError: (error) => {
-      console.error('Erro ao criar contato:', error);
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 };
 
-export const useUpdateContactMutation = () => {
+// Update contact mutation
+export const useUpdateContactOptimized = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Contact> }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<SimpleContact> }) => {
       const { data, error } = await supabase
         .from('contacts')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -256,71 +175,24 @@ export const useUpdateContactMutation = () => {
         .single();
 
       if (error) {
-        throw new Error(`Erro ao atualizar contato: ${error.message}`);
+        throw new Error(`Error updating contact: ${error.message}`);
       }
 
       return data;
     },
-    onSuccess: (updatedContact) => {
-      // Invalidar queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ['contacts'] });
-      queryClient.invalidateQueries({ queryKey: ['contacts', 'stats'] });
-      
-      // Update específico por ID
-      queryClient.setQueryData(['contact', updatedContact.id], updatedContact);
-    },
-    onError: (error) => {
-      console.error('Erro ao atualizar contato:', error);
-    },
-  });
-};
-
-export const useDeleteContactMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('contacts')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        throw new Error(`Erro ao deletar contato: ${error.message}`);
-      }
-
-      return id;
-    },
-    onSuccess: (deletedId) => {
-      // Invalidar todas as queries de contatos
-      queryClient.invalidateQueries({ queryKey: ['contacts'] });
-    },
-    onError: (error) => {
-      console.error('Erro ao deletar contato:', error);
-    },
-  });
-};
-
-/**
- * Utilitários para cache e prefetch
- */
-export const useContactsUtils = () => {
-  const queryClient = useQueryClient();
-
-  return {
-    prefetchContactsByStage: (stage: string) => {
-      queryClient.prefetchQuery({
-        queryKey: ['contacts', 'by-stage', stage],
-        staleTime: cacheConfig.static.staleTime,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts-optimized'] });
+      toast({
+        title: "Success",
+        description: "Contact updated successfully",
       });
     },
-    
-    invalidateAllContacts: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
-    
-    refetchStats: () => {
-      queryClient.refetchQueries({ queryKey: ['contacts', 'stats'] });
-    },
-  };
+  });
 };

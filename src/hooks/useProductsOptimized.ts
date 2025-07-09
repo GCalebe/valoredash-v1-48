@@ -17,11 +17,11 @@ interface SimpleProduct {
 }
 
 // Query keys
-export const productsKeys = {
-  all: ['products'] as const,
-  lists: () => [...productsKeys.all, 'list'] as const,
-  list: (filters: string) => [...productsKeys.lists(), { filters }] as const,
-  byCategory: (category: string) => [...productsKeys.all, 'category', category] as const,
+export const productsKeysOptimized = {
+  all: ['products-optimized'] as const,
+  lists: () => [...productsKeysOptimized.all, 'list'] as const,
+  list: (filters: string) => [...productsKeysOptimized.lists(), { filters }] as const,
+  byCategory: (category: string) => [...productsKeysOptimized.all, 'category', category] as const,
 };
 
 // Fetch AI products
@@ -112,9 +112,9 @@ const deleteProduct = async (id: string): Promise<void> => {
 };
 
 // Hook for fetching all products
-export const useProductsQuery = () => {
+export const useProductsOptimizedQuery = () => {
   return useQuery({
-    queryKey: productsKeys.lists(),
+    queryKey: productsKeysOptimized.lists(),
     queryFn: fetchAIProducts,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -123,9 +123,9 @@ export const useProductsQuery = () => {
 };
 
 // Hook for fetching products by category
-export const useProductsByCategory = (category: string) => {
+export const useProductsByCategoryOptimized = (category: string) => {
   return useQuery({
-    queryKey: productsKeys.byCategory(category),
+    queryKey: productsKeysOptimized.byCategory(category),
     queryFn: () => fetchProductsByCategory(category),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -135,13 +135,13 @@ export const useProductsByCategory = (category: string) => {
 };
 
 // Hook for creating product
-export const useCreateProductMutation = () => {
+export const useCreateProductOptimized = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: createProduct,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productsKeys.all });
+      queryClient.invalidateQueries({ queryKey: productsKeysOptimized.all });
       toast({
         title: "Success",
         description: "Product created successfully",
@@ -158,13 +158,13 @@ export const useCreateProductMutation = () => {
 };
 
 // Hook for updating product
-export const useUpdateProductMutation = () => {
+export const useUpdateProductOptimized = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: updateProduct,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productsKeys.all });
+      queryClient.invalidateQueries({ queryKey: productsKeysOptimized.all });
       toast({
         title: "Success",
         description: "Product updated successfully",
@@ -181,13 +181,13 @@ export const useUpdateProductMutation = () => {
 };
 
 // Hook for deleting product
-export const useDeleteProductMutation = () => {
+export const useDeleteProductOptimized = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteProduct,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productsKeys.all });
+      queryClient.invalidateQueries({ queryKey: productsKeysOptimized.all });
       toast({
         title: "Success",
         description: "Product deleted successfully",
@@ -204,44 +204,22 @@ export const useDeleteProductMutation = () => {
 };
 
 // Utility functions for manual cache management
-export const productsUtils = {
+export const productsUtilsOptimized = {
   invalidateAll: (queryClient: ReturnType<typeof useQueryClient>) => {
-    queryClient.invalidateQueries({ queryKey: productsKeys.all });
+    queryClient.invalidateQueries({ queryKey: productsKeysOptimized.all });
   },
   prefetchProducts: (queryClient: ReturnType<typeof useQueryClient>) => {
     queryClient.prefetchQuery({
-      queryKey: productsKeys.lists(),
+      queryKey: productsKeysOptimized.lists(),
       queryFn: fetchAIProducts,
       staleTime: 5 * 60 * 1000,
     });
   },
   prefetchProductsByCategory: (queryClient: ReturnType<typeof useQueryClient>, category: string) => {
     queryClient.prefetchQuery({
-      queryKey: productsKeys.byCategory(category),
+      queryKey: productsKeysOptimized.byCategory(category),
       queryFn: () => fetchProductsByCategory(category),
       staleTime: 5 * 60 * 1000,
     });
   },
 };
-
-// Legacy hook for backward compatibility
-export function useProducts() {
-  const { data: products = [], isLoading: loading, refetch } = useProductsQuery();
-  
-  return {
-    products,
-    combos: [], // Empty for now since no combo table exists
-    loading,
-    refreshing: false,
-    fetchProducts: refetch,
-    refreshProducts: refetch,
-    addProduct: () => Promise.resolve(undefined),
-    updateProduct: () => Promise.resolve(false),
-    deleteProduct: () => Promise.resolve(false),
-    addCombo: () => Promise.resolve(undefined),
-    deleteCombo: () => Promise.resolve(false),
-    fetchClientProducts: () => Promise.resolve({ clientProducts: [], availableProducts: [] }),
-    addProductToClient: () => Promise.resolve(false),
-    removeProductFromClient: () => Promise.resolve(false),
-  };
-}

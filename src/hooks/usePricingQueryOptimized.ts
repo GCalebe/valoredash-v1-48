@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-// Simplified pricing plan interface (no pricing_plans table exists)
+// Simplified pricing plan interface (no pricing_plans table exists in schema)
 interface SimplePricingPlan {
   id: string;
   name: string;
@@ -17,7 +17,7 @@ interface SimplePricingPlan {
   updated_at: string;
 }
 
-// Mock data since pricing_plans table doesn't exist in schema
+// Mock data since pricing_plans table doesn't exist
 const mockPricingPlans: SimplePricingPlan[] = [
   {
     id: '1',
@@ -45,18 +45,24 @@ const mockPricingPlans: SimplePricingPlan[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
+  {
+    id: '3',
+    name: 'Enterprise',
+    description: 'For large organizations',
+    price: 199.99,
+    currency: 'BRL',
+    billing_period: 'monthly',
+    features: ['Custom solutions', 'Unlimited contacts', 'API access', 'Priority support'],
+    is_popular: false,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
 ];
-
-// Query keys
-export const pricingKeys = {
-  all: ['pricing'] as const,
-  lists: () => [...pricingKeys.all, 'list'] as const,
-  list: (filters: string) => [...pricingKeys.lists(), { filters }] as const,
-  byPeriod: (period: string) => [...pricingKeys.all, 'period', period] as const,
-};
 
 // Fetch pricing plans (mock data)
 const fetchPricingPlans = async (): Promise<SimplePricingPlan[]> => {
+  // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   return mockPricingPlans.filter(plan => plan.is_active);
 };
@@ -68,9 +74,9 @@ const fetchPricingPlansByPeriod = async (period: 'monthly' | 'yearly'): Promise<
 };
 
 // Hook for fetching all pricing plans
-export const usePricingQuery = () => {
+export const usePricingQueryOptimized = () => {
   return useQuery({
-    queryKey: pricingKeys.lists(),
+    queryKey: ['pricing-optimized'],
     queryFn: fetchPricingPlans,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
@@ -79,9 +85,9 @@ export const usePricingQuery = () => {
 };
 
 // Hook for fetching pricing plans by period
-export const usePricingByPeriodQuery = (period: 'monthly' | 'yearly') => {
+export const usePricingByPeriodQueryOptimized = (period: 'monthly' | 'yearly') => {
   return useQuery({
-    queryKey: pricingKeys.byPeriod(period),
+    queryKey: ['pricing-optimized', 'period', period],
     queryFn: () => fetchPricingPlansByPeriod(period),
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
@@ -91,11 +97,12 @@ export const usePricingByPeriodQuery = (period: 'monthly' | 'yearly') => {
 };
 
 // Hook for creating pricing plan (mock)
-export const useCreatePricingPlanMutation = () => {
+export const useCreatePricingPlanOptimized = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (plan: Omit<SimplePricingPlan, 'id' | 'created_at' | 'updated_at'>): Promise<SimplePricingPlan> => {
+      // Mock creation
       await new Promise(resolve => setTimeout(resolve, 500));
       const newPlan: SimplePricingPlan = {
         ...plan,
@@ -106,7 +113,7 @@ export const useCreatePricingPlanMutation = () => {
       return newPlan;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pricingKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['pricing-optimized'] });
       toast({
         title: "Success",
         description: "Pricing plan created successfully",
@@ -123,11 +130,12 @@ export const useCreatePricingPlanMutation = () => {
 };
 
 // Hook for updating pricing plan (mock)
-export const useUpdatePricingPlanMutation = () => {
+export const useUpdatePricingPlanOptimized = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<SimplePricingPlan> & { id: string }): Promise<SimplePricingPlan> => {
+      // Mock update
       await new Promise(resolve => setTimeout(resolve, 500));
       const updatedPlan: SimplePricingPlan = {
         ...mockPricingPlans.find(p => p.id === id)!,
@@ -137,7 +145,7 @@ export const useUpdatePricingPlanMutation = () => {
       return updatedPlan;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pricingKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['pricing-optimized'] });
       toast({
         title: "Success",
         description: "Pricing plan updated successfully",
@@ -153,39 +161,14 @@ export const useUpdatePricingPlanMutation = () => {
   });
 };
 
-// Hook for deleting pricing plan (mock)
-export const useDeletePricingPlanMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: string): Promise<void> => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pricingKeys.all });
-      toast({
-        title: "Success",
-        description: "Pricing plan deleted successfully",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-};
-
 // Utility functions
-export const pricingUtils = {
+export const pricingUtilsOptimized = {
   invalidateAll: (queryClient: ReturnType<typeof useQueryClient>) => {
-    queryClient.invalidateQueries({ queryKey: pricingKeys.all });
+    queryClient.invalidateQueries({ queryKey: ['pricing-optimized'] });
   },
   prefetchPlans: (queryClient: ReturnType<typeof useQueryClient>) => {
     queryClient.prefetchQuery({
-      queryKey: pricingKeys.lists(),
+      queryKey: ['pricing-optimized'],
       queryFn: fetchPricingPlans,
       staleTime: 10 * 60 * 1000,
     });
