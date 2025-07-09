@@ -261,7 +261,7 @@ const Subscription: React.FC = () => {
                   <User className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 </div>
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {user?.name || "Usuário"}
+                  {user?.user_metadata?.name || "Usuário"}
                 </span>
               </div>
 
@@ -721,7 +721,7 @@ const Subscription: React.FC = () => {
                       <div className="flex justify-between">
                         <p className="font-medium mb-1">Mensagens:</p>
                         <p className="text-gray-600 dark:text-gray-400">
-                          {plan.messages === "unlimited"
+                          {!plan.messages || plan.messages === 0
                             ? "Ilimitadas"
                             : plan.messages}
                         </p>

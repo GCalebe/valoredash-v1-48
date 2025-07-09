@@ -48,7 +48,7 @@ const createChatMessage = (role: string, content: string, timestamp: string, typ
     role: role as "user" | "assistant" | "human" | "ai" | "unknown",
     content,
     timestamp,
-    ...(type && { type }),
+    type: (type as "image" | "human" | "ai" | "text" | "file") || "text",
   };
 };
 

@@ -295,8 +295,8 @@ const Schedule = () => {
           openDeleteEventDialog={openDeleteEventDialog}
           openEventLink={openEventLink}
           onPeriodChange={handlePeriodChange}
-          calendarViewType={calendarViewTab}
-          setCalendarViewType={setCalendarViewTab}
+          calendarViewType={calendarViewTab === "agenda" ? "lista" : calendarViewTab}
+          setCalendarViewType={(view) => setCalendarViewTab(view === "lista" ? "agenda" : view)}
           scheduleEvents={scheduleEvents}
           statusFilter={statusFilter}
           hostFilter={hostFilter}
