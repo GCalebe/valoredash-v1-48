@@ -242,8 +242,17 @@ export function useProducts() {
     deleteProduct: () => Promise.resolve(false),
     addCombo: () => Promise.resolve(undefined),
     deleteCombo: () => Promise.resolve(false),
-    fetchClientProducts: () => Promise.resolve({ clientProducts: [], availableProducts: [] }),
-    addProductToClient: () => Promise.resolve(true),
-    removeProductFromClient: () => Promise.resolve(true),
+    fetchClientProducts: (clientId: string) => {
+      console.log('Mock fetchClientProducts called with clientId:', clientId);
+      return Promise.resolve({ clientProducts: [], availableProducts: [] });
+    },
+    addProductToClient: (clientId: string, productId: string) => {
+      console.log('Mock addProductToClient called with:', { clientId, productId });
+      return Promise.resolve(true);
+    },
+    removeProductFromClient: (clientId: string, productId: string) => {
+      console.log('Mock removeProductFromClient called with:', { clientId, productId });
+      return Promise.resolve(true);
+    },
   };
 }

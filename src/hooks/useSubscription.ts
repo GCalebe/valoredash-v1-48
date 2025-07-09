@@ -414,7 +414,9 @@ export function useSubscription() {
   // Get current plan details
   const getCurrentPlan = useCallback((): PricingPlan | null => {
     if (!subscription) return null;
-    return availablePlans.find(p => p.id === subscription.planId) || null;
+    const foundPlan = availablePlans.find(p => p.id === subscription.planId);
+    // Ensure description is provided to match PricingPlan interface
+    return foundPlan ? { ...foundPlan, description: foundPlan.description || '' } : null;
   }, [subscription, availablePlans]);
 
   // Initialize subscription data when component mounts

@@ -19,10 +19,10 @@ export const useSupabasePricing = () => {
     name: plan.name,
     description: plan.description || '',
     price: plan.price,
-    billingPeriod: plan.billing_period as 'monthly' | 'yearly',
-    features: plan.features || [],
-    popular: plan.popular || false,
-    aiProducts: plan.ai_products || []
+    billing_period: plan.billing_cycle as 'monthly' | 'yearly',
+    features: Array.isArray(plan.features) ? plan.features as string[] : [],
+    popular: plan.is_popular || false,
+    ai_products: []
   });
 
   const transformSubscription = (sub: UserSubscriptionRow): UserSubscription => ({
@@ -30,17 +30,17 @@ export const useSupabasePricing = () => {
     userId: sub.user_id,
     planId: sub.plan_id,
     status: sub.status as 'active' | 'canceled' | 'past_due' | 'trialing',
-    currentPeriodStart: sub.current_period_start,
-    currentPeriodEnd: sub.current_period_end,
-    cancelAtPeriodEnd: sub.cancel_at_period_end || false,
+    currentPeriodStart: sub.start_date || sub.created_at,
+    currentPeriodEnd: sub.end_date || sub.next_billing_date,
+    cancelAtPeriodEnd: !sub.auto_renew || false,
     createdAt: sub.created_at
   });
 
   const transformPaymentMethod = (pm: PaymentMethodRow): PaymentMethod => ({
     id: pm.id,
-    type: pm.type as 'credit_card' | 'debit_card' | 'pix',
-    lastFour: pm.last_four,
-    brand: pm.brand,
+    type: pm.type as 'credit_card' | 'pix' | 'boleto' | 'bank_transfer',
+    last4: pm.last_four_digits,
+    brand: pm.card_brand,
     expiryMonth: pm.expiry_month,
     expiryYear: pm.expiry_year,
     isDefault: pm.is_default || false
@@ -48,11 +48,12 @@ export const useSupabasePricing = () => {
 
   const transformInvoice = (inv: InvoiceRow): Invoice => ({
     id: inv.id,
-    subscriptionId: inv.subscription_id,
-    amount: inv.amount,
-    status: inv.status as 'paid' | 'pending' | 'failed',
+    userId: inv.user_id,
+    subscriptionId: inv.subscription_id || '',
+    amount: inv.total_amount,
+    status: inv.status as 'paid' | 'open' | 'overdue' | 'void',
     dueDate: inv.due_date,
-    paidAt: inv.paid_at,
+    paidAt: inv.paid_at || undefined,
     createdAt: inv.created_at
   });
 
@@ -81,7 +82,7 @@ export const useSupabasePricing = () => {
 
   // Get plans by billing period
   const getPlansByPeriod = useCallback((period: 'monthly' | 'yearly') => {
-    return plans.filter(plan => plan.billingPeriod === period);
+    return plans.filter(plan => plan.billing_period === period);
   }, [plans]);
 
   // Get user subscription
@@ -194,10 +195,10 @@ export const useSupabasePricing = () => {
         .insert({
           user_id: userId,
           type: paymentMethod.type,
-          last_four: paymentMethod.lastFour,
-          brand: paymentMethod.brand,
-          expiry_month: paymentMethod.expiryMonth,
-          expiry_year: paymentMethod.expiryYear,
+          last_four_digits: paymentMethod.last4 || '',
+          card_brand: paymentMethod.brand || '',
+          expiry_month: paymentMethod.expiryMonth || 12,
+          expiry_year: paymentMethod.expiryYear || 2025,
           is_default: paymentMethod.isDefault
         })
         .select()

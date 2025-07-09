@@ -36,7 +36,7 @@ export function useScheduleState() {
     phone: "",
     date: new Date(),
     service: "Manutenção de Casco",
-    status: "pendente",
+    status: "scheduled",
     notes: "",
   });
 
@@ -71,7 +71,7 @@ export function useScheduleState() {
       phone: "",
       date: new Date(),
       service: "Manutenção de Casco",
-      status: "pendente",
+      status: "scheduled",
       notes: "",
     });
   };

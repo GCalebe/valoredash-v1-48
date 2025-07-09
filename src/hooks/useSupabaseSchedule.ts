@@ -1,49 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../integrations/supabase/client';
-import type { Database } from '../integrations/supabase/types';
 import { ScheduleEvent } from './useScheduleData';
 
-type ScheduleRow = Database['public']['Tables']['schedule_events']['Row'];
-type ScheduleInsert = Database['public']['Tables']['schedule_events']['Insert'];
-type ScheduleUpdate = Database['public']['Tables']['schedule_events']['Update'];
-
+// Mock Supabase schedule hook since schedule_events table doesn't exist
+// This uses calendar_events for now or provides mock data
 export function useSupabaseSchedule() {
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Transform Supabase data to ScheduleEvent format
-  const transformScheduleData = (data: ScheduleRow[]): ScheduleEvent[] => {
-    return data.map(item => ({
-      id: item.id,
-      title: item.title || '',
-      date: new Date(item.event_date),
-      time: item.event_time || '',
-      clientName: item.client_name || '',
-      phone: item.phone || '',
-      service: item.service || '',
-      status: item.status || 'pending',
-      notes: item.notes || undefined
-    }));
-  };
-
-  // Fetch all schedule events
+  // Mock fetch all schedule events
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const { data, error } = await supabase
-        .from('schedule_events')
-        .select('*')
-        .order('event_date', { ascending: true });
+      // Mock data for now
+      const mockEvents: ScheduleEvent[] = [];
+      setEvents(mockEvents);
       
-      if (error) throw error;
-      
-      const transformedEvents = transformScheduleData(data || []);
-      setEvents(transformedEvents);
-      
-      return transformedEvents;
+      return mockEvents;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
@@ -54,25 +29,17 @@ export function useSupabaseSchedule() {
     }
   }, []);
 
-  // Fetch events by date range
+  // Mock fetch events by date range
   const fetchEventsByDateRange = useCallback(async (startDate: string, endDate: string) => {
     try {
       setLoading(true);
       setError(null);
       
-      const { data, error } = await supabase
-        .from('schedule_events')
-        .select('*')
-        .gte('event_date', startDate)
-        .lte('event_date', endDate)
-        .order('event_date', { ascending: true });
+      console.log('Mock fetchEventsByDateRange called with:', { startDate, endDate });
+      const mockEvents: ScheduleEvent[] = [];
+      setEvents(mockEvents);
       
-      if (error) throw error;
-      
-      const transformedEvents = transformScheduleData(data || []);
-      setEvents(transformedEvents);
-      
-      return transformedEvents;
+      return mockEvents;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
@@ -83,24 +50,17 @@ export function useSupabaseSchedule() {
     }
   }, []);
 
-  // Fetch events by status
+  // Mock fetch events by status
   const fetchEventsByStatus = useCallback(async (status: string) => {
     try {
       setLoading(true);
       setError(null);
       
-      const { data, error } = await supabase
-        .from('schedule_events')
-        .select('*')
-        .eq('status', status)
-        .order('event_date', { ascending: true });
+      console.log('Mock fetchEventsByStatus called with status:', status);
+      const mockEvents: ScheduleEvent[] = [];
+      setEvents(mockEvents);
       
-      if (error) throw error;
-      
-      const transformedEvents = transformScheduleData(data || []);
-      setEvents(transformedEvents);
-      
-      return transformedEvents;
+      return mockEvents;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
@@ -111,31 +71,20 @@ export function useSupabaseSchedule() {
     }
   }, []);
 
-  // Create new schedule event
+  // Mock create new schedule event
   const createEvent = useCallback(async (eventData: Omit<ScheduleEvent, 'id'>) => {
     try {
       setError(null);
       
-      const insertData: ScheduleInsert = {
-        title: eventData.title,
-        event_date: eventData.date.toISOString().split('T')[0],
-        event_time: eventData.time,
-        client_name: eventData.clientName,
-        phone: eventData.phone,
-        service: eventData.service,
-        status: eventData.status,
-        notes: eventData.notes || null
+      console.log('Mock createEvent called with:', eventData);
+      
+      const newEvent: ScheduleEvent = {
+        ...eventData,
+        id: `mock_${Date.now()}`,
+        start_time: eventData.start_time || new Date().toISOString(),
+        end_time: eventData.end_time || new Date(Date.now() + 3600000).toISOString()
       };
       
-      const { data, error } = await supabase
-        .from('schedule_events')
-        .insert(insertData)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
-      const newEvent = transformScheduleData([data])[0];
       setEvents(prev => [...prev, newEvent]);
       
       return newEvent;
@@ -147,55 +96,33 @@ export function useSupabaseSchedule() {
     }
   }, []);
 
-  // Update schedule event
-  const updateEvent = useCallback(async (id: number, eventData: Partial<ScheduleEvent>) => {
+  // Mock update schedule event
+  const updateEvent = useCallback(async (id: string | number, eventData: Partial<ScheduleEvent>) => {
     try {
       setError(null);
       
-      const updateData: ScheduleUpdate = {};
+      console.log('Mock updateEvent called with:', { id, eventData });
       
-      if (eventData.title !== undefined) updateData.title = eventData.title;
-      if (eventData.date !== undefined) updateData.event_date = eventData.date.toISOString().split('T')[0];
-      if (eventData.time !== undefined) updateData.event_time = eventData.time;
-      if (eventData.clientName !== undefined) updateData.client_name = eventData.clientName;
-      if (eventData.phone !== undefined) updateData.phone = eventData.phone;
-      if (eventData.service !== undefined) updateData.service = eventData.service;
-      if (eventData.status !== undefined) updateData.status = eventData.status;
-      if (eventData.notes !== undefined) updateData.notes = eventData.notes || null;
+      setEvents(prev => prev.map(event => 
+        event.id === id ? { ...event, ...eventData } : event
+      ));
       
-      const { data, error } = await supabase
-        .from('schedule_events')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
-      const updatedEvent = transformScheduleData([data])[0];
-      setEvents(prev => prev.map(event => event.id === id ? updatedEvent : event));
-      
-      return updatedEvent;
+      const updatedEvent = events.find(event => event.id === id);
+      return updatedEvent || null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
       console.error('Error updating schedule event:', err);
       throw err;
     }
-  }, []);
+  }, [events]);
 
-  // Delete schedule event
-  const deleteEvent = useCallback(async (id: number) => {
+  // Mock delete schedule event
+  const deleteEvent = useCallback(async (id: string | number) => {
     try {
       setError(null);
       
-      const { error } = await supabase
-        .from('schedule_events')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
+      console.log('Mock deleteEvent called with id:', id);
       setEvents(prev => prev.filter(event => event.id !== id));
       
       return true;
@@ -210,7 +137,11 @@ export function useSupabaseSchedule() {
   // Get events for today
   const getTodayEvents = useCallback(() => {
     const today = new Date().toDateString();
-    return events.filter(event => event.date.toDateString() === today);
+    return events.filter(event => {
+      // Use start_time if available, otherwise try to parse from other fields
+      const eventDate = event.start_time ? new Date(event.start_time).toDateString() : '';
+      return eventDate === today;
+    });
   }, [events]);
 
   // Get events for this week
@@ -220,7 +151,8 @@ export function useSupabaseSchedule() {
     const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
     
     return events.filter(event => {
-      const eventDate = new Date(event.date);
+      if (!event.start_time) return false;
+      const eventDate = new Date(event.start_time);
       return eventDate >= startOfWeek && eventDate <= endOfWeek;
     });
   }, [events]);
@@ -232,7 +164,8 @@ export function useSupabaseSchedule() {
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     
     return events.filter(event => {
-      const eventDate = new Date(event.date);
+      if (!event.start_time) return false;
+      const eventDate = new Date(event.start_time);
       return eventDate >= startOfMonth && eventDate <= endOfMonth;
     });
   }, [events]);

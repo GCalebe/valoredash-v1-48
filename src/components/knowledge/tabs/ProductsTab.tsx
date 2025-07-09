@@ -44,13 +44,7 @@ const ProductsTab = () => {
           name: newProduct.name,
           price: parseFloat(newProduct.price),
           description: "",
-          benefits: [],
-          objections: [],
-          has_combo: false,
-          has_upgrade: false,
           has_promotion: newProduct.hasPromotion,
-          differentials: [],
-          success_cases: [],
         });
         setNewProduct({ name: "", price: "", hasPromotion: false });
         setIsAddDialogOpen(false);
@@ -81,18 +75,10 @@ const ProductsTab = () => {
       try {
         await updateProductMutation.mutateAsync({
           id: editingProduct.id,
-          productData: {
-            name: editingProduct.name,
-            price: editingProduct.price || 0,
-            description: editingProduct.description || "",
-            benefits: [],
-            objections: [],
-            has_combo: false,
-            has_upgrade: false,
-            has_promotion: editingProduct.has_promotion || false,
-            differentials: [],
-            success_cases: [],
-          },
+          name: editingProduct.name,
+          price: editingProduct.price || 0,
+          description: editingProduct.description || "",
+          has_promotion: editingProduct.has_promotion || false,
         });
         setEditingProduct(null);
         setIsEditDialogOpen(false);

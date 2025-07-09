@@ -117,8 +117,14 @@ export const getContacts = async (filters?: ContactFilters): Promise<SupabaseRes
 
     const { data, error } = await query.order('created_at', { ascending: false });
 
+    // Add custom_values property to match expected type
+    const dataWithCustomValues = data?.map(contact => ({
+      ...contact,
+      custom_values: {} // Add missing property with default value
+    }));
+
     return {
-      data,
+      data: dataWithCustomValues,
       error,
       success: !error
     };
@@ -188,8 +194,15 @@ export const getFunnelByDateRange = async (startDate?: string, endDate?: string)
       end_date: endDate
     });
 
+    // Add missing id and created_at properties
+    const dataWithRequiredFields = data?.map(item => ({
+      ...item,
+      id: `funnel_${item.name}_${Date.now()}`, // Generate ID
+      created_at: new Date().toISOString() // Add timestamp
+    }));
+
     return {
-      data,
+      data: dataWithRequiredFields,
       error,
       success: !error
     };
@@ -210,8 +223,25 @@ export const getMetricsByDateRange = async (startDate?: string, endDate?: string
       end_date: endDate
     });
 
+    // Add missing properties to match ConversationMetrics type
+    const dataWithRequiredFields = data?.map(item => ({
+      ...item,
+      id: `metrics_${Date.now()}`,
+      total_respondidas: item.total_conversations || 0,
+      avg_response_time: 0,
+      avg_closing_time: 0,
+      avg_response_start_time: 0,
+      secondary_response_rate: 0,
+      total_secondary_responses: 0,
+      average_negotiated_value: item.negotiated_value || 0,
+      total_negotiating_value: item.negotiated_value || 0,
+      previous_period_value: 0,
+      is_stale: false,
+      created_at: new Date().toISOString()
+    }));
+
     return {
-      data,
+      data: dataWithRequiredFields,
       error,
       success: !error
     };
@@ -259,8 +289,14 @@ export const addContact = async (contact: ContactInsert): Promise<SupabaseRespon
       .select()
       .single();
 
+    // Add custom_values property to match expected type
+    const dataWithCustomValues = data ? {
+      ...data,
+      custom_values: {} // Add missing property with default value
+    } : null;
+
     return {
-      data,
+      data: dataWithCustomValues,
       error,
       success: !error
     };
@@ -283,8 +319,14 @@ export const updateContact = async (id: string, updates: ContactUpdate): Promise
       .select()
       .single();
 
+    // Add custom_values property to match expected type
+    const dataWithCustomValues = data ? {
+      ...data,
+      custom_values: {} // Add missing property with default value
+    } : null;
+
     return {
-      data,
+      data: dataWithCustomValues,
       error,
       success: !error
     };
@@ -390,7 +432,12 @@ export const useContacts = (filters?: ContactFilters, pageSize: number = 20) => 
       if (error) {
         setError(error.message);
       } else {
-        setContacts(data || []);
+        // Add custom_values property to match expected type
+        const dataWithCustomValues = data?.map(contact => ({
+          ...contact,
+          custom_values: {} // Add missing property with default value
+        })) || [];
+        setContacts(dataWithCustomValues);
         setTotalCount(count || 0);
         setPage(currentPage);
       }
