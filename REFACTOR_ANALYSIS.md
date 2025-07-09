@@ -7,6 +7,9 @@
 2. **ClientInfoPanel.tsx refatorado** - 240+ linhas → 67 linhas com 5 componentes focados
 3. **useDashboardRealtimeQuery.ts otimizado** - 216 linhas → 72 linhas com 3 hooks separados
 
+### ✅ Prioridade MÉDIA - Concluídas  
+4. **AddClientDialog.tsx refatorado** - 680 linhas → 170 linhas com 4 componentes + 1 hook especializado
+
 ## 📁 Arquivos de Poluição (Para mover para `archive/`)
 
 ### Documentação e Scripts de Setup
@@ -90,14 +93,14 @@
 - [x] **SOLID**: Aplicar princípio de responsabilidade única
 - [x] **Status**: ✅ REFATORADO - Criados 5 componentes focados + 1 hook customizado
 
-#### ⏳ 4. AddClientDialog.tsx - Muitos erros de tipo
+#### ✅ 4. AddClientDialog.tsx - 680 linhas → 170 linhas
 **Localização**: `src/components/clients/AddClientDialog.tsx`
-- [ ] **Legibilidade**: Simplificar campos do formulário
-- [ ] **Manutenibilidade**: Usar validação centralizada
-- [ ] **Reutilização**: Extrair campos como componentes
-- [ ] **Testabilidade**: Separar validações
-- [ ] **SOLID**: Single Responsibility por campo
-- [ ] **Status**: ❌ Pendente
+- [x] **Legibilidade**: Simplificar campos do formulário
+- [x] **Manutenibilidade**: Usar validação centralizada
+- [x] **Reutilização**: Extrair campos como componentes
+- [x] **Testabilidade**: Separar validações
+- [x] **SOLID**: Single Responsibility por campo
+- [x] **Status**: ✅ REFATORADO - Criados 4 componentes + 1 hook especializado
 
 #### ⏳ 5. EventFormDialog.tsx - Erros de tipo Contact
 **Localização**: `src/components/EventFormDialog.tsx`
