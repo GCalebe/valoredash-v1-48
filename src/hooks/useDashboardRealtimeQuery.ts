@@ -57,7 +57,7 @@ export function useDashboardRealtimeQuery(props?: UseDashboardRealtimeProps) {
 
   const invalidateScheduleData = useCallback(async () => {
     console.log("Invalidating schedule data queries");
-    queryClient.invalidateQueries({ queryKey: queryKeys.schedule?.all || ['schedule'] });
+    queryClient.invalidateQueries({ queryKey: ['schedule'] });
     if (props?.refetchScheduleData) {
       await props.refetchScheduleData();
     }
@@ -65,7 +65,7 @@ export function useDashboardRealtimeQuery(props?: UseDashboardRealtimeProps) {
 
   const invalidateServicesData = useCallback(() => {
     console.log("Invalidating services data queries");
-    queryClient.invalidateQueries({ queryKey: queryKeys.services?.all || ['services'] });
+    queryClient.invalidateQueries({ queryKey: ['services'] });
     queryClient.invalidateQueries({ queryKey: queryKeys.clientStats.all });
   }, [queryClient]);
 
@@ -183,8 +183,17 @@ export function useDashboardRealtimeQuery(props?: UseDashboardRealtimeProps) {
 
   // Utilitários para invalidação manual
   const utils = {
-    invalidateAll: () => {
-      cacheUtils.invalidateAll(queryClient);
+    invalidateMetrics: () => {
+      cacheUtils.invalidateMetrics();
+    },
+    invalidateContacts: () => {
+      cacheUtils.invalidateContacts();
+    },
+    invalidateRealtime: () => {
+      cacheUtils.invalidateRealtime();
+    },
+    clearAll: () => {
+      cacheUtils.clearAll();
     },
     invalidateClientData,
     invalidateConversationData,

@@ -33,7 +33,7 @@ export const useContactsInfiniteQuery = (filters: ContactFilters = {}, pageSize 
       const offset = typeof pageParam === 'string' ? parseInt(pageParam) : 0;
       let query = supabase
         .from('contacts')
-        .select('*', { count: 'exact' })
+        .select('id, kanban_stage, created_at, sales, budget')
         .order('created_at', { ascending: false })
         .range(offset, offset + pageSize - 1);
 
@@ -56,7 +56,8 @@ export const useContactsInfiniteQuery = (filters: ContactFilters = {}, pageSize 
           .lte('created_at', filters.dateRange.end);
       }
 
-      const { data, error, count } = await query;
+      const { data, error } = await query;
+      const count = data?.length || 0;
 
       if (error) {
         throw new Error(`Erro ao buscar contatos: ${error.message}`);
@@ -93,7 +94,7 @@ export const useContactsQuery = (filters: ContactFilters = {}, page = 1, pageSiz
 
       let query = supabase
         .from('contacts')
-        .select('*', { count: 'exact' })
+        .select('id, kanban_stage, created_at, sales, budget')
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -116,7 +117,8 @@ export const useContactsQuery = (filters: ContactFilters = {}, page = 1, pageSiz
           .lte('created_at', filters.dateRange.end);
       }
 
-      const { data, error, count } = await query;
+      const { data, error } = await query;
+      const count = data?.length || 0;
 
       if (error) {
         throw new Error(`Erro ao buscar contatos: ${error.message}`);

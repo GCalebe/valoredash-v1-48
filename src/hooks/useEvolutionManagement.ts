@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Evolution {
   id: string;
@@ -24,10 +24,12 @@ interface UseEvolutionManagementProps {
   clientId?: string;
 }
 
+// NOTE: The 'evolutions' table doesn't exist in the database.
+// This hook is disabled until the table is created.
 export const useEvolutionManagement = ({ clientId }: UseEvolutionManagementProps) => {
   const [evolutions, setEvolutions] = useState<Evolution[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>('The evolutions table does not exist in the database');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentEvolution, setCurrentEvolution] = useState<Evolution | null>(null);
   const [formData, setFormData] = useState<EvolutionFormData>({
@@ -37,7 +39,7 @@ export const useEvolutionManagement = ({ clientId }: UseEvolutionManagementProps
     status: 'active',
   });
 
-  // Reset form data to default values
+  // Disabled functionality - return empty functions
   const resetFormData = useCallback(() => {
     setFormData({
       title: '',
@@ -48,191 +50,55 @@ export const useEvolutionManagement = ({ clientId }: UseEvolutionManagementProps
     setCurrentEvolution(null);
   }, []);
 
-  // Open form for creating a new evolution
   const openCreateForm = useCallback(() => {
-    resetFormData();
-    setIsFormOpen(true);
-  }, [resetFormData]);
-
-  // Open form for editing an existing evolution
-  const openEditForm = useCallback((evolution: Evolution) => {
-    setFormData({
-      title: evolution.title,
-      description: evolution.description,
-      date: evolution.date,
-      status: evolution.status,
-    });
-    setCurrentEvolution(evolution);
-    setIsFormOpen(true);
+    console.warn('Evolution management is disabled - evolutions table does not exist');
   }, []);
 
-  // Close the form
+  const openEditForm = useCallback((evolution: Evolution) => {
+    console.warn('Evolution management is disabled - evolutions table does not exist');
+  }, []);
+
   const closeForm = useCallback(() => {
     setIsFormOpen(false);
     resetFormData();
   }, [resetFormData]);
 
-  // Handle form input changes
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   }, []);
 
-  // Fetch evolutions for a client
   const fetchEvolutions = useCallback(async () => {
-    if (!clientId) return;
+    console.warn('Evolution management is disabled - evolutions table does not exist');
+    return [];
+  }, []);
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error } = await supabase
-        .from('evolutions')
-        .select('*')
-        .eq('client_id', clientId)
-        .order('date', { ascending: false });
-
-      if (error) throw error;
-
-      setEvolutions(data || []);
-    } catch (err) {
-      setError('Failed to fetch evolutions');
-      console.error('Error fetching evolutions:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [clientId]);
-
-  // Create a new evolution
   const createEvolution = useCallback(async () => {
-    if (!clientId) return;
+    console.warn('Evolution management is disabled - evolutions table does not exist');
+    return null;
+  }, []);
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      const newEvolution = {
-        client_id: clientId,
-        ...formData,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      const { data, error } = await supabase
-        .from('evolutions')
-        .insert([newEvolution])
-        .select();
-
-      if (error) throw error;
-
-      // Add the new evolution to the state
-      if (data && data.length > 0) {
-        setEvolutions(prev => [data[0], ...prev]);
-      }
-
-      closeForm();
-      return data?.[0];
-    } catch (err) {
-      setError('Failed to create evolution');
-      console.error('Error creating evolution:', err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [clientId, formData, closeForm]);
-
-  // Update an existing evolution
   const updateEvolution = useCallback(async () => {
-    if (!clientId || !currentEvolution) return;
+    console.warn('Evolution management is disabled - evolutions table does not exist');
+    return null;
+  }, []);
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      const updatedEvolution = {
-        ...formData,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { data, error } = await supabase
-        .from('evolutions')
-        .update(updatedEvolution)
-        .eq('id', currentEvolution.id)
-        .select();
-
-      if (error) throw error;
-
-      // Update the evolution in the state
-      if (data && data.length > 0) {
-        setEvolutions(prev =>
-          prev.map(ev => (ev.id === currentEvolution.id ? data[0] : ev))
-        );
-      }
-
-      closeForm();
-      return data?.[0];
-    } catch (err) {
-      setError('Failed to update evolution');
-      console.error('Error updating evolution:', err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [clientId, currentEvolution, formData, closeForm]);
-
-  // Delete an evolution
   const deleteEvolution = useCallback(async (evolutionId: string) => {
-    if (!clientId) return;
+    console.warn('Evolution management is disabled - evolutions table does not exist');
+    return false;
+  }, []);
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { error } = await supabase
-        .from('evolutions')
-        .delete()
-        .eq('id', evolutionId);
-
-      if (error) throw error;
-
-      // Remove the evolution from the state
-      setEvolutions(prev => prev.filter(ev => ev.id !== evolutionId));
-
-      return true;
-    } catch (err) {
-      setError('Failed to delete evolution');
-      console.error('Error deleting evolution:', err);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [clientId]);
-
-  // Handle form submission
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate form data
-    if (!formData.title.trim() || !formData.date) {
-      setError('Title and date are required');
-      return null;
-    }
-    
-    if (currentEvolution) {
-      return await updateEvolution();
-    } else {
-      return await createEvolution();
-    }
-  }, [formData, currentEvolution, updateEvolution, createEvolution]);
+    console.warn('Evolution management is disabled - evolutions table does not exist');
+    return null;
+  }, []);
 
-  // Fetch evolutions when clientId changes
+  // Fetch evolutions when clientId changes - disabled
   useEffect(() => {
-    if (clientId) {
-      fetchEvolutions();
-    } else {
-      setEvolutions([]);
-    }
-  }, [clientId, fetchEvolutions]);
+    // Evolution management is disabled since table doesn't exist
+    setEvolutions([]);
+  }, [clientId]);
 
   // Sort evolutions by date (most recent first)
   const sortedEvolutions = [...evolutions].sort((a, b) => {

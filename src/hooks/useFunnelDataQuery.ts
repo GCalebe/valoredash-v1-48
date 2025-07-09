@@ -47,26 +47,14 @@ export const funnelDataKeys = {
 const fetchFunnelData = async (filters: FunnelFilters = {}): Promise<FunnelData[]> => {
   let query = supabase
     .from('funnel_data')
-    .select('*')
-    .order('date', { ascending: false });
+    .select('id, name, value, percentage, color, created_at')
+    .order('created_at', { ascending: false });
 
-  // Apply filters
+  // Apply basic filters (dateRange removed since 'date' column doesn't exist in funnel_data)
   if (filters.dateRange) {
     query = query
-      .gte('date', filters.dateRange.start)
-      .lte('date', filters.dateRange.end);
-  }
-
-  if (filters.source) {
-    query = query.eq('source', filters.source);
-  }
-
-  if (filters.campaign) {
-    query = query.eq('campaign', filters.campaign);
-  }
-
-  if (filters.stage) {
-    query = query.eq('stage', filters.stage);
+      .gte('created_at', filters.dateRange.start)
+      .lte('created_at', filters.dateRange.end);
   }
 
   const { data, error } = await query;
@@ -76,24 +64,42 @@ const fetchFunnelData = async (filters: FunnelFilters = {}): Promise<FunnelData[
     throw new Error(`Failed to fetch funnel data: ${error.message}`);
   }
 
-  return data || [];
+  // Transform data to match FunnelData interface
+  return (data || []).map(item => ({
+    id: item.id,
+    stage: item.name || 'unknown',
+    count: item.value || 0,
+    conversion_rate: item.percentage || 0,
+    date: item.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+    created_at: item.created_at,
+    updated_at: item.created_at, // Use created_at as fallback
+  }));
 };
 
 // Fetch funnel data by date range
 const fetchFunnelByDateRange = async (startDate: string, endDate: string): Promise<FunnelData[]> => {
   const { data, error } = await supabase
     .from('funnel_data')
-    .select('*')
-    .gte('date', startDate)
-    .lte('date', endDate)
-    .order('date', { ascending: true });
+    .select('id, name, value, percentage, color, created_at')
+    .gte('created_at', startDate)
+    .lte('created_at', endDate)
+    .order('created_at', { ascending: true });
 
   if (error) {
     console.error('Error fetching funnel data by date range:', error);
     throw new Error(`Failed to fetch funnel data by date range: ${error.message}`);
   }
 
-  return data || [];
+  // Transform data to match FunnelData interface
+  return (data || []).map(item => ({
+    id: item.id,
+    stage: item.name || 'unknown',
+    count: item.value || 0,
+    conversion_rate: item.percentage || 0,
+    date: item.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+    created_at: item.created_at,
+    updated_at: item.created_at, // Use created_at as fallback
+  }));
 };
 
 // Calculate funnel metrics
@@ -142,9 +148,17 @@ const calculateFunnelMetrics = async (filters: FunnelFilters = {}): Promise<Funn
 
 // Create funnel data entry
 const createFunnelData = async (data: Omit<FunnelData, 'id' | 'created_at' | 'updated_at'>): Promise<FunnelData> => {
+  // Transform FunnelData to funnel_data table format
+  const insertData = {
+    name: data.stage,
+    value: data.count,
+    percentage: data.conversion_rate || 0,
+    color: '#8884d8' // Default color
+  };
+  
   const { data: result, error } = await supabase
     .from('funnel_data')
-    .insert([data])
+    .insert([insertData])
     .select()
     .single();
 
@@ -153,7 +167,16 @@ const createFunnelData = async (data: Omit<FunnelData, 'id' | 'created_at' | 'up
     throw new Error(`Failed to create funnel data: ${error.message}`);
   }
 
-  return result;
+  // Transform back to FunnelData format
+  return {
+    id: result.id,
+    stage: result.name || 'unknown',
+    count: result.value || 0,
+    conversion_rate: result.percentage || 0,
+    date: result.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+    created_at: result.created_at,
+    updated_at: result.created_at,
+  };
 };
 
 // Update funnel data
@@ -170,7 +193,16 @@ const updateFunnelData = async ({ id, ...updates }: Partial<FunnelData> & { id: 
     throw new Error(`Failed to update funnel data: ${error.message}`);
   }
 
-  return data;
+  // Transform back to FunnelData format
+  return {
+    id: data.id,
+    stage: data.name || 'unknown',
+    count: data.value || 0,
+    conversion_rate: data.percentage || 0,
+    date: data.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+    created_at: data.created_at,
+    updated_at: data.created_at,
+  };
 };
 
 // Hook for fetching funnel data

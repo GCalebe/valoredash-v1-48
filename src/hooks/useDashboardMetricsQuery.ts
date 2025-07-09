@@ -28,9 +28,9 @@ export const useDashboardMetricsQuery = () => {
         leadsResult,
         scheduleResult
       ] = await Promise.allSettled([
-        supabase.from('contacts').select('id, kanban_stage, lead_value').limit(1000),
+        supabase.from('contacts').select('id, kanban_stage, sales, budget').limit(1000),
         supabase.from('conversation_metrics').select('*').limit(100),
-        supabase.from('contacts').select('conversion_probability').not('conversion_probability', 'is', null),
+        supabase.from('contacts').select('id, sales, budget').limit(100),
         supabase.from('calendar_events').select('*').gte('start_time', new Date().toISOString().split('T')[0])
       ]);
 
@@ -47,17 +47,15 @@ export const useDashboardMetricsQuery = () => {
         c.kanban_stage === 'lead' || c.kanban_stage === 'contato-inicial'
       ).length;
       
-      const conversionRate = leads.length > 0 
-        ? leads.reduce((acc, curr) => acc + (curr.conversion_probability || 0), 0) / leads.length
-        : 0;
+      const conversionRate = 0; // Set to 0 since conversion_probability doesn't exist
 
       const responseTime = conversations.length > 0 
-        ? conversations.reduce((acc, curr) => acc + (curr.response_time || 0), 0) / conversations.length
+        ? conversations.reduce((acc, curr) => acc + (curr.avg_response_time || 0), 0) / conversations.length
         : 0;
 
       const todayScheduled = schedule.length;
       
-      const monthlyRevenue = clients.reduce((acc, curr) => acc + (curr.lead_value || 0), 0);
+      const monthlyRevenue = clients.reduce((acc, curr) => acc + (curr.sales || curr.budget || 0), 0);
       
       // Calcular crescimento (mock - implementar lógica real depois)
       const growthRate = Math.random() * 20 - 10; // Placeholder

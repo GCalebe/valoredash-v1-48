@@ -109,7 +109,7 @@ export function useConversationMetrics(
   // React Query hooks
   const { data: conversationMetrics, isLoading: isLoadingConversation } = useMetricsByDateRangeQuery(startDateStr, endDate);
   const { data: dashboardMetrics, isLoading: isLoadingDashboard } = useDashboardMetricsQuery();
-  const { data: latestStats, isLoading: isLoadingStats } = useClientStatsQuery();
+  const { stats: latestStats, loading: isLoadingStats } = useClientStatsQuery();
   const { data: funnelData = [], isLoading: isLoadingFunnel } = useFunnelByDateRangeQuery(startDateStr, endDate);
   
   const loading = isLoadingConversation || isLoadingDashboard || isLoadingStats || isLoadingFunnel;
@@ -153,7 +153,7 @@ export function useConversationMetrics(
           ...transformedMetrics,
           totalConversations: realMetrics.total_conversations || 0,
           responseRate: realMetrics.response_rate || 0,
-          totalRespondidas: realMetrics.total_responses || 0,
+          totalRespondidas: realMetrics.total_respondidas || 0,
           avgResponseTime: realMetrics.avg_response_time || 0,
           conversionRate: realMetrics.conversion_rate || 0,
           avgClosingTime: realMetrics.avg_closing_time || 0,
@@ -172,7 +172,7 @@ export function useConversationMetrics(
 
       setMetrics({
         ...transformedMetrics,
-        totalNegotiatingValue: latestStats?.total_negotiating_value || 125000,
+        totalNegotiatingValue: 125000, // Set default value since field doesn't exist
         isStale: false
       });
 

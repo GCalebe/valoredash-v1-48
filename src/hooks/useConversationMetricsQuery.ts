@@ -97,12 +97,12 @@ export const useConversationMetricsAggregated = (dateRange?: { start: string; en
   // Agregações calculadas
   const aggregated = {
     total: metrics?.length || 0,
-    totalResponded: metrics?.filter(m => m.status === 'responded').length || 0,
-    totalPending: metrics?.filter(m => m.status === 'pending').length || 0,
+    totalResponded: metrics?.filter(m => m.total_respondidas && m.total_respondidas > 0).length || 0,
+    totalPending: metrics?.filter(m => !m.total_respondidas || m.total_respondidas === 0).length || 0,
     responseRate: metrics?.length ? 
-      (metrics.filter(m => m.status === 'responded').length / metrics.length) * 100 : 0,
+      (metrics.filter(m => m.response_rate && m.response_rate > 0).length / metrics.length) * 100 : 0,
     avgResponseTime: metrics?.length ?
-      metrics.reduce((acc, m) => acc + (m.response_time || 0), 0) / metrics.length : 0,
+      metrics.reduce((acc, m) => acc + (m.avg_response_time || 0), 0) / metrics.length : 0,
   };
 
   return {

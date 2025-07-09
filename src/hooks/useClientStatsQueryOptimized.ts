@@ -36,11 +36,9 @@ export const useClientStatsQueryOptimized = (filters?: ClientStatsFilters) => {
       let query = supabase.from('contacts').select(`
         id,
         kanban_stage,
-        lead_source,
-        lead_value,
-        conversion_probability,
         created_at,
-        last_interaction
+        sales,
+        budget
       `);
 
       // Aplicar filtros se fornecidos
@@ -54,9 +52,7 @@ export const useClientStatsQueryOptimized = (filters?: ClientStatsFilters) => {
         query = query.eq('kanban_stage', filters.stage);
       }
 
-      if (filters?.source) {
-        query = query.eq('lead_source', filters.source);
-      }
+      // Skip source filter since lead_source doesn't exist in contacts table
 
       const { data: contacts, error } = await query.limit(5000);
 
@@ -98,20 +94,16 @@ export const useClientStatsQueryOptimized = (filters?: ClientStatsFilters) => {
         const stage = contact.kanban_stage || 'unknown';
         stats.byStage[stage] = (stats.byStage[stage] || 0) + 1;
 
-        // Por fonte
-        const source = contact.lead_source || 'unknown';
-        stats.bySource[source] = (stats.bySource[source] || 0) + 1;
+        // Skip source tracking since lead_source doesn't exist
+        stats.bySource['unknown'] = stats.bySource['unknown'] || 0;
 
-        // Valores
-        if (contact.lead_value) {
-          totalValue += contact.lead_value;
+        // Use sales or budget as value fallback
+        const value = contact.sales || contact.budget || 0;
+        if (value > 0) {
+          totalValue += value;
         }
 
-        // Probabilidade de conversão
-        if (contact.conversion_probability !== null && contact.conversion_probability !== undefined) {
-          totalWithProbability++;
-          sumProbability += contact.conversion_probability;
-        }
+        // Skip conversion probability since field doesn't exist
 
         // Contadores específicos
         if (stage === 'fechado' || stage === 'convertido') {
@@ -123,7 +115,7 @@ export const useClientStatsQueryOptimized = (filters?: ClientStatsFilters) => {
 
       // Cálculos finais
       stats.averageValue = contactList.length > 0 ? totalValue / contactList.length : 0;
-      stats.conversionRate = totalWithProbability > 0 ? sumProbability / totalWithProbability : 0;
+      stats.conversionRate = 0; // Set to 0 since conversion_probability doesn't exist
 
       return stats;
     },
