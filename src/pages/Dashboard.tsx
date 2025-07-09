@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardRealtimeQuery } from "@/hooks/useDashboardRealtimeQuery";
@@ -10,13 +10,9 @@ import KnowledgeCard from "@/components/dashboard/KnowledgeCard";
 import ClientsCard from "@/components/dashboard/ClientsCard";
 import EvolutionCard from "@/components/dashboard/EvolutionCard";
 import ScheduleCard from "@/components/dashboard/ScheduleCard";
-// import AIStoreCard from "@/components/dashboard/AIStoreCard"; // Temporariamente removido
-// import UserAIAccessCard from "@/components/dashboard/UserAIAccessCard"; // Temporariamente removido
 import AccountManagementCard from "@/components/dashboard/AccountManagementCard";
-import NavigationTest from "@/components/NavigationTest";
-// DiagnosticPanel removido conforme solicitado
 
-const Dashboard = () => {
+const Dashboard = React.memo(() => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   const { refetchScheduleData } = useScheduleData();
@@ -29,6 +25,17 @@ const Dashboard = () => {
       navigate("/");
     }
   }, [user, isLoading, navigate]);
+
+  // Memoize cards to prevent unnecessary re-renders
+  const dashboardCards = useMemo(() => [
+    <MetricsCard key="metrics" />,
+    <ChatsCard key="chats" />,
+    <KnowledgeCard key="knowledge" />,
+    <ClientsCard key="clients" />,
+    <EvolutionCard key="evolution" />,
+    <ScheduleCard key="schedule" />,
+    <AccountManagementCard key="account" />
+  ], []);
 
   if (isLoading) {
     return (
@@ -48,21 +55,15 @@ const Dashboard = () => {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto w-full mb-8">
-          <MetricsCard />
-          <ChatsCard />
-          <KnowledgeCard />
-          <ClientsCard />
-          <EvolutionCard />
-          <ScheduleCard />
-          {/* AIStoreCard temporariamente removido */}
-          {/* UserAIAccessCard temporariamente removido */}
-          <AccountManagementCard />
+          {dashboardCards}
         </div>
         
         {/* Componente de diagnóstico removido */}
       </main>
     </div>
   );
-};
+});
+
+Dashboard.displayName = 'Dashboard';
 
 export default Dashboard;
