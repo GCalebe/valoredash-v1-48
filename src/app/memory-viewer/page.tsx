@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { SemanticMemoryViewer } from '@/components/memory/SemanticMemoryViewer';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';

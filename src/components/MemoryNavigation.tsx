@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import { useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Brain, Clock, BookOpen, LayoutDashboard, MessageSquare } from 'lucide-react';
 
@@ -14,13 +14,8 @@ interface NavItem {
 }
 
 export function MemoryNavigation() {
-  const pathname = usePathname();
-  const [isClient, setIsClient] = useState(false);
-
-  // Evitar erros de hidratação
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const location = useLocation();
+  const pathname = location.pathname;
 
   const navItems: NavItem[] = [
     {
@@ -55,14 +50,12 @@ export function MemoryNavigation() {
     },
   ];
 
-  if (!isClient) return null;
-
   return (
     <div className="flex flex-col sm:flex-row gap-2 p-4 bg-muted/40 rounded-lg mb-8">
       {navItems.map((item) => {
         const isActive = pathname === item.href;
         return (
-          <Link key={item.href} href={item.href} className="w-full sm:w-auto">
+          <Link key={item.href} to={item.href} className="w-full sm:w-auto">
             <Button
               variant={isActive ? 'default' : 'outline'}
               className="w-full justify-start gap-2"

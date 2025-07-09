@@ -22,6 +22,17 @@ export interface Conversation {
   sessionId: string;
 }
 
+// Add Chat interface that was missing
+export interface Chat {
+  id: string;
+  client: {
+    id: string;
+    name: string;
+    email?: string;
+  };
+  conversations: Conversation[];
+}
+
 export interface Client {
   id: number;
   nome: string;
@@ -43,7 +54,7 @@ export interface N8nChatHistory {
 }
 
 export interface ChatMessage {
-  id?: number;
+  id?: number | string;
   conversation_id?: string;
   phone?: string;
   user_message?: string;
@@ -57,4 +68,8 @@ export interface ChatMessage {
   role?: "user" | "assistant" | "human" | "ai" | "unknown";
   type?: "text" | "image" | "file" | "human" | "ai";
   timestamp?: string;
+  sender?: {
+    id: string;
+    name: string;
+  };
 }

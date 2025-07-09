@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/integrations/supabase/client';
 import { EpisodicMemoryViewer } from '@/components/EpisodicMemoryViewer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,64 +15,34 @@ export default function EpisodicMemoryViewerPage() {
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const supabase = createClientComponentClient();
 
-  // Carregar sessões com memórias episódicas
+  // Carregar conversas existentes como sessões
   const loadSessions = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Buscar sessões que têm memórias episódicas
+      // Buscar conversas existentes
       const { data, error } = await supabase
-        .from('n8n_chat_memory')
-        .select('session_id, created_at')
-        .eq('memory_type', 'episodic')
+        .from('conversations')
+        .select('id, name, session_id, created_at')
         .order('created_at', { ascending: false })
-        .limit(100);
+        .limit(20);
 
       if (error) throw error;
 
-      // Agrupar por session_id e pegar a mais recente de cada
-      const uniqueSessions = data.reduce((acc: any[], curr: any) => {
-        const existingSession = acc.find(s => s.session_id === curr.session_id);
-        if (!existingSession) {
-          acc.push(curr);
-        }
-        return acc;
-      }, []);
+      // Mapear conversas para sessões
+      const sessionData = data.map(conv => ({
+        id: conv.session_id || conv.id,
+        name: conv.name || `Conversa ${conv.id.substring(0, 8)}`,
+        created_at: conv.created_at,
+      }));
 
-      // Buscar informações adicionais das sessões (nome do chat)
-      if (uniqueSessions.length > 0) {
-        const { data: chatsData, error: chatsError } = await supabase
-          .from('n8n_chats')
-          .select('id, name')
-          .in(
-            'id',
-            uniqueSessions.map(s => s.session_id)
-          );
+      setSessions(sessionData);
 
-        if (chatsError) throw chatsError;
-
-        // Combinar dados
-        const sessionsWithNames = uniqueSessions.map(session => {
-          const chatInfo = chatsData.find((chat: any) => chat.id === session.session_id);
-          return {
-            id: session.session_id,
-            name: chatInfo?.name || `Chat ${session.session_id.substring(0, 8)}`,
-            created_at: session.created_at,
-          };
-        });
-
-        setSessions(sessionsWithNames);
-
-        // Selecionar a primeira sessão por padrão
-        if (sessionsWithNames.length > 0 && !selectedSessionId) {
-          setSelectedSessionId(sessionsWithNames[0].id);
-        }
-      } else {
-        setSessions([]);
+      // Selecionar a primeira sessão por padrão
+      if (sessionData.length > 0 && !selectedSessionId) {
+        setSelectedSessionId(sessionData[0].id);
       }
     } catch (err: any) {
       console.error('Erro ao carregar sessões:', err);
@@ -141,7 +111,7 @@ export default function EpisodicMemoryViewerPage() {
               </Select>
             ) : (
               <p className="text-center py-4 text-muted-foreground">
-                Nenhuma conversa com memórias episódicas encontrada.
+                Nenhuma conversa encontrada.
               </p>
             )}
           </CardContent>

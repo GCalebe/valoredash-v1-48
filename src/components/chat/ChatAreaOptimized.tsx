@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { ChatConversationHeader } from '@/components/chat/ChatConversationHeader';
-import { MessageInput } from '@/components/chat/MessageInput';
-import { NoSelectedChat } from '@/components/chat/NoSelectedChat';
+import ChatConversationHeader from '@/components/chat/ChatConversationHeader';
+import MessageInput from '@/components/chat/MessageInput';
+import NoSelectedChat from '@/components/chat/NoSelectedChat';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatMessagesOptimized } from '@/hooks/useChatMessagesOptimized';
 import { Chat, ChatMessage, Conversation } from '@/types/chat';
@@ -39,7 +39,7 @@ export function ChatAreaOptimized({
     refresh,
     sendMessage,
   } = useChatMessagesOptimized({
-    sessionId: selectedConversation?.id || '',
+    sessionId: selectedConversation?.sessionId || selectedConversation?.id || '',
     pageSize: 50,
     pollingInterval: 5000,
     useCache: true,
@@ -73,10 +73,6 @@ export function ChatAreaOptimized({
       content,
       role: 'user',
       timestamp: new Date().toISOString(),
-      sender: {
-        id: selectedChat.client.id,
-        name: selectedChat.client.name,
-      },
     };
     
     await sendMessage(newMessage);
@@ -90,9 +86,7 @@ export function ChatAreaOptimized({
   return (
     <div className="flex h-full flex-col">
       <ChatConversationHeader
-        name={selectedChat.client.name}
-        status="online"
-        avatarFallback={selectedChat.client.name.charAt(0)}
+        selectedConversation={selectedConversation}
       />
       
       <ScrollArea
@@ -149,7 +143,7 @@ export function ChatAreaOptimized({
               <MessageItemOptimized
                 key={message.id}
                 message={message}
-                isClient={message.sender?.id === selectedChat.client.id}
+                isClient={message.role === 'user'}
               />
             ))
           )}
@@ -163,7 +157,10 @@ export function ChatAreaOptimized({
         </div>
       </ScrollArea>
       
-      <MessageInput onSendMessage={handleSendMessage} />
+      <MessageInput 
+        selectedChat={selectedChat?.id || null}
+        selectedConversation={selectedConversation}
+      />
     </div>
   );
 }

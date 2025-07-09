@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ChatAreaOptimized } from '@/components/chat/ChatAreaOptimized';
 import { ChatList } from '@/components/chat/ChatList';
 import { Chat, Conversation } from '@/types/chat';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { logger } from '@/utils/logger';
 
@@ -18,21 +18,40 @@ export default function ChatOptimizedPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Função para formatar os dados de chat recebidos do Supabase
+  // Função para formatar os dados de conversa recebidos do Supabase
   const formatChatData = (data: any[]): Chat[] => {
-    return data.map((chat) => ({
-      id: chat.id,
-      client: {
-        id: chat.client.id,
-        name: chat.client.name,
-        email: chat.client.email,
-      },
-      conversations: chat.conversations.map((conv: any) => ({
+    // Agrupar conversas por cliente/contato
+    const groupedConversations = data.reduce((acc, conv) => {
+      const clientId = conv.session_id || conv.id;
+      const clientName = conv.name || `Cliente ${clientId}`;
+      
+      if (!acc[clientId]) {
+        acc[clientId] = {
+          id: clientId,
+          client: {
+            id: clientId,
+            name: clientName,
+            email: conv.email,
+          },
+          conversations: [],
+        };
+      }
+      
+      acc[clientId].conversations.push({
         id: conv.id,
         name: conv.name,
-        created_at: conv.created_at,
-      })),
-    }));
+        lastMessage: '',
+        time: conv.created_at,
+        unread: 0,
+        phone: conv.phone,
+        email: conv.email,
+        sessionId: conv.session_id,
+      });
+      
+      return acc;
+    }, {} as Record<string, Chat>);
+    
+    return Object.values(groupedConversations);
   };
 
   // Função para selecionar o chat e conversa iniciais
@@ -47,14 +66,17 @@ export default function ChatOptimizedPage() {
     }
   };
 
-  // Função para buscar chats do Supabase
+  // Função para buscar chats do Supabase (usando tabelas disponíveis)
   const fetchChatsFromSupabase = async () => {
     const { data, error } = await supabase
-      .from('n8n_chats')
+      .from('conversations')
       .select(`
         id,
-        client:n8n_clients!n8n_chats_client_id_fkey(id, name, email),
-        conversations:n8n_conversations!n8n_chats_id_fkey(id, name, created_at)
+        name,
+        phone,
+        email,
+        session_id,
+        created_at
       `)
       .order('created_at', { ascending: false });
 
@@ -87,8 +109,8 @@ export default function ChatOptimizedPage() {
     
     // Configurar subscription para atualizações em tempo real
     const subscription = supabase
-      .channel('n8n_chats_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'n8n_chats' }, loadChats)
+      .channel('conversations_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, loadChats)
       .subscribe();
 
     return () => {
