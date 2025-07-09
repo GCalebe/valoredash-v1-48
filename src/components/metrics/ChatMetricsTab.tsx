@@ -114,7 +114,7 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
       {/* Bloco 1: KPIs Principais */}
       <div className="space-y-4">
         <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-blue-200 dark:border-blue-700 pb-2">
-          📊 Indicadores de Atendimento
+          📊 Indicadores Principais
         </h4>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
