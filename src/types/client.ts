@@ -4,35 +4,64 @@ export interface Contact {
   email?: string | null;
   phone?: string | null;
   address?: string;
+  
+  // Cliente info
   clientName?: string | null;
   client_name?: string | null;
   clientSize?: string | null;
   clientType?: string | null;
   cpfCnpj?: string | null;
   asaasCustomerId?: string | null;
-  payments?: any;
+  
+  // Status e estágio
   status?: "Active" | "Inactive" | string;
+  kanbanStage?: string;
+  kanban_stage?: string; // Database field name
+  
+  // Dados financeiros
+  sales?: number;
+  budget?: number;
+  lead_value?: number;
+  paymentMethod?: string;
+  payment?: string;
+  
+  // Comunicação
   notes?: string;
   lastContact?: string;
-  kanbanStage?: string; // << aqui: permitir qualquer valor de stage
   lastMessage?: string;
   lastMessageTime?: string;
   unreadCount?: number;
+  
+  // Session/Chat
   sessionId?: string;
   session_id?: string;
-  // Novos campos
+  
+  // Tags e categorização
   tags?: string[];
   responsibleUser?: string;
-  sales?: number;
   clientSector?: string;
-  budget?: number;
-  paymentMethod?: string;
   clientObjective?: string;
   lossReason?: string;
+  
+  // Contratos
   contractNumber?: string;
   contractDate?: string;
-  payment?: string;
   uploadedFiles?: string[];
+  
+  // Lead data
+  conversion_probability?: number;
+  lead_source?: string;
+  last_interaction?: string;
+  
+  // Company data
+  company?: string;
+  position?: string;
+  
+  // Timestamps
+  created_at?: string;
+  updated_at?: string;
+  
+  // Estágio de consulta
   consultationStage?:
     | "Nova consulta"
     | "Qualificado"
@@ -44,8 +73,12 @@ export interface Contact {
     | "Fatura enviada"
     | "Fatura paga – ganho"
     | "Projeto cancelado – perdido";
+    
   // Campos personalizados
   customValues?: CustomFieldValue[];
+  
+  // Outros campos dinâmicos
+  payments?: any;
 }
 
 export interface CustomFieldValue {

@@ -1,30 +1,22 @@
 import React from "react";
-import {
-  MessageCircle,
-  Users,
-  TrendingUp,
-  Target,
-  Clock,
-  Percent,
-} from "lucide-react";
-import StatCard from "./StatCard";
-import ConversationChart from "./ConversationChart";
-import ConversionFunnelChart from "./ConversionFunnelChart";
-import ConversionByTimeChart from "./ConversionByTimeChart";
-import RecentClientsTable from "./RecentClientsTable";
-import LeadsTable from "./LeadsTable";
-import SecondaryResponseRateCard from "./SecondaryResponseRateCard";
-import ResponseTimeCard from "./ResponseTimeCard";
-import NegotiatedValueCard from "./NegotiatedValueCard";
-import NegotiatingValueCard from "./NegotiatingValueCard";
-import AverageResponseStartCard from "./AverageResponseStartCard";
-import AverageClosingTimeCard from "./AverageClosingTimeCard";
-import LeadsAverageByTimeChart from "./LeadsAverageByTimeChart";
-
-import LeadsGrowthChart from "./LeadsGrowthChart";
-import LeadsByArrivalFunnelChart from "./LeadsByArrivalFunnelChart";
 import { useClientStatsQuery } from "@/hooks/useClientStatsQuery";
 import { useTransformedMetricsData } from "@/hooks/useTransformedMetricsData";
+
+// Imported refactored sections
+import MetricsHeader from "./sections/MetricsHeader";
+import KPISection from "./sections/KPISection";
+import TimeMetricsSection from "./sections/TimeMetricsSection";
+import DetailedMetricsSection from "./sections/DetailedMetricsSection";
+import PerformanceChartsSection from "./sections/PerformanceChartsSection";
+
+// Remaining imports for sections not yet refactored
+import LeadsGrowthChart from "./LeadsGrowthChart";
+import LeadsByArrivalFunnelChart from "./LeadsByArrivalFunnelChart";
+import NegotiatedValueCard from "./NegotiatedValueCard";
+import NegotiatingValueCard from "./NegotiatingValueCard";
+import RecentClientsTable from "./RecentClientsTable";
+import LeadsTable from "./LeadsTable";
+import SectionHeader from "./sections/SectionHeader";
 
 interface ChatMetricsTabProps {
   stats: any;
@@ -102,149 +94,54 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
   return (
     <div className="space-y-8">
       {/* Header com gradiente */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800 rounded-xl p-6 text-white">
-        <h3 className="text-2xl font-bold mb-2">
-          Dashboard de Chat e Conversações
-        </h3>
-        <p className="text-blue-100 dark:text-blue-200">
-          Acompanhe o desempenho das suas conversas e leads em tempo real
-        </p>
-      </div>
+      <MetricsHeader 
+        title="Dashboard de Chat e Conversações"
+        description="Acompanhe o desempenho das suas conversas e leads em tempo real"
+      />
 
-      {/* Bloco 1: KPIs Principais */}
+      {/* KPIs Principais */}
+      <KPISection
+        totalConversations={metricsData.totalConversations || 340}
+        responseRate={metricsData.responseRate || 85}
+        totalClients={clientData.totalClients || 120}
+        newClientsThisMonth={clientData.newClientsThisMonth || 15}
+        conversionRate={metricsData.conversionRate || 30}
+        loading={isLoading}
+      />
+
+      {/* Métricas de Tempo */}
+      <TimeMetricsSection
+        avgResponseStartTime={metricsData.avgResponseStartTime || 45}
+        avgClosingTime={metricsData.avgClosingTime || 5}
+        loading={isLoading}
+      />
+
+      {/* Métricas Detalhadas */}
+      <DetailedMetricsSection
+        secondaryResponseRate={metricsData.secondaryResponseRate || 70}
+        totalRespondidas={metricsData.totalRespondidas || 289}
+        totalSecondaryResponses={metricsData.totalSecondaryResponses || 200}
+        avgResponseTime={metricsData.avgResponseTime || 2}
+        loading={isLoading}
+      />
+
+      {/* Gráficos de Performance */}
+      <PerformanceChartsSection
+        conversationData={conversationData}
+        conversionFunnelData={conversionFunnelData}
+        conversionByTimeData={conversionByTimeData}
+        leadsAverageByTimeData={leadsAverageByTimeData}
+        noShowRate={metricsData.noShowRate || 15}
+        loading={isLoading}
+        transformedDataLoading={transformedDataLoading}
+      />
+
+      {/* Análise de Leads */}
       <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-blue-200 dark:border-blue-700 pb-2">
-          📊 Indicadores Principais
-        </h4>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            title="Total de Conversas"
-            value={metricsData.totalConversations || 340}
-            icon={<MessageCircle />}
-            trend="Conversas iniciadas este período"
-            loading={isLoading}
-            iconBgClass="bg-blue-100 dark:bg-blue-900/30"
-            iconTextClass="text-blue-600 dark:text-blue-400"
-          />
-
-          <StatCard
-            title="Taxa de Resposta"
-            value={`${metricsData.responseRate || 85}%`}
-            icon={<Percent />}
-            trend="Conversas respondidas"
-            loading={isLoading}
-            iconBgClass="bg-green-100 dark:bg-green-900/30"
-            iconTextClass="text-green-600 dark:text-green-400"
-          />
-
-          <StatCard
-            title="Total de Clientes"
-            value={clientData.totalClients || 120}
-            icon={<Users />}
-            trend={`+${clientData.newClientsThisMonth || 15} este mês`}
-            loading={isLoading}
-            iconBgClass="bg-purple-100 dark:bg-purple-900/30"
-            iconTextClass="text-purple-600 dark:text-purple-400"
-          />
-
-          <StatCard
-            title="Taxa de Conversão"
-            value={`${metricsData.conversionRate || 30}%`}
-            icon={<Target />}
-            trend="De leads para clientes"
-            loading={isLoading}
-            iconBgClass="bg-orange-100 dark:bg-orange-900/30"
-            iconTextClass="text-orange-600 dark:text-orange-400"
-          />
-        </div>
-      </div>
-
-      {/* Bloco 2: Métricas de Tempo */}
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-cyan-200 dark:border-cyan-700 pb-2">
-          ⏱️ Métricas de Tempo
-        </h4>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <AverageResponseStartCard
-            avgStartTime={metricsData.avgResponseStartTime || 45}
-            loading={isLoading}
-            trend="Melhoria de 15% vs período anterior"
-          />
-
-          <AverageClosingTimeCard
-            avgClosingTime={metricsData.avgClosingTime || 5}
-            loading={isLoading}
-            trend="Redução de 20% vs período anterior"
-          />
-        </div>
-      </div>
-
-
-      {/* Bloco 4: Métricas Secundárias */}
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-purple-200 dark:border-purple-700 pb-2">
-          📈 Métricas Detalhadas
-        </h4>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SecondaryResponseRateCard
-            value={metricsData.secondaryResponseRate || 70}
-            totalRespondidas={metricsData.totalRespondidas || 289}
-            totalSecondaryResponses={metricsData.totalSecondaryResponses || 200}
-            loading={isLoading}
-          />
-
-          <ResponseTimeCard
-            avgResponseTime={metricsData.avgResponseTime || 2}
-            loading={isLoading}
-          />
-        </div>
-      </div>
-
-      {/* Bloco 5: Gráficos de Performance */}
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-yellow-200 dark:border-yellow-700 pb-2">
-          📈 Análise de Performance
-        </h4>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ConversationChart
-            data={conversationData}
-            loading={isLoading}
-          />
-          <ConversionFunnelChart
-            data={conversionFunnelData}
-            loading={transformedDataLoading}
-            noShowRate={metricsData.noShowRate || 15}
-            onFilterChange={(date, stages, showNoShow) => {
-              console.log("Filtro aplicado no Funil de Conversão:", {
-                date,
-                stages,
-                showNoShow,
-              });
-              // Aqui você pode implementar a lógica para filtrar os dados com base nos parâmetros
-            }}
-          />
-        </div>
-
-        <ConversionByTimeChart
-          data={conversionByTimeData}
-          loading={isLoading}
+        <SectionHeader 
+          title="🎯 Análise de Leads" 
+          borderColor="border-red-200 dark:border-red-700" 
         />
-
-        <LeadsAverageByTimeChart
-          data={leadsAverageByTimeData}
-          loading={isLoading}
-        />
-      </div>
-
-      {/* Bloco 6: Análise de Leads */}
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-red-200 dark:border-red-700 pb-2">
-          🎯 Análise de Leads
-        </h4>
 
         <div className="grid grid-cols-1 gap-6">
           <LeadsGrowthChart
@@ -263,16 +160,16 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
               stages,
               showNoShow,
             });
-            // Aqui você pode implementar a lógica para filtrar os dados com base nos parâmetros
           }}
         />
       </div>
 
-      {/* Bloco 3: Métricas Financeiras */}
+      {/* Métricas Financeiras */}
       <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-green-200 dark:border-green-700 pb-2">
-          💰 Métricas Financeiras
-        </h4>
+        <SectionHeader 
+          title="💰 Métricas Financeiras" 
+          borderColor="border-green-200 dark:border-green-700" 
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <NegotiatedValueCard
@@ -293,11 +190,12 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
         </div>
       </div>
       
-      {/* Bloco 7: Tabelas Detalhadas */}
+      {/* Tabelas Detalhadas */}
       <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-indigo-200 dark:border-indigo-700 pb-2">
-          📋 Dados Detalhados
-        </h4>
+        <SectionHeader 
+          title="📋 Dados Detalhados" 
+          borderColor="border-indigo-200 dark:border-indigo-700" 
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RecentClientsTable

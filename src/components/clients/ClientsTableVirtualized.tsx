@@ -12,23 +12,8 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-interface Contact {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  position?: string;
-  kanban_stage?: string;
-  tags?: string[];
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-  last_interaction?: string;
-  lead_source?: string;
-  lead_value?: number;
-  conversion_probability?: number;
-}
+// Import Contact from centralized types
+import type { Contact } from '@/types/client';
 
 interface ClientsTableVirtualizedProps {
   contacts: Contact[];
