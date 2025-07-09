@@ -119,7 +119,7 @@ const ScheduleCard = () => {
             </p>
             <div className="flex items-center gap-1 text-xs">
               <Clock className="h-3 w-3 text-blue-500 flex-shrink-0" />
-              <span className="font-medium">{todayEvents[0].time || new Date(todayEvents[0].start_time || '').toLocaleTimeString()}</span>
+              <span className="font-medium">{todayEvents[0].time || (todayEvents[0].start_time ? new Date(todayEvents[0].start_time).toLocaleTimeString() : 'Sem horário')}</span>
               <span className="text-gray-600 dark:text-gray-300 truncate">
                 - {todayEvents[0].clientName || todayEvents[0].client_name || 'Cliente'}
               </span>

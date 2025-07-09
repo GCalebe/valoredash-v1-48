@@ -165,7 +165,7 @@ const AIMessagesTab = () => {
     }
   };
 
-  const handleDeleteMessage = async (id: number) => {
+  const handleDeleteMessage = async (id: string) => {
     try {
       await deleteMessageMutation.mutateAsync(id);
       toast({
@@ -182,13 +182,13 @@ const AIMessagesTab = () => {
     }
   };
 
-  const handleToggleMessage = async (id: number) => {
+  const handleToggleMessage = async (id: string) => {
     const message = messages.find(msg => msg.id === id);
     if (!message) return;
 
     try {
       await updateMessageMutation.mutateAsync({
-        id,
+        id: id,
         is_active: !message.is_active,
       });
     } catch (error) {

@@ -147,7 +147,7 @@ const AIStagesTab = () => {
     }
   };
 
-  const handleDeleteStage = async (id: number) => {
+  const handleDeleteStage = async (id: string) => {
     try {
       await deleteStageMutation.mutateAsync(id);
       toast({
@@ -164,7 +164,7 @@ const AIStagesTab = () => {
     }
   };
 
-  const handleToggleStage = async (id: number) => {
+  const handleToggleStage = async (id: string) => {
     const stage = stages.find(s => s.id === id);
     if (!stage) return;
 
@@ -186,8 +186,8 @@ const AIStagesTab = () => {
     }
   };
 
-  const handleMoveStage = async (id: number, direction: "up" | "down") => {
-    const sortedStages = [...stages].sort((a, b) => a.order - b.order);
+  const handleMoveStage = async (id: string, direction: "up" | "down") => {
+    const sortedStages = [...stages].sort((a, b) => (a.order || 0) - (b.order || 0));
     const stageIndex = sortedStages.findIndex((stage) => stage.id === id);
     
     if (
@@ -226,7 +226,7 @@ const AIStagesTab = () => {
     }
   };
 
-  const sortedStages = [...stages].sort((a, b) => a.order - b.order);
+  const sortedStages = [...stages].sort((a, b) => (a.order || 0) - (b.order || 0));
 
   if (isLoading) {
     return (
@@ -382,7 +382,7 @@ const AIStagesTab = () => {
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
-                        {stage.order_position}
+                        {stage.order || index + 1}
                       </div>
                       <div>
                         <CardTitle className="text-base">

@@ -77,17 +77,14 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({ contactId }) => {
           .from("utm_tracking")
           .select("*")
           .eq("lead_id", contactId)
-          .order("utm_created_at", { ascending: false });
+          .order("created_at", { ascending: false });
 
         if (error) {
           console.error("Erro ao buscar dados UTM:", error);
           return;
         }
 
-        setUtmData((data || []).map(item => ({
-          ...item,
-          utm_created_at: item.utm_created_at || item.created_at
-        })));
+        setUtmData(data || []);
 
         // Calcular métricas
         if (data && data.length > 0) {

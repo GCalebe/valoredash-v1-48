@@ -199,10 +199,27 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RecentClientsTable
-            clients={recentClientsData}
+            clients={recentClientsData.map(client => ({
+              id: parseInt(client.id) || Math.random(),
+              name: client.name,
+              phone: client.phone || '',
+              status: client.status || 'Ativo',
+              created_at: client.created_at || new Date().toISOString(),
+              marketingClients: 0,
+              lastVisit: client.created_at || new Date().toISOString()
+            }))}
             loading={isLoading}
           />
-          <LeadsTable leads={leadsData} loading={isLoading} />
+          <LeadsTable 
+            leads={leadsData.map(lead => ({
+              id: parseInt(lead.id) || Math.random(),
+              name: lead.name,
+              status: lead.status || 'Novo',
+              last_contact: lead.last_contact || new Date().toISOString(),
+              lastContact: lead.last_contact || new Date().toISOString()
+            }))} 
+            loading={isLoading} 
+          />
         </div>
       </div>
     </div>
