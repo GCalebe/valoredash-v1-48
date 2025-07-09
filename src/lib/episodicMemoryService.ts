@@ -11,12 +11,11 @@ export const episodicMemoryService = {
    * Armazena uma memória episódica
    */
   storeEpisodicMemory: async (
-    sessionId: string,
     memory: Partial<N8nChatMemory>
   ): Promise<N8nChatMemory | null> => {
     try {
       // Mock implementation - return null for now since table structure is complex
-      console.log('Mock storeEpisodicMemory called', { sessionId, memory });
+      console.log('Mock storeEpisodicMemory called', { memory });
       return null;
     } catch (err) {
       logger.error('Erro ao armazenar memória episódica:', err);
@@ -97,6 +96,53 @@ export const episodicMemoryService = {
   clearCache: (sessionId?: string): void => {
     console.log('Mock clearCache called', { sessionId });
     episodicCache.clear();
+  },
+
+  /**
+   * Gera linha do tempo episódica
+   */
+  generateTimeline: async (sessionId: string, useCache = true): Promise<any[]> => {
+    try {
+      // Mock implementation
+      console.log('Mock generateTimeline called', { sessionId, useCache });
+      return [];
+    } catch (err) {
+      logger.error('Erro ao gerar linha do tempo:', err);
+      return [];
+    }
+  },
+
+  /**
+   * Busca memórias por período
+   */
+  getEpisodicMemoriesByPeriod: async (
+    sessionId: string,
+    startDate: string,
+    endDate: string,
+    useCache = true
+  ): Promise<N8nChatMemory[]> => {
+    try {
+      // Mock implementation
+      console.log('Mock getEpisodicMemoriesByPeriod called', { sessionId, startDate, endDate, useCache });
+      return [];
+    } catch (err) {
+      logger.error('Erro ao buscar memórias por período:', err);
+      return [];
+    }
+  },
+
+  /**
+   * Atualiza importância de uma memória
+   */
+  updateImportance: async (memoryId: number, importance: number): Promise<boolean> => {
+    try {
+      // Mock implementation
+      console.log('Mock updateImportance called', { memoryId, importance });
+      return true;
+    } catch (err) {
+      logger.error('Erro ao atualizar importância:', err);
+      return false;
+    }
   },
 
   /**

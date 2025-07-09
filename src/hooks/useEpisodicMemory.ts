@@ -45,7 +45,7 @@ export function useEpisodicMemory({
 
       // Carregar memórias e linha do tempo em paralelo
       const [memoriesData, timelineData] = await Promise.all([
-        episodicMemoryService.getEpisodicMemories(sessionId, useCache),
+        episodicMemoryService.getEpisodicMemories(sessionId, 50, useCache),
         episodicMemoryService.generateTimeline(sessionId, useCache),
       ]);
 

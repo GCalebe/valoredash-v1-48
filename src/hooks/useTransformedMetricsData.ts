@@ -327,8 +327,8 @@ export const useTransformedMetricsData = () => {
 
       return Object.entries(stageGroups).map(([stageName, stageData], index) => ({
         name: stageName,
-        value: stageData.count,
-        percentage: total > 0 ? Math.round((stageData.count / total) * 100) : 0,
+        value: (stageData as any).count || 0,
+        percentage: (total as number) > 0 ? Math.round(((stageData as any).count || 0) / (total as number) * 100) : 0,
         color: `hsl(${(index * 137.5) % 360}, 70%, 50%)` // Cores distribuídas
       }));
     }
