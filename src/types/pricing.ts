@@ -3,10 +3,10 @@ export interface PricingPlan {
   name: string;
   description: string;
   price: number;
-  billingPeriod: 'monthly' | 'yearly';
+  billing_period: 'monthly' | 'yearly';
   features: string[];
   popular?: boolean;
-  aiProducts: string[]; // IDs of AI products included in this plan
+  ai_products?: string[]; // IDs of AI products included in this plan
 }
 
 export interface UserSubscription {

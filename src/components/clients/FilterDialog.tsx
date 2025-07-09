@@ -31,6 +31,24 @@ import {
 } from "@/components/ui/select";
 import { CustomFieldFilter } from "@/hooks/useClientsFilters";
 
+// Props interface for FilterDialog component
+interface FilterDialogProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  statusFilter: string;
+  segmentFilter: string;
+  lastContactFilter: string;
+  customFieldFilters: CustomFieldFilter[];
+  onStatusFilterChange: (value: string) => void;
+  onSegmentFilterChange: (value: string) => void;
+  onLastContactFilterChange: (value: string) => void;
+  onAddCustomFieldFilter: (filter: CustomFieldFilter) => void;
+  onRemoveCustomFieldFilter: (fieldId: string) => void;
+  onClearFilters: () => void;
+  onClearCustomFieldFilters: () => void;
+  hasActiveFilters: boolean;
+}
+
 // Simple interface that avoids complex type inference
 interface ClientRecord {
   asaas_customer_id?: string | null;

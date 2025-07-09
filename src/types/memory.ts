@@ -27,6 +27,7 @@ export interface EntityRelationship {
   source: string;
   target: string;
   type: string;
+  relation?: string; // Backward compatibility
   attributes?: Record<string, any>;
   confidence?: number;
 }
@@ -35,13 +36,17 @@ export interface EntityRelationship {
  * Interface para memória episódica (sequência de eventos)
  */
 export interface EpisodicMemory {
-  events: Array<{
+  id: number;
+  date: string;
+  description: string;
+  events?: Array<{
     action: string;
     timestamp: string;
     actors: string[];
     context?: Record<string, any>;
   }>;
   summary?: string;
+  details?: Record<string, any>;
 }
 
 /**
@@ -56,7 +61,7 @@ export interface N8nChatMemory {
   created_at?: string;
 
   // Novos campos para tipos de memória
-  memory_type?: MemoryType;
+  memory_type: MemoryType; // Required for Memory interface compatibility
   memory_level?: MemoryLevel;
   expiration_date?: string;
   importance?: number; // 1-10
@@ -68,4 +73,17 @@ export interface N8nChatMemory {
     categories?: string[];
     [key: string]: any;
   };
+}
+
+/**
+ * Interface unificada para sistemas de memória
+ */
+export interface Memory {
+  id: number;
+  message: string;
+  memory_type: MemoryType;
+  created_at: string;
+  importance?: number;
+  entities?: Array<{ name: string }>;
+  context?: Record<string, any>;
 }

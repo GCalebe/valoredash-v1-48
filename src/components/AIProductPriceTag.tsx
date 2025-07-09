@@ -38,14 +38,14 @@ const AIProductPriceTag: React.FC<AIProductPriceTagProps> = ({
   const { data: supabasePlans = [] } = usePricingQuery();
   
   const currentPlan = getCurrentPlan();
-  const hasAccess = currentPlan?.aiProducts.includes(product.id) || false;
+  const hasAccess = currentPlan?.ai_products?.includes(product.id) || false;
   
   // Use Supabase plans if available
   const availablePlans = supabasePlans || [];
   
   // Find the cheapest plan that includes this AI product
   const cheapestPlan = availablePlans
-    .filter(plan => plan.billing_period === "monthly" && plan.aiProducts.includes(product.id))
+    .filter(plan => plan.billing_period === "monthly" && plan.ai_products?.includes(product.id))
     .sort((a, b) => a.price - b.price)[0];
     
   // Plans are automatically loaded by React Query

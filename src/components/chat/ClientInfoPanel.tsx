@@ -52,7 +52,7 @@ const ClientInfoPanel = ({
 
         // Encontrar o cliente correspondente à sessão selecionada
         const client = availableContacts.find(
-          (client) => client.sessionId === selectedConversation.sessionId,
+          (client) => client.sessionId === selectedConversation.sessionId || client.session_id === selectedConversation.sessionId,
         );
 
         if (client) {

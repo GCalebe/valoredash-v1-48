@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { episodicMemoryService } from '@/lib/episodicMemoryService';
-import { N8nChatMemory, EpisodicMemory } from '@/types/memory';
+import { N8nChatMemory, EpisodicMemory, Memory } from '@/types/memory';
 import { logger } from '@/utils/logger';
 
 interface UseEpisodicMemoryOptions {
@@ -11,12 +11,12 @@ interface UseEpisodicMemoryOptions {
 }
 
 interface UseEpisodicMemoryResult {
-  memories: N8nChatMemory[];
+  memories: Memory[];
   timeline: EpisodicMemory[];
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
-  getMemoriesByPeriod: (startDate: string, endDate: string) => Promise<N8nChatMemory[]>;
+  getMemoriesByPeriod: (startDate: string, endDate: string) => Promise<Memory[]>;
   storeMemory: (memory: Partial<N8nChatMemory>) => Promise<N8nChatMemory | null>;
   updateImportance: (memoryId: number, importance: number) => Promise<boolean>;
   clearCache: (pattern?: string) => void;
@@ -31,7 +31,7 @@ export function useEpisodicMemory({
   autoRefresh = false,
   refreshInterval = 30000, // 30 segundos
 }: UseEpisodicMemoryOptions): UseEpisodicMemoryResult {
-  const [memories, setMemories] = useState<N8nChatMemory[]>([]);
+  const [memories, setMemories] = useState<Memory[]>([]);
   const [timeline, setTimeline] = useState<EpisodicMemory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -49,7 +49,18 @@ export function useEpisodicMemory({
         episodicMemoryService.generateTimeline(sessionId, useCache),
       ]);
 
-      setMemories(memoriesData);
+      // Convert N8nChatMemory to Memory format
+      const convertedMemories: Memory[] = memoriesData.map(item => ({
+        id: item.id,
+        message: typeof item.message === 'string' ? item.message : JSON.stringify(item.message),
+        memory_type: item.memory_type || 'episodic',
+        created_at: item.created_at || new Date().toISOString(),
+        importance: item.importance,
+        entities: item.entities,
+        context: item.context
+      }));
+
+      setMemories(convertedMemories);
       setTimeline(timelineData);
       setError(null);
     } catch (err) {
@@ -62,16 +73,27 @@ export function useEpisodicMemory({
 
   // Função para buscar memórias por período
   const getMemoriesByPeriod = useCallback(
-    async (startDate: string, endDate: string): Promise<N8nChatMemory[]> => {
+    async (startDate: string, endDate: string): Promise<Memory[]> => {
       if (!sessionId) return [];
 
       try {
-        return await episodicMemoryService.getEpisodicMemoriesByPeriod(
+        const results = await episodicMemoryService.getEpisodicMemoriesByPeriod(
           sessionId,
           startDate,
           endDate,
           useCache
         );
+        
+        // Convert N8nChatMemory to Memory format
+        return results.map(item => ({
+          id: item.id,
+          message: typeof item.message === 'string' ? item.message : JSON.stringify(item.message),
+          memory_type: item.memory_type || 'episodic',
+          created_at: item.created_at || new Date().toISOString(),
+          importance: item.importance,
+          entities: item.entities,
+          context: item.context
+        }));
       } catch (err) {
         logger.error('Erro ao buscar memórias por período:', err);
         return [];
@@ -92,8 +114,18 @@ export function useEpisodicMemory({
         });
 
         if (newMemory) {
-          // Atualizar estado local
-          setMemories(prev => [newMemory, ...prev]);
+          // Convert and update local state
+          const convertedMemory: Memory = {
+            id: newMemory.id,
+            message: typeof newMemory.message === 'string' ? newMemory.message : JSON.stringify(newMemory.message),
+            memory_type: newMemory.memory_type || 'episodic',
+            created_at: newMemory.created_at || new Date().toISOString(),
+            importance: newMemory.importance,
+            entities: newMemory.entities,
+            context: newMemory.context
+          };
+          
+          setMemories(prev => [convertedMemory, ...prev]);
           
           // Recarregar linha do tempo
           const updatedTimeline = await episodicMemoryService.generateTimeline(sessionId, false);

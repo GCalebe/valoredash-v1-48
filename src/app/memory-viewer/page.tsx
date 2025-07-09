@@ -48,23 +48,19 @@ export default function MemoryViewerPage() {
           return;
         }
 
-        // Buscar detalhes das sessões
+        // Buscar detalhes das sessões usando a tabela conversations
         const { data: conversationsData, error: conversationsError } = await supabase
-          .from('n8n_conversations')
-          .select(`
-            id,
-            name,
-            n8n_chats!inner(client:n8n_clients!inner(name))
-          `)
-          .in('id', uniqueSessionIds);
+          .from('conversations')
+          .select('id, name, client_name')
+          .in('session_id', uniqueSessionIds);
 
         if (conversationsError) throw conversationsError;
 
         // Formatar dados para o tipo Session
         const formattedSessions: Session[] = conversationsData.map((conv) => ({
           id: conv.id,
-          name: conv.name,
-          client_name: conv.n8n_chats[0]?.client?.name || 'Cliente desconhecido',
+          name: conv.name || `Conversa ${conv.id.substring(0, 8)}`,
+          client_name: conv.client_name || 'Cliente desconhecido',
         }));
 
         setSessions(formattedSessions);

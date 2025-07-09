@@ -26,7 +26,7 @@ interface Memory {
   message: string;
   memory_type: string;
   created_at: string;
-  importance: number;
+  importance?: number;
   entities?: Array<{ name: string }>;
   context?: Record<string, any>;
 }
@@ -246,10 +246,9 @@ function DateSelector({
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar
-            mode="single"
             selected={date}
             onSelect={onSelect}
-            initialFocus
+            className="pointer-events-auto"
           />
         </PopoverContent>
       </Popover>
@@ -354,11 +353,19 @@ export function EpisodicMemoryViewer({ sessionId, autoRefresh = false }: Episodi
     const groups: Record<string, TimelineEvent[]> = {};
     
     timeline.forEach(item => {
-      const date = format(new Date(item.date), 'yyyy-MM-dd');
+      // Convert EpisodicMemory to TimelineEvent format
+      const timelineEvent: TimelineEvent = {
+        id: item.id,
+        date: item.date,
+        description: item.description,
+        details: item.details
+      };
+      
+      const date = format(new Date(timelineEvent.date), 'yyyy-MM-dd');
       if (!groups[date]) {
         groups[date] = [];
       }
-      groups[date].push(item);
+      groups[date].push(timelineEvent);
     });
     
     return Object.entries(groups).map(([date, events]) => ({
@@ -380,7 +387,17 @@ export function EpisodicMemoryViewer({ sessionId, autoRefresh = false }: Episodi
       const formattedEndDate = format(endDate, 'yyyy-MM-dd');
       
       const results = await getMemoriesByPeriod(formattedStartDate, formattedEndDate);
-      setPeriodMemories(results);
+      // Convert N8nChatMemory to Memory format
+      const convertedResults: Memory[] = results.map(item => ({
+        id: item.id,
+        message: typeof item.message === 'string' ? item.message : JSON.stringify(item.message),
+        memory_type: item.memory_type || 'episodic',
+        created_at: item.created_at || new Date().toISOString(),
+        importance: item.importance,
+        entities: item.entities,
+        context: item.context
+      }));
+      setPeriodMemories(convertedResults);
     } catch (err) {
       console.error('Erro ao buscar por período:', err);
     } finally {

@@ -18,6 +18,7 @@ export interface Contact {
   lastMessageTime?: string;
   unreadCount?: number;
   sessionId?: string;
+  session_id?: string;
   // Novos campos
   tags?: string[];
   responsibleUser?: string;
