@@ -1,5 +1,14 @@
 import { useState } from 'react';
 
+// Schedule event interface
+export interface ScheduleEvent {
+  id: string;
+  title: string;
+  start_time: string;
+  end_time: string;
+  status?: string;
+}
+
 // Mock schedule data hook since the table structure is different
 export function useScheduleData() {
   const [selectedDate, setSelectedDate] = useState<string>(
@@ -11,19 +20,11 @@ export function useScheduleData() {
     selectedDate,
     setSelectedDate,
     isLoading: false,
+    loading: false,
+    refreshing: false,
     refetch: () => {},
+    refetchScheduleData: () => {},
     getEventsByDate: () => [],
     getEventsInRange: () => [],
   };
 }
-
-// Mock type export
-export interface ScheduleEvent {
-  id: string;
-  title: string;
-  start_time: string;
-  end_time: string;
-  status?: string;
-}
-
-export type { ScheduleEvent };

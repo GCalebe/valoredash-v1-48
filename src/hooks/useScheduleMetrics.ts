@@ -6,5 +6,9 @@ export function useScheduleMetrics(selectedDate: string) {
     pending: 0,
     cancelled: 0,
     isLoading: false,
+    today: 0,
+    thisWeek: 0,
+    thisMonth: 0,
+    confirmed: 0,
   };
 }

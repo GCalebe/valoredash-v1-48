@@ -11,7 +11,7 @@ interface ScheduleMetricsCardsProps {
 
 export function ScheduleMetricsCards({ scheduleEvents }: ScheduleMetricsCardsProps) {
   const { settings } = useThemeSettings();
-  const metrics = useScheduleMetrics(scheduleEvents);
+  const metrics = useScheduleMetrics(new Date().toISOString());
 
   const metricsData = [
     { 

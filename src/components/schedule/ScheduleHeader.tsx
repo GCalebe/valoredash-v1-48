@@ -44,7 +44,7 @@ const ScheduleHeader = ({
   const navigate = useNavigate();
   
   // Buscar dados para exibir contagem correta
-  const { events } = useScheduleData(hostFilter);
+  const { events } = useScheduleData();
 
   return (
     <header

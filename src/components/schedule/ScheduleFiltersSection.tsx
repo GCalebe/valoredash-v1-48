@@ -31,7 +31,7 @@ export const ScheduleFiltersSection = ({
   const { settings } = useThemeSettings();
   
   // Buscar dados para exibir contagem correta
-  const { events } = useScheduleData(hostFilter);
+  const { events } = useScheduleData();
   
   return (
     <div

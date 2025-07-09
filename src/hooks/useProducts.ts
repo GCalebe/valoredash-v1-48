@@ -13,6 +13,8 @@ interface SimpleProduct {
   image?: string;
   new?: boolean;
   popular?: boolean;
+  price?: number;
+  has_promotion?: boolean;
   created_at?: string;
 }
 
@@ -241,7 +243,7 @@ export function useProducts() {
     addCombo: () => Promise.resolve(undefined),
     deleteCombo: () => Promise.resolve(false),
     fetchClientProducts: () => Promise.resolve({ clientProducts: [], availableProducts: [] }),
-    addProductToClient: () => Promise.resolve(false),
-    removeProductFromClient: () => Promise.resolve(false),
+    addProductToClient: () => Promise.resolve(true),
+    removeProductFromClient: () => Promise.resolve(true),
   };
 }
