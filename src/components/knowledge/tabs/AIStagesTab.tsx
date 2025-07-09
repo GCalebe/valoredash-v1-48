@@ -64,10 +64,10 @@ const AIStagesTab = () => {
     const stageData = {
       name: newStage.name,
       description: newStage.description,
-      trigger: newStage.trigger,
+      trigger_conditions: { trigger: newStage.trigger },
       actions: newStage.actions.split("\n").filter((action) => action.trim()),
-      next_stage: newStage.nextStage,
-      order: stages.length + 1,
+      next_stage_id: newStage.nextStage,
+      stage_order: stages.length + 1,
       is_active: true,
     };
 
@@ -99,10 +99,10 @@ const AIStagesTab = () => {
     setEditingStage(stage);
     setNewStage({
       name: stage.name,
-      description: stage.description,
-      trigger: stage.trigger,
-      actions: stage.actions.join("\n"),
-                        nextStage: stage.next_stage,
+      description: stage.description || "",
+      trigger: stage.trigger_conditions?.trigger || "",
+      actions: Array.isArray(stage.actions) ? stage.actions.join("\n") : "",
+      nextStage: stage.next_stage_id || "",
     });
     setIsEditDialogOpen(true);
   };
@@ -113,9 +113,9 @@ const AIStagesTab = () => {
     const updatedData = {
       name: newStage.name,
       description: newStage.description,
-      trigger: newStage.trigger,
+      trigger_conditions: { trigger: newStage.trigger },
       actions: newStage.actions.split("\n").filter((action) => action.trim()),
-      next_stage: newStage.nextStage,
+      next_stage_id: newStage.nextStage,
     };
 
     try {
@@ -187,7 +187,7 @@ const AIStagesTab = () => {
   };
 
   const handleMoveStage = async (id: string, direction: "up" | "down") => {
-    const sortedStages = [...stages].sort((a, b) => (a.order || 0) - (b.order || 0));
+    const sortedStages = [...stages].sort((a, b) => (a.stage_order || 0) - (b.stage_order || 0));
     const stageIndex = sortedStages.findIndex((stage) => stage.id === id);
     
     if (
@@ -208,7 +208,7 @@ const AIStagesTab = () => {
     // Update order numbers
     const reorderData = newStages.map((stage, index) => ({
       id: stage.id,
-      order: index + 1,
+      stage_order: index + 1,
     }));
 
     try {
@@ -226,7 +226,7 @@ const AIStagesTab = () => {
     }
   };
 
-  const sortedStages = [...stages].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const sortedStages = [...stages].sort((a, b) => (a.stage_order || 0) - (b.stage_order || 0));
 
   if (isLoading) {
     return (
@@ -382,7 +382,7 @@ const AIStagesTab = () => {
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
-                        {stage.order || index + 1}
+                        {stage.stage_order || index + 1}
                       </div>
                       <div>
                         <CardTitle className="text-base">
@@ -431,16 +431,16 @@ const AIStagesTab = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {stage.trigger && (
+                    {stage.trigger_conditions?.trigger && (
                       <div>
                         <span className="text-sm font-medium">Gatilho:</span>
                         <span className="text-sm text-gray-600 dark:text-gray-300 ml-2">
-                          {stage.trigger}
+                          {stage.trigger_conditions.trigger}
                         </span>
                       </div>
                     )}
 
-                    {stage.actions.length > 0 && (
+                    {stage.actions && Array.isArray(stage.actions) && stage.actions.length > 0 && (
                       <div>
                         <span className="text-sm font-medium">Ações:</span>
                         <ul className="text-sm text-gray-600 dark:text-gray-300 ml-4 mt-1">
@@ -469,10 +469,10 @@ const AIStagesTab = () => {
                         </Button>
                       </div>
 
-                      {stage.next_stage && stage.next_stage !== "Fim" && (
+                      {stage.next_stage_id && stage.next_stage_id !== "Fim" && (
                         <div className="flex items-center text-sm text-gray-500">
                           <ArrowRight className="h-4 w-4 mr-1" />
-                          Próxima: {stage.next_stage}
+                          Próxima: {stage.next_stage_id}
                         </div>
                       )}
                     </div>

@@ -5,34 +5,44 @@ import { toast } from '@/hooks/use-toast';
 export interface AIStage {
   id: string;
   name: string;
-  description: string;
-  trigger: string;
-  actions: string[];
-  next_stage: string;
-  order: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
+  description: string | null;
+  stage_order: number;
+  actions: any | null;
+  trigger_conditions: any | null;
+  next_stage_id: string | null;
+  personality_id: string | null;
+  timeout_minutes: number | null;
+  is_final_stage: boolean | null;
+  is_active: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
+  created_by: string | null;
+  updated_by: string | null;
 }
 
 interface AIStageInsert {
   name: string;
-  description: string;
-  trigger: string;
-  actions: string[];
-  next_stage: string;
-  order: number;
+  description?: string;
+  stage_order: number;
+  actions?: any;
+  trigger_conditions?: any;
+  next_stage_id?: string;
+  personality_id?: string;
+  timeout_minutes?: number;
+  is_final_stage?: boolean;
   is_active?: boolean;
 }
 
 interface AIStageUpdate {
   name?: string;
   description?: string;
-  trigger?: string;
-  actions?: string[];
-  next_stage?: string;
-  order?: number;
+  stage_order?: number;
+  actions?: any;
+  trigger_conditions?: any;
+  next_stage_id?: string;
+  personality_id?: string;
+  timeout_minutes?: number;
+  is_final_stage?: boolean;
   is_active?: boolean;
 }
 
@@ -50,7 +60,7 @@ const fetchAIStages = async (): Promise<AIStage[]> => {
   const { data, error } = await supabase
     .from('ai_stages')
     .select('*')
-    .order('order', { ascending: true });
+    .order('stage_order', { ascending: true });
 
   if (error) throw error;
   return data || [];
@@ -62,7 +72,7 @@ const fetchActiveAIStages = async (): Promise<AIStage[]> => {
     .from('ai_stages')
     .select('*')
     .eq('is_active', true)
-    .order('order', { ascending: true });
+    .order('stage_order', { ascending: true });
 
   if (error) throw error;
   return data || [];
@@ -104,12 +114,15 @@ const deleteAIStage = async (id: string): Promise<void> => {
 };
 
 // Reorder AI stages
-const reorderAIStages = async (stageUpdates: { id: string; order: number }[]): Promise<void> => {
-  const { error } = await supabase.rpc('reorder_ai_stages', {
-    stage_updates: stageUpdates
-  });
-
-  if (error) throw error;
+const reorderAIStages = async (stageUpdates: { id: string; stage_order: number }[]): Promise<void> => {
+  for (const update of stageUpdates) {
+    const { error } = await supabase
+      .from('ai_stages')
+      .update({ stage_order: update.stage_order })
+      .eq('id', update.id);
+    
+    if (error) throw error;
+  }
 };
 
 // Hooks
