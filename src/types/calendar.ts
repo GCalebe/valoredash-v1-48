@@ -54,5 +54,5 @@ export interface ScheduleEvent {
   clientName?: string;
   client_name?: string;
   description?: string;
-  status?: string;
+  status?: "scheduled" | "completed" | "cancelled" | "rescheduled";
 }

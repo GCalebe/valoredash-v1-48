@@ -44,6 +44,7 @@ export function VirtualizedList<T>({
   const ListComponent = useMemo(() => {
     const listProps = {
       height,
+      width: "100%",
       itemCount: items.length,
       onScroll,
       overscanCount,

@@ -13,7 +13,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useKanbanStages } from "@/hooks/useKanbanStages";
-import MetricsFilters from "./MetricsFilters";
+import MetricsFiltersSimple from "./MetricsFiltersSimple";
 
 type DateRange = {
   from: Date;
@@ -120,14 +120,14 @@ export function FunnelChartSettings({
               <div className="space-y-2">
                 <h4 className="text-sm font-medium">Período de Análise</h4>
                 <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
-                  <MetricsFilters
+                  <MetricsFiltersSimple
                     selectedPeriod={localPeriod}
                     onPeriodChange={setLocalPeriod}
                     selectedDateRange={localDateRange}
                     onDateRangeChange={setLocalDateRange}
                     showPeriodSelector={true}
                     showDateRange={false}
-                  />
+        />
                 </div>
               </div>
             )}

@@ -12,7 +12,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, RefreshCw } from "lucide-react";
 import { useScheduleData } from "@/hooks/useScheduleData";
-import { ScheduleEvent } from "@/types/calendar";
+
+interface ScheduleEvent {
+  id: string;
+  title: string;
+  date?: string;
+  time?: string;
+  start_time?: string;
+  end_time?: string;
+  clientName?: string;
+  client_name?: string;
+  description?: string;
+  status?: "scheduled" | "completed" | "cancelled" | "rescheduled";
+}
 
 const ScheduleCard = () => {
   const navigate = useNavigate();
@@ -119,7 +131,9 @@ const ScheduleCard = () => {
             </p>
             <div className="flex items-center gap-1 text-xs">
               <Clock className="h-3 w-3 text-blue-500 flex-shrink-0" />
-              <span className="font-medium">{todayEvents[0].time || (todayEvents[0].start_time ? new Date(todayEvents[0].start_time).toLocaleTimeString() : 'Sem horário')}</span>
+              <span className="font-medium">
+                {todayEvents[0].time || (todayEvents[0].start_time ? new Date(todayEvents[0].start_time).toLocaleTimeString() : 'Sem horário')}
+              </span>
               <span className="text-gray-600 dark:text-gray-300 truncate">
                 - {todayEvents[0].clientName || todayEvents[0].client_name || 'Cliente'}
               </span>

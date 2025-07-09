@@ -1,25 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subDays, subWeeks, subMonths, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Clock } from "lucide-react";
+import { DateRange, PeriodOption } from "@/types/filters";
 
-type DateRange = {
-  from: Date;
-  to: Date;
-};
-
-type PeriodOption = {
-  label: string;
-  value: string;
-  getRange: () => DateRange;
-};
-
-interface MetricsFiltersProps {
+interface MetricsFiltersSimpleProps {
   selectedDate?: Date | null;
   selectedDateRange?: DateRange | null;
   selectedPeriod?: string;
@@ -31,7 +20,7 @@ interface MetricsFiltersProps {
   showDateRange?: boolean;
 }
 
-const MetricsFilters: React.FC<MetricsFiltersProps> = ({
+const MetricsFiltersSimple = React.memo<MetricsFiltersSimpleProps>(({
   selectedDate,
   selectedDateRange,
   selectedPeriod = "today",
@@ -46,7 +35,7 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
   const [dateRange, setDateRange] = useState<DateRange | null>(selectedDateRange || null);
   const [period, setPeriod] = useState<string>(selectedPeriod);
 
-  const periodOptions: PeriodOption[] = [
+  const periodOptions: PeriodOption[] = useMemo(() => [
     {
       label: "Hoje",
       value: "today",
@@ -101,46 +90,48 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
       value: "custom",
       getRange: () => ({ from: new Date(), to: new Date() })
     }
-  ];
+  ], []);
 
-  const handleDateSelect = (newDate: Date | null) => {
-    setDate(newDate);
-    if (onDateChange) {
-      onDateChange(newDate);
-    }
-  };
+  const handleDateSelect = useCallback((newDate: Date | undefined) => {
+    const selectedDate = newDate || null;
+    setDate(selectedDate);
+    onDateChange?.(selectedDate);
+  }, [onDateChange]);
 
-  const handlePeriodChange = (newPeriod: string) => {
+  const handlePeriodChange = useCallback((newPeriod: string) => {
     setPeriod(newPeriod);
-    if (onPeriodChange) {
-      onPeriodChange(newPeriod);
-    }
+    onPeriodChange?.(newPeriod);
     
-    // Se não for personalizado, atualiza automaticamente o range
     if (newPeriod !== "custom") {
       const selectedOption = periodOptions.find(opt => opt.value === newPeriod);
-      if (selectedOption && onDateRangeChange) {
+      if (selectedOption) {
         const range = selectedOption.getRange();
         setDateRange(range);
-        onDateRangeChange(range);
+        onDateRangeChange?.(range);
       }
     }
-  };
+  }, [onPeriodChange, onDateRangeChange, periodOptions]);
 
-  const handleDateRangeSelect = (newRange: DateRange | null) => {
-    setDateRange(newRange);
-    if (onDateRangeChange) {
-      onDateRangeChange(newRange);
+  const handleDateRangeSelect = useCallback((selectedRange: any) => {
+    let newRange: DateRange | null = null;
+    
+    if (selectedRange?.from && selectedRange?.to) {
+      newRange = { from: selectedRange.from, to: selectedRange.to };
+    } else if (selectedRange?.from) {
+      newRange = { from: selectedRange.from, to: selectedRange.from };
     }
-  };
+    
+    setDateRange(newRange);
+    onDateRangeChange?.(newRange);
+  }, [onDateRangeChange]);
 
-  const formatDateRange = (range: DateRange | null) => {
+  const formatDateRange = useCallback((range: DateRange | null) => {
     if (!range) return "Selecione um período";
     if (range.from.getTime() === range.to.getTime()) {
       return format(range.from, "PPP", { locale: ptBR });
     }
     return `${format(range.from, "dd/MM", { locale: ptBR })} - ${format(range.to, "dd/MM/yyyy", { locale: ptBR })}`;
-  };
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -182,18 +173,11 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
               <Calendar
                 mode="range"
                 selected={dateRange ? { from: dateRange.from, to: dateRange.to } : undefined}
-                onSelect={(range) => {
-                  if (range?.from && range?.to) {
-                    handleDateRangeSelect({ from: range.from, to: range.to });
-                  } else if (range?.from) {
-                    handleDateRangeSelect({ from: range.from, to: range.from });
-                  } else {
-                    handleDateRangeSelect(null);
-                  }
-                }}
+                onSelect={handleDateRangeSelect}
                 numberOfMonths={2}
                 initialFocus
                 locale={ptBR}
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
@@ -224,6 +208,7 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
                 onSelect={handleDateSelect}
                 initialFocus
                 locale={ptBR}
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
@@ -247,18 +232,11 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
               <Calendar
                 mode="range"
                 selected={dateRange ? { from: dateRange.from, to: dateRange.to } : undefined}
-                onSelect={(range) => {
-                  if (range?.from && range?.to) {
-                    handleDateRangeSelect({ from: range.from, to: range.to });
-                  } else if (range?.from) {
-                    handleDateRangeSelect({ from: range.from, to: range.from });
-                  } else {
-                    handleDateRangeSelect(null);
-                  }
-                }}
+                onSelect={handleDateRangeSelect}
                 numberOfMonths={2}
                 initialFocus
                 locale={ptBR}
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
@@ -272,6 +250,8 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
       )}
     </div>
   );
-};
+});
 
-export default MetricsFilters;
+MetricsFiltersSimple.displayName = 'MetricsFiltersSimple';
+
+export default MetricsFiltersSimple;
