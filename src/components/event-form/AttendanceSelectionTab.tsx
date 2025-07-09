@@ -1,0 +1,141 @@
+import React from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { X, Plus } from "lucide-react";
+
+interface AttendanceSelectionTabProps {
+  state: any;
+  updateState: (updates: any) => void;
+  constants: any;
+  addTag: () => void;
+  removeTag: (id: string) => void;
+  onPrevious: () => void;
+}
+
+export function AttendanceSelectionTab({
+  state,
+  updateState,
+  constants,
+  addTag,
+  removeTag,
+  onPrevious,
+}: AttendanceSelectionTabProps) {
+  return (
+    <>
+      <div className="space-y-2">
+        <Label htmlFor="attendanceType">Tipo de Atendimento</Label>
+        <Select 
+          value={state.attendanceType} 
+          onValueChange={(value) => updateState({ attendanceType: value })}
+        >
+          <SelectTrigger id="attendanceType">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {constants.ATTENDANCE_TYPES.map((type: any) => (
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {state.attendanceType === "presencial" ? (
+        <div className="space-y-2">
+          <Label htmlFor="location">Local do Atendimento *</Label>
+          <Input
+            id="location"
+            value={state.location}
+            onChange={(e) => updateState({ location: e.target.value })}
+            placeholder="Endereço ou local do atendimento"
+            className={state.errors.location ? "border-destructive" : ""}
+          />
+          {state.errors.location && (
+            <p className="text-sm text-destructive">{state.errors.location}</p>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Label htmlFor="meetingLink">Link da Reunião *</Label>
+          <Input
+            id="meetingLink"
+            value={state.meetingLink}
+            onChange={(e) => updateState({ meetingLink: e.target.value })}
+            placeholder="https://meet.google.com/abc-def-ghi"
+            className={state.errors.meetingLink ? "border-destructive" : ""}
+          />
+          {state.errors.meetingLink && (
+            <p className="text-sm text-destructive">{state.errors.meetingLink}</p>
+          )}
+        </div>
+      )}
+      
+      <div className="space-y-2">
+        <Label>Tags Personalizadas</Label>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {state.tags.map((tag: any) => (
+            <Badge 
+              key={tag.id} 
+              style={{backgroundColor: tag.color}}
+              className="text-white flex items-center gap-1"
+            >
+              {tag.text}
+              <button 
+                type="button" 
+                onClick={() => removeTag(tag.id)}
+                className="ml-1 hover:bg-white/20 rounded-full"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <div className="flex-1 flex gap-2">
+            <Input
+              placeholder="Nova tag..."
+              value={state.newTag}
+              onChange={(e) => updateState({ newTag: e.target.value })}
+              onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+            />
+            <input
+              type="color"
+              value={state.newTagColor}
+              onChange={(e) => updateState({ newTagColor: e.target.value })}
+              className="w-10 h-10 rounded border cursor-pointer"
+            />
+          </div>
+          <Button type="button" onClick={addTag} size="sm">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="eventDescription">Observações (opcional)</Label>
+        <Textarea
+          id="eventDescription"
+          value={state.eventDescription}
+          onChange={(e) => updateState({ eventDescription: e.target.value })}
+          placeholder="Informações adicionais sobre o evento..."
+          className="min-h-[80px]"
+        />
+      </div>
+      
+      <div className="flex justify-between items-center pt-2">
+        <Button type="button" variant="outline" onClick={onPrevious}>
+          Anterior
+        </Button>
+        
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          Pronto para salvar
+        </div>
+      </div>
+    </>
+  );
+}

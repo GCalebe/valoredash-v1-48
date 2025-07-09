@@ -102,14 +102,14 @@
 - [x] **SOLID**: Single Responsibility por campo
 - [x] **Status**: ✅ REFATORADO - Criados 4 componentes + 1 hook especializado
 
-#### ⏳ 5. EventFormDialog.tsx - Erros de tipo Contact
+#### ✅ 5. EventFormDialog.tsx - 1235 linhas → 200 linhas
 **Localização**: `src/components/EventFormDialog.tsx`
-- [ ] **Legibilidade**: Simplificar lógica do formulário
-- [ ] **Manutenibilidade**: Extrair validações
-- [ ] **Reutilização**: Componentes de campo reutilizáveis
-- [ ] **Testabilidade**: Hooks testáveis separados
-- [ ] **SOLID**: Uma responsabilidade por função
-- [ ] **Status**: ❌ Pendente
+- [x] **Legibilidade**: Simplificar lógica do formulário
+- [x] **Manutenibilidade**: Extrair validações
+- [x] **Reutilização**: Componentes de campo reutilizáveis
+- [x] **Testabilidade**: Hooks testáveis separados
+- [x] **SOLID**: Uma responsabilidade por função
+- [x] **Status**: ✅ REFATORADO - Criados 5 componentes focados + usa hook existente
 
 ## 🎯 Prioridades de Refatoração
 
