@@ -55,10 +55,10 @@ export function useChatMessagesOptimized({
       setLoading(true);
       
       // Buscar mensagens com paginação
-      const chatMemories = await memoryService.fetchChatHistory(
+      const chatMemories = await memoryService.getMemoriesBySession(
         sessionId,
+        undefined,
         pageSize,
-        currentPage,
         useCache
       );
       
@@ -163,10 +163,10 @@ export function useChatMessagesOptimized({
     
     try {
       // Buscar apenas as mensagens mais recentes
-      const latestMemories = await memoryService.fetchChatHistory(
+      const latestMemories = await memoryService.getMemoriesBySession(
         sessionId,
+        undefined,
         20, // Buscar apenas as 20 mais recentes
-        1,
         false // Não usar cache para polling
       );
       

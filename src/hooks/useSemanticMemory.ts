@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { semanticMemoryService } from '@/lib/semanticMemoryService';
 import { N8nChatMemory, SemanticEntity, EntityRelationship } from '@/types/memory';
 import { logger } from '@/utils/logger';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UseSemanticMemoryOptions {
   sessionId: string;
@@ -65,37 +66,42 @@ export function useSemanticMemory({
     }
   }, [sessionId, useCache]);
 
-  // Função para buscar memórias por similaridade
+  // Função para buscar memórias por similaridade (simplified)
   const searchBySimilarity = useCallback(
     async (query: string, limit = 10): Promise<N8nChatMemory[]> => {
       if (!sessionId || !query.trim()) return [];
 
       try {
-        return await semanticMemoryService.searchMemoriesBySimilarity(
-          sessionId,
-          query,
-          limit,
-          false // Não usar cache para buscas por similaridade
-        );
+        // Buscar todas as memórias semânticas e filtrar por conteúdo similar
+        const allMemories = await semanticMemoryService.getSemanticMemories(sessionId, useCache);
+        return allMemories
+          .filter(memory => {
+            const content = typeof memory.message === 'string' ? memory.message : JSON.stringify(memory.message);
+            return content.toLowerCase().includes(query.toLowerCase());
+          })
+          .slice(0, limit);
       } catch (err) {
         logger.error('Erro ao buscar memórias por similaridade:', err);
         return [];
       }
     },
-    [sessionId]
+    [sessionId, useCache]
   );
 
-  // Função para buscar memórias por entidade
+  // Função para buscar memórias por entidade (simplified)
   const searchByEntity = useCallback(
     async (entityName: string): Promise<N8nChatMemory[]> => {
       if (!sessionId || !entityName.trim()) return [];
 
       try {
-        return await semanticMemoryService.getMemoriesByEntity(
-          sessionId,
-          entityName,
-          useCache
-        );
+        // Buscar todas as memórias semânticas e filtrar por entidade
+        const allMemories = await semanticMemoryService.getSemanticMemories(sessionId, useCache);
+        return allMemories.filter(memory => {
+          if (!memory.entities || !Array.isArray(memory.entities)) return false;
+          return memory.entities.some((entity: any) => 
+            entity.name && entity.name.toLowerCase().includes(entityName.toLowerCase())
+          );
+        });
       } catch (err) {
         logger.error('Erro ao buscar memórias por entidade:', err);
         return [];
@@ -153,22 +159,29 @@ export function useSemanticMemory({
     [sessionId]
   );
 
-  // Função para atualizar importância
+  // Função para atualizar importância (simplified)
   const updateImportance = useCallback(
     async (memoryId: number, importance: number): Promise<boolean> => {
       try {
-        const success = await semanticMemoryService.updateImportance(memoryId, importance);
+        // Atualizar direto na base de dados usando supabase
+        const { error } = await supabase
+          .from('n8n_chat_memory')
+          .update({ importance })
+          .eq('id', memoryId);
 
-        if (success) {
+        if (!error) {
           // Atualizar estado local
           setMemories(prev =>
             prev.map(memory =>
               memory.id === memoryId ? { ...memory, importance } : memory
             )
           );
+          // Limpar cache para forçar reload
+          semanticMemoryService.clearCache();
+          return true;
         }
 
-        return success;
+        return false;
       } catch (err) {
         logger.error('Erro ao atualizar importância:', err);
         return false;

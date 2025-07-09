@@ -123,7 +123,10 @@ export async function getContactsFromSupabase(): Promise<SupabaseContact[]> {
       return [];
     }
 
-    return data || [];
+    return (data || []).map(contact => ({
+      ...contact,
+      status: (contact.status as 'Active' | 'Inactive') || 'Active'
+    }));
   } catch (error) {
     console.error('Erro na função getContactsFromSupabase:', error);
     return [];
@@ -201,8 +204,9 @@ export async function getFunnelDataFromSupabase(
  */
 export async function getConversionByTimeFromSupabase() {
   try {
+    // Using funnel_data as alternative since conversion_by_time doesn't exist in types
     const { data, error } = await supabase
-      .from('conversion_by_time')
+      .from('funnel_data')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -224,10 +228,11 @@ export async function getConversionByTimeFromSupabase() {
  */
 export async function getLeadsBySourceFromSupabase() {
   try {
+    // Using utm_tracking as alternative since leads_by_source doesn't exist in types
     const { data, error } = await supabase
-      .from('leads_by_source')
+      .from('utm_tracking')
       .select('*')
-      .order('value', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Erro ao buscar leads por fonte:', error);
@@ -272,7 +277,7 @@ export async function getUTMDataFromSupabase() {
   try {
     const [metricsResult, campaignsResult, trackingResult] = await Promise.all([
       supabase.from('utm_metrics').select('*').limit(1).single(),
-      supabase.from('campaign_data').select('*').order('value', { ascending: false }),
+      supabase.from('utm_tracking').select('*').order('created_at', { ascending: false }),
       supabase.from('utm_tracking').select('*').order('created_at', { ascending: false })
     ]);
 
@@ -429,16 +434,35 @@ export async function checkTablesExist() {
     const results = [];
 
     for (const table of tables) {
-      const { data, error } = await supabase
-        .from(table)
-        .select('id')
-        .limit(1);
+      try {
+        // Only check tables that exist in types
+        const validTables = ['contacts', 'ai_products', 'client_stats', 'conversation_metrics', 'funnel_data', 'utm_metrics', 'utm_tracking'];
+        if (!validTables.includes(table)) {
+          results.push({
+            table,
+            exists: false,
+            error: `Table ${table} not found in types`
+          });
+          continue;
+        }
+        
+        const { data, error } = await supabase
+          .from(table as any)
+          .select('id')
+          .limit(1);
       
-      results.push({
-        table,
-        exists: !error,
-        error: error?.message
-      });
+        results.push({
+          table,
+          exists: !error,
+          error: error?.message
+        });
+      } catch (tableError) {
+        results.push({
+          table,
+          exists: false,
+          error: tableError instanceof Error ? tableError.message : 'Unknown error'
+        });
+      }
     }
 
     return results;

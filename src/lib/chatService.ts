@@ -11,7 +11,7 @@ import { memoryService } from "./memoryService";
 export async function fetchChatHistory(conversationId: string) {
   try {
     // Usar o novo serviço de memória para buscar o histórico
-    const memories = await memoryService.fetchChatHistory(conversationId);
+    const memories = await memoryService.getMemoriesBySession(conversationId);
 
     // Converter para o formato N8nChatHistory para manter compatibilidade
     return memories.map((memory) => ({
