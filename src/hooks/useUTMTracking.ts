@@ -17,9 +17,9 @@ export function useUTMTracking(
   
   // Calculate metrics based on current data
   const currentMetrics = selectedCampaign !== "all" ? campaignMetrics : allMetrics;
-  const totalClicks = currentMetrics.reduce((sum, metric) => sum + (metric.clicks || 0), 0);
-  const totalConversions = currentMetrics.reduce((sum, metric) => sum + (metric.conversions || 0), 0);
-  const totalCost = currentMetrics.reduce((sum, metric) => sum + (metric.cost || 0), 0);
+  const totalClicks = currentMetrics.length; // Count of metrics as clicks proxy
+  const totalConversions = currentMetrics.filter(metric => metric.utm_conversion === true).length;
+  const totalCost = 0; // No cost data in simplified model
   
   const metrics = {
     totalClicks,

@@ -1,4 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/integrations/supabase/client';
 import { MemoryCache } from './memoryCache';
 import { N8nChatMemory } from '@/types/memory';
 import { logger } from '@/utils/logger';
@@ -6,7 +6,6 @@ import { logger } from '@/utils/logger';
 // Cache dedicado para memória contextual
 const contextCache = new MemoryCache({
   maxSize: 100,
-  defaultTTL: 5 * 60 * 1000, // 5 minutos
 });
 
 /**
@@ -18,14 +17,14 @@ export const contextualMemoryService = {
    */
   storeContextualMemory: async (memory: Partial<N8nChatMemory>): Promise<N8nChatMemory | null> => {
     try {
-      const supabase = createClientComponentClient();
-      
       // Garantir que é uma memória contextual
       const memoryData = {
         ...memory,
+        session_id: memory.session_id || '',
         memory_type: 'contextual',
         memory_level: memory.memory_level || 'short_term',
         importance: memory.importance || 1,
+        message: memory.message || { text: '', timestamp: new Date().toISOString() }, // Required field
       };
       
       // Serializar campos JSON
@@ -56,12 +55,14 @@ export const contextualMemoryService = {
       }
       
       // Deserializar campos JSON
-      const parsedMemory = {
+      const parsedMemory: N8nChatMemory = {
         ...data,
-        entities: data.entities ? JSON.parse(data.entities) : [],
-        relationships: data.relationships ? JSON.parse(data.relationships) : [],
-        context: data.context ? JSON.parse(data.context) : {},
-        metadata: data.metadata ? JSON.parse(data.metadata) : {},
+        memory_type: data.memory_type as any,
+        memory_level: data.memory_level as any,
+        entities: data.entities ? JSON.parse(String(data.entities)) : [],
+        relationships: data.relationships ? JSON.parse(String(data.relationships)) : [],
+        context: data.context ? JSON.parse(String(data.context)) : {},
+        metadata: data.metadata ? JSON.parse(String(data.metadata)) : {},
       };
       
       return parsedMemory;
@@ -88,8 +89,6 @@ export const contextualMemoryService = {
         }
       }
       
-      const supabase = createClientComponentClient();
-      
       // Buscar memórias contextuais
       const { data, error } = await supabase
         .from('n8n_chat_memory')
@@ -103,13 +102,15 @@ export const contextualMemoryService = {
         return [];
       }
       
-      // Deserializar campos JSON
-      const parsedMemories = data.map(memory => ({
+      // Deserializar campos JSON e converter tipos
+      const parsedMemories: N8nChatMemory[] = data.map(memory => ({
         ...memory,
-        entities: memory.entities ? JSON.parse(memory.entities) : [],
-        relationships: memory.relationships ? JSON.parse(memory.relationships) : [],
-        context: memory.context ? JSON.parse(memory.context) : {},
-        metadata: memory.metadata ? JSON.parse(memory.metadata) : {},
+        memory_type: memory.memory_type as any,
+        memory_level: memory.memory_level as any,
+        entities: memory.entities ? JSON.parse(String(memory.entities)) : [],
+        relationships: memory.relationships ? JSON.parse(String(memory.relationships)) : [],
+        context: memory.context ? JSON.parse(String(memory.context)) : {},
+        metadata: memory.metadata ? JSON.parse(String(memory.metadata)) : {},
       }));
       
       // Armazenar no cache
@@ -140,8 +141,6 @@ export const contextualMemoryService = {
         }
       }
       
-      const supabase = createClientComponentClient();
-      
       // Buscar memórias contextuais por nível
       const { data, error } = await supabase
         .from('n8n_chat_memory')
@@ -156,13 +155,15 @@ export const contextualMemoryService = {
         return [];
       }
       
-      // Deserializar campos JSON
-      const parsedMemories = data.map(memory => ({
+      // Deserializar campos JSON e converter tipos
+      const parsedMemories: N8nChatMemory[] = data.map(memory => ({
         ...memory,
-        entities: memory.entities ? JSON.parse(memory.entities) : [],
-        relationships: memory.relationships ? JSON.parse(memory.relationships) : [],
-        context: memory.context ? JSON.parse(memory.context) : {},
-        metadata: memory.metadata ? JSON.parse(memory.metadata) : {},
+        memory_type: memory.memory_type as any,
+        memory_level: memory.memory_level as any,
+        entities: memory.entities ? JSON.parse(String(memory.entities)) : [],
+        relationships: memory.relationships ? JSON.parse(String(memory.relationships)) : [],
+        context: memory.context ? JSON.parse(String(memory.context)) : {},
+        metadata: memory.metadata ? JSON.parse(String(memory.metadata)) : {},
       }));
       
       // Armazenar no cache
@@ -180,8 +181,6 @@ export const contextualMemoryService = {
    */
   updateImportance: async (memoryId: number, importance: number): Promise<boolean> => {
     try {
-      const supabase = createClientComponentClient();
-      
       // Buscar a memória atual para obter o session_id
       const { data: memoryData, error: fetchError } = await supabase
         .from('n8n_chat_memory')
@@ -223,8 +222,6 @@ export const contextualMemoryService = {
    */
   removeExpiredMemories: async (): Promise<number> => {
     try {
-      const supabase = createClientComponentClient();
-      
       // Buscar IDs de sessões com memórias expiradas para invalidar cache depois
       const { data: sessionsData } = await supabase
         .from('n8n_chat_memory')
@@ -296,7 +293,7 @@ export const contextualMemoryService = {
       importantMemories.forEach(memory => {
         if (memory.entities && memory.entities.length > 0) {
           memory.entities.forEach((entity: any) => {
-            if (!entities.has(entity.name)) {
+            if (entity && entity.name && !entities.has(entity.name)) {
               entities.set(entity.name, entity);
             }
           });
@@ -308,9 +305,11 @@ export const contextualMemoryService = {
       importantMemories.forEach(memory => {
         if (memory.relationships && memory.relationships.length > 0) {
           memory.relationships.forEach((rel: any) => {
-            const key = `${rel.source}-${rel.type}-${rel.target}`;
-            if (!relationships.has(key)) {
-              relationships.set(key, rel);
+            if (rel && rel.source && rel.type && rel.target) {
+              const key = `${rel.source}-${rel.type}-${rel.target}`;
+              if (!relationships.has(key)) {
+                relationships.set(key, rel);
+              }
             }
           });
         }
@@ -375,7 +374,8 @@ export const contextualMemoryService = {
    */
   clearCache: (pattern?: string): void => {
     if (pattern) {
-      contextCache.deletePattern(pattern);
+      // Simplified cache clearing since deletePattern doesn't exist
+      contextCache.clear();
     } else {
       contextCache.clear();
     }

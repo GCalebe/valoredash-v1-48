@@ -5,6 +5,9 @@ import { toast } from '@/hooks/use-toast';
 // Import Contact from centralized types
 import type { Contact } from '@/types/client';
 
+// Export Contact for other modules
+export type { Contact };
+
 export interface ContactFilters {
   kanban_stage?: string;
   lead_source?: string;

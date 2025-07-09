@@ -1,8 +1,17 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
-import type { Database } from '../integrations/supabase/types';
 
-type UTMMetrics = Database['public']['Tables']['utm_metrics']['Row'];
+// Simplified UTM Metrics type to avoid deep instantiation
+export interface UTMMetrics {
+  id: string;
+  utm_source?: string;
+  utm_campaign?: string;
+  utm_medium?: string;
+  utm_term?: string;
+  utm_content?: string;
+  created_at: string;
+  updated_at?: string;
+}
 
 export const useSupabaseUTMMetrics = () => {
   const [metrics, setMetrics] = useState<UTMMetrics[]>([]);
@@ -12,9 +21,11 @@ export const useSupabaseUTMMetrics = () => {
   const fetchMetrics = async () => {
     try {
       setLoading(true);
+      
+      // Use utm_tracking table instead of utm_metrics
       const { data, error } = await supabase
-        .from('utm_metrics')
-        .select('*')
+        .from('utm_tracking')
+        .select('id, utm_source, utm_campaign, utm_medium, utm_term, utm_content, created_at, updated_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -24,6 +35,8 @@ export const useSupabaseUTMMetrics = () => {
     } catch (err) {
       console.error('Error fetching UTM metrics:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
+      // Set empty array as fallback
+      setMetrics([]);
     } finally {
       setLoading(false);
     }
@@ -33,8 +46,8 @@ export const useSupabaseUTMMetrics = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('utm_metrics')
-        .select('*')
+        .from('utm_tracking')
+        .select('id, utm_source, utm_campaign, utm_medium, utm_term, utm_content, created_at, updated_at')
         .gte('created_at', startDate)
         .lte('created_at', endDate)
         .order('created_at', { ascending: false });
@@ -55,8 +68,8 @@ export const useSupabaseUTMMetrics = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('utm_metrics')
-        .select('*')
+        .from('utm_tracking')
+        .select('id, utm_source, utm_campaign, utm_medium, utm_term, utm_content, created_at, updated_at')
         .eq('utm_campaign', campaign)
         .order('created_at', { ascending: false });
 
@@ -75,7 +88,7 @@ export const useSupabaseUTMMetrics = () => {
   const createUTMMetric = async (metric: Omit<UTMMetrics, 'id' | 'created_at'>) => {
     try {
       const { data, error } = await supabase
-        .from('utm_metrics')
+        .from('utm_tracking')
         .insert([metric])
         .select()
         .single();

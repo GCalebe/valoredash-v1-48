@@ -231,26 +231,25 @@ export const useTransformedMetricsData = () => {
     }
 
     // Agrupar por estágio e calcular totais (sem filtro de data)
-    const stageGroups = funnelData.reduce((acc, item) => {
+    const stageGroups = funnelData.reduce((acc: Record<string, { stage: string; count: number }>, item: any) => {
       const stage = item.stage || 'Lead';
-      acc[stage] = (acc[stage] || 0) + (item.count || 1);
+      const count = typeof item.count === 'number' ? item.count : 1;
+      if (!acc[stage]) {
+        acc[stage] = { stage, count: 0 };
+      }
+      acc[stage].count += count;
       return acc;
-    }, {} as Record<string, number>);
+    }, {});
 
-    const stages = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won'];
-    const stageLabels = ['Lead', 'Qualificado', 'Proposta', 'Negociação', 'Fechado'];
-    
-    return stages.map((stage, index) => {
-      const count = stageGroups[stage] || 0;
-      const prevCount = index > 0 ? (stageGroups[stages[index - 1]] || 0) : count;
-      const conversion_rate = prevCount > 0 ? (count / prevCount) * 100 : 100;
-      
-      return {
-        stage: stageLabels[index],
-        count,
-        conversion_rate: index === 0 ? 100 : conversion_rate,
-      };
-    });
+    const stages = Object.values(stageGroups);
+    const total = stages.reduce((sum, stage) => sum + stage.count, 0);
+
+    return Object.entries(stageGroups).map(([stageName, stageData], index) => ({
+      name: stageName,
+      value: stageData.count,
+      percentage: total > 0 ? Math.round((stageData.count / total) * 100) : 0,
+      color: `hsl(${(index * 137.5) % 360}, 70%, 50%)` // Cores distribuídas
+    }));
   }, [funnelData]);
 
   // Dados do funil por data de chegada (sem filtro de data - mostra todos os dados)
@@ -322,12 +321,14 @@ export const useTransformedMetricsData = () => {
       }, {} as Record<string, { count: number; stage: string }>);
 
       const stages = Object.values(stageGroups);
-      const total = stages.reduce((sum, stage) => sum + stage.count, 0);
+      const total = stages.reduce((sum: number, stage: { count: number; stage: string }) => {
+        return sum + stage.count;
+      }, 0);
 
-      return stages.map((stage, index) => ({
-        name: stage.stage,
-        value: stage.count,
-        percentage: total > 0 ? Math.round((stage.count / total) * 100) : 0,
+      return Object.entries(stageGroups).map(([stageName, stageData], index) => ({
+        name: stageName,
+        value: stageData.count,
+        percentage: total > 0 ? Math.round((stageData.count / total) * 100) : 0,
         color: `hsl(${(index * 137.5) % 360}, 70%, 50%)` // Cores distribuídas
       }));
     }
