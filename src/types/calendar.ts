@@ -29,7 +29,7 @@ export type EventFormData = {
 };
 
 // Appointment types (mock data)
-export type AppointmentStatus = "confirmado" | "pendente" | "cancelado";
+export type AppointmentStatus = "scheduled" | "completed" | "cancelled" | "rescheduled";
 
 export type Appointment = {
   id: number;

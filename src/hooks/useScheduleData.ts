@@ -4,17 +4,10 @@ import { toast } from "sonner";
 import { logger } from "@/utils/logger";
 import { useScheduleQuery } from "./useScheduleQuery";
 
-export interface ScheduleEvent {
-  id: number;
-  title: string;
-  date: Date;
-  time: string;
-  clientName: string;
-  phone: string;
-  service: string;
-  status: string;
-  notes?: string;
-}
+// Import the unified ScheduleEvent type from calendar types
+import { ScheduleEvent } from "@/types/calendar";
+
+export { ScheduleEvent };
 
 export function useScheduleData(hostFilter: string = "all") {
   const [refreshing, setRefreshing] = useState(false);

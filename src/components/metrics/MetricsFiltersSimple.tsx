@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback } from "react";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -170,15 +169,9 @@ const MetricsFiltersSimple = React.memo<MetricsFiltersSimpleProps>(({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="range"
-                selected={dateRange ? { from: dateRange.from, to: dateRange.to } : undefined}
-                onSelect={handleDateRangeSelect}
-                numberOfMonths={2}
-                initialFocus
-                locale={ptBR}
-                className="pointer-events-auto"
-              />
+              <div className="p-3">
+                <p>Data personalizada em desenvolvimento</p>
+              </div>
             </PopoverContent>
           </Popover>
         </div>
@@ -202,14 +195,9 @@ const MetricsFiltersSimple = React.memo<MetricsFiltersSimpleProps>(({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={handleDateSelect}
-                initialFocus
-                locale={ptBR}
-                className="pointer-events-auto"
-              />
+              <div className="p-3">
+                <p>Seletor de data em desenvolvimento</p>
+              </div>
             </PopoverContent>
           </Popover>
         </div>
@@ -229,15 +217,9 @@ const MetricsFiltersSimple = React.memo<MetricsFiltersSimpleProps>(({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="range"
-                selected={dateRange ? { from: dateRange.from, to: dateRange.to } : undefined}
-                onSelect={handleDateRangeSelect}
-                numberOfMonths={2}
-                initialFocus
-                locale={ptBR}
-                className="pointer-events-auto"
-              />
+              <div className="p-3">
+                <p>Período personalizado em desenvolvimento</p>
+              </div>
             </PopoverContent>
           </Popover>
         </div>

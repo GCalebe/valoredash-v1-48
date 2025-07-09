@@ -2,8 +2,8 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 
 interface CalendarViewSwitcherProps {
-  view: "mes" | "semana" | "dia" | "lista";
-  onChange: (view: "mes" | "semana" | "dia" | "lista") => void;
+  view: "mes" | "semana" | "dia" | "agenda";
+  onChange: (view: "mes" | "semana" | "dia" | "agenda") => void;
 }
 
 export const CalendarViewSwitcher: React.FC<CalendarViewSwitcherProps> = ({
