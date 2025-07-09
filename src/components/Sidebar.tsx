@@ -17,6 +17,7 @@ import {
   Bot,
   CreditCard,
   Shield,
+  UserCog,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -121,6 +122,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                 name: "Administração",
                 icon: Shield,
                 path: "/admin",
+              },
+              {
+                name: "Usuários",
+                icon: UserCog,
+                path: "/user-management",
               },
             ]
           : []),

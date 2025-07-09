@@ -2040,25 +2040,34 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          department: string | null
           email: string | null
           full_name: string | null
           id: string
+          is_active: boolean | null
+          last_login_at: string | null
           role: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          department?: string | null
           email?: string | null
           full_name?: string | null
           id: string
+          is_active?: boolean | null
+          last_login_at?: string | null
           role?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          department?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          is_active?: boolean | null
+          last_login_at?: string | null
           role?: string | null
           updated_at?: string | null
         }
@@ -2097,6 +2106,30 @@ export type Database = {
           PromptTokens?: string | null
           Timestamp?: string
           Workflow?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2168,6 +2201,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_usage_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          month_year: string
+          total_conversations: number | null
+          total_expenses: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          month_year: string
+          total_conversations?: number | null
+          total_expenses?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          month_year?: string
+          total_conversations?: number | null
+          total_expenses?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       utm_metrics: {
         Row: {
@@ -2651,7 +2714,18 @@ export type Database = {
         Args: { "": unknown }
         Returns: unknown
       }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
       is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
@@ -2684,9 +2758,17 @@ export type Database = {
         Args: { table_name: string; record_id: string }
         Returns: boolean
       }
+      update_user_usage_metrics: {
+        Args: {
+          _user_id: string
+          _conversations_increment?: number
+          _expenses_increment?: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2813,6 +2895,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
