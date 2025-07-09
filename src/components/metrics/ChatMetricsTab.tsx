@@ -1,22 +1,21 @@
 import React from "react";
 import { useClientStatsQuery } from "@/hooks/useClientStatsQuery";
 import { useTransformedMetricsData } from "@/hooks/useTransformedMetricsData";
+import { useMetricsFilters } from "@/hooks/useMetricsFilters";
+
+// Enhanced components
+import MetricsFilters from "./enhanced/MetricsFilters";
+import MetricCard from "./enhanced/MetricCard";
+import NewLeadsOverTimeChart from "./enhanced/NewLeadsOverTimeChart";
+import ConversationsChart from "./enhanced/ConversationsChart";
+import AdManagerSection from "./enhanced/AdManagerSection";
 
 // Imported refactored sections
 import MetricsHeader from "./sections/MetricsHeader";
-import KPISection from "./sections/KPISection";
-import TimeMetricsSection from "./sections/TimeMetricsSection";
-import DetailedMetricsSection from "./sections/DetailedMetricsSection";
-import PerformanceChartsSection from "./sections/PerformanceChartsSection";
-
-// Remaining imports for sections not yet refactored
-import LeadsGrowthChart from "./LeadsGrowthChart";
-import LeadsByArrivalFunnelChart from "./LeadsByArrivalFunnelChart";
-import NegotiatedValueCard from "./NegotiatedValueCard";
-import NegotiatingValueCard from "./NegotiatingValueCard";
-import RecentClientsTable from "./RecentClientsTable";
-import LeadsTable from "./LeadsTable";
 import SectionHeader from "./sections/SectionHeader";
+
+// Icons
+import { MessageCircle, Users, Target, Percent, Clock, TrendingUp, DollarSign, Star } from "lucide-react";
 
 interface ChatMetricsTabProps {
   stats: any;
@@ -30,6 +29,15 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
   loading,
 }) => {
   const { stats: supabaseClientStats, loading: clientStatsLoading, isStale } = useClientStatsQuery();
+  
+  // Filters hook
+  const {
+    filters,
+    updateDatePeriod,
+    updateCustomDateRange,
+    updateDataSource,
+    resetFilters,
+  } = useMetricsFilters();
   
   // Use the new transformed metrics data hook
   const {
@@ -91,137 +99,169 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
   // Combinar loading states
   const isLoading = loading || clientStatsLoading || transformedDataLoading;
 
+  // Mock data for new charts
+  const newLeadsData = [
+    { date: "01/01", leads: 12, converted: 8 },
+    { date: "02/01", leads: 15, converted: 10 },
+    { date: "03/01", leads: 18, converted: 12 },
+    { date: "04/01", leads: 22, converted: 16 },
+    { date: "05/01", leads: 19, converted: 14 },
+    { date: "06/01", leads: 25, converted: 18 },
+    { date: "07/01", leads: 28, converted: 20 },
+  ];
+
+  const conversationsDataForChart = conversationData.map(item => ({
+    date: item.date,
+    iniciadas: item.respondidas + item.naoRespondidas,
+    respondidas: item.respondidas,
+    naoRespondidas: item.naoRespondidas,
+  }));
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header com gradiente */}
       <MetricsHeader 
-        title="Dashboard de Chat e Conversações"
-        description="Acompanhe o desempenho das suas conversas e leads em tempo real"
+        title="Dashboard de Métricas Avançado"
+        description="Análise completa de performance, leads e conversões em tempo real"
       />
 
-      {/* KPIs Principais */}
-      <KPISection
-        totalConversations={metricsData.totalConversations || 340}
-        responseRate={metricsData.responseRate || 85}
-        totalClients={clientData.totalClients || 120}
-        newClientsThisMonth={clientData.newClientsThisMonth || 15}
-        conversionRate={metricsData.conversionRate || 30}
-        loading={isLoading}
+      {/* Filtros */}
+      <MetricsFilters
+        datePeriod={filters.dataPeriod}
+        dataSource={filters.dataSource}
+        customStartDate={filters.customStartDate}
+        customEndDate={filters.customEndDate}
+        onDatePeriodChange={updateDatePeriod}
+        onDataSourceChange={updateDataSource}
+        onCustomDateChange={updateCustomDateRange}
+        onReset={resetFilters}
       />
 
-      {/* Métricas de Tempo */}
-      <TimeMetricsSection
-        avgResponseStartTime={metricsData.avgResponseStartTime || 45}
-        avgClosingTime={metricsData.avgClosingTime || 5}
-        loading={isLoading}
-      />
-
-      {/* Métricas Detalhadas */}
-      <DetailedMetricsSection
-        secondaryResponseRate={metricsData.secondaryResponseRate || 70}
-        totalRespondidas={metricsData.totalRespondidas || 289}
-        totalSecondaryResponses={metricsData.totalSecondaryResponses || 200}
-        avgResponseTime={metricsData.avgResponseTime || 2}
-        loading={isLoading}
-      />
-
-      {/* Gráficos de Performance */}
-      <PerformanceChartsSection
-        conversationData={conversationData}
-        conversionFunnelData={conversionFunnelData}
-        conversionByTimeData={conversionByTimeData}
-        leadsAverageByTimeData={leadsAverageByTimeData}
-        noShowRate={metricsData.noShowRate || 15}
-        loading={isLoading}
-        transformedDataLoading={transformedDataLoading}
-      />
-
-      {/* Análise de Leads */}
+      {/* KPIs Reformulados */}
       <div className="space-y-4">
         <SectionHeader 
-          title="🎯 Análise de Leads" 
-          borderColor="border-red-200 dark:border-red-700" 
+          title="📊 Indicadores Principais" 
+          borderColor="border-blue-200 dark:border-blue-700" 
         />
 
-        <div className="grid grid-cols-1 gap-6">
-          <LeadsGrowthChart
-            data={leadsGrowthData}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <MetricCard
+            title="Total de Leads Novos"
+            value={metricsData.totalConversations || 340}
+            icon={<Users />}
+            description="Número total de novos leads captados no período selecionado"
+            absoluteValue={340}
+            trend={{
+              value: 12.5,
+              label: "+12.5% vs período anterior",
+              direction: 'up'
+            }}
+            iconBgClass="bg-blue-100 dark:bg-blue-900/30"
+            iconTextClass="text-blue-600 dark:text-blue-400"
+            loading={isLoading}
+          />
+
+          <MetricCard
+            title="Conversas Não Respondidas"
+            value={Math.round((metricsData.totalConversations || 340) * 0.15)}
+            icon={<MessageCircle />}
+            description="Leads que ainda não receberam resposta da equipe"
+            absoluteValue={51}
+            percentage={15}
+            trend={{
+              value: -5.2,
+              label: "-5.2% vs período anterior",
+              direction: 'down'
+            }}
+            iconBgClass="bg-red-100 dark:bg-red-900/30"
+            iconTextClass="text-red-600 dark:text-red-400"
+            loading={isLoading}
+          />
+
+          <MetricCard
+            title="Taxa de Conversão"
+            value={`${metricsData.conversionRate || 30}%`}
+            icon={<Target />}
+            description="Percentual de leads que se tornaram clientes"
+            trend={{
+              value: 2.8,
+              label: "+2.8% vs período anterior",
+              direction: 'up'
+            }}
+            iconBgClass="bg-green-100 dark:bg-green-900/30"
+            iconTextClass="text-green-600 dark:text-green-400"
+            loading={isLoading}
+          />
+
+          <MetricCard
+            title="Ticket Médio"
+            value="R$ 2.850"
+            icon={<DollarSign />}
+            description="Valor médio dos negócios fechados"
+            trend={{
+              value: 8.3,
+              label: "+8.3% vs período anterior",
+              direction: 'up'
+            }}
+            iconBgClass="bg-emerald-100 dark:bg-emerald-900/30"
+            iconTextClass="text-emerald-600 dark:text-emerald-400"
+            loading={isLoading}
+          />
+
+          <MetricCard
+            title="Tempo Médio de Resposta"
+            value="2.5h"
+            icon={<Clock />}
+            description="Tempo médio para primeira resposta aos leads"
+            trend={{
+              value: -15.6,
+              label: "-15.6% vs período anterior",
+              direction: 'down'
+            }}
+            iconBgClass="bg-orange-100 dark:bg-orange-900/30"
+            iconTextClass="text-orange-600 dark:text-orange-400"
+            loading={isLoading}
+          />
+
+          <MetricCard
+            title="Mais Vendido"
+            value="Plano Pro"
+            icon={<Star />}
+            description="Produto ou serviço com maior volume de vendas"
+            trend={{
+              value: 0,
+              label: "Manteve a liderança",
+              direction: 'neutral'
+            }}
+            iconBgClass="bg-purple-100 dark:bg-purple-900/30"
+            iconTextClass="text-purple-600 dark:text-purple-400"
             loading={isLoading}
           />
         </div>
-
-        <LeadsByArrivalFunnelChart
-          data={funnelByDateData}
-          loading={transformedDataLoading}
-          noShowRate={metricsData.noShowRate || 12}
-          onFilterChange={(date, stages, showNoShow) => {
-            console.log("Filtro aplicado no Funil por Data de Chegada:", {
-              date,
-              stages,
-              showNoShow,
-            });
-          }}
-        />
       </div>
 
-      {/* Métricas Financeiras */}
+      {/* Novos Gráficos */}
       <div className="space-y-4">
         <SectionHeader 
-          title="💰 Métricas Financeiras" 
-          borderColor="border-green-200 dark:border-green-700" 
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <NegotiatedValueCard
-            totalValue={metricsData.negotiatedValue || 50000}
-            totalDeals={3}
-            averageValue={metricsData.averageNegotiatedValue || 16666}
-            loading={isLoading}
-            trend="Crescimento de 19% vs período anterior"
-            previousPeriodValue={metricsData.previousPeriodValue || 42000}
-          />
-
-          <NegotiatingValueCard
-            totalValue={metricsData.totalNegotiatingValue || 125000}
-            loading={loading}
-            trend="Em processo de fechamento"
-            activePipelines={8}
-          />
-        </div>
-      </div>
-      
-      {/* Tabelas Detalhadas */}
-      <div className="space-y-4">
-        <SectionHeader 
-          title="📋 Dados Detalhados" 
+          title="📈 Análise Temporal" 
           borderColor="border-indigo-200 dark:border-indigo-700" 
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RecentClientsTable
-            clients={recentClientsData.map(client => ({
-              id: parseInt(client.id) || Math.random(),
-              name: client.name,
-              phone: client.phone || '',
-              status: client.status || 'Ativo',
-              created_at: client.created_at || new Date().toISOString(),
-              marketingClients: 0,
-              lastVisit: client.created_at || new Date().toISOString()
-            }))}
+          <NewLeadsOverTimeChart
+            data={newLeadsData}
             loading={isLoading}
           />
-          <LeadsTable 
-            leads={leadsData.map(lead => ({
-              id: parseInt(lead.id) || Math.random(),
-              name: lead.name,
-              status: lead.status || 'Novo',
-              last_contact: lead.last_contact || new Date().toISOString(),
-              lastContact: lead.last_contact || new Date().toISOString()
-            }))} 
-            loading={isLoading} 
+          
+          <ConversationsChart
+            data={conversationsDataForChart}
+            loading={isLoading}
           />
         </div>
       </div>
+
+      {/* Seção do Gerenciador de Anúncios */}
+      <AdManagerSection loading={isLoading} />
     </div>
   );
 };
