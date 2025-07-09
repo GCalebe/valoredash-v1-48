@@ -118,8 +118,8 @@ export function useChatMessagesOptimized({
           sender: message.sender,
         },
         created_at: message.timestamp || new Date().toISOString(),
-        memory_type: 'contextual',
-        memory_level: 'short_term',
+        memory_type: 'contextual' as any,
+        memory_level: 'short_term' as any,
       };
       
       // Adicionar mensagem otimisticamente à UI

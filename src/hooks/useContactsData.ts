@@ -69,7 +69,7 @@ export const useContactsData = () => {
       // Update using React Query mutation
       await updateContactMutation.mutateAsync({
         id: contactId,
-        data: { kanban_stage: newStage }
+        kanban_stage: newStage
       });
       
       toast({

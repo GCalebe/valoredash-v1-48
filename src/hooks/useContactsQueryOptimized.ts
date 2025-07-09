@@ -30,11 +30,12 @@ export const useContactsInfiniteQuery = (filters: ContactFilters = {}, pageSize 
   return useInfiniteQuery({
     queryKey: queryKeys.contacts(filters),
     queryFn: async ({ pageParam = 0 }): Promise<ContactsPage> => {
+      const offset = typeof pageParam === 'string' ? parseInt(pageParam) : 0;
       let query = supabase
         .from('contacts')
         .select('*', { count: 'exact' })
         .order('created_at', { ascending: false })
-        .range(pageParam, pageParam + pageSize - 1);
+        .range(offset, offset + pageSize - 1);
 
       // Aplicar filtros
       if (filters.search) {
@@ -63,8 +64,8 @@ export const useContactsInfiniteQuery = (filters: ContactFilters = {}, pageSize 
 
       const contacts = data || [];
       const total = count || 0;
-      const hasMore = pageParam + pageSize < total;
-      const nextCursor = hasMore ? pageParam + pageSize : undefined;
+      const hasMore = (offset + pageSize) < total;
+      const nextCursor = hasMore ? (offset + pageSize).toString() : undefined;
 
       return {
         data: contacts,
@@ -73,7 +74,8 @@ export const useContactsInfiniteQuery = (filters: ContactFilters = {}, pageSize 
         total,
       };
     },
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialPageParam: '0',
+    getNextPageParam: (lastPage: ContactsPage) => lastPage.nextCursor,
     ...cacheConfig.dynamic,
     staleTime: 2 * 60 * 1000, // 2 minutos para contatos
   });
@@ -170,7 +172,7 @@ export const useContactsStatsQuery = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('contacts')
-        .select('kanban_stage, lead_source, conversion_probability, created_at')
+        .select('kanban_stage, created_at')
         .limit(1000);
 
       if (error) {
@@ -187,14 +189,8 @@ export const useContactsStatsQuery = () => {
           acc[stage] = (acc[stage] || 0) + 1;
           return acc;
         }, {} as Record<string, number>),
-        bySource: contacts.reduce((acc, contact) => {
-          const source = contact.lead_source || 'unknown';
-          acc[source] = (acc[source] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>),
-        avgConversion: contacts.filter(c => c.conversion_probability).length > 0
-          ? contacts.filter(c => c.conversion_probability).reduce((acc, c) => acc + (c.conversion_probability || 0), 0) / contacts.filter(c => c.conversion_probability).length
-          : 0,
+        bySource: {}, // Removed since lead_source doesn't exist
+        avgConversion: 0, // Removed since conversion_probability doesn't exist
         thisMonth: contacts.filter(c => {
           const created = new Date(c.created_at);
           const thisMonth = new Date();

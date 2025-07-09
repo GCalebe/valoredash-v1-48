@@ -147,7 +147,7 @@ export const useContactsActions = () => {
       };
       
       // Update contact using React Query mutation
-      await updateContactMutation.mutateAsync({ id: selectedContact.id, data: updateData });
+      await updateContactMutation.mutateAsync({ id: selectedContact.id, ...updateData });
       
       // Call the success callback
       onSuccess();

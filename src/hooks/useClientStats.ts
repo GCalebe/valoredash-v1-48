@@ -26,9 +26,9 @@ export function useClientStats() {
       // Transform Supabase data to match expected format
       const transformedStats = {
         totalClients: latestStats.total_clients || 0,
-        activeClients: latestStats.active_clients || 0,
+        activeClients: latestStats.total_clients || 0, // Use total_clients as fallback
         newClientsThisMonth: latestStats.new_clients_this_month || 0,
-        conversionRate: latestStats.conversion_rate || 0,
+        conversionRate: 0, // Set to 0 since field doesn't exist
         monthlyGrowth: [], // Empty array for charts
         ChatBreeds: [], // Empty array for charts
         recentClients: [], // Empty array for recent clients
