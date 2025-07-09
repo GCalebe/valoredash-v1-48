@@ -167,16 +167,16 @@ export function AppointmentsSection({
                     setFormData({
                       ...formData,
                       status: e.target.value as
-                        | "confirmado"
-                        | "pendente"
-                        | "cancelado",
+                        | "scheduled"
+                        | "completed"
+                        | "cancelled",
                     })
                   }
                   required
                 >
-                  <option value="pendente">Pendente</option>
-                  <option value="confirmado">Confirmado</option>
-                  <option value="cancelado">Cancelado</option>
+                  <option value="scheduled">Pendente</option>
+                  <option value="completed">Confirmado</option>
+                  <option value="cancelled">Cancelado</option>
                 </select>
               </div>
             </div>
@@ -330,16 +330,16 @@ export function AppointmentsSection({
                     setFormData({
                       ...formData,
                       status: e.target.value as
-                        | "confirmado"
-                        | "pendente"
-                        | "cancelado",
+                        | "scheduled"
+                        | "completed"
+                        | "cancelled",
                     })
                   }
                   required
                 >
-                  <option value="pendente">Pendente</option>
-                  <option value="confirmado">Confirmado</option>
-                  <option value="cancelado">Cancelado</option>
+                  <option value="scheduled">Pendente</option>
+                  <option value="completed">Confirmado</option>
+                  <option value="cancelled">Cancelado</option>
                 </select>
               </div>
             </div>

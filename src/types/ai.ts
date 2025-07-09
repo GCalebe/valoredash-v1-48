@@ -31,6 +31,8 @@ export interface AIStage {
   is_final_stage?: boolean;
   created_at?: string;
   updated_at?: string;
+  created_by?: string;
+  updated_by?: string;
 }
 
 export interface AIPersonality {
@@ -48,4 +50,8 @@ export interface AIPersonality {
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
+  created_by?: string;
+  updated_by?: string;
+  custom_instructions?: string;
+  fallback_responses?: any;
 }

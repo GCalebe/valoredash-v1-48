@@ -89,22 +89,22 @@ export const ScheduleFiltersSection = ({
                 Visualizando todos ({events.length} eventos)
               </SelectItem>
               <SelectItem
-                value="confirmado"
+                value="scheduled"
                 className="text-white hover:bg-slate-700"
               >
-                Confirmados ({events.filter(e => e.status === "confirmado").length})
+                Confirmados ({events.filter(e => e.status === "scheduled").length})
               </SelectItem>
               <SelectItem
-                value="pendente"
+                value="completed"
                 className="text-white hover:bg-slate-700"
               >
-                Pendentes ({events.filter(e => e.status === "pendente").length})
+                Pendentes ({events.filter(e => e.status === "completed").length})
               </SelectItem>
               <SelectItem
-                value="cancelado"
+                value="cancelled"
                 className="text-white hover:bg-slate-700"
               >
-                Cancelados ({events.filter(e => e.status === "cancelado").length})
+                Cancelados ({events.filter(e => e.status === "cancelled").length})
               </SelectItem>
             </SelectContent>
           </Select>
