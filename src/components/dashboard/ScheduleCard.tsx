@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, RefreshCw } from "lucide-react";
 import { useScheduleData } from "@/hooks/useScheduleData";
+import { ScheduleEvent } from "@/types/calendar";
 
 const ScheduleCard = () => {
   const navigate = useNavigate();
@@ -30,8 +31,8 @@ const ScheduleCard = () => {
 
   // Próximos agendamentos hoje
   const today = new Date();
-  const todayEvents = events.filter((event) => {
-    const eventDate = new Date(event.date);
+  const todayEvents = events.filter((event: ScheduleEvent) => {
+    const eventDate = new Date(event.date || event.start_time || '');
     return eventDate.toDateString() === today.toDateString();
   });
 
@@ -118,9 +119,9 @@ const ScheduleCard = () => {
             </p>
             <div className="flex items-center gap-1 text-xs">
               <Clock className="h-3 w-3 text-blue-500 flex-shrink-0" />
-              <span className="font-medium">{todayEvents[0].time}</span>
+              <span className="font-medium">{todayEvents[0].time || new Date(todayEvents[0].start_time || '').toLocaleTimeString()}</span>
               <span className="text-gray-600 dark:text-gray-300 truncate">
-                - {todayEvents[0].clientName}
+                - {todayEvents[0].clientName || todayEvents[0].client_name || 'Cliente'}
               </span>
             </div>
           </div>

@@ -75,6 +75,14 @@ interface UTMData {
   utm_created_at: string;
   created_at: string;
   device_type?: string;
+  lead_id?: string;
+  utm_conversion?: boolean;
+  utm_conversion_value?: number;
+  utm_conversion_stage?: string;
+  landing_page?: string;
+  geo_location?: any;
+  utm_first_touch?: string;
+  utm_last_touch?: string;
   [key: string]: any;
 }
 

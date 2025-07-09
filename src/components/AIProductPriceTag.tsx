@@ -45,7 +45,7 @@ const AIProductPriceTag: React.FC<AIProductPriceTagProps> = ({
   
   // Find the cheapest plan that includes this AI product
   const cheapestPlan = availablePlans
-    .filter(plan => plan.billing_period === "monthly" && plan.ai_products?.includes(product.id))
+    .filter(plan => plan.billing_period === "monthly" && (plan as any).ai_products?.includes(product.id))
     .sort((a, b) => a.price - b.price)[0];
     
   // Plans are automatically loaded by React Query

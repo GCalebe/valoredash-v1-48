@@ -3,8 +3,13 @@
 export interface AIMessage {
   id: string;
   content: string;
-  role: 'assistant' | 'user';
-  timestamp: string;
+  role?: 'assistant' | 'user';
+  timestamp?: string;
+  category?: string;
+  name?: string;
+  variables?: string[];
+  context?: string;
+  is_active?: boolean;
   metadata?: Record<string, any>;
 }
 
@@ -12,14 +17,17 @@ export interface AIStage {
   id: string;
   name: string;
   description?: string;
-  stage_order: number;
+  stage_order?: number;
+  order?: number;
   order_position?: number; // Backward compatibility
-  is_active: boolean;
+  is_active?: boolean;
   personality_id?: string;
   actions?: any[];
+  trigger?: string;
+  next_stage?: string;
+  next_stage_id?: string;
   trigger_conditions?: Record<string, any>;
   timeout_minutes?: number;
-  next_stage_id?: string;
   is_final_stage?: boolean;
   created_at?: string;
   updated_at?: string;

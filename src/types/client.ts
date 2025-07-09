@@ -5,12 +5,13 @@ export interface Contact {
   phone?: string | null;
   address?: string;
   clientName?: string | null;
+  client_name?: string | null;
   clientSize?: string | null;
   clientType?: string | null;
   cpfCnpj?: string | null;
   asaasCustomerId?: string | null;
   payments?: any;
-  status?: "Active" | "Inactive";
+  status?: "Active" | "Inactive" | string;
   notes?: string;
   lastContact?: string;
   kanbanStage?: string; // << aqui: permitir qualquer valor de stage

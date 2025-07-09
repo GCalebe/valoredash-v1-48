@@ -24,21 +24,23 @@ import StatCard from "../metrics/StatCard";
 
 interface UTMData {
   id: string;
-  lead_id: string;
-  utm_source: string;
-  utm_medium: string;
-  utm_campaign: string;
-  utm_term: string;
-  utm_content: string;
-  utm_created_at: string;
-  utm_conversion: boolean;
-  utm_conversion_value: number;
-  utm_conversion_stage: string;
-  landing_page: string;
-  device_type: string;
-  geo_location: any;
-  utm_first_touch: string;
-  utm_last_touch: string;
+  lead_id?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  utm_created_at?: string;
+  created_at: string;
+  utm_conversion?: boolean;
+  utm_conversion_value?: number;
+  utm_conversion_stage?: string;
+  landing_page?: string;
+  device_type?: string;
+  geo_location?: any;
+  utm_first_touch?: string;
+  utm_last_touch?: string;
+  [key: string]: any;
 }
 
 interface UTMMetrics {
@@ -82,7 +84,10 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({ contactId }) => {
           return;
         }
 
-        setUtmData(data || []);
+        setUtmData((data || []).map(item => ({
+          ...item,
+          utm_created_at: item.utm_created_at || item.created_at
+        })));
 
         // Calcular métricas
         if (data && data.length > 0) {

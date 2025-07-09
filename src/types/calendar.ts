@@ -43,3 +43,16 @@ export type Appointment = {
 };
 
 export type AppointmentFormData = Omit<Appointment, "id">;
+
+export interface ScheduleEvent {
+  id: string;
+  title: string;
+  date?: string;
+  time?: string;
+  start_time?: string;
+  end_time?: string;
+  clientName?: string;
+  client_name?: string;
+  description?: string;
+  status?: string;
+}
