@@ -635,66 +635,85 @@ export type Database = {
         }
         Relationships: []
       }
-      client_stats: {
+      client_custom_values: {
         Row: {
-          avg_response_time: number | null
           client_id: string
-          conversion_rate: number | null
-          created_at: string | null
+          created_at: string
+          field_id: string
+          field_value: Json
           id: string
-          last_interaction: string | null
-          satisfaction_score: number | null
-          total_interactions: number | null
-          total_revenue: number | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
-          avg_response_time?: number | null
           client_id: string
-          conversion_rate?: number | null
-          created_at?: string | null
+          created_at?: string
+          field_id: string
+          field_value: Json
           id?: string
-          last_interaction?: string | null
-          satisfaction_score?: number | null
-          total_interactions?: number | null
-          total_revenue?: number | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
-          avg_response_time?: number | null
           client_id?: string
-          conversion_rate?: number | null
-          created_at?: string | null
+          created_at?: string
+          field_id?: string
+          field_value?: Json
           id?: string
-          last_interaction?: string | null
-          satisfaction_score?: number | null
-          total_interactions?: number | null
-          total_revenue?: number | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "client_stats_client_id_fkey"
+            foreignKeyName: "client_custom_values_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "client_stats_client_id_fkey"
+            foreignKeyName: "client_custom_values_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "dados_cliente"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "client_stats_client_id_fkey"
+            foreignKeyName: "client_custom_values_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_clients_complete"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "client_custom_values_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "custom_fields"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      client_stats: {
+        Row: {
+          created_at: string | null
+          id: string
+          new_clients_this_month: number | null
+          total_chats: number | null
+          total_clients: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          new_clients_this_month?: number | null
+          total_chats?: number | null
+          total_clients?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          new_clients_this_month?: number | null
+          total_chats?: number | null
+          total_clients?: number | null
+        }
+        Relationships: []
       }
       contacts: {
         Row: {
@@ -702,20 +721,27 @@ export type Database = {
           asaas_customer_id: string | null
           budget: number | null
           client_name: string | null
+          client_objective: string | null
           client_sector: string | null
           client_size: string | null
           client_type: string | null
+          consultation_stage: string | null
+          contract_date: string | null
+          contract_number: string | null
           cpf_cnpj: string | null
           created_at: string | null
-          custom_fields: Json | null
+          deleted_at: string | null
           email: string | null
           id: string
           kanban_stage: string | null
+          kanban_stage_id: string | null
           last_contact: string | null
           last_message: string | null
           last_message_time: string | null
+          loss_reason: string | null
           name: string
           notes: string | null
+          payment: string | null
           payment_method: string | null
           phone: string | null
           responsible_user: string | null
@@ -725,26 +751,34 @@ export type Database = {
           tags: string[] | null
           unread_count: number | null
           updated_at: string | null
+          uploaded_files: string[] | null
         }
         Insert: {
           address?: string | null
           asaas_customer_id?: string | null
           budget?: number | null
           client_name?: string | null
+          client_objective?: string | null
           client_sector?: string | null
           client_size?: string | null
           client_type?: string | null
+          consultation_stage?: string | null
+          contract_date?: string | null
+          contract_number?: string | null
           cpf_cnpj?: string | null
           created_at?: string | null
-          custom_fields?: Json | null
+          deleted_at?: string | null
           email?: string | null
           id?: string
           kanban_stage?: string | null
+          kanban_stage_id?: string | null
           last_contact?: string | null
           last_message?: string | null
           last_message_time?: string | null
+          loss_reason?: string | null
           name: string
           notes?: string | null
+          payment?: string | null
           payment_method?: string | null
           phone?: string | null
           responsible_user?: string | null
@@ -754,26 +788,34 @@ export type Database = {
           tags?: string[] | null
           unread_count?: number | null
           updated_at?: string | null
+          uploaded_files?: string[] | null
         }
         Update: {
           address?: string | null
           asaas_customer_id?: string | null
           budget?: number | null
           client_name?: string | null
+          client_objective?: string | null
           client_sector?: string | null
           client_size?: string | null
           client_type?: string | null
+          consultation_stage?: string | null
+          contract_date?: string | null
+          contract_number?: string | null
           cpf_cnpj?: string | null
           created_at?: string | null
-          custom_fields?: Json | null
+          deleted_at?: string | null
           email?: string | null
           id?: string
           kanban_stage?: string | null
+          kanban_stage_id?: string | null
           last_contact?: string | null
           last_message?: string | null
           last_message_time?: string | null
+          loss_reason?: string | null
           name?: string
           notes?: string | null
+          payment?: string | null
           payment_method?: string | null
           phone?: string | null
           responsible_user?: string | null
@@ -782,104 +824,433 @@ export type Database = {
           status?: string | null
           tags?: string[] | null
           unread_count?: number | null
+          updated_at?: string | null
+          uploaded_files?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_kanban_stage_fk"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "kanban_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_responsible_user_fk"
+            columns: ["responsible_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_session_fk"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["session_id"]
+          },
+        ]
+      }
+      conversation_daily_data: {
+        Row: {
+          avg_resolution_time: unknown | null
+          avg_response_time: unknown | null
+          created_at: string | null
+          date: string
+          id: string
+          new_conversations: number | null
+          resolved_conversations: number | null
+          satisfaction_score: number | null
+          total_conversations: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avg_resolution_time?: unknown | null
+          avg_response_time?: unknown | null
+          created_at?: string | null
+          date: string
+          id?: string
+          new_conversations?: number | null
+          resolved_conversations?: number | null
+          satisfaction_score?: number | null
+          total_conversations?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avg_resolution_time?: unknown | null
+          avg_response_time?: unknown | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          new_conversations?: number | null
+          resolved_conversations?: number | null
+          satisfaction_score?: number | null
+          total_conversations?: number | null
           updated_at?: string | null
         }
         Relationships: []
       }
       conversation_metrics: {
         Row: {
+          average_negotiated_value: number | null
+          avg_closing_time: number | null
+          avg_response_start_time: number | null
           avg_response_time: number | null
-          contact_id: string
-          conversation_duration: number | null
+          conversion_rate: number | null
           created_at: string | null
           id: string
-          message_count: number | null
-          satisfaction_rating: number | null
-          session_id: string | null
+          is_stale: boolean | null
+          negotiated_value: number | null
+          previous_period_value: number | null
+          response_rate: number | null
+          secondary_response_rate: number | null
+          total_conversations: number | null
+          total_negotiating_value: number | null
+          total_respondidas: number | null
+          total_secondary_responses: number | null
+        }
+        Insert: {
+          average_negotiated_value?: number | null
+          avg_closing_time?: number | null
+          avg_response_start_time?: number | null
+          avg_response_time?: number | null
+          conversion_rate?: number | null
+          created_at?: string | null
+          id?: string
+          is_stale?: boolean | null
+          negotiated_value?: number | null
+          previous_period_value?: number | null
+          response_rate?: number | null
+          secondary_response_rate?: number | null
+          total_conversations?: number | null
+          total_negotiating_value?: number | null
+          total_respondidas?: number | null
+          total_secondary_responses?: number | null
+        }
+        Update: {
+          average_negotiated_value?: number | null
+          avg_closing_time?: number | null
+          avg_response_start_time?: number | null
+          avg_response_time?: number | null
+          conversion_rate?: number | null
+          created_at?: string | null
+          id?: string
+          is_stale?: boolean | null
+          negotiated_value?: number | null
+          previous_period_value?: number | null
+          response_rate?: number | null
+          secondary_response_rate?: number | null
+          total_conversations?: number | null
+          total_negotiating_value?: number | null
+          total_respondidas?: number | null
+          total_secondary_responses?: number | null
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          address: string | null
+          avatar: string | null
+          client_name: string | null
+          client_size: string | null
+          client_type: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          last_message: string | null
+          name: string
+          phone: string | null
+          session_id: string
+          time: string | null
+          unread: number | null
           updated_at: string | null
         }
         Insert: {
-          avg_response_time?: number | null
-          contact_id: string
-          conversation_duration?: number | null
+          address?: string | null
+          avatar?: string | null
+          client_name?: string | null
+          client_size?: string | null
+          client_type?: string | null
           created_at?: string | null
+          email?: string | null
           id?: string
-          message_count?: number | null
-          satisfaction_rating?: number | null
-          session_id?: string | null
+          last_message?: string | null
+          name: string
+          phone?: string | null
+          session_id: string
+          time?: string | null
+          unread?: number | null
           updated_at?: string | null
         }
         Update: {
-          avg_response_time?: number | null
-          contact_id?: string
-          conversation_duration?: number | null
+          address?: string | null
+          avatar?: string | null
+          client_name?: string | null
+          client_size?: string | null
+          client_type?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          last_message?: string | null
+          name?: string
+          phone?: string | null
+          session_id?: string
+          time?: string | null
+          unread?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      conversion_by_time: {
+        Row: {
+          conversion_rate: number | null
+          converted_leads: number | null
+          created_at: string | null
+          id: string
+          period_value: string
+          revenue_generated: number | null
+          time_period: string
+          total_leads: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          conversion_rate?: number | null
+          converted_leads?: number | null
           created_at?: string | null
           id?: string
-          message_count?: number | null
-          satisfaction_rating?: number | null
-          session_id?: string | null
+          period_value: string
+          revenue_generated?: number | null
+          time_period: string
+          total_leads?: number | null
           updated_at?: string | null
+        }
+        Update: {
+          conversion_rate?: number | null
+          converted_leads?: number | null
+          created_at?: string | null
+          id?: string
+          period_value?: string
+          revenue_generated?: number | null
+          time_period?: string
+          total_leads?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      coupon_redemptions: {
+        Row: {
+          coupon_id: string
+          discount_amount: number
+          id: string
+          invoice_id: string | null
+          redeemed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          discount_amount: number
+          id?: string
+          invoice_id?: string | null
+          redeemed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          discount_amount?: number
+          id?: string
+          invoice_id?: string | null
+          redeemed_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "conversation_metrics_contact_id_fkey"
-            columns: ["contact_id"]
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
             isOneToOne: false
-            referencedRelation: "contacts"
+            referencedRelation: "discount_coupons"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "conversation_metrics_contact_id_fkey"
-            columns: ["contact_id"]
+            foreignKeyName: "coupon_redemptions_invoice_id_fkey"
+            columns: ["invoice_id"]
             isOneToOne: false
-            referencedRelation: "dados_cliente"
+            referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      custom_field_audit_log: {
+        Row: {
+          change_type: string
+          changed_by: string | null
+          client_id: string
+          created_at: string
+          field_id: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+        }
+        Insert: {
+          change_type: string
+          changed_by?: string | null
+          client_id: string
+          created_at?: string
+          field_id: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+        }
+        Update: {
+          change_type?: string
+          changed_by?: string | null
+          client_id?: string
+          created_at?: string
+          field_id?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "conversation_metrics_contact_id_fkey"
-            columns: ["contact_id"]
+            foreignKeyName: "custom_field_audit_log_field_id_fkey"
+            columns: ["field_id"]
             isOneToOne: false
-            referencedRelation: "v_clients_complete"
+            referencedRelation: "custom_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_field_validation_rules: {
+        Row: {
+          created_at: string
+          error_message: string
+          field_id: string
+          id: string
+          rule_type: string
+          rule_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_message: string
+          field_id: string
+          id?: string
+          rule_type: string
+          rule_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string
+          field_id?: string
+          id?: string
+          rule_type?: string
+          rule_value?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_field_validation_rules_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "custom_fields"
             referencedColumns: ["id"]
           },
         ]
       }
       custom_fields: {
         Row: {
-          created_at: string | null
-          default_value: string | null
+          category: string
+          created_at: string
+          deleted_at: string | null
           field_name: string
+          field_options: Json | null
           field_type: string
           id: string
-          is_required: boolean | null
-          options: Json | null
-          table_name: string
-          updated_at: string | null
-          validation_rules: Json | null
+          is_required: boolean
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
-          default_value?: string | null
+          category?: string
+          created_at?: string
+          deleted_at?: string | null
           field_name: string
+          field_options?: Json | null
           field_type: string
           id?: string
-          is_required?: boolean | null
-          options?: Json | null
-          table_name: string
-          updated_at?: string | null
-          validation_rules?: Json | null
+          is_required?: boolean
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
-          default_value?: string | null
+          category?: string
+          created_at?: string
+          deleted_at?: string | null
           field_name?: string
+          field_options?: Json | null
           field_type?: string
           id?: string
-          is_required?: boolean | null
-          options?: Json | null
-          table_name?: string
+          is_required?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      discount_coupons: {
+        Row: {
+          applicable_plans: string[] | null
+          code: string
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean | null
+          max_discount: number | null
+          min_amount: number | null
+          name: string
+          updated_at: string | null
+          usage_count: number | null
+          usage_limit: number | null
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          applicable_plans?: string[] | null
+          code: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean | null
+          max_discount?: number | null
+          min_amount?: number | null
+          name: string
           updated_at?: string | null
-          validation_rules?: Json | null
+          usage_count?: number | null
+          usage_limit?: number | null
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          applicable_plans?: string[] | null
+          code?: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_discount?: number | null
+          min_amount?: number | null
+          name?: string
+          updated_at?: string | null
+          usage_count?: number | null
+          usage_limit?: number | null
+          valid_from?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
@@ -907,66 +1278,108 @@ export type Database = {
         }
         Relationships: []
       }
-      faq: {
+      email_templates: {
         Row: {
-          answer: string
-          category: string | null
           created_at: string | null
+          created_by: string | null
+          html_content: string | null
           id: string
           is_active: boolean | null
-          keywords: string[] | null
+          name: string
+          subject: string
+          template_type: string | null
+          text_content: string | null
+          updated_at: string | null
+          variables: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          html_content?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject: string
+          template_type?: string | null
+          text_content?: string | null
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          html_content?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string
+          template_type?: string | null
+          text_content?: string | null
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Relationships: []
+      }
+      faq_items: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
           question: string
+          tags: string[] | null
           updated_at: string | null
         }
         Insert: {
           answer: string
-          category?: string | null
+          category?: string
           created_at?: string | null
+          created_by?: string | null
           id?: string
           is_active?: boolean | null
-          keywords?: string[] | null
           question: string
+          tags?: string[] | null
           updated_at?: string | null
         }
         Update: {
           answer?: string
-          category?: string | null
+          category?: string
           created_at?: string | null
+          created_by?: string | null
           id?: string
           is_active?: boolean | null
-          keywords?: string[] | null
           question?: string
+          tags?: string[] | null
           updated_at?: string | null
         }
         Relationships: []
       }
       funnel_data: {
         Row: {
-          conversion_rate: number | null
+          color: string | null
           created_at: string | null
-          date: string
           id: string
-          stage: string
-          updated_at: string | null
-          visitors: number | null
+          name: string | null
+          percentage: number | null
+          value: number | null
         }
         Insert: {
-          conversion_rate?: number | null
+          color?: string | null
           created_at?: string | null
-          date: string
           id?: string
-          stage: string
-          updated_at?: string | null
-          visitors?: number | null
+          name?: string | null
+          percentage?: number | null
+          value?: number | null
         }
         Update: {
-          conversion_rate?: number | null
+          color?: string | null
           created_at?: string | null
-          date?: string
           id?: string
-          stage?: string
-          updated_at?: string | null
-          visitors?: number | null
+          name?: string | null
+          percentage?: number | null
+          value?: number | null
         }
         Relationships: []
       }
@@ -991,65 +1404,275 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_items: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          invoice_id: string
+          plan_id: string | null
+          quantity: number | null
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          invoice_id: string
+          plan_id?: string | null
+          quantity?: number | null
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          invoice_id?: string
+          plan_id?: string | null
+          quantity?: number | null
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          discount_amount: number | null
+          due_date: string
+          id: string
+          invoice_number: string
+          notes: string | null
+          paid_at: string | null
+          payment_method_id: string | null
+          status: string | null
+          subscription_id: string | null
+          subtotal: number
+          tax_amount: number | null
+          total_amount: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          discount_amount?: number | null
+          due_date: string
+          id?: string
+          invoice_number: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method_id?: string | null
+          status?: string | null
+          subscription_id?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          total_amount: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          discount_amount?: number | null
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method_id?: string | null
+          status?: string | null
+          subscription_id?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          total_amount?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "user_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kanban_stages: {
         Row: {
-          color: string | null
-          created_at: string | null
-          description: string | null
+          created_at: string
           id: string
-          is_active: boolean | null
-          name: string
-          order_position: number
+          ordering: number
+          settings: Json | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ordering?: number
+          settings?: Json | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ordering?: number
+          settings?: Json | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      leads_by_source: {
+        Row: {
+          conversion_rate: number | null
+          converted_leads: number | null
+          cost_per_lead: number | null
+          created_at: string | null
+          id: string
+          revenue_generated: number | null
+          roi: number | null
+          source: string
+          total_leads: number | null
           updated_at: string | null
         }
         Insert: {
-          color?: string | null
+          conversion_rate?: number | null
+          converted_leads?: number | null
+          cost_per_lead?: number | null
           created_at?: string | null
-          description?: string | null
           id?: string
-          is_active?: boolean | null
-          name: string
-          order_position: number
+          revenue_generated?: number | null
+          roi?: number | null
+          source: string
+          total_leads?: number | null
           updated_at?: string | null
         }
         Update: {
-          color?: string | null
+          conversion_rate?: number | null
+          converted_leads?: number | null
+          cost_per_lead?: number | null
           created_at?: string | null
-          description?: string | null
           id?: string
-          is_active?: boolean | null
-          name?: string
-          order_position?: number
+          revenue_generated?: number | null
+          roi?: number | null
+          source?: string
+          total_leads?: number | null
           updated_at?: string | null
         }
         Relationships: []
       }
-      messages: {
+      leads_over_time: {
         Row: {
-          content: string
+          conversions_count: number | null
           created_at: string | null
+          date: string
           id: string
-          is_from_user: boolean | null
-          metadata: Json | null
-          session_id: string
+          leads_count: number | null
+          revenue: number | null
+          source: string
           updated_at: string | null
         }
         Insert: {
-          content: string
+          conversions_count?: number | null
           created_at?: string | null
+          date: string
           id?: string
-          is_from_user?: boolean | null
-          metadata?: Json | null
-          session_id: string
+          leads_count?: number | null
+          revenue?: number | null
+          source: string
           updated_at?: string | null
         }
         Update: {
-          content?: string
+          conversions_count?: number | null
           created_at?: string | null
+          date?: string
           id?: string
-          is_from_user?: boolean | null
-          metadata?: Json | null
-          session_id?: string
+          leads_count?: number | null
+          revenue?: number | null
+          source?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      monthly_growth: {
+        Row: {
+          active_users: number | null
+          arr: number | null
+          churned_users: number | null
+          closed_deals: number | null
+          conversion_rate: number | null
+          created_at: string | null
+          deal_value: number | null
+          id: string
+          month_year: string
+          mrr: number | null
+          new_deals: number | null
+          new_users: number | null
+          revenue: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          active_users?: number | null
+          arr?: number | null
+          churned_users?: number | null
+          closed_deals?: number | null
+          conversion_rate?: number | null
+          created_at?: string | null
+          deal_value?: number | null
+          id?: string
+          month_year: string
+          mrr?: number | null
+          new_deals?: number | null
+          new_users?: number | null
+          revenue?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          active_users?: number | null
+          arr?: number | null
+          churned_users?: number | null
+          closed_deals?: number | null
+          conversion_rate?: number | null
+          created_at?: string | null
+          deal_value?: number | null
+          id?: string
+          month_year?: string
+          mrr?: number | null
+          new_deals?: number | null
+          new_users?: number | null
+          revenue?: number | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1078,98 +1701,365 @@ export type Database = {
         }
         Relationships: []
       }
-      pricing: {
+      n8n_chat_history_old: {
         Row: {
           created_at: string | null
-          currency: string | null
-          description: string | null
-          features: string[] | null
-          id: string
-          is_popular: boolean | null
-          name: string
-          price: number
-          updated_at: string | null
+          data: string | null
+          hora: string | null
+          id: number
+          message: Json
+          session_id: string
         }
         Insert: {
           created_at?: string | null
-          currency?: string | null
-          description?: string | null
-          features?: string[] | null
-          id?: string
-          is_popular?: boolean | null
-          name: string
-          price: number
-          updated_at?: string | null
+          data?: string | null
+          hora?: string | null
+          id?: number
+          message: Json
+          session_id: string
         }
         Update: {
           created_at?: string | null
+          data?: string | null
+          hora?: string | null
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
+      n8n_chat_memory: {
+        Row: {
+          context: Json | null
+          created_at: string | null
+          data: string | null
+          entities: Json | null
+          expiration_date: string | null
+          hora: string | null
+          id: number
+          importance: number | null
+          memory_level: string | null
+          memory_type: string | null
+          message: Json
+          metadata: Json | null
+          relationships: Json | null
+          session_id: string
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string | null
+          data?: string | null
+          entities?: Json | null
+          expiration_date?: string | null
+          hora?: string | null
+          id?: number
+          importance?: number | null
+          memory_level?: string | null
+          memory_type?: string | null
+          message: Json
+          metadata?: Json | null
+          relationships?: Json | null
+          session_id: string
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string | null
+          data?: string | null
+          entities?: Json | null
+          expiration_date?: string | null
+          hora?: string | null
+          id?: number
+          importance?: number | null
+          memory_level?: string | null
+          memory_type?: string | null
+          message?: Json
+          metadata?: Json | null
+          relationships?: Json | null
+          session_id?: string
+        }
+        Relationships: []
+      }
+      payment_history: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          failure_reason: string | null
+          id: string
+          invoice_id: string
+          payment_method_id: string | null
+          processed_at: string | null
+          provider_response: Json | null
+          provider_transaction_id: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          failure_reason?: string | null
+          id?: string
+          invoice_id: string
+          payment_method_id?: string | null
+          processed_at?: string | null
+          provider_response?: Json | null
+          provider_transaction_id?: string | null
+          status: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          failure_reason?: string | null
+          id?: string
+          invoice_id?: string
+          payment_method_id?: string | null
+          processed_at?: string | null
+          provider_response?: Json | null
+          provider_transaction_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_history_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_history_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_methods: {
+        Row: {
+          card_brand: string | null
+          created_at: string | null
+          expiry_month: number | null
+          expiry_year: number | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          last_four_digits: string | null
+          provider: string | null
+          provider_payment_method_id: string | null
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          card_brand?: string | null
+          created_at?: string | null
+          expiry_month?: number | null
+          expiry_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          last_four_digits?: string | null
+          provider?: string | null
+          provider_payment_method_id?: string | null
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          card_brand?: string | null
+          created_at?: string | null
+          expiry_month?: number | null
+          expiry_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          last_four_digits?: string | null
+          provider?: string | null
+          provider_payment_method_id?: string | null
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pricing_plans: {
+        Row: {
+          billing_cycle: string
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          limits: Json | null
+          name: string
+          price: number
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          billing_cycle: string
+          created_at?: string | null
           currency?: string | null
           description?: string | null
-          features?: string[] | null
+          features?: Json | null
           id?: string
+          is_active?: boolean | null
           is_popular?: boolean | null
+          limits?: Json | null
+          name: string
+          price: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          billing_cycle?: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          limits?: Json | null
           name?: string
           price?: number
+          sort_order?: number | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      product_combo_items: {
+        Row: {
+          combo_id: string
+          product_id: string
+        }
+        Insert: {
+          combo_id: string
+          product_id: string
+        }
+        Update: {
+          combo_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_combo_items_combo_id_fkey"
+            columns: ["combo_id"]
+            isOneToOne: false
+            referencedRelation: "product_combos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_combo_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_combos: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          discount_percentage: number | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }
       products: {
         Row: {
-          category: string | null
+          benefits: string[] | null
           created_at: string | null
+          created_by: string | null
           description: string | null
+          differentials: string[] | null
+          has_combo: boolean | null
+          has_promotion: boolean | null
+          has_upgrade: boolean | null
           id: string
           name: string
+          objections: string[] | null
           price: number
+          success_cases: string[] | null
           updated_at: string | null
         }
         Insert: {
-          category?: string | null
+          benefits?: string[] | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
+          differentials?: string[] | null
+          has_combo?: boolean | null
+          has_promotion?: boolean | null
+          has_upgrade?: boolean | null
           id?: string
           name: string
+          objections?: string[] | null
           price: number
+          success_cases?: string[] | null
           updated_at?: string | null
         }
         Update: {
-          category?: string | null
+          benefits?: string[] | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
+          differentials?: string[] | null
+          has_combo?: boolean | null
+          has_promotion?: boolean | null
+          has_upgrade?: boolean | null
           id?: string
           name?: string
+          objections?: string[] | null
           price?: number
+          success_cases?: string[] | null
           updated_at?: string | null
         }
         Relationships: []
       }
-      schedule: {
+      profiles: {
         Row: {
           created_at: string | null
-          date: string
-          description: string | null
+          email: string | null
+          full_name: string | null
           id: string
-          time: string
-          title: string
+          role: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          date: string
-          description?: string | null
-          id?: string
-          time: string
-          title: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          role?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          date?: string
-          description?: string | null
+          email?: string | null
+          full_name?: string | null
           id?: string
-          time?: string
-          title?: string
+          role?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1210,98 +2100,313 @@ export type Database = {
         }
         Relationships: []
       }
-      utm_metrics: {
+      user_subscriptions: {
         Row: {
-          campaign: string | null
-          clicks: number | null
-          content: string | null
-          conversions: number | null
+          auto_renew: boolean | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string | null
-          date: string
+          end_date: string | null
           id: string
-          medium: string | null
-          source: string | null
-          term: string | null
+          last_payment_date: string | null
+          next_billing_date: string | null
+          payment_method_id: string | null
+          plan_id: string
+          start_date: string
+          status: string | null
+          trial_end_date: string | null
           updated_at: string | null
-          visitors: number | null
+          user_id: string
         }
         Insert: {
-          campaign?: string | null
-          clicks?: number | null
-          content?: string | null
-          conversions?: number | null
+          auto_renew?: boolean | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string | null
-          date: string
+          end_date?: string | null
           id?: string
-          medium?: string | null
-          source?: string | null
-          term?: string | null
+          last_payment_date?: string | null
+          next_billing_date?: string | null
+          payment_method_id?: string | null
+          plan_id: string
+          start_date?: string
+          status?: string | null
+          trial_end_date?: string | null
           updated_at?: string | null
-          visitors?: number | null
+          user_id: string
         }
         Update: {
-          campaign?: string | null
-          clicks?: number | null
-          content?: string | null
-          conversions?: number | null
+          auto_renew?: boolean | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string | null
-          date?: string
+          end_date?: string | null
           id?: string
-          medium?: string | null
-          source?: string | null
-          term?: string | null
+          last_payment_date?: string | null
+          next_billing_date?: string | null
+          payment_method_id?: string | null
+          plan_id?: string
+          start_date?: string
+          status?: string | null
+          trial_end_date?: string | null
           updated_at?: string | null
-          visitors?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_subscriptions_payment_method"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      utm_metrics: {
+        Row: {
+          conversion_rate: number | null
+          created_at: string | null
+          id: string
+          is_stale: boolean | null
+          total_campaigns: number | null
+          total_leads: number | null
+        }
+        Insert: {
+          conversion_rate?: number | null
+          created_at?: string | null
+          id?: string
+          is_stale?: boolean | null
+          total_campaigns?: number | null
+          total_leads?: number | null
+        }
+        Update: {
+          conversion_rate?: number | null
+          created_at?: string | null
+          id?: string
+          is_stale?: boolean | null
+          total_campaigns?: number | null
+          total_leads?: number | null
         }
         Relationships: []
       }
-      websites: {
+      utm_tracking: {
         Row: {
           created_at: string | null
-          description: string | null
+          device_type: string | null
+          fbclid: string | null
+          first_seen_at: string | null
+          first_utm_campaign: string | null
+          first_utm_content: string | null
+          first_utm_created_at: string | null
+          first_utm_medium: string | null
+          first_utm_source: string | null
+          first_utm_term: string | null
+          gclid: string | null
+          gclientid: string | null
+          geo_location: Json | null
           id: string
-          name: string
+          ip_address: unknown | null
+          landing_page: string | null
+          last_utm_campaign: string | null
+          last_utm_content: string | null
+          last_utm_created_at: string | null
+          last_utm_medium: string | null
+          last_utm_source: string | null
+          last_utm_term: string | null
+          lead_id: string | null
+          referrer: string | null
           updated_at: string | null
-          url: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_conversion: boolean | null
+          utm_conversion_at: string | null
+          utm_conversion_stage: string | null
+          utm_conversion_time: unknown | null
+          utm_conversion_value: number | null
+          utm_first_touch: string | null
+          utm_id: string | null
+          utm_last_touch: string | null
+          utm_medium: string | null
+          utm_referrer: string | null
+          utm_session_id: string | null
+          utm_source: string | null
+          utm_term: string | null
         }
         Insert: {
           created_at?: string | null
-          description?: string | null
+          device_type?: string | null
+          fbclid?: string | null
+          first_seen_at?: string | null
+          first_utm_campaign?: string | null
+          first_utm_content?: string | null
+          first_utm_created_at?: string | null
+          first_utm_medium?: string | null
+          first_utm_source?: string | null
+          first_utm_term?: string | null
+          gclid?: string | null
+          gclientid?: string | null
+          geo_location?: Json | null
           id?: string
-          name: string
+          ip_address?: unknown | null
+          landing_page?: string | null
+          last_utm_campaign?: string | null
+          last_utm_content?: string | null
+          last_utm_created_at?: string | null
+          last_utm_medium?: string | null
+          last_utm_source?: string | null
+          last_utm_term?: string | null
+          lead_id?: string | null
+          referrer?: string | null
           updated_at?: string | null
-          url: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_conversion?: boolean | null
+          utm_conversion_at?: string | null
+          utm_conversion_stage?: string | null
+          utm_conversion_time?: unknown | null
+          utm_conversion_value?: number | null
+          utm_first_touch?: string | null
+          utm_id?: string | null
+          utm_last_touch?: string | null
+          utm_medium?: string | null
+          utm_referrer?: string | null
+          utm_session_id?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Update: {
           created_at?: string | null
-          description?: string | null
+          device_type?: string | null
+          fbclid?: string | null
+          first_seen_at?: string | null
+          first_utm_campaign?: string | null
+          first_utm_content?: string | null
+          first_utm_created_at?: string | null
+          first_utm_medium?: string | null
+          first_utm_source?: string | null
+          first_utm_term?: string | null
+          gclid?: string | null
+          gclientid?: string | null
+          geo_location?: Json | null
           id?: string
-          name?: string
+          ip_address?: unknown | null
+          landing_page?: string | null
+          last_utm_campaign?: string | null
+          last_utm_content?: string | null
+          last_utm_created_at?: string | null
+          last_utm_medium?: string | null
+          last_utm_source?: string | null
+          last_utm_term?: string | null
+          lead_id?: string | null
+          referrer?: string | null
           updated_at?: string | null
-          url?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_conversion?: boolean | null
+          utm_conversion_at?: string | null
+          utm_conversion_stage?: string | null
+          utm_conversion_time?: unknown | null
+          utm_conversion_value?: number | null
+          utm_first_touch?: string | null
+          utm_id?: string | null
+          utm_last_touch?: string | null
+          utm_medium?: string | null
+          utm_referrer?: string | null
+          utm_session_id?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "utm_tracking_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "utm_tracking_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "dados_cliente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "utm_tracking_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients_complete"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
+      conversation_metrics_view: {
+        Row: {
+          avg_unread_messages: number | null
+          month: string | null
+          total_conversations: number | null
+        }
+        Relationships: []
+      }
+      conversion_funnel_view: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          name: string | null
+          percentage: number | null
+          value: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          name?: string | null
+          percentage?: number | null
+          value?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          name?: string | null
+          percentage?: number | null
+          value?: number | null
+        }
+        Relationships: []
+      }
       dados_cliente: {
         Row: {
           address: string | null
           asaas_customer_id: string | null
           budget: number | null
           client_name: string | null
+          client_objective: string | null
           client_sector: string | null
           client_size: string | null
           client_type: string | null
+          consultation_stage: string | null
           cpf_cnpj: string | null
           created_at: string | null
-          custom_fields: Json | null
+          custom_fields_jsonb: Json | null
+          deleted_at: string | null
           email: string | null
           id: string | null
           kanban_stage: string | null
+          kanban_stage_id: string | null
           last_contact: string | null
           last_message: string | null
           last_message_time: string | null
+          message_count: number | null
           name: string | null
           notes: string | null
           payment_method: string | null
@@ -1313,6 +2418,113 @@ export type Database = {
           tags: string[] | null
           unread_count: number | null
           updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_kanban_stage_fk"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "kanban_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_responsible_user_fk"
+            columns: ["responsible_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_session_fk"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["session_id"]
+          },
+        ]
+      }
+      dashboard_metrics: {
+        Row: {
+          conversion_rate: number | null
+          negotiated_value: number | null
+          new_clients_this_month: number | null
+          response_rate: number | null
+          total_campaigns: number | null
+          total_chats: number | null
+          total_clients: number | null
+          total_conversations: number | null
+          total_leads: number | null
+        }
+        Relationships: []
+      }
+      latest_chat_messages: {
+        Row: {
+          id: number | null
+          message: Json | null
+          message_time: string | null
+          session_id: string | null
+        }
+        Relationships: []
+      }
+      lead_conversion_funnel_view: {
+        Row: {
+          count: number | null
+          percentage: number | null
+          stage: string | null
+        }
+        Relationships: []
+      }
+      n8n_chat_histories: {
+        Row: {
+          created_at: string | null
+          data: string | null
+          hora: string | null
+          id: number | null
+          message: Json | null
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data?: string | null
+          hora?: string | null
+          id?: number | null
+          message?: Json | null
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data?: string | null
+          hora?: string | null
+          id?: number | null
+          message?: Json | null
+          session_id?: string | null
+        }
+        Relationships: []
+      }
+      n8n_chat_history: {
+        Row: {
+          created_at: string | null
+          data: string | null
+          hora: string | null
+          id: number | null
+          message: Json | null
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data?: string | null
+          hora?: string | null
+          id?: number | null
+          message?: Json | null
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data?: string | null
+          hora?: string | null
+          id?: number | null
+          message?: Json | null
+          session_id?: string | null
         }
         Relationships: []
       }
@@ -1322,18 +2534,23 @@ export type Database = {
           asaas_customer_id: string | null
           budget: number | null
           client_name: string | null
+          client_objective: string | null
           client_sector: string | null
           client_size: string | null
           client_type: string | null
+          consultation_stage: string | null
           cpf_cnpj: string | null
           created_at: string | null
-          custom_fields: Json | null
+          custom_fields_jsonb: Json | null
+          deleted_at: string | null
           email: string | null
           id: string | null
           kanban_stage: string | null
+          kanban_stage_id: string | null
           last_contact: string | null
           last_message: string | null
           last_message_time: string | null
+          message_count: number | null
           name: string | null
           notes: string | null
           payment_method: string | null
@@ -1346,20 +2563,126 @@ export type Database = {
           unread_count: number | null
           updated_at: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contacts_kanban_stage_fk"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "kanban_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_responsible_user_fk"
+            columns: ["responsible_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_session_fk"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["session_id"]
+          },
+        ]
       }
     }
     Functions: {
-      reorder_ai_stages: {
-        Args: {
-          personality_uuid: string
-          stage_ids: string[]
-        }
+      calculate_daily_conversation_stats: {
+        Args: { target_date?: string }
         Returns: undefined
       }
-      update_updated_at_column: {
+      export_schema_summary: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      f_contact_custom_fields: {
+        Args: { _client_id: string }
+        Returns: Json
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_dashboard_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_funnel_by_date_range: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          name: string
+          value: number
+          percentage: number
+          color: string
+        }[]
+      }
+      get_metrics_by_date_range: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          total_conversations: number
+          response_rate: number
+          conversion_rate: number
+          negotiated_value: number
+        }[]
+      }
+      get_utm_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      gtrgm_compress: {
+        Args: { "": unknown }
         Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      match_documents: {
+        Args: { query_embedding: string; match_count?: number; filter?: Json }
+        Returns: {
+          id: number
+          content: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      reorder_ai_stages: {
+        Args: { personality_uuid: string; stage_ids: string[] }
+        Returns: undefined
+      }
+      set_limit: {
+        Args: { "": number }
+        Returns: number
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: { "": string }
+        Returns: string[]
+      }
+      soft_delete_record: {
+        Args: { table_name: string; record_id: string }
+        Returns: boolean
       }
     }
     Enums: {
@@ -1371,27 +2694,33 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[keyof Database]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema['Tables'] & PublicSchema['Views'])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-        Database[PublicTableNameOrOptions['schema']]['Views'])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-      Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] &
-        PublicSchema['Views'])
-    ? (PublicSchema['Tables'] &
-        PublicSchema['Views'])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1399,20 +2728,24 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1420,20 +2753,24 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -1441,29 +2778,41 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema['Enums']
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions['schema']]['Enums']
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema['Enums']
-    ? PublicSchema['Enums'][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema['CompositeTypes']
-    | { schema: keyof Database },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema['CompositeTypes']
-    ? PublicSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
