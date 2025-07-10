@@ -41,18 +41,11 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
   const headerStyle = {
     color: stageColor,
   };
-  const backgroundStyle = {
-    backgroundColor: `${stageColor}15`, // 15% opacity
-    borderColor: `${stageColor}30`, // 30% opacity for border
-  };
 
   return (
     <div className="w-[280px] md:w-[320px] flex-shrink-0">
-      <Card 
-        className="h-full flex flex-col border"
-        style={backgroundStyle}
-      >
-        <CardHeader className="p-2 border-b-2" style={{ borderColor: `${stageColor}30` }}>
+      <Card className="h-full flex flex-col border">
+        <CardHeader className="p-2 border-b">
           <CardTitle className="text-sm font-semibold flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span style={headerStyle}>

@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ChromePicker } from "react-color";
 import { KanbanStage } from "@/hooks/useKanbanStages";
 
 interface EditStageDialogProps {
@@ -18,18 +19,6 @@ interface EditStageDialogProps {
   onSave: (stageId: string, title: string, color: string) => void;
 }
 
-const PRESET_COLORS = [
-  "#6b7280", // gray
-  "#3b82f6", // blue
-  "#eab308", // yellow
-  "#22c55e", // green
-  "#a855f7", // purple
-  "#f97316", // orange
-  "#10b981", // emerald
-  "#ef4444", // red
-  "#8b5cf6", // violet
-  "#06b6d4", // cyan
-];
 
 const EditStageDialog: React.FC<EditStageDialogProps> = ({
   isOpen,
@@ -39,13 +28,14 @@ const EditStageDialog: React.FC<EditStageDialogProps> = ({
 }) => {
   const [title, setTitle] = useState(stage?.title || "");
   const [selectedColor, setSelectedColor] = useState(
-    stage?.settings?.color || PRESET_COLORS[0]
+    stage?.settings?.color || "#6b7280"
   );
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   React.useEffect(() => {
     if (stage) {
       setTitle(stage.title);
-      setSelectedColor(stage.settings?.color || PRESET_COLORS[0]);
+      setSelectedColor(stage.settings?.color || "#6b7280");
     }
   }, [stage]);
 
@@ -57,10 +47,11 @@ const EditStageDialog: React.FC<EditStageDialogProps> = ({
 
   const handleClose = () => {
     onClose();
+    setShowColorPicker(false);
     // Reset form when closing
     if (stage) {
       setTitle(stage.title);
-      setSelectedColor(stage.settings?.color || PRESET_COLORS[0]);
+      setSelectedColor(stage.settings?.color || "#6b7280");
     }
   };
 
@@ -84,21 +75,27 @@ const EditStageDialog: React.FC<EditStageDialogProps> = ({
           
           <div className="space-y-2">
             <Label>Cor do Estágio</Label>
-            <div className="grid grid-cols-5 gap-2">
-              {PRESET_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    selectedColor === color
-                      ? "border-foreground scale-110"
-                      : "border-border hover:scale-105"
-                  }`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setSelectedColor(color)}
-                  aria-label={`Selecionar cor ${color}`}
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                className="w-full h-10 rounded border border-border flex items-center justify-between px-3 hover:bg-muted/50"
+                onClick={() => setShowColorPicker(!showColorPicker)}
+              >
+                <span className="text-sm">Escolher cor</span>
+                <div 
+                  className="w-6 h-6 rounded border border-border"
+                  style={{ backgroundColor: selectedColor }}
                 />
-              ))}
+              </button>
+              {showColorPicker && (
+                <div className="mt-2">
+                  <ChromePicker
+                    color={selectedColor}
+                    onChange={(color) => setSelectedColor(color.hex)}
+                    disableAlpha
+                  />
+                </div>
+              )}
             </div>
           </div>
           
