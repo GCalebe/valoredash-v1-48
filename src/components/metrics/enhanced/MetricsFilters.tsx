@@ -84,16 +84,30 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
             <CalendarIcon className="h-4 w-4" />
             Período de Análise
           </Label>
-          <Select value={datePeriod} onValueChange={onDatePeriodChange}>
+          <Select 
+            value={datePeriod} 
+            onValueChange={(value) => {
+              console.log('Período selecionado:', value);
+              onDatePeriodChange(value);
+            }}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione um período" />
             </SelectTrigger>
-            <SelectContent className="z-50 bg-background border">
+            <SelectContent 
+              className="z-[9999] bg-popover border border-border shadow-lg max-h-60 overflow-y-auto" 
+              position="popper"
+              sideOffset={5}
+            >
               {periodOptions.map((option) => (
                 <SelectItem 
                   key={option.value} 
                   value={option.value}
-                  className="cursor-pointer hover:bg-accent focus:bg-accent"
+                  className="cursor-pointer hover:bg-accent focus:bg-accent data-[highlighted]:bg-accent data-[state=checked]:bg-accent"
+                  onSelect={() => {
+                    console.log('Item clicado:', option.value);
+                    onDatePeriodChange(option.value);
+                  }}
                 >
                   {option.label}
                 </SelectItem>

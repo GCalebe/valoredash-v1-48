@@ -62,6 +62,11 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
     updateCustomDateRange,
     resetFilters,
   } = useMetricsFilters();
+
+  const handleDatePeriodChange = (period: string) => {
+    console.log('Alterando período para:', period);
+    updateDatePeriod(period);
+  };
   
   // Estado de loading consolidado
   const isLoading = loading || consolidatedLoading;
@@ -123,7 +128,7 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
         datePeriod={filters.dataPeriod}
         customStartDate={filters.customStartDate}
         customEndDate={filters.customEndDate}
-        onDatePeriodChange={updateDatePeriod}
+        onDatePeriodChange={handleDatePeriodChange}
         onCustomDateChange={updateCustomDateRange}
         onReset={resetFilters}
       />
