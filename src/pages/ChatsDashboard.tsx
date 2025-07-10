@@ -7,6 +7,9 @@ import ChatLayout from "@/components/chat/ChatLayout";
 import { useConversations } from "@/hooks/useConversations";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import { useChatMessages } from "@/hooks/useChatMessages";
+import { useConversationFilters } from "@/hooks/useConversationFilters";
+import { useConversationTableFilters } from "@/hooks/useConversationTableFilters";
+import ConversationFilterDialog from "@/components/chat/ConversationFilterDialog";
 import PauseDurationDialog from "@/components/PauseDurationDialog";
 
 const ChatsDashboard = () => {
@@ -20,6 +23,7 @@ const ChatsDashboard = () => {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState("");
   const [pauseDialogOpen, setPauseDialogOpen] = useState(false);
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const { toast } = useToast();
 
   // Use custom hooks for data fetching and state management
@@ -36,6 +40,21 @@ const ChatsDashboard = () => {
     loading: messagesLoading,
     handleNewMessage,
   } = useChatMessages(selectedChat);
+
+  // Set up filtering functionality
+  const filters = useConversationFilters();
+
+  const { filteredConversations } = useConversationTableFilters({
+    conversations,
+    searchTerm: filters.searchTerm,
+    statusFilter: filters.statusFilter,
+    segmentFilter: filters.segmentFilter,
+    lastContactFilter: filters.lastContactFilter,
+    unreadFilter: filters.unreadFilter,
+    lastMessageFilter: filters.lastMessageFilter,
+    clientTypeFilter: filters.clientTypeFilter,
+    customFieldFilters: filters.customFieldFilters,
+  });
 
   // Set up real-time listeners for new chat messages
   useRealtimeUpdates({
@@ -161,9 +180,47 @@ const ChatsDashboard = () => {
     );
   };
 
+  // Filter handlers
+  const handleOpenFilters = () => {
+    setFilterDialogOpen(true);
+  };
+
+  const handleCloseFilters = () => {
+    setFilterDialogOpen(false);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-      <ChatHeader signOut={signOut} />
+      <ChatHeader 
+        signOut={signOut}
+        searchTerm={filters.searchTerm}
+        onSearchChange={filters.setSearchTerm}
+        onOpenFilters={handleOpenFilters}
+        hasActiveFilters={filters.hasActiveFilters}
+      />
+
+      <ConversationFilterDialog
+        isOpen={filterDialogOpen}
+        onOpenChange={setFilterDialogOpen}
+        statusFilter={filters.statusFilter}
+        segmentFilter={filters.segmentFilter}
+        lastContactFilter={filters.lastContactFilter}
+        unreadFilter={filters.unreadFilter}
+        lastMessageFilter={filters.lastMessageFilter}
+        clientTypeFilter={filters.clientTypeFilter}
+        customFieldFilters={filters.customFieldFilters}
+        onStatusFilterChange={filters.setStatusFilter}
+        onSegmentFilterChange={filters.setSegmentFilter}
+        onLastContactFilterChange={filters.setLastContactFilter}
+        onUnreadFilterChange={filters.setUnreadFilter}
+        onLastMessageFilterChange={filters.setLastMessageFilter}
+        onClientTypeFilterChange={filters.setClientTypeFilter}
+        onAddCustomFieldFilter={filters.addCustomFieldFilter}
+        onRemoveCustomFieldFilter={filters.removeCustomFieldFilter}
+        onClearFilters={() => filters.clearAll()}
+        onClearCustomFieldFilters={() => filters.clearAll("customFields")}
+        hasActiveFilters={filters.hasActiveFilters}
+      />
 
       <PauseDurationDialog
         isOpen={pauseDialogOpen}
@@ -175,6 +232,7 @@ const ChatsDashboard = () => {
       <div className="flex-1 overflow-hidden">
         <ChatLayout
           conversations={conversations}
+          filteredConversations={filteredConversations}
           selectedChat={selectedChat}
           setSelectedChat={setSelectedChat}
           isLoading={isLoading}

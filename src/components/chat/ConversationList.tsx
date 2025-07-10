@@ -8,6 +8,7 @@ import { useThemeSettings } from "@/context/ThemeSettingsContext";
 
 interface ConversationListProps {
   conversations: Conversation[];
+  filteredConversations: Conversation[];
   selectedChat: string | null;
   setSelectedChat: (id: string) => void;
   isLoading: Record<string, boolean>;
@@ -18,6 +19,7 @@ interface ConversationListProps {
 
 const ConversationList = ({
   conversations,
+  filteredConversations,
   selectedChat,
   setSelectedChat,
   isLoading,
@@ -29,9 +31,12 @@ const ConversationList = ({
 
   console.log("🎨 ConversationList renderizando com:");
   console.log("📊 Número de conversas:", conversations.length);
+  console.log("📊 Número de conversas filtradas:", filteredConversations.length);
   console.log("📋 Conversas:", conversations);
   console.log("⏳ Loading:", loading);
   console.log("🎯 Chat selecionado:", selectedChat);
+
+  const displayConversations = filteredConversations;
 
   return (
     <div className="h-full flex flex-col">
@@ -45,7 +50,7 @@ const ConversationList = ({
           )}
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          {conversations.length} conversas ativas
+          {displayConversations.length} de {conversations.length} conversas
         </p>
       </div>
 
@@ -57,17 +62,17 @@ const ConversationList = ({
                 Carregando conversas...
               </p>
             </div>
-          ) : conversations.length === 0 ? (
+          ) : displayConversations.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500 dark:text-gray-400 text-sm">
                 Nenhuma conversa encontrada
               </p>
               <p className="text-xs text-gray-400 mt-2">
-                Verificando logs do console para diagnóstico...
+                {conversations.length > 0 ? "Tente ajustar os filtros aplicados" : "Verificando logs do console para diagnóstico..."}
               </p>
             </div>
           ) : (
-            conversations.map((conversation) => {
+            displayConversations.map((conversation) => {
               console.log(
                 "🔄 Renderizando conversa:",
                 conversation.name,

@@ -11,6 +11,7 @@ import { Conversation, ChatMessage } from "@/types/chat";
 
 interface ChatLayoutProps {
   conversations: Conversation[];
+  filteredConversations: Conversation[];
   selectedChat: string | null;
   setSelectedChat: (id: string) => void;
   isLoading: Record<string, boolean>;
@@ -25,6 +26,7 @@ interface ChatLayoutProps {
 
 const ChatLayout = ({
   conversations,
+  filteredConversations,
   selectedChat,
   setSelectedChat,
   isLoading,
@@ -52,6 +54,7 @@ const ChatLayout = ({
       >
         <ConversationList
           conversations={conversations}
+          filteredConversations={filteredConversations}
           selectedChat={selectedChat}
           setSelectedChat={handleSelectChat}
           isLoading={isLoading}
