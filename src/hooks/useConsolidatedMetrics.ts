@@ -54,37 +54,26 @@ const isDataStale = (lastUpdated: string): boolean => {
 // Função para buscar métricas consolidadas
 const fetchConsolidatedMetrics = async (
   startDate: string, 
-  endDate: string, 
-  source?: string
+  endDate: string
 ): Promise<ConsolidatedMetrics> => {
   try {
     // Buscar dados de conversas
-    let conversationsQuery = supabase
+    const conversationsQuery = supabase
       .from('conversations')
       .select('*')
       .gte('created_at', startDate)
       .lte('created_at', endDate);
-
-    if (source && source !== 'all') {
-      // Adicionar filtro por fonte quando implementado na tabela
-      // conversationsQuery = conversationsQuery.eq('source', source);
-    }
 
     const { data: conversations, error: conversationsError } = await conversationsQuery;
     
     if (conversationsError) throw conversationsError;
 
     // Buscar dados de contatos (leads)
-    let contactsQuery = supabase
+    const contactsQuery = supabase
       .from('contacts')
       .select('*')
       .gte('created_at', startDate)
       .lte('created_at', endDate);
-
-    if (source && source !== 'all') {
-      // Filtrar por UTM source quando implementado
-      // contactsQuery = contactsQuery.eq('utm_source', source);
-    }
 
     const { data: contacts, error: contactsError } = await contactsQuery;
     
@@ -166,8 +155,7 @@ const fetchConsolidatedMetrics = async (
 // Função para buscar dados de série temporal
 const fetchTimeSeriesData = async (
   startDate: string, 
-  endDate: string, 
-  source?: string
+  endDate: string
 ): Promise<TimeSeriesData[]> => {
   try {
     // Buscar dados diários de conversação
@@ -264,12 +252,10 @@ export const useConsolidatedMetrics = () => {
   
   const { 
     start_date: startDate, 
-    end_date: endDate, 
-    source 
+    end_date: endDate
   } = useMemo(() => ({
     start_date: filters.dateRange.start.toISOString(),
     end_date: filters.dateRange.end.toISOString(),
-    source: filters.dataSource,
   }), [filters]);
 
   // Query para métricas consolidadas
@@ -279,8 +265,8 @@ export const useConsolidatedMetrics = () => {
     error: metricsError,
     isStale: metricsStale,
   } = useQuery({
-    queryKey: ['consolidated-metrics', startDate, endDate, source],
-    queryFn: () => fetchConsolidatedMetrics(startDate, endDate, source),
+    queryKey: ['consolidated-metrics', startDate, endDate],
+    queryFn: () => fetchConsolidatedMetrics(startDate, endDate),
     staleTime: 1000 * 60 * 2, // 2 minutos
     refetchInterval: 1000 * 60 * 5, // 5 minutos
   });
@@ -290,8 +276,8 @@ export const useConsolidatedMetrics = () => {
     data: timeSeriesData,
     isLoading: timeSeriesLoading,
   } = useQuery({
-    queryKey: ['time-series-data', startDate, endDate, source],
-    queryFn: () => fetchTimeSeriesData(startDate, endDate, source),
+    queryKey: ['time-series-data', startDate, endDate],
+    queryFn: () => fetchTimeSeriesData(startDate, endDate),
     staleTime: 1000 * 60 * 5, // 5 minutos
   });
 

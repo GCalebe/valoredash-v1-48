@@ -9,7 +9,6 @@ export interface DateRange {
 export interface MetricsFilters {
   dateRange: DateRange;
   dataPeriod: string;
-  dataSource: string;
   customStartDate?: string;
   customEndDate?: string;
 }
@@ -21,7 +20,6 @@ export const useMetricsFilters = () => {
       end: endOfDay(new Date())
     },
     dataPeriod: 'last7days',
-    dataSource: 'all',
   });
 
   const updateDatePeriod = useCallback((period: string) => {
@@ -69,18 +67,11 @@ export const useMetricsFilters = () => {
     }
   }, []);
 
-  const updateDataSource = useCallback((source: string) => {
-    setFilters(prev => ({
-      ...prev,
-      dataSource: source
-    }));
-  }, []);
 
   // Compute filtered query parameters
   const queryParams = useMemo(() => ({
     start_date: filters.dateRange.start.toISOString(),
     end_date: filters.dateRange.end.toISOString(),
-    source: filters.dataSource !== 'all' ? filters.dataSource : undefined,
   }), [filters]);
 
   const resetFilters = useCallback(() => {
@@ -90,7 +81,6 @@ export const useMetricsFilters = () => {
         end: endOfDay(new Date())
       },
       dataPeriod: 'last7days',
-      dataSource: 'all',
     });
   }, []);
 
@@ -99,7 +89,6 @@ export const useMetricsFilters = () => {
     queryParams,
     updateDatePeriod,
     updateCustomDateRange,
-    updateDataSource,
     resetFilters,
   };
 };

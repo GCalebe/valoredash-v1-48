@@ -60,7 +60,6 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
   const {
     updateDatePeriod,
     updateCustomDateRange,
-    updateDataSource,
     resetFilters,
   } = useMetricsFilters();
   
@@ -122,11 +121,9 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
       {/* Filtros */}
       <MetricsFilters
         datePeriod={filters.dataPeriod}
-        dataSource={filters.dataSource}
         customStartDate={filters.customStartDate}
         customEndDate={filters.customEndDate}
         onDatePeriodChange={updateDatePeriod}
-        onDataSourceChange={updateDataSource}
         onCustomDateChange={updateCustomDateRange}
         onReset={resetFilters}
       />

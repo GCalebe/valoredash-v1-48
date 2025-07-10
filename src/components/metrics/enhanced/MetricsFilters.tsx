@@ -5,26 +5,27 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Filter, RefreshCw, X } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarIcon, Filter, RefreshCw, X } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface MetricsFiltersProps {
   datePeriod: string;
-  dataSource: string;
   customStartDate?: string;
   customEndDate?: string;
   onDatePeriodChange: (period: string) => void;
-  onDataSourceChange: (source: string) => void;
   onCustomDateChange: (startDate: string, endDate: string) => void;
   onReset: () => void;
 }
 
 const MetricsFilters: React.FC<MetricsFiltersProps> = ({
   datePeriod,
-  dataSource,
   customStartDate,
   customEndDate,
   onDatePeriodChange,
-  onDataSourceChange,
   onCustomDateChange,
   onReset,
 }) => {
@@ -36,15 +37,6 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
     { label: "Personalizado", value: "custom" },
   ];
 
-  const sourceOptions = [
-    { label: "Todas as fontes", value: "all" },
-    { label: "Facebook", value: "facebook" },
-    { label: "Google", value: "google" },
-    { label: "Instagram", value: "instagram" },
-    { label: "WhatsApp", value: "whatsapp" },
-    { label: "Site", value: "site" },
-    { label: "Outros", value: "others" },
-  ];
 
   const handleCustomDateChange = (field: 'start' | 'end', value: string) => {
     const start = field === 'start' ? value : customStartDate || '';
@@ -58,7 +50,6 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
   const getActiveFiltersCount = () => {
     let count = 0;
     if (datePeriod !== 'last7days') count++;
-    if (dataSource !== 'all') count++;
     return count;
   };
 
@@ -87,71 +78,100 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Período de Data */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Período de Análise
-            </Label>
-            <Select value={datePeriod} onValueChange={onDatePeriodChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um período" />
-              </SelectTrigger>
-              <SelectContent>
-                {periodOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Fonte de Dados */}
-          <div className="space-y-2">
-            <Label>Fonte de Dados</Label>
-            <Select value={dataSource} onValueChange={onDataSourceChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma fonte" />
-              </SelectTrigger>
-              <SelectContent>
-                {sourceOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Período de Data */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4" />
+            Período de Análise
+          </Label>
+          <Select value={datePeriod} onValueChange={onDatePeriodChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione um período" />
+            </SelectTrigger>
+            <SelectContent>
+              {periodOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Datas Personalizadas */}
         {datePeriod === "custom" && (
-          <div className="space-y-2">
+          <div className="space-y-4">
             <Label>Período Personalizado</Label>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="startDate" className="text-sm text-muted-foreground">
-                  Data Início
-                </Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={customStartDate || ''}
-                  onChange={(e) => handleCustomDateChange('start', e.target.value)}
-                />
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">Data Início</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !customStartDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {customStartDate ? (
+                        format(new Date(customStartDate), "PPP", { locale: ptBR })
+                      ) : (
+                        <span>Selecione a data inicial</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      selected={customStartDate ? new Date(customStartDate) : null}
+                      onSelect={(date) => {
+                        if (date) {
+                          const startDate = format(date, 'yyyy-MM-dd');
+                          const endDate = customEndDate || format(date, 'yyyy-MM-dd');
+                          handleCustomDateChange('start', startDate);
+                          if (!customEndDate) {
+                            handleCustomDateChange('end', endDate);
+                          }
+                        }
+                      }}
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-              <div>
-                <Label htmlFor="endDate" className="text-sm text-muted-foreground">
-                  Data Fim
-                </Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={customEndDate || ''}
-                  onChange={(e) => handleCustomDateChange('end', e.target.value)}
-                />
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">Data Fim</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !customEndDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {customEndDate ? (
+                        format(new Date(customEndDate), "PPP", { locale: ptBR })
+                      ) : (
+                        <span>Selecione a data final</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      selected={customEndDate ? new Date(customEndDate) : null}
+                      onSelect={(date) => {
+                        if (date) {
+                          const endDate = format(date, 'yyyy-MM-dd');
+                          handleCustomDateChange('end', endDate);
+                        }
+                      }}
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
@@ -166,15 +186,6 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
                 <X 
                   className="h-3 w-3 cursor-pointer hover:text-destructive" 
                   onClick={() => onDatePeriodChange('last7days')}
-                />
-              </Badge>
-            )}
-            {dataSource !== 'all' && (
-              <Badge variant="outline" className="flex items-center gap-1">
-                Fonte: {sourceOptions.find(s => s.value === dataSource)?.label}
-                <X 
-                  className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                  onClick={() => onDataSourceChange('all')}
                 />
               </Badge>
             )}
