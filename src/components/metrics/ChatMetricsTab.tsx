@@ -123,15 +123,20 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
         </Card>
       )}
 
-      {/* Filtros */}
-      <MetricsFilters
-        datePeriod={filters.dataPeriod}
-        customStartDate={filters.customStartDate}
-        customEndDate={filters.customEndDate}
-        onDatePeriodChange={handleDatePeriodChange}
-        onCustomDateChange={updateCustomDateRange}
-        onReset={resetFilters}
-      />
+      {/* Header com Filtros */}
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
+          Métricas de Conversas
+        </h3>
+        <MetricsFilters
+          datePeriod={filters.dataPeriod}
+          customStartDate={filters.customStartDate}
+          customEndDate={filters.customEndDate}
+          onDatePeriodChange={handleDatePeriodChange}
+          onCustomDateChange={updateCustomDateRange}
+          onReset={resetFilters}
+        />
+      </div>
 
       {/* KPIs Reformulados */}
       <div className="space-y-4">

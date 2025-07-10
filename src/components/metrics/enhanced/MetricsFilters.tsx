@@ -1,13 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Filter, RefreshCw, X } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Filter, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -29,6 +27,8 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
   onCustomDateChange,
   onReset,
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const periodOptions = [
     { label: "Hoje", value: "today" },
     { label: "Últimos 7 dias", value: "last7days" },
@@ -37,85 +37,83 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
     { label: "Personalizado", value: "custom" },
   ];
 
-
-  const handleCustomDateChange = (field: 'start' | 'end', value: string) => {
-    const start = field === 'start' ? value : customStartDate || '';
-    const end = field === 'end' ? value : customEndDate || '';
+  const handleCustomDateSelect = (date: Date | undefined, type: 'start' | 'end') => {
+    if (!date) return;
     
-    if (start && end) {
-      onCustomDateChange(start, end);
+    const dateStr = format(date, 'yyyy-MM-dd');
+    
+    if (type === 'start') {
+      const endDate = customEndDate || dateStr;
+      onCustomDateChange(dateStr, endDate);
+    } else {
+      const startDate = customStartDate || dateStr;
+      onCustomDateChange(startDate, dateStr);
     }
   };
 
-  const getActiveFiltersCount = () => {
-    let count = 0;
-    if (datePeriod !== 'last7days') count++;
-    return count;
+  const getCurrentPeriodLabel = () => {
+    const option = periodOptions.find(p => p.value === datePeriod);
+    return option?.label || "Últimos 7 dias";
   };
 
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="gap-2"
+        >
+          <Filter className="h-4 w-4" />
+          Filtros
+        </Button>
+      </SheetTrigger>
+      
+      <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-primary" />
             Filtros de Métricas
-            {getActiveFiltersCount() > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {getActiveFiltersCount()} aplicado{getActiveFiltersCount() > 1 ? 's' : ''}
-              </Badge>
+          </SheetTitle>
+        </SheetHeader>
+        
+        <div className="space-y-6 mt-6">
+          {/* Período Atual */}
+          <div className="p-3 bg-muted rounded-lg">
+            <div className="text-sm text-muted-foreground">Período atual:</div>
+            <div className="font-medium">{getCurrentPeriodLabel()}</div>
+            {datePeriod === "custom" && customStartDate && customEndDate && (
+              <div className="text-sm text-muted-foreground mt-1">
+                {format(new Date(customStartDate), "dd/MM/yyyy", { locale: ptBR })} - {format(new Date(customEndDate), "dd/MM/yyyy", { locale: ptBR })}
+              </div>
             )}
-          </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onReset}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Limpar
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Período de Data */}
-        <div className="space-y-2">
-          <Label className="flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4" />
-            Período de Análise
-          </Label>
-          <Select 
-            value={datePeriod} 
-            onValueChange={onDatePeriodChange}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selecione um período" />
-            </SelectTrigger>
-            <SelectContent 
-              className="z-[9999] bg-popover border border-border shadow-lg max-h-60 overflow-y-auto" 
-              position="popper"
-              sideOffset={5}
-            >
-              {periodOptions.map((option) => (
-                <SelectItem 
-                  key={option.value} 
-                  value={option.value}
-                  className="cursor-pointer hover:bg-accent focus:bg-accent data-[highlighted]:bg-accent data-[state=checked]:bg-accent"
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          </div>
 
-        {/* Datas Personalizadas */}
-        {datePeriod === "custom" && (
-          <div className="space-y-4">
-            <Label>Período Personalizado</Label>
-            <div className="grid grid-cols-2 gap-4">
+          {/* Seleção de Período */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Período de Análise</Label>
+            <Select value={datePeriod} onValueChange={onDatePeriodChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione um período" />
+              </SelectTrigger>
+              <SelectContent>
+                {periodOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Calendário Personalizado */}
+          {datePeriod === "custom" && (
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Datas Personalizadas</Label>
+              
+              {/* Data de Início */}
               <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">Data Início</Label>
+                <Label className="text-sm text-muted-foreground">Data de Início</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -127,32 +125,25 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {customStartDate ? (
-                        format(new Date(customStartDate), "PPP", { locale: ptBR })
+                        format(new Date(customStartDate), "dd/MM/yyyy", { locale: ptBR })
                       ) : (
                         <span>Selecione a data inicial</span>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-50 bg-background border" align="start">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
-                      selected={customStartDate ? new Date(customStartDate) : null}
-                      onSelect={(date) => {
-                        if (date) {
-                          const startDate = format(date, 'yyyy-MM-dd');
-                          const endDate = customEndDate || format(date, 'yyyy-MM-dd');
-                          handleCustomDateChange('start', startDate);
-                          if (!customEndDate) {
-                            handleCustomDateChange('end', endDate);
-                          }
-                        }
-                      }}
-                      className="p-3 pointer-events-auto"
+                      selected={customStartDate ? new Date(customStartDate) : undefined}
+                      onSelect={(date) => handleCustomDateSelect(date, 'start')}
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
               </div>
+
+              {/* Data de Fim */}
               <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">Data Fim</Label>
+                <Label className="text-sm text-muted-foreground">Data de Fim</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -164,46 +155,43 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {customEndDate ? (
-                        format(new Date(customEndDate), "PPP", { locale: ptBR })
+                        format(new Date(customEndDate), "dd/MM/yyyy", { locale: ptBR })
                       ) : (
                         <span>Selecione a data final</span>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-50 bg-background border" align="start">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
-                      selected={customEndDate ? new Date(customEndDate) : null}
-                      onSelect={(date) => {
-                        if (date) {
-                          const endDate = format(date, 'yyyy-MM-dd');
-                          handleCustomDateChange('end', endDate);
-                        }
-                      }}
-                      className="p-3 pointer-events-auto"
+                      selected={customEndDate ? new Date(customEndDate) : undefined}
+                      onSelect={(date) => handleCustomDateSelect(date, 'end')}
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Filtros Ativos */}
-        {getActiveFiltersCount() > 0 && (
-          <div className="flex flex-wrap gap-2 pt-2 border-t">
-            {datePeriod !== 'last7days' && (
-              <Badge variant="outline" className="flex items-center gap-1">
-                Período: {periodOptions.find(p => p.value === datePeriod)?.label}
-                <X 
-                  className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                  onClick={() => onDatePeriodChange('last7days')}
-                />
-              </Badge>
-            )}
+          {/* Botões de Ação */}
+          <div className="flex gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={onReset}
+              className="flex-1"
+            >
+              Limpar Filtros
+            </Button>
+            <Button 
+              onClick={() => setIsOpen(false)}
+              className="flex-1"
+            >
+              Aplicar
+            </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 
