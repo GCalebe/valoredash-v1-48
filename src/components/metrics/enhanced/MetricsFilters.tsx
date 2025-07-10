@@ -85,12 +85,16 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
             Período de Análise
           </Label>
           <Select value={datePeriod} onValueChange={onDatePeriodChange}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione um período" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-50 bg-background border">
               {periodOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem 
+                  key={option.value} 
+                  value={option.value}
+                  className="cursor-pointer hover:bg-accent focus:bg-accent"
+                >
                   {option.label}
                 </SelectItem>
               ))}
@@ -122,7 +126,7 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 z-50 bg-background border" align="start">
                     <Calendar
                       selected={customStartDate ? new Date(customStartDate) : null}
                       onSelect={(date) => {
@@ -159,7 +163,7 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 z-50 bg-background border" align="start">
                     <Calendar
                       selected={customEndDate ? new Date(customEndDate) : null}
                       onSelect={(date) => {
