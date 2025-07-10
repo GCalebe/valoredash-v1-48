@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useConsolidatedMetrics } from "@/hooks/useConsolidatedMetrics";
 import { useRealTimeMetrics } from "@/hooks/useRealTimeMetrics";
 import { useValidatedData } from "@/hooks/useValidatedData";
@@ -63,10 +63,10 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
     resetFilters,
   } = useMetricsFilters();
 
-  const handleDatePeriodChange = (period: string) => {
-    console.log('Alterando período para:', period);
+  const handleDatePeriodChange = useCallback((period: string) => {
+    console.log('🎯 ChatMetricsTab: handleDatePeriodChange chamado com:', period);
     updateDatePeriod(period);
-  };
+  }, [updateDatePeriod]);
   
   // Estado de loading consolidado
   const isLoading = loading || consolidatedLoading;

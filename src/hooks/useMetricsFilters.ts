@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { startOfDay, endOfDay, subDays, startOfMonth, endOfMonth } from 'date-fns';
 
 export interface DateRange {
@@ -22,34 +22,54 @@ export const useMetricsFilters = () => {
     dataPeriod: 'last7days',
   });
 
-  const updateDatePeriod = useCallback((period: string) => {
-    const now = new Date();
-    let start: Date;
-    let end: Date = endOfDay(now);
+  // Debounce ref para evitar múltiplas chamadas
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-    switch (period) {
-      case 'today':
-        start = startOfDay(now);
-        break;
-      case 'last7days':
-        start = startOfDay(subDays(now, 7));
-        break;
-      case 'last30days':
-        start = startOfDay(subDays(now, 30));
-        break;
-      case 'thisMonth':
-        start = startOfMonth(now);
-        end = endOfMonth(now);
-        break;
-      default:
-        start = startOfDay(subDays(now, 7));
+  const updateDatePeriod = useCallback((period: string) => {
+    console.log('🔄 updateDatePeriod chamado com:', period);
+    
+    // Limpar debounce anterior
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
 
-    setFilters(prev => ({
-      ...prev,
-      datePeriod: period,
-      dateRange: { start, end }
-    }));
+    // Debounce de 100ms para evitar múltiplas atualizações
+    debounceRef.current = setTimeout(() => {
+      console.log('✅ Aplicando mudança de período:', period);
+      
+      const now = new Date();
+      let start: Date;
+      let end: Date = endOfDay(now);
+
+      switch (period) {
+        case 'today':
+          start = startOfDay(now);
+          break;
+        case 'last7days':
+          start = startOfDay(subDays(now, 7));
+          break;
+        case 'last30days':
+          start = startOfDay(subDays(now, 30));
+          break;
+        case 'thisMonth':
+          start = startOfMonth(now);
+          end = endOfMonth(now);
+          break;
+        default:
+          start = startOfDay(subDays(now, 7));
+      }
+
+      setFilters(prev => {
+        console.log('📊 Estado anterior:', prev.dataPeriod);
+        console.log('📊 Novo estado:', period);
+        
+        return {
+          ...prev,
+          dataPeriod: period,
+          dateRange: { start, end }
+        };
+      });
+    }, 100);
   }, []);
 
   const updateCustomDateRange = useCallback((startDate: string, endDate: string) => {

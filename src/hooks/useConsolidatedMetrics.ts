@@ -237,8 +237,10 @@ export const useConsolidatedMetrics = () => {
   } = useQuery({
     queryKey: ['consolidated-metrics', startDate, endDate],
     queryFn: () => fetchConsolidatedMetrics(startDate, endDate),
-    staleTime: 1000 * 60 * 2, // 2 minutos
-    refetchInterval: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchInterval: 1000 * 60 * 10, // 10 minutos
+    refetchOnWindowFocus: false,
+    retry: 2,
   });
 
   // Query para dados de série temporal
@@ -248,7 +250,9 @@ export const useConsolidatedMetrics = () => {
   } = useQuery({
     queryKey: ['time-series-data', startDate, endDate],
     queryFn: () => fetchTimeSeriesData(startDate, endDate),
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 10, // 10 minutos
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   // Query para leads por fonte
@@ -258,7 +262,9 @@ export const useConsolidatedMetrics = () => {
   } = useQuery({
     queryKey: ['leads-by-source', startDate, endDate],
     queryFn: () => fetchLeadsBySource(startDate, endDate),
-    staleTime: 1000 * 60 * 10, // 10 minutos
+    staleTime: 1000 * 60 * 15, // 15 minutos
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   const loading = metricsLoading || timeSeriesLoading || leadsBySourceLoading;
