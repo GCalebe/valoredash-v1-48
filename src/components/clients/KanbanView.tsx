@@ -13,7 +13,7 @@ interface KanbanViewProps {
   onEditClick: (contact: Contact) => void;
   isCompact: boolean;
   stages: KanbanStage[];
-  onStageEdit?: (stageName: string) => void;
+  onStageEdit?: (stage: KanbanStage) => void; // Changed parameter type
 }
 
 const KanbanView = ({
@@ -65,7 +65,11 @@ const KanbanView = ({
 
     if (source.droppableId === destination.droppableId) return;
 
-    const newStage = destination.droppableId;
+    // Find the stage by ID and get its title for the onStageChange callback
+    const destinationStage = stages.find(stage => stage.id === destination.droppableId);
+    if (!destinationStage) return;
+
+    const newStage = destinationStage.title;
     onStageChange(draggableId, newStage);
   };
 
@@ -123,7 +127,7 @@ const KanbanView = ({
           {stages.map((stage) => (
             <KanbanStageColumn
               key={stage.id}
-              stage={stage.title}
+              stage={stage} // Pass the full stage object
               contacts={contactsByStage[stage.title] || []}
               onContactClick={onContactClick}
               onEditClick={onEditClick}

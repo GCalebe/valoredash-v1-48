@@ -5,6 +5,9 @@ export interface KanbanStage {
   id: string;
   title: string;
   ordering: number;
+  settings?: {
+    color?: string;
+  };
 }
 
 const DEFAULT_STAGES = [

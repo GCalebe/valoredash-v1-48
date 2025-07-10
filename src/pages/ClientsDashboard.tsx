@@ -5,11 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useClientManagement } from "@/hooks/useClientManagement";
 import { useClientsFilters } from "@/hooks/useClientsFilters";
-import { useKanbanStages } from "@/hooks/useKanbanStages";
+import { useKanbanStagesSupabase, KanbanStage } from "@/hooks/useKanbanStagesSupabase";
 import ClientsDashboardLayout from "@/components/clients/ClientsDashboardLayout";
 import ClientsTable from "@/components/clients/ClientsTable";
 import KanbanView from "@/components/clients/KanbanView";
 import ClientsModals from "@/components/clients/ClientsModals";
+import EditStageDialog from "@/components/clients/EditStageDialog";
 
 const ClientsDashboard = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -21,6 +22,10 @@ const ClientsDashboard = () => {
   const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
   const [isCompactView, setIsCompactView] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  
+  // Stage editing state  
+  const [isEditStageDialogOpen, setIsEditStageDialogOpen] = useState(false);
+  const [selectedStage, setSelectedStage] = useState<KanbanStage | null>(null);
 
   const {
     contacts,
@@ -56,7 +61,22 @@ const ClientsDashboard = () => {
     handleKanbanStageChange,
   } = useClientManagement();
 
-  const kanbanStages = useKanbanStages();
+  const kanbanStages = useKanbanStagesSupabase();
+
+  // Handle stage editing
+  const handleStageEdit = (stage: KanbanStage) => {
+    setSelectedStage(stage);
+    setIsEditStageDialogOpen(true);
+  };
+
+  const handleSaveStage = (stageId: string, title: string, color: string) => {
+    kanbanStages.updateStage(stageId, title, color);
+  };
+
+  const handleCloseEditStageDialog = () => {
+    setIsEditStageDialogOpen(false);
+    setSelectedStage(null);
+  };
 
   useEffect(() => {
     if (!isAuthLoading && !user) {
@@ -133,10 +153,7 @@ const ClientsDashboard = () => {
             onEditClick={openEditModal}
             isCompact={isCompactView}
             stages={kanbanStages.stages}
-            onStageEdit={(stageName) => {
-              console.log('Editando estágio:', stageName);
-              // TODO: Implementar dialog de edição
-            }}
+            onStageEdit={handleStageEdit}
           />
         )}
       </div>
@@ -162,6 +179,13 @@ const ClientsDashboard = () => {
         openEditModal={openEditModal}
         handleMessageSubmit={handleMessageSubmit}
         handlePauseDurationConfirm={handlePauseDurationConfirm}
+      />
+
+      <EditStageDialog
+        isOpen={isEditStageDialogOpen}
+        onClose={handleCloseEditStageDialog}
+        stage={selectedStage}
+        onSave={handleSaveStage}
       />
     </ClientsDashboardLayout>
   );
