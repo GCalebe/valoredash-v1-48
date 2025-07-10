@@ -133,6 +133,10 @@ const ClientsDashboard = () => {
             onEditClick={openEditModal}
             isCompact={isCompactView}
             stages={kanbanStages.stages}
+            onStageEdit={(stageName) => {
+              console.log('Editando estágio:', stageName);
+              // TODO: Implementar dialog de edição
+            }}
           />
         )}
       </div>

@@ -1,7 +1,9 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Droppable } from "react-beautiful-dnd";
+import { Edit3 } from "lucide-react";
 import KanbanClientCard from "./KanbanClientCard";
 import { Contact } from "@/types/client";
 
@@ -11,18 +13,10 @@ interface KanbanStageColumnProps {
   onContactClick: (contact: Contact) => void;
   onEditClick: (contact: Contact) => void;
   isCompact: boolean;
+  onStageEdit?: (stageName: string) => void;
 }
 
-const STAGE_COLORS: { [key: string]: string } = {
-  Entraram: "bg-gray-100 dark:bg-gray-800/50",
-  Conversaram: "bg-blue-100 dark:bg-blue-900/40",
-  Agendaram: "bg-yellow-100 dark:bg-yellow-900/40",
-  Compareceram: "bg-green-100 dark:bg-green-900/40",
-  Negociaram: "bg-purple-100 dark:bg-purple-900/40",
-  Postergaram: "bg-orange-100 dark:bg-orange-900/40",
-  Converteram: "bg-emerald-100 dark:bg-emerald-900/40",
-};
-const DEFAULT_STAGE_COLOR = "bg-gray-50 dark:bg-gray-900/40";
+// Cores removidas - agora usando apenas cores do texto
 
 const STAGE_HEADER_COLORS: { [key: string]: string } = {
   Entraram: "text-gray-500 dark:text-gray-400",
@@ -41,18 +35,25 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
   onContactClick,
   onEditClick,
   isCompact,
+  onStageEdit,
 }) => (
   <div className="w-[280px] md:w-[320px] flex-shrink-0">
-    <Card
-      className={`h-full flex flex-col ${
-        STAGE_COLORS[stage] ?? DEFAULT_STAGE_COLOR
-      }`}
-    >
+    <Card className="h-full flex flex-col bg-card border">
       <CardHeader className="p-2 border-b-2 border-border/80">
         <CardTitle className="text-sm font-semibold flex items-center justify-between">
-          <span className={STAGE_HEADER_COLORS[stage] ?? DEFAULT_HEADER_COLOR}>
-            {stage}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className={STAGE_HEADER_COLORS[stage] ?? DEFAULT_HEADER_COLOR}>
+              {stage}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-4 w-4 p-0 hover:bg-muted/50"
+              onClick={() => onStageEdit?.(stage)}
+            >
+              <Edit3 className="h-3 w-3" />
+            </Button>
+          </div>
           <Badge variant="secondary" className="text-xs h-5">
             {contacts.length}
           </Badge>

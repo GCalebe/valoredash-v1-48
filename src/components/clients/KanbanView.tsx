@@ -13,6 +13,7 @@ interface KanbanViewProps {
   onEditClick: (contact: Contact) => void;
   isCompact: boolean;
   stages: KanbanStage[];
+  onStageEdit?: (stageName: string) => void;
 }
 
 const KanbanView = ({
@@ -23,6 +24,7 @@ const KanbanView = ({
   onEditClick,
   isCompact,
   stages,
+  onStageEdit,
 }: KanbanViewProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -126,6 +128,7 @@ const KanbanView = ({
               onContactClick={onContactClick}
               onEditClick={onEditClick}
               isCompact={isCompact}
+              onStageEdit={onStageEdit}
             />
           ))}
         </div>
