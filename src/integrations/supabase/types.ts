@@ -715,6 +715,58 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_stage_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          contact_id: string
+          id: string
+          metadata: Json | null
+          new_stage: string
+          old_stage: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          contact_id: string
+          id?: string
+          metadata?: Json | null
+          new_stage: string
+          old_stage?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          contact_id?: string
+          id?: string
+          metadata?: Json | null
+          new_stage?: string
+          old_stage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_stage_history_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_stage_history_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "dados_cliente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_stage_history_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients_complete"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           address: string | null
@@ -2667,6 +2719,17 @@ export type Database = {
         Args: { _client_id: string }
         Returns: Json
       }
+      get_contact_stage_history: {
+        Args: { contact_uuid: string }
+        Returns: {
+          id: string
+          old_stage: string
+          new_stage: string
+          changed_at: string
+          changed_by: string
+          metadata: Json
+        }[]
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -2691,6 +2754,17 @@ export type Database = {
           response_rate: number
           conversion_rate: number
           negotiated_value: number
+        }[]
+      }
+      get_stage_history_by_period: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          contact_id: string
+          contact_name: string
+          old_stage: string
+          new_stage: string
+          changed_at: string
+          metadata: Json
         }[]
       }
       get_utm_metrics: {

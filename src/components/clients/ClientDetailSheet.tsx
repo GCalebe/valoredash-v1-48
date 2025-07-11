@@ -11,6 +11,7 @@ import { MessageCircle, Edit, Trash } from "lucide-react";
 import ClientInfo from "./ClientInfo";
 import { DynamicCategory } from "./DynamicCategoryManager";
 import { useDynamicFields } from "@/hooks/useDynamicFields";
+import ContactStageHistory from "./ContactStageHistory";
 
 interface ClientDetailSheetProps {
   isOpen: boolean;
@@ -93,6 +94,8 @@ const ClientDetailSheet: React.FC<ClientDetailSheetProps> = ({
               dynamicFields={dynamicFields}
               context="details"
             />
+
+            <ContactStageHistory contactId={contact.id} />
 
             <div className="flex space-x-2 mt-6">
               <Button
