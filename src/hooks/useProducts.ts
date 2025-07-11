@@ -2,49 +2,77 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-// Simplified product interface using ai_products table
-interface SimpleProduct {
+// Product interface matching the unified products table
+export interface Product {
   id: string;
   name: string;
+  price: number;
   description?: string;
   category?: string;
+  benefits?: string[];
+  objections?: string[];
+  differentials?: string[];
+  success_cases?: string[];
   features?: string[];
   icon?: string;
   image?: string;
+  has_combo: boolean;
+  has_upgrade: boolean;
+  has_promotion: boolean;
   new?: boolean;
   popular?: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+// Form data interface for creating/updating products
+export interface ProductFormData {
+  name: string;
   price?: number;
+  description?: string;
+  category?: string;
+  benefits?: string[];
+  objections?: string[];
+  differentials?: string[];
+  success_cases?: string[];
+  features?: string[];
+  icon?: string;
+  image?: string;
+  has_combo?: boolean;
+  has_upgrade?: boolean;
   has_promotion?: boolean;
-  created_at?: string;
+  new?: boolean;
+  popular?: boolean;
 }
 
 // Query keys
 export const productsKeys = {
   all: ['products'] as const,
-  lists: () => [...productsKeys.all, 'list'] as const,
-  list: (filters: string) => [...productsKeys.lists(), { filters }] as const,
-  byCategory: (category: string) => [...productsKeys.all, 'category', category] as const,
+  lists: () => ['products', 'list'] as const,
+  list: (filters: string) => ['products', 'list', { filters }] as const,
+  byCategory: (category: string) => ['products', 'category', category] as const,
 };
 
-// Fetch AI products
-const fetchAIProducts = async (): Promise<SimpleProduct[]> => {
+// Fetch products
+const fetchProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase
-    .from('ai_products')
+    .from('products')
     .select('*')
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching AI products:', error);
-    throw new Error(`Failed to fetch AI products: ${error.message}`);
+    console.error('Error fetching products:', error);
+    throw new Error(`Failed to fetch products: ${error.message}`);
   }
 
-  return data || [];
+  return (data as Product[]) || [];
 };
 
 // Fetch products by category
-const fetchProductsByCategory = async (category: string): Promise<SimpleProduct[]> => {
+const fetchProductsByCategory = async (category: string): Promise<Product[]> => {
   const { data, error } = await supabase
-    .from('ai_products')
+    .from('products')
     .select('*')
     .eq('category', category)
     .order('created_at', { ascending: false });
@@ -54,24 +82,34 @@ const fetchProductsByCategory = async (category: string): Promise<SimpleProduct[
     throw new Error(`Failed to fetch products by category: ${error.message}`);
   }
 
-  return data || [];
+  return (data as Product[]) || [];
 };
 
 // Create product
-const createProduct = async (product: Omit<SimpleProduct, 'id' | 'created_at'>): Promise<SimpleProduct> => {
+const createProduct = async (productData: ProductFormData): Promise<Product> => {
+  // Set default values for required fields
+  const product = {
+    name: productData.name,
+    price: productData.price || 0,
+    description: productData.description,
+    category: productData.category,
+    benefits: productData.benefits || [],
+    objections: productData.objections || [],
+    differentials: productData.differentials || [],
+    success_cases: productData.success_cases || [],
+    features: productData.features || [],
+    icon: productData.icon,
+    image: productData.image,
+    has_combo: productData.has_combo || false,
+    has_upgrade: productData.has_upgrade || false,
+    has_promotion: productData.has_promotion || false,
+    new: productData.new || false,
+    popular: productData.popular || false,
+  };
+
   const { data, error } = await supabase
-    .from('ai_products')
-    .insert([{
-      id: crypto.randomUUID(),
-      name: product.name,
-      description: product.description,
-      category: product.category,
-      features: product.features,
-      icon: product.icon,
-      image: product.image,
-      new: product.new,
-      popular: product.popular,
-    }])
+    .from('products')
+    .insert([product])
     .select()
     .single();
 
@@ -84,10 +122,15 @@ const createProduct = async (product: Omit<SimpleProduct, 'id' | 'created_at'>):
 };
 
 // Update product
-const updateProduct = async ({ id, ...updates }: Partial<SimpleProduct> & { id: string }): Promise<SimpleProduct> => {
+const updateProduct = async ({ id, ...updates }: ProductFormData & { id: string }): Promise<Product> => {
+  // Remove undefined values
+  const cleanUpdates = Object.fromEntries(
+    Object.entries(updates).filter(([_, value]) => value !== undefined)
+  );
+
   const { data, error } = await supabase
-    .from('ai_products')
-    .update(updates)
+    .from('products')
+    .update(cleanUpdates)
     .eq('id', id)
     .select()
     .single();
@@ -103,7 +146,7 @@ const updateProduct = async ({ id, ...updates }: Partial<SimpleProduct> & { id: 
 // Delete product
 const deleteProduct = async (id: string): Promise<void> => {
   const { error } = await supabase
-    .from('ai_products')
+    .from('products')
     .delete()
     .eq('id', id);
 
@@ -117,7 +160,7 @@ const deleteProduct = async (id: string): Promise<void> => {
 export const useProductsQuery = () => {
   return useQuery({
     queryKey: productsKeys.lists(),
-    queryFn: fetchAIProducts,
+    queryFn: fetchProducts,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
@@ -203,27 +246,6 @@ export const useDeleteProductMutation = () => {
       });
     },
   });
-};
-
-// Utility functions for manual cache management
-export const productsUtils = {
-  invalidateAll: (queryClient: ReturnType<typeof useQueryClient>) => {
-    queryClient.invalidateQueries({ queryKey: productsKeys.all });
-  },
-  prefetchProducts: (queryClient: ReturnType<typeof useQueryClient>) => {
-    queryClient.prefetchQuery({
-      queryKey: productsKeys.lists(),
-      queryFn: fetchAIProducts,
-      staleTime: 5 * 60 * 1000,
-    });
-  },
-  prefetchProductsByCategory: (queryClient: ReturnType<typeof useQueryClient>, category: string) => {
-    queryClient.prefetchQuery({
-      queryKey: productsKeys.byCategory(category),
-      queryFn: () => fetchProductsByCategory(category),
-      staleTime: 5 * 60 * 1000,
-    });
-  },
 };
 
 // Legacy hook for backward compatibility
