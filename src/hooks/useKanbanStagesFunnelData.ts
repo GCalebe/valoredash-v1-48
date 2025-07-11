@@ -32,75 +32,80 @@ export function useKanbanStagesFunnelData({ stages, dateRange }: UseKanbanStages
     setError(null);
 
     try {
-      console.log('🔍 Buscando dados do funil com parâmetros:', { stages, dateRange });
+      console.log('🔍 Buscando dados do funil normalizado:', { stages, dateRange });
 
-      // Buscar TODOS os contatos ativos com seus estágios atuais
-      // O filtro de data será aplicado apenas para contatos criados no período
-      const { data: allContacts, error: queryError } = await supabase
+      // Buscar contatos ativos com estágios normalizados
+      // Priorizar kanban_stage que foi normalizado pelos triggers
+      const { data: contacts, error: queryError } = await supabase
         .from('contacts')
         .select(`
           id,
-          kanban_stage, 
+          kanban_stage,
           created_at,
-          kanban_stage_id,
-          kanban_stages(title)
+          deleted_at
         `)
         .is('deleted_at', null)
+        .gte('created_at', dateRange.from.toISOString())
+        .lte('created_at', dateRange.to.toISOString())
         .order('created_at', { ascending: false });
 
       if (queryError) {
-        console.error('❌ Erro na query:', queryError);
+        console.error('❌ Erro na query normalizada:', queryError);
         throw queryError;
       }
 
-      console.log('📊 Total de contatos encontrados:', allContacts?.length || 0);
+      console.log('📊 Contatos encontrados no período:', contacts?.length || 0);
 
-      // Filtrar contatos criados no período especificado
-      const contactsInPeriod = allContacts?.filter(contact => {
-        const createdAt = new Date(contact.created_at);
-        return createdAt >= dateRange.from && createdAt <= dateRange.to;
-      }) || [];
+      // Normalizar estágios ausentes para "Novo Lead"
+      const normalizedContacts = contacts?.map(contact => ({
+        ...contact,
+        kanban_stage: contact.kanban_stage || 'Novo Lead'
+      })) || [];
 
-      console.log('📅 Contatos criados no período:', contactsInPeriod.length);
-      console.log('📋 Amostra dos dados:', contactsInPeriod.slice(0, 5));
+      console.log('📋 Amostra dos contatos normalizados:', normalizedContacts.slice(0, 5));
 
-      // Contar contatos por estágio atual (apenas os criados no período)
+      // Contar contatos por estágio
       const stageCounts: Record<string, number> = {};
       
-      // Inicializar contadores com zero para todos os estágios selecionados
+      // Inicializar contadores com zero
       stages.forEach(stage => {
         stageCounts[stage] = 0;
       });
 
-      // Contar os contatos por estágio atual
-      contactsInPeriod.forEach(contact => {
-        // Priorizar kanban_stages.title (dados normalizados)
-        let currentStage = contact.kanban_stages?.title || contact.kanban_stage;
+      // Contar os contatos por estágio normalizado
+      normalizedContacts.forEach(contact => {
+        const currentStage = contact.kanban_stage;
         
         if (currentStage && stages.includes(currentStage)) {
           stageCounts[currentStage]++;
         } else if (currentStage) {
-          console.log('🚫 Estágio não incluído no filtro:', currentStage);
+          // Mapear automaticamente estágios não incluídos para "Novo Lead" se apropriado
+          if (!stages.includes(currentStage) && stages.includes('Novo Lead')) {
+            stageCounts['Novo Lead']++;
+            console.log('🔄 Estágio mapeado para Novo Lead:', currentStage);
+          } else {
+            console.log('🚫 Estágio não incluído no filtro:', currentStage);
+          }
         }
       });
 
-      console.log('📈 Contagem por estágio:', stageCounts);
+      console.log('📈 Contagem final por estágio:', stageCounts);
 
       // Calcular total para percentuais
       const totalCount = Object.values(stageCounts).reduce((sum, count) => sum + count, 0);
-      console.log('🔢 Total de contatos no período:', totalCount);
+      console.log('🔢 Total de contatos processados:', totalCount);
 
-      // Converter para formato do funil ordenado pela sequência dos estágios
+      // Converter para formato do funil
       const funnelData: FunnelStageData[] = stages.map(stage => ({
         stage,
         count: stageCounts[stage] || 0,
         percentage: totalCount > 0 ? ((stageCounts[stage] || 0) / totalCount) * 100 : 0,
       }));
 
-      console.log('🎯 Dados do funil processados:', funnelData);
+      console.log('🎯 Dados do funil normalizados:', funnelData);
       setData(funnelData);
     } catch (err) {
-      console.error('❌ Erro ao buscar dados do funil:', err);
+      console.error('❌ Erro ao buscar dados do funil normalizado:', err);
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
