@@ -3,6 +3,7 @@ import ConversationChart from '../ConversationChart';
 import ConversionFunnelChart from '../ConversionFunnelChart';
 import ConversionByTimeChart from '../ConversionByTimeChart';
 import LeadsAverageByTimeChart from '../LeadsAverageByTimeChart';
+import KanbanStagesFunnelChart from '../KanbanStagesFunnelChart';
 import SectionHeader from './SectionHeader';
 
 interface PerformanceChartsSectionProps {
@@ -51,6 +52,9 @@ const PerformanceChartsSection: React.FC<PerformanceChartsSectionProps> = ({
           onFilterChange={handleFilterChange}
         />
       </div>
+
+      {/* Funil de Estágios do Kanban */}
+      <KanbanStagesFunnelChart />
 
       <ConversionByTimeChart
         data={conversionByTimeData}
