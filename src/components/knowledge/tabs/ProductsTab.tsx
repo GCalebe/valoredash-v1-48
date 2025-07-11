@@ -10,6 +10,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useProducts, useCreateProductMutation, useUpdateProductMutation, useDeleteProductMutation } from "@/hooks/useProducts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Product } from "@/types/product";
 
 // Import new components
 import ProductForm from "@/components/knowledge/products/ProductForm";
@@ -27,7 +28,7 @@ const ProductsTab = () => {
   // Dialog states
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
   // View and filtering states
   const [searchTerm, setSearchTerm] = useState("");
@@ -81,14 +82,7 @@ const ProductsTab = () => {
 
   const handleCreateProduct = async (data: any) => {
     try {
-      await createProductMutation.mutateAsync({
-        name: data.name,
-        description: data.description,
-        category: data.category || null,
-        features: data.benefits || [],
-        popular: data.has_promotion || false,
-        new: data.has_upgrade || false,
-      });
+      await createProductMutation.mutateAsync(data);
       setIsAddDialogOpen(false);
       toast({
         title: "Produto criado",
@@ -103,7 +97,7 @@ const ProductsTab = () => {
     }
   };
 
-  const handleEditProduct = (product: any) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setIsEditDialogOpen(true);
   };
@@ -111,12 +105,8 @@ const ProductsTab = () => {
   const handleUpdateProduct = async (data: any) => {
     try {
       await updateProductMutation.mutateAsync({
-        id: editingProduct.id,
-        name: data.name,
-        description: data.description,
-        category: data.category || null,
-        features: data.benefits || [],
-        popular: data.has_promotion || false,
+        id: editingProduct!.id,
+        ...data
       });
       setEditingProduct(null);
       setIsEditDialogOpen(false);

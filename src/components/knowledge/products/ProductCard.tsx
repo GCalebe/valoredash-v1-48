@@ -19,21 +19,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { Product } from "@/types/product";
+
 interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    price?: number;
-    description?: string;
-    benefits?: string[];
-    objections?: string[];
-    differentials?: string[];
-    success_cases?: string[];
-    has_combo?: boolean;
-    has_upgrade?: boolean;
-    has_promotion?: boolean;
-  };
-  onEdit: (product: any) => void;
+  product: Product;
+  onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
   isDeleting?: boolean;
 }
@@ -135,10 +125,37 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <span>{getBadgeCount(product.success_cases)} casos</span>
             </div>
           )}
+          
+          {getBadgeCount(product.features) > 0 && (
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Package className="h-3 w-3" />
+              <span>{getBadgeCount(product.features)} funcionalidades</span>
+            </div>
+          )}
         </div>
+
+        {/* Category */}
+        {product.category && (
+          <div className="text-sm text-muted-foreground">
+            <Tag className="h-3 w-3 inline mr-1" />
+            {product.category}
+          </div>
+        )}
 
         {/* Status Badges */}
         <div className="flex flex-wrap gap-2">
+          {product.new && (
+            <Badge variant="default" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+              Novo
+            </Badge>
+          )}
+          
+          {product.popular && (
+            <Badge variant="default" className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
+              Popular
+            </Badge>
+          )}
+          
           {product.has_promotion && (
             <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
               Em Promoção

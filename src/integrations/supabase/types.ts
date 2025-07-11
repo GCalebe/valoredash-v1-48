@@ -1953,13 +1953,6 @@ export type Database = {
             referencedRelation: "product_combos"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "product_combo_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
         ]
       }
       product_combos: {
@@ -1989,49 +1982,67 @@ export type Database = {
       products: {
         Row: {
           benefits: string[] | null
+          category: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
           differentials: string[] | null
+          features: string[] | null
           has_combo: boolean | null
           has_promotion: boolean | null
           has_upgrade: boolean | null
+          icon: string | null
           id: string
+          image: string | null
           name: string
+          new: boolean | null
           objections: string[] | null
-          price: number
+          popular: boolean | null
+          price: number | null
           success_cases: string[] | null
           updated_at: string | null
         }
         Insert: {
           benefits?: string[] | null
+          category?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           differentials?: string[] | null
+          features?: string[] | null
           has_combo?: boolean | null
           has_promotion?: boolean | null
           has_upgrade?: boolean | null
+          icon?: string | null
           id?: string
+          image?: string | null
           name: string
+          new?: boolean | null
           objections?: string[] | null
-          price: number
+          popular?: boolean | null
+          price?: number | null
           success_cases?: string[] | null
           updated_at?: string | null
         }
         Update: {
           benefits?: string[] | null
+          category?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           differentials?: string[] | null
+          features?: string[] | null
           has_combo?: boolean | null
           has_promotion?: boolean | null
           has_upgrade?: boolean | null
+          icon?: string | null
           id?: string
+          image?: string | null
           name?: string
+          new?: boolean | null
           objections?: string[] | null
-          price?: number
+          popular?: boolean | null
+          price?: number | null
           success_cases?: string[] | null
           updated_at?: string | null
         }
@@ -2526,14 +2537,6 @@ export type Database = {
           message: Json | null
           message_time: string | null
           session_id: string | null
-        }
-        Relationships: []
-      }
-      lead_conversion_funnel_view: {
-        Row: {
-          count: number | null
-          percentage: number | null
-          stage: string | null
         }
         Relationships: []
       }

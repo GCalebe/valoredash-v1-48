@@ -24,15 +24,21 @@ import {
 
 const productSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  price: z.number().min(0, "Preço deve ser positivo"),
+  price: z.number().min(0, "Preço deve ser positivo").optional(),
   description: z.string().optional(),
+  category: z.string().optional(),
   benefits: z.array(z.string()).default([]),
   objections: z.array(z.string()).default([]),
   differentials: z.array(z.string()).default([]),
   success_cases: z.array(z.string()).default([]),
+  features: z.array(z.string()).default([]),
+  icon: z.string().optional(),
+  image: z.string().optional(),
   has_combo: z.boolean().default(false),
   has_upgrade: z.boolean().default(false),
   has_promotion: z.boolean().default(false),
+  new: z.boolean().default(false),
+  popular: z.boolean().default(false),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -64,27 +70,33 @@ const ProductForm: React.FC<ProductFormProps> = ({
       name: "",
       price: 0,
       description: "",
+      category: "",
       benefits: [],
       objections: [],
       differentials: [],
       success_cases: [],
+      features: [],
+      icon: "",
+      image: "",
       has_combo: false,
       has_upgrade: false,
       has_promotion: false,
+      new: false,
+      popular: false,
       ...initialData,
     },
   });
 
   const watchedValues = watch();
 
-  const handleArrayAdd = (field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases'>, value: string) => {
+  const handleArrayAdd = (field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases' | 'features'>, value: string) => {
     if (value.trim()) {
       const currentArray = watchedValues[field] || [];
       setValue(field, [...currentArray, value.trim()]);
     }
   };
 
-  const handleArrayRemove = (field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases'>, index: number) => {
+  const handleArrayRemove = (field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases' | 'features'>, index: number) => {
     const currentArray = watchedValues[field] || [];
     setValue(field, currentArray.filter((_, i) => i !== index));
   };
@@ -95,7 +107,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     placeholder, 
     icon: Icon 
   }: { 
-    field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases'>;
+    field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases' | 'features'>;
     label: string;
     placeholder: string;
     icon: any;
@@ -207,6 +219,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
               </div>
 
               <div>
+                <Label htmlFor="category" className="flex items-center gap-2">
+                  <Tag className="h-4 w-4" />
+                  Categoria
+                </Label>
+                <Input
+                  id="category"
+                  {...register("category")}
+                  placeholder="Ex: Consultoria, Software, Curso..."
+                />
+              </div>
+
+              <div>
                 <Label htmlFor="description" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   Descrição
@@ -243,6 +267,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 label="Diferenciais"
                 placeholder="Adicione um diferencial..."
                 icon={Award}
+              />
+
+              <ArrayInputField
+                field="features"
+                label="Funcionalidades"
+                placeholder="Adicione uma funcionalidade..."
+                icon={Package}
               />
             </CardContent>
           </Card>
@@ -308,6 +339,42 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   onCheckedChange={(checked) => setValue("has_upgrade", checked)}
                 />
                 <Label htmlFor="has_upgrade">Oferece upgrade</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="new"
+                  checked={watchedValues.new}
+                  onCheckedChange={(checked) => setValue("new", checked)}
+                />
+                <Label htmlFor="new">Produto novo</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="popular"
+                  checked={watchedValues.popular}
+                  onCheckedChange={(checked) => setValue("popular", checked)}
+                />
+                <Label htmlFor="popular">Produto popular</Label>
+              </div>
+
+              <div>
+                <Label htmlFor="icon">Ícone (URL)</Label>
+                <Input
+                  id="icon"
+                  {...register("icon")}
+                  placeholder="https://exemplo.com/icone.png"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="image">Imagem (URL)</Label>
+                <Input
+                  id="image"
+                  {...register("image")}
+                  placeholder="https://exemplo.com/imagem.jpg"
+                />
               </div>
             </CardContent>
           </Card>
