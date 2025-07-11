@@ -32,19 +32,47 @@ export function useKanbanStagesFunnelData({ stages, dateRange }: UseKanbanStages
     setError(null);
 
     try {
-      // Query para contar as mudanças de estágio no período
-      const { data: stageHistory, error: queryError } = await supabase
-        .from('contact_stage_history')
-        .select('new_stage')
-        .gte('changed_at', dateRange.from.toISOString())
-        .lte('changed_at', dateRange.to.toISOString())
-        .in('new_stage', stages);
+      console.log('🔍 Buscando dados do funil com parâmetros:', { stages, dateRange });
+
+      // Buscar contatos criados no período especificado com informações dos estágios
+      const { data: contacts, error: queryError } = await supabase
+        .from('contacts')
+        .select(`
+          kanban_stage, 
+          created_at,
+          kanban_stage_id,
+          kanban_stages(title)
+        `)
+        .gte('created_at', dateRange.from.toISOString())
+        .lte('created_at', dateRange.to.toISOString())
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
 
       if (queryError) {
+        console.error('❌ Erro na query:', queryError);
         throw queryError;
       }
 
-      // Contar ocorrências por estágio
+      console.log('📊 Contatos encontrados:', contacts?.length || 0);
+      console.log('📋 Amostra dos dados:', contacts?.slice(0, 5));
+
+      // Também buscar contatos que usam o campo kanban_stage diretamente
+      const { data: contactsWithTextStage, error: textStageError } = await supabase
+        .from('contacts')
+        .select('kanban_stage, created_at')
+        .gte('created_at', dateRange.from.toISOString())
+        .lte('created_at', dateRange.to.toISOString())
+        .is('deleted_at', null)
+        .not('kanban_stage', 'is', null)
+        .order('created_at', { ascending: false });
+
+      if (textStageError) {
+        console.error('❌ Erro na query de estágios de texto:', textStageError);
+      }
+
+      console.log('📝 Contatos com estágio de texto:', contactsWithTextStage?.length || 0);
+
+      // Contar contatos por estágio atual
       const stageCounts: Record<string, number> = {};
       
       // Inicializar contadores com zero para todos os estágios selecionados
@@ -52,15 +80,31 @@ export function useKanbanStagesFunnelData({ stages, dateRange }: UseKanbanStages
         stageCounts[stage] = 0;
       });
 
-      // Contar as ocorrências
-      stageHistory?.forEach(record => {
-        if (record.new_stage && stages.includes(record.new_stage)) {
-          stageCounts[record.new_stage]++;
+      // Contar os contatos por estágio atual (usando kanban_stages.title)
+      contacts?.forEach(contact => {
+        const stage = contact.kanban_stages?.title;
+        if (stage && stages.includes(stage)) {
+          stageCounts[stage]++;
+        } else if (stage) {
+          console.log('🚫 Estágio da tabela não incluído no filtro:', stage);
         }
       });
 
+      // Contar os contatos por estágio atual (usando kanban_stage diretamente)
+      contactsWithTextStage?.forEach(contact => {
+        const stage = contact.kanban_stage;
+        if (stage && stages.includes(stage)) {
+          stageCounts[stage]++;
+        } else if (stage) {
+          console.log('🚫 Estágio de texto não incluído no filtro:', stage);
+        }
+      });
+
+      console.log('📈 Contagem por estágio:', stageCounts);
+
       // Calcular total para percentuais
       const totalCount = Object.values(stageCounts).reduce((sum, count) => sum + count, 0);
+      console.log('🔢 Total de contatos:', totalCount);
 
       // Converter para formato do funil
       const funnelData: FunnelStageData[] = stages
@@ -69,11 +113,13 @@ export function useKanbanStagesFunnelData({ stages, dateRange }: UseKanbanStages
           count: stageCounts[stage] || 0,
           percentage: totalCount > 0 ? ((stageCounts[stage] || 0) / totalCount) * 100 : 0,
         }))
-        .filter(item => item.count > 0); // Só mostrar estágios com dados
+        // Não filtrar estágios com 0 para mostrar o funil completo
+        .filter(item => stages.includes(item.stage));
 
+      console.log('🎯 Dados do funil processados:', funnelData);
       setData(funnelData);
     } catch (err) {
-      console.error('Erro ao buscar dados do funil:', err);
+      console.error('❌ Erro ao buscar dados do funil:', err);
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
