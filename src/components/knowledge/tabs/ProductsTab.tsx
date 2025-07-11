@@ -83,10 +83,11 @@ const ProductsTab = () => {
     try {
       await createProductMutation.mutateAsync({
         name: data.name,
-        price: data.price,
         description: data.description,
-        // Map additional fields to the current schema
-        has_promotion: data.has_promotion,
+        category: data.category || null,
+        features: data.benefits || [],
+        popular: data.has_promotion || false,
+        new: data.has_upgrade || false,
       });
       setIsAddDialogOpen(false);
       toast({
@@ -112,9 +113,10 @@ const ProductsTab = () => {
       await updateProductMutation.mutateAsync({
         id: editingProduct.id,
         name: data.name,
-        price: data.price,
         description: data.description,
-        has_promotion: data.has_promotion,
+        category: data.category || null,
+        features: data.benefits || [],
+        popular: data.has_promotion || false,
       });
       setEditingProduct(null);
       setIsEditDialogOpen(false);
