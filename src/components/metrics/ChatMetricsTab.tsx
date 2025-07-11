@@ -10,6 +10,7 @@ import MetricCard from "./enhanced/MetricCard";
 import NewLeadsOverTimeChart from "./enhanced/NewLeadsOverTimeChart";
 import ConversationsChart from "./enhanced/ConversationsChart";
 import AdManagerSection from "./enhanced/AdManagerSection";
+import KanbanStagesFunnelChart from "./KanbanStagesFunnelChart";
 
 // Imported refactored sections
 import MetricsHeader from "./sections/MetricsHeader";
@@ -279,6 +280,16 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             loading={isLoading}
           />
         </div>
+      </div>
+
+      {/* Funil do Kanban */}
+      <div className="space-y-4">
+        <SectionHeader 
+          title="🎯 Funil de Conversão por Estágios" 
+          borderColor="border-emerald-200 dark:border-emerald-700" 
+        />
+
+        <KanbanStagesFunnelChart />
       </div>
 
       {/* Seção do Gerenciador de Anúncios */}
