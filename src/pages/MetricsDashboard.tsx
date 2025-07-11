@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // Import components
 import DashboardHeader from "@/components/metrics/DashboardHeader";
 import ChatMetricsTab from "@/components/metrics/ChatMetricsTab";
+import KanbanStagesFunnelChart from "@/components/metrics/KanbanStagesFunnelChart";
 // import UTMMetricsTab from "@/components/metrics/UTMMetricsTab";
 // PageTest removido conforme solicitado
 
@@ -43,10 +44,14 @@ const MetricsDashboard = () => {
 
         {/* Tabs for Chat and UTM Metrics */}
         <Tabs defaultValue="chat" className="w-full">
-          <TabsList className="grid w-full grid-cols-1 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageCircle className="h-4 w-4" />
               Métricas de Chat
+            </TabsTrigger>
+            <TabsTrigger value="funnel" className="flex items-center gap-2">
+              <LineChart className="h-4 w-4" />
+              Funil de Estágios
             </TabsTrigger>
             {/* <TabsTrigger value="utm" className="flex items-center gap-2">
               <Share2 className="h-4 w-4" />
@@ -57,6 +62,13 @@ const MetricsDashboard = () => {
           {/* Chat Metrics Tab */}
           <TabsContent value="chat">
             <ChatMetricsTab stats={stats} metrics={metrics} loading={loading} />
+          </TabsContent>
+
+          {/* Kanban Stages Funnel Tab */}
+          <TabsContent value="funnel">
+            <div className="grid gap-6">
+              <KanbanStagesFunnelChart />
+            </div>
           </TabsContent>
 
           {/* UTM Metrics Tab */}

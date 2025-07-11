@@ -2136,6 +2136,27 @@ export type Database = {
         }
         Relationships: []
       }
+      stage_name_mapping: {
+        Row: {
+          created_at: string | null
+          id: string
+          new_name: string
+          old_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          new_name: string
+          old_name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          new_name?: string
+          old_name?: string
+        }
+        Relationships: []
+      }
       tokens: {
         Row: {
           CachedTokens: string | null
@@ -2814,6 +2835,10 @@ export type Database = {
           metadata: Json
           similarity: number
         }[]
+      }
+      normalize_stage_name: {
+        Args: { input_stage: string }
+        Returns: string
       }
       reorder_ai_stages: {
         Args: { personality_uuid: string; stage_ids: string[] }
