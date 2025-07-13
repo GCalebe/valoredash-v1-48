@@ -253,13 +253,6 @@ export type Database = {
             foreignKeyName: "appointments_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
-            referencedRelation: "dados_cliente"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "appointments_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
             referencedRelation: "v_clients_complete"
             referencedColumns: ["id"]
           },
@@ -415,13 +408,6 @@ export type Database = {
             foreignKeyName: "calendar_events_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
-            referencedRelation: "dados_cliente"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_events_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
             referencedRelation: "v_clients_complete"
             referencedColumns: ["id"]
           },
@@ -554,13 +540,6 @@ export type Database = {
             foreignKeyName: "campaign_recipients_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
-            referencedRelation: "dados_cliente"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "campaign_recipients_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
             referencedRelation: "v_clients_complete"
             referencedColumns: ["id"]
           },
@@ -672,13 +651,6 @@ export type Database = {
             foreignKeyName: "client_custom_values_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "dados_cliente"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_custom_values_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "v_clients_complete"
             referencedColumns: ["id"]
           },
@@ -755,17 +727,40 @@ export type Database = {
             foreignKeyName: "contact_stage_history_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
-            referencedRelation: "dados_cliente"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contact_stage_history_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
             referencedRelation: "v_clients_complete"
             referencedColumns: ["id"]
           },
         ]
+      }
+      contact_stage_history_backup: {
+        Row: {
+          changed_at: string | null
+          changed_by: string | null
+          contact_id: string | null
+          id: string | null
+          metadata: Json | null
+          new_stage: string | null
+          old_stage: string | null
+        }
+        Insert: {
+          changed_at?: string | null
+          changed_by?: string | null
+          contact_id?: string | null
+          id?: string | null
+          metadata?: Json | null
+          new_stage?: string | null
+          old_stage?: string | null
+        }
+        Update: {
+          changed_at?: string | null
+          changed_by?: string | null
+          contact_id?: string | null
+          id?: string | null
+          metadata?: Json | null
+          new_stage?: string | null
+          old_stage?: string | null
+        }
+        Relationships: []
       }
       contacts: {
         Row: {
@@ -785,7 +780,6 @@ export type Database = {
           deleted_at: string | null
           email: string | null
           id: string
-          kanban_stage: string | null
           kanban_stage_id: string | null
           last_contact: string | null
           last_message: string | null
@@ -822,7 +816,6 @@ export type Database = {
           deleted_at?: string | null
           email?: string | null
           id?: string
-          kanban_stage?: string | null
           kanban_stage_id?: string | null
           last_contact?: string | null
           last_message?: string | null
@@ -859,7 +852,6 @@ export type Database = {
           deleted_at?: string | null
           email?: string | null
           id?: string
-          kanban_stage?: string | null
           kanban_stage_id?: string | null
           last_contact?: string | null
           last_message?: string | null
@@ -902,6 +894,120 @@ export type Database = {
             referencedColumns: ["session_id"]
           },
         ]
+      }
+      contacts_backup: {
+        Row: {
+          address: string | null
+          asaas_customer_id: string | null
+          budget: number | null
+          client_name: string | null
+          client_objective: string | null
+          client_sector: string | null
+          client_size: string | null
+          client_type: string | null
+          consultation_stage: string | null
+          contract_date: string | null
+          contract_number: string | null
+          cpf_cnpj: string | null
+          created_at: string | null
+          deleted_at: string | null
+          email: string | null
+          id: string | null
+          kanban_stage: string | null
+          kanban_stage_id: string | null
+          last_contact: string | null
+          last_message: string | null
+          last_message_time: string | null
+          loss_reason: string | null
+          name: string | null
+          notes: string | null
+          payment: string | null
+          payment_method: string | null
+          phone: string | null
+          responsible_user: string | null
+          sales: number | null
+          session_id: string | null
+          status: string | null
+          tags: string[] | null
+          unread_count: number | null
+          updated_at: string | null
+          uploaded_files: string[] | null
+        }
+        Insert: {
+          address?: string | null
+          asaas_customer_id?: string | null
+          budget?: number | null
+          client_name?: string | null
+          client_objective?: string | null
+          client_sector?: string | null
+          client_size?: string | null
+          client_type?: string | null
+          consultation_stage?: string | null
+          contract_date?: string | null
+          contract_number?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          id?: string | null
+          kanban_stage?: string | null
+          kanban_stage_id?: string | null
+          last_contact?: string | null
+          last_message?: string | null
+          last_message_time?: string | null
+          loss_reason?: string | null
+          name?: string | null
+          notes?: string | null
+          payment?: string | null
+          payment_method?: string | null
+          phone?: string | null
+          responsible_user?: string | null
+          sales?: number | null
+          session_id?: string | null
+          status?: string | null
+          tags?: string[] | null
+          unread_count?: number | null
+          updated_at?: string | null
+          uploaded_files?: string[] | null
+        }
+        Update: {
+          address?: string | null
+          asaas_customer_id?: string | null
+          budget?: number | null
+          client_name?: string | null
+          client_objective?: string | null
+          client_sector?: string | null
+          client_size?: string | null
+          client_type?: string | null
+          consultation_stage?: string | null
+          contract_date?: string | null
+          contract_number?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          id?: string | null
+          kanban_stage?: string | null
+          kanban_stage_id?: string | null
+          last_contact?: string | null
+          last_message?: string | null
+          last_message_time?: string | null
+          loss_reason?: string | null
+          name?: string | null
+          notes?: string | null
+          payment?: string | null
+          payment_method?: string | null
+          phone?: string | null
+          responsible_user?: string | null
+          sales?: number | null
+          session_id?: string | null
+          status?: string | null
+          tags?: string[] | null
+          unread_count?: number | null
+          updated_at?: string | null
+          uploaded_files?: string[] | null
+        }
+        Relationships: []
       }
       conversation_daily_data: {
         Row: {
@@ -2485,13 +2591,6 @@ export type Database = {
             foreignKeyName: "utm_tracking_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "dados_cliente"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "utm_tracking_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
             referencedRelation: "v_clients_complete"
             referencedColumns: ["id"]
           },
@@ -2530,65 +2629,6 @@ export type Database = {
           value?: number | null
         }
         Relationships: []
-      }
-      dados_cliente: {
-        Row: {
-          address: string | null
-          asaas_customer_id: string | null
-          budget: number | null
-          client_name: string | null
-          client_objective: string | null
-          client_sector: string | null
-          client_size: string | null
-          client_type: string | null
-          consultation_stage: string | null
-          cpf_cnpj: string | null
-          created_at: string | null
-          custom_fields_jsonb: Json | null
-          deleted_at: string | null
-          email: string | null
-          id: string | null
-          kanban_stage: string | null
-          kanban_stage_id: string | null
-          last_contact: string | null
-          last_message: string | null
-          last_message_time: string | null
-          message_count: number | null
-          name: string | null
-          notes: string | null
-          payment_method: string | null
-          phone: string | null
-          responsible_user: string | null
-          sales: number | null
-          session_id: string | null
-          status: string | null
-          tags: string[] | null
-          unread_count: number | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contacts_kanban_stage_fk"
-            columns: ["kanban_stage_id"]
-            isOneToOne: false
-            referencedRelation: "kanban_stages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contacts_responsible_user_fk"
-            columns: ["responsible_user"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contacts_session_fk"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["session_id"]
-          },
-        ]
       }
       dashboard_metrics: {
         Row: {
@@ -2835,10 +2875,6 @@ export type Database = {
           metadata: Json
           similarity: number
         }[]
-      }
-      normalize_stage_name: {
-        Args: { input_stage: string }
-        Returns: string
       }
       reorder_ai_stages: {
         Args: { personality_uuid: string; stage_ids: string[] }

@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { Contact } from "@/types/client";
 import { toast } from "@/hooks/use-toast";
@@ -63,18 +64,21 @@ export const useContactsData = () => {
 
   const handleKanbanStageChange = async (
     contactId: string,
-    newStage: string,
+    newStageId: string,
   ) => {
+    console.log(`[useContactsData] Moving contact ${contactId} to stage ID: ${newStageId}`);
+    
     try {
-      // Update using React Query mutation
+      // Update using React Query mutation with the stage ID
       await updateContactMutation.mutateAsync({
         id: contactId,
-        kanban_stage: newStage
+        kanban_stage_id: newStageId
       });
       
       toast({
         title: "Etapa atualizada",
-        description: `Cliente movido para ${newStage}.`,
+        description: "Cliente movido com sucesso.",
+        duration: 2000,
       });
     } catch (error) {
       console.error("Error updating kanban stage:", error);
@@ -83,6 +87,7 @@ export const useContactsData = () => {
         title: "Erro ao atualizar etapa",
         description: "Não foi possível atualizar a etapa do cliente.",
         variant: "destructive",
+        duration: 4000,
       });
     }
   };

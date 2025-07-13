@@ -1,19 +1,21 @@
+
 import React, { useRef, useState, useCallback } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import KanbanStageColumn from "./KanbanStageColumn";
 import { Contact } from "@/types/client";
 import { KanbanStage } from "@/hooks/useKanbanStages";
 import { useContactsByKanbanStage } from "@/hooks/useContactsByKanbanStage";
+import { toast } from "@/hooks/use-toast";
 
 interface KanbanViewProps {
   contacts: Contact[];
   onContactClick: (contact: Contact) => void;
-  onStageChange: (contactId: string, newStage: string) => void;
+  onStageChange: (contactId: string, newStageId: string) => void;
   searchTerm: string;
   onEditClick: (contact: Contact) => void;
   isCompact: boolean;
   stages: KanbanStage[];
-  onStageEdit?: (stage: KanbanStage) => void; // Changed parameter type
+  onStageEdit?: (stage: KanbanStage) => void;
 }
 
 const KanbanView = ({
@@ -30,6 +32,7 @@ const KanbanView = ({
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const [dragStartTime, setDragStartTime] = useState<number | null>(null);
 
   // Filtragem de contatos
   const filteredContacts = contacts.filter(
@@ -49,7 +52,7 @@ const KanbanView = ({
   React.useEffect(() => {
     console.log(
       "[KanbanView] Stages disponíveis:",
-      stages.map((s) => s.title),
+      stages.map((s) => ({ id: s.id, title: s.title })),
     );
     console.log(
       "[KanbanView] Total de contatos filtrados:",
@@ -58,20 +61,51 @@ const KanbanView = ({
     console.log("[KanbanView] Agrupamento final:", contactsByStage);
   }, [filteredContacts, stages, contactsByStage]);
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
+  const handleDragStart = useCallback(() => {
+    setDragStartTime(Date.now());
+    console.log("[KanbanView] Drag started");
+  }, []);
+
+  const handleDragEnd = useCallback((result: any) => {
+    const dragEndTime = Date.now();
+    const dragDuration = dragStartTime ? dragEndTime - dragStartTime : 0;
+    
+    console.log("[KanbanView] Drag ended:", result);
+    console.log("[KanbanView] Drag duration:", dragDuration, "ms");
+    
+    setDragStartTime(null);
+
+    if (!result.destination) {
+      console.log("[KanbanView] No destination - drag cancelled");
+      return;
+    }
 
     const { source, destination, draggableId } = result;
 
-    if (source.droppableId === destination.droppableId) return;
+    if (source.droppableId === destination.droppableId) {
+      console.log("[KanbanView] Same column - no action needed");
+      return;
+    }
 
-    // Find the stage by ID and get its title for the onStageChange callback
+    // Find the source and destination stages
+    const sourceStage = stages.find(stage => stage.id === source.droppableId);
     const destinationStage = stages.find(stage => stage.id === destination.droppableId);
-    if (!destinationStage) return;
+    
+    if (!sourceStage || !destinationStage) {
+      console.error("[KanbanView] Could not find source or destination stage");
+      toast({
+        title: "Erro",
+        description: "Não foi possível encontrar os estágios de origem ou destino.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const newStage = destinationStage.title;
-    onStageChange(draggableId, newStage);
-  };
+    console.log(`[KanbanView] Moving contact ${draggableId} from ${sourceStage.title} to ${destinationStage.title}`);
+    
+    // Call the stage change handler with the destination stage ID
+    onStageChange(draggableId, destination.droppableId);
+  }, [stages, onStageChange, dragStartTime]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!scrollContainerRef.current) return;
@@ -108,7 +142,7 @@ const KanbanView = ({
   }, []);
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
+    <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div
         ref={scrollContainerRef}
         className={`overflow-x-auto overflow-y-hidden h-full select-none transition-all duration-200 ${
@@ -127,7 +161,7 @@ const KanbanView = ({
           {stages.map((stage) => (
             <KanbanStageColumn
               key={stage.id}
-              stage={stage} // Pass the full stage object
+              stage={stage}
               contacts={contactsByStage[stage.title] || []}
               onContactClick={onContactClick}
               onEditClick={onEditClick}

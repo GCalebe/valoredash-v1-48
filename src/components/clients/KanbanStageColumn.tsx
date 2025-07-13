@@ -1,33 +1,22 @@
+
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Droppable } from "react-beautiful-dnd";
+import { Droppable, Draggable } from "react-beautiful-dnd";
 import { Edit3 } from "lucide-react";
 import KanbanClientCard from "./KanbanClientCard";
 import { Contact } from "@/types/client";
 import { KanbanStage } from "@/hooks/useKanbanStages";
 
 interface KanbanStageColumnProps {
-  stage: KanbanStage; // Changed from string to KanbanStage
+  stage: KanbanStage;
   contacts: Contact[];
   onContactClick: (contact: Contact) => void;
   onEditClick: (contact: Contact) => void;
   isCompact: boolean;
-  onStageEdit?: (stage: KanbanStage) => void; // Changed parameter type
+  onStageEdit?: (stage: KanbanStage) => void;
 }
-
-// Default text colors for stage headers
-const STAGE_HEADER_COLORS: { [key: string]: string } = {
-  Entraram: "text-gray-500 dark:text-gray-400",
-  Conversaram: "text-blue-500 dark:text-blue-400",
-  Agendaram: "text-yellow-500 dark:text-yellow-400",
-  Compareceram: "text-green-500 dark:text-green-400",
-  Negociaram: "text-purple-500 dark:text-purple-400",
-  Postergaram: "text-orange-500 dark:text-orange-400",
-  Converteram: "text-emerald-500 dark:text-emerald-400",
-};
-const DEFAULT_HEADER_COLOR = "text-gray-500 dark:text-gray-400";
 
 const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
   stage,
@@ -72,23 +61,51 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 className={`min-h-[200px] transition-colors duration-200 rounded-lg ${
-                  snapshot.isDraggingOver ? "bg-black/5 dark:bg-white/5" : ""
+                  snapshot.isDraggingOver ? "bg-blue-50 dark:bg-blue-950/20 ring-2 ring-blue-200 dark:ring-blue-800" : ""
                 }`}
               >
                 {contacts.map((contact, index) => (
-                  <KanbanClientCard
-                    key={contact.id}
-                    contact={contact}
-                    onClick={onContactClick}
-                    onEditClick={onEditClick}
-                    index={index}
-                    isCompact={isCompact}
-                  />
+                  <Draggable key={contact.id} draggableId={contact.id} index={index}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className={`mb-2 ${
+                          snapshot.isDragging ? "opacity-50 rotate-2 scale-105 shadow-2xl z-50" : ""
+                        }`}
+                        style={{
+                          ...provided.draggableProps.style,
+                          ...(snapshot.isDragging && {
+                            background: "white",
+                            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                          }),
+                        }}
+                      >
+                        <KanbanClientCard
+                          contact={contact}
+                          onClick={onContactClick}
+                          onEditClick={onEditClick}
+                          index={index}
+                          isCompact={isCompact}
+                          dragHandleProps={provided.dragHandleProps}
+                          draggableProps={provided.draggableProps}
+                          innerRef={provided.innerRef}
+                          snapshot={snapshot}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
                 ))}
                 {provided.placeholder}
                 {contacts.length === 0 && !snapshot.isDraggingOver && (
                   <div className="text-center text-gray-400 text-sm py-8">
                     Arraste um cliente para cá
+                  </div>
+                )}
+                {snapshot.isDraggingOver && contacts.length === 0 && (
+                  <div className="text-center text-blue-500 text-sm py-8 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 dark:bg-blue-950/20">
+                    Solte o cliente aqui
                   </div>
                 )}
               </div>
