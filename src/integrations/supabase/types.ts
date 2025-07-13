@@ -2772,6 +2772,10 @@ export type Database = {
         Args: { target_date?: string }
         Returns: undefined
       }
+      debug_kanban_stage_update: {
+        Args: { contact_uuid: string; new_stage_id: string }
+        Returns: Json
+      }
       export_schema_summary: {
         Args: Record<PropertyKey, never>
         Returns: Json

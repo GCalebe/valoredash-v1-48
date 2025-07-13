@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -26,6 +25,9 @@ const ClientsDashboard = () => {
   // Stage editing state  
   const [isEditStageDialogOpen, setIsEditStageDialogOpen] = useState(false);
   const [selectedStage, setSelectedStage] = useState<KanbanStage | null>(null);
+
+  // Use the new Supabase-based kanban stages hook
+  const kanbanStages = useKanbanStagesSupabase();
 
   const {
     contacts,
@@ -60,8 +62,6 @@ const ClientsDashboard = () => {
     handlePauseDurationConfirm,
     handleKanbanStageChange,
   } = useClientManagement();
-
-  const kanbanStages = useKanbanStagesSupabase();
 
   // Handle stage editing
   const handleStageEdit = (stage: KanbanStage) => {

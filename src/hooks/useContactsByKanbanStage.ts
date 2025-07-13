@@ -1,55 +1,46 @@
 
-import { useMemo } from "react";
-import { Contact } from "@/types/client";
-import { KanbanStage } from "@/hooks/useKanbanStages";
+import { useMemo } from 'react';
+import { Contact } from '@/types/client';
+import { KanbanStage } from '@/hooks/useKanbanStagesSupabase';
 
-/**
- * Agrupa os contatos por estágio do Kanban.
- * Retorna um objeto { [kanbanStageTitle]: Contact[] }.
- * Também loga para diagnóstico.
- */
-export function useContactsByKanbanStage(
+export const useContactsByKanbanStage = (
   contacts: Contact[],
-  stages: KanbanStage[],
-): Record<string, Contact[]> {
+  stages: KanbanStage[]
+) => {
   return useMemo(() => {
-    const stageMap = new Map(stages.map(stage => [stage.id, stage.title]));
+    console.log("[useContactsByKanbanStage] Processing contacts:", contacts.length);
+    console.log("[useContactsByKanbanStage] Available stages:", stages.map(s => ({ id: s.id, title: s.title })));
+
     const contactsByStage: Record<string, Contact[]> = {};
 
-    // Inicializa com arrays vazios para todos os estágios
-    for (const stage of stages) {
+    // Initialize all stages with empty arrays
+    stages.forEach(stage => {
       contactsByStage[stage.title] = [];
-    }
+    });
 
-    // Agrupa contatos por estágio
-    for (const contact of contacts) {
-      // Usa kanban_stage_id se disponível, senão usa kanbanStage como fallback
-      let stageId = contact.kanban_stage_id || contact.kanbanStage;
-      let stageTitle = stageMap.get(stageId) || stageId;
+    // Group contacts by stage
+    contacts.forEach(contact => {
+      console.log(`[useContactsByKanbanStage] Processing contact ${contact.name} with stage_id: ${contact.kanban_stage_id}`);
       
-      // Se não encontrar o estágio nas stages configuradas, usa o primeiro como fallback
-      if (!stageTitle || !contactsByStage[stageTitle]) {
-        console.warn(
-          `[useContactsByKanbanStage] Cliente "${contact.name}" (ID ${contact.id}) está com stage "${stageId}" não encontrado. Realocando para "${stages[0]?.title}"`
-        );
-        stageTitle = stages[0]?.title || "Entraram";
-      }
+      // Find the stage by ID
+      const stage = stages.find(s => s.id === contact.kanban_stage_id);
       
-      if (stageTitle && contactsByStage[stageTitle]) {
-        contactsByStage[stageTitle].push(contact);
+      if (stage) {
+        console.log(`[useContactsByKanbanStage] Found stage "${stage.title}" for contact ${contact.name}`);
+        contactsByStage[stage.title].push(contact);
+      } else {
+        console.warn(`[useContactsByKanbanStage] No stage found for contact ${contact.name} with stage_id: ${contact.kanban_stage_id}`);
+        // Default to first stage if no stage is found
+        if (stages.length > 0) {
+          contactsByStage[stages[0].title].push(contact);
+        }
       }
-    }
+    });
 
-    // Diagnóstico: mostra o agrupamento resultante
-    console.log(
-      "[useContactsByKanbanStage] Resultado agrupamento:",
-      Object.entries(contactsByStage).map(([stage, contacts]) => ({
-        stage,
-        count: contacts.length,
-        contactIds: contacts.map(c => c.id)
-      }))
+    console.log("[useContactsByKanbanStage] Final grouping:", 
+      Object.entries(contactsByStage).map(([stage, contacts]) => ({ stage, count: contacts.length }))
     );
 
     return contactsByStage;
   }, [contacts, stages]);
-}
+};
