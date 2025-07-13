@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { ChatMessage, N8nChatHistory } from "@/types/chat";
-import { parseMessage } from "@/utils/chatUtils";
-import { fetchChatHistory, subscribeToChat } from "@/lib/chatService";
+import { ChatMessage } from "@/types/chat";
+import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
 import { useContactsQuery } from "@/hooks/useContactsQuery";
 
@@ -29,90 +28,6 @@ const generateMockMessages = (sessionId: string, availableContacts: any[]): Chat
     type: "ai",
   });
 
-  // Mensagem específica baseada no tipo de cliente
-  if (client.clientType === "pessoa-juridica") {
-    messages.push({
-      role: "human",
-      content: `Minha empresa é do setor ${client.clientSector} e estamos buscando ${client.clientObjective}. Vocês têm experiência nessa área?`,
-      timestamp: "14:33",
-      type: "human",
-    });
-
-    messages.push({
-      role: "assistant",
-      content: `Perfeito! Temos bastante experiência com empresas do setor ${client.clientSector}. Para ${client.clientObjective}, temos soluções personalizadas que podem se adequar perfeitamente às suas necessidades.\n\nVocê gostaria de agendar uma reunião para conversarmos com mais detalhes? Posso apresentar cases de sucesso similares ao seu!`,
-      timestamp: "14:35",
-      type: "ai",
-    });
-  } else {
-    messages.push({
-      role: "human",
-      content:
-        client.clientObjective ||
-        "Preciso de uma consultoria personalizada para minha situação.",
-      timestamp: "14:33",
-      type: "human",
-    });
-
-    messages.push({
-      role: "assistant",
-      content:
-        "Entendo perfeitamente sua necessidade! Trabalhamos com consultoria personalizada para cada cliente.\n\nVou te conectar com um dos nossos especialistas. Qual seria o melhor horário para você ter uma conversa mais detalhada?",
-      timestamp: "14:35",
-      type: "ai",
-    });
-  }
-
-  // Mensagem baseada no estágio atual
-  if (client.kanbanStage === "Negociação") {
-    messages.push({
-      role: "human",
-      content:
-        "Gostei da proposta que vocês enviaram. Podemos conversar sobre os valores?",
-      timestamp: "15:20",
-      type: "human",
-    });
-
-    messages.push({
-      role: "assistant",
-      content:
-        "Que ótimo que gostou da proposta! 😊\n\nVou te conectar com nosso especialista comercial para conversarmos sobre os valores e condições de pagamento. Ele pode te apresentar algumas opções que podem ser interessantes para você.",
-      timestamp: "15:22",
-      type: "ai",
-    });
-  }
-
-  if (client.kanbanStage === "Projeto cancelado – perdido") {
-    messages.push({
-      role: "human",
-      content:
-        "Infelizmente precisamos cancelar o projeto por questões orçamentárias.",
-      timestamp: "16:10",
-      type: "human",
-    });
-
-    messages.push({
-      role: "assistant",
-      content:
-        "Compreendo perfeitamente sua situação. Obrigada pela transparência!\n\nFicaremos aqui caso no futuro vocês queiram retomar o projeto. Estaremos sempre à disposição para ajudar! 🤝",
-      timestamp: "16:12",
-      type: "ai",
-    });
-  }
-
-  // Última mensagem baseada na mensagem atual do cliente
-  if (
-    client.lastMessage &&
-    client.lastMessage !== messages[messages.length - 1]?.content
-  ) {
-    messages.push({
-      role: "human",
-      content: client.lastMessage,
-      timestamp: "Agora",
-      type: "human",
-    });
-  }
-
   return messages;
 };
 
@@ -127,24 +42,45 @@ export function useChatMessages(selectedChat: string | null) {
 
   const fetchMessages = useCallback(
     async (conversationId: string) => {
+      if (!conversationId) return;
+      
+      setLoading(true);
       try {
-        setLoading(true);
-        logger.debug(
-          `Gerando mensagens mockup para a sessão ${conversationId}...`,
-        );
+        console.log(`Fetching messages for conversation: ${conversationId}`);
+        
+        // Buscar mensagens da nova tabela unificada
+        const { data: messagesData, error } = await supabase
+          .from("n8n_chat_messages")
+          .select("*")
+          .eq("session_id", conversationId)
+          .eq("active", true)
+          .order("created_at", { ascending: true });
 
-        // Desativando busca de mensagens reais e usando apenas mensagens mockup
-        logger.debug("Usando apenas mensagens mockup conforme solicitado");
+        if (error) {
+          console.error("Error fetching messages:", error);
+          // Fallback para dados fictícios se houver erro
+          const mockMessages = generateMockMessages(conversationId, availableContacts);
+          setMessages(mockMessages);
+          return;
+        }
+
+        // Converter para o formato esperado
+        const formattedMessages: ChatMessage[] = (messagesData || []).map((msg) => ({
+          id: msg.id.toString(),
+          content: msg.user_message || msg.bot_message || "",
+          role: msg.user_message ? "user" : "assistant",
+          timestamp: msg.created_at,
+          type: (msg.message_type || "text") as "text" | "image" | "file" | "human" | "ai",
+        }));
+
+        console.log(`Fetched ${formattedMessages.length} real messages for conversation ${conversationId}`);
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        // Fallback para dados fictícios
         const mockMessages = generateMockMessages(conversationId, availableContacts);
         setMessages(mockMessages);
-        logger.debug("Generated mock messages:", mockMessages.length);
-      } catch (error) {
-        logger.error("Error fetching messages:", error);
-
-        // Em caso de erro, sempre tenta usar dados mockup
-        const mockMessages = generateMockMessages(selectedChat || "", availableContacts);
-        setMessages(mockMessages);
-
+        
         toast({
           title: "Usando mensagens de exemplo",
           description: "Exibindo conversa de demonstração.",
@@ -153,25 +89,8 @@ export function useChatMessages(selectedChat: string | null) {
         setLoading(false);
       }
     },
-    [toast, selectedChat, availableContacts],
+    [availableContacts, toast],
   );
-
-  // Assinatura em tempo real desativada para usar apenas dados mockup
-  useEffect(() => {
-    if (!selectedChat) return;
-
-    logger.debug(
-      `Assinatura em tempo real desativada para a sessão ${selectedChat}...`,
-    );
-    logger.debug("Usando apenas dados mockup conforme solicitado");
-
-    // Não há necessidade de limpar assinatura, pois não estamos configurando nenhuma
-    return () => {
-      logger.debug(
-        `Nenhuma assinatura para cancelar para a sessão ${selectedChat}...`,
-      );
-    };
-  }, [selectedChat]);
 
   // Fetch messages when selected chat changes
   useEffect(() => {
@@ -182,8 +101,6 @@ export function useChatMessages(selectedChat: string | null) {
       setLoading(false);
     }
   }, [selectedChat, fetchMessages]);
-
-  // Contacts are automatically loaded by React Query
 
   const handleNewMessage = (message: ChatMessage) => {
     logger.debug("Adding new message to local state:", message);

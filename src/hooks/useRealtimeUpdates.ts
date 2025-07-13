@@ -13,23 +13,23 @@ export function useRealtimeUpdates({
   useEffect(() => {
     console.log("Setting up realtime updates for chat history");
 
-    // Create a single subscription for chat history updates
+    // Create a single subscription for unified chat messages
     const subscription = supabase
-      .channel("n8n_chat_histories_updates")
+      .channel("n8n_chat_messages_updates")
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
-          table: "n8n_chat_histories",
+          table: "n8n_chat_messages",
         },
         (payload) => {
-          console.log("New chat history entry detected:", payload);
+          console.log("New chat message detected:", payload);
 
           const sessionId = payload.new.session_id;
           console.log(`Processing message for session: ${sessionId}`);
 
-          // First update the last message in the conversation list
+          // Update the last message in the conversation list
           updateConversationLastMessage(sessionId)
             .then(() =>
               console.log(

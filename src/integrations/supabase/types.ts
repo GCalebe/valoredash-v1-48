@@ -249,13 +249,6 @@ export type Database = {
             referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "appointments_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "v_clients_complete"
-            referencedColumns: ["id"]
-          },
         ]
       }
       audit_log: {
@@ -404,13 +397,6 @@ export type Database = {
             referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "calendar_events_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "v_clients_complete"
-            referencedColumns: ["id"]
-          },
         ]
       }
       campaign_data: {
@@ -536,13 +522,6 @@ export type Database = {
             referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "campaign_recipients_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "v_clients_complete"
-            referencedColumns: ["id"]
-          },
         ]
       }
       campaigns: {
@@ -648,13 +627,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "client_custom_values_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_clients_complete"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "client_custom_values_field_id_fkey"
             columns: ["field_id"]
             isOneToOne: false
@@ -721,13 +693,6 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contact_stage_history_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "v_clients_complete"
             referencedColumns: ["id"]
           },
         ]
@@ -885,13 +850,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contacts_session_fk"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["session_id"]
           },
         ]
       }
@@ -1107,54 +1065,45 @@ export type Database = {
       }
       conversations: {
         Row: {
-          address: string | null
           avatar: string | null
-          client_name: string | null
-          client_size: string | null
-          client_type: string | null
+          client_data: Json | null
           created_at: string | null
           email: string | null
           id: string
           last_message: string | null
+          last_message_time: string | null
           name: string
           phone: string | null
           session_id: string
-          time: string | null
-          unread: number | null
+          unread_count: number | null
           updated_at: string | null
         }
         Insert: {
-          address?: string | null
           avatar?: string | null
-          client_name?: string | null
-          client_size?: string | null
-          client_type?: string | null
+          client_data?: Json | null
           created_at?: string | null
           email?: string | null
           id?: string
           last_message?: string | null
+          last_message_time?: string | null
           name: string
           phone?: string | null
           session_id: string
-          time?: string | null
-          unread?: number | null
+          unread_count?: number | null
           updated_at?: string | null
         }
         Update: {
-          address?: string | null
           avatar?: string | null
-          client_name?: string | null
-          client_size?: string | null
-          client_type?: string | null
+          client_data?: Json | null
           created_at?: string | null
           email?: string | null
           id?: string
           last_message?: string | null
+          last_message_time?: string | null
           name?: string
           phone?: string | null
           session_id?: string
-          time?: string | null
-          unread?: number | null
+          unread_count?: number | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1835,105 +1784,39 @@ export type Database = {
         }
         Relationships: []
       }
-      n8n_chat_histories_old: {
+      n8n_chat_messages: {
         Row: {
-          data: string | null
-          hora: string | null
-          id: number
-          message: Json | null
-          session_id: string
-        }
-        Insert: {
-          data?: string | null
-          hora?: string | null
-          id?: number
-          message?: Json | null
-          session_id: string
-        }
-        Update: {
-          data?: string | null
-          hora?: string | null
-          id?: number
-          message?: Json | null
-          session_id?: string
-        }
-        Relationships: []
-      }
-      n8n_chat_history_old: {
-        Row: {
+          active: boolean | null
+          bot_message: string | null
           created_at: string | null
-          data: string | null
-          hora: string | null
           id: number
-          message: Json
+          message_data: Json | null
+          message_type: string | null
+          phone: string | null
           session_id: string
+          user_message: string | null
         }
         Insert: {
+          active?: boolean | null
+          bot_message?: string | null
           created_at?: string | null
-          data?: string | null
-          hora?: string | null
           id?: number
-          message: Json
+          message_data?: Json | null
+          message_type?: string | null
+          phone?: string | null
           session_id: string
+          user_message?: string | null
         }
         Update: {
+          active?: boolean | null
+          bot_message?: string | null
           created_at?: string | null
-          data?: string | null
-          hora?: string | null
           id?: number
-          message?: Json
+          message_data?: Json | null
+          message_type?: string | null
+          phone?: string | null
           session_id?: string
-        }
-        Relationships: []
-      }
-      n8n_chat_memory: {
-        Row: {
-          context: Json | null
-          created_at: string | null
-          data: string | null
-          entities: Json | null
-          expiration_date: string | null
-          hora: string | null
-          id: number
-          importance: number | null
-          memory_level: string | null
-          memory_type: string | null
-          message: Json
-          metadata: Json | null
-          relationships: Json | null
-          session_id: string
-        }
-        Insert: {
-          context?: Json | null
-          created_at?: string | null
-          data?: string | null
-          entities?: Json | null
-          expiration_date?: string | null
-          hora?: string | null
-          id?: number
-          importance?: number | null
-          memory_level?: string | null
-          memory_type?: string | null
-          message: Json
-          metadata?: Json | null
-          relationships?: Json | null
-          session_id: string
-        }
-        Update: {
-          context?: Json | null
-          created_at?: string | null
-          data?: string | null
-          entities?: Json | null
-          expiration_date?: string | null
-          hora?: string | null
-          id?: number
-          importance?: number | null
-          memory_level?: string | null
-          memory_type?: string | null
-          message?: Json
-          metadata?: Json | null
-          relationships?: Json | null
-          session_id?: string
+          user_message?: string | null
         }
         Relationships: []
       }
@@ -2587,25 +2470,10 @@ export type Database = {
             referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "utm_tracking_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "v_clients_complete"
-            referencedColumns: ["id"]
-          },
         ]
       }
     }
     Views: {
-      conversation_metrics_view: {
-        Row: {
-          avg_unread_messages: number | null
-          month: string | null
-          total_conversations: number | null
-        }
-        Relationships: []
-      }
       conversion_funnel_view: {
         Row: {
           color: string | null
@@ -2643,128 +2511,6 @@ export type Database = {
           total_leads: number | null
         }
         Relationships: []
-      }
-      latest_chat_messages: {
-        Row: {
-          id: number | null
-          message: Json | null
-          message_time: string | null
-          session_id: string | null
-        }
-        Relationships: []
-      }
-      n8n_chat_histories: {
-        Row: {
-          created_at: string | null
-          data: string | null
-          hora: string | null
-          id: number | null
-          message: Json | null
-          session_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          data?: string | null
-          hora?: string | null
-          id?: number | null
-          message?: Json | null
-          session_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          data?: string | null
-          hora?: string | null
-          id?: number | null
-          message?: Json | null
-          session_id?: string | null
-        }
-        Relationships: []
-      }
-      n8n_chat_history: {
-        Row: {
-          created_at: string | null
-          data: string | null
-          hora: string | null
-          id: number | null
-          message: Json | null
-          session_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          data?: string | null
-          hora?: string | null
-          id?: number | null
-          message?: Json | null
-          session_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          data?: string | null
-          hora?: string | null
-          id?: number | null
-          message?: Json | null
-          session_id?: string | null
-        }
-        Relationships: []
-      }
-      v_clients_complete: {
-        Row: {
-          address: string | null
-          asaas_customer_id: string | null
-          budget: number | null
-          client_name: string | null
-          client_objective: string | null
-          client_sector: string | null
-          client_size: string | null
-          client_type: string | null
-          consultation_stage: string | null
-          cpf_cnpj: string | null
-          created_at: string | null
-          custom_fields_jsonb: Json | null
-          deleted_at: string | null
-          email: string | null
-          id: string | null
-          kanban_stage: string | null
-          kanban_stage_id: string | null
-          last_contact: string | null
-          last_message: string | null
-          last_message_time: string | null
-          message_count: number | null
-          name: string | null
-          notes: string | null
-          payment_method: string | null
-          phone: string | null
-          responsible_user: string | null
-          sales: number | null
-          session_id: string | null
-          status: string | null
-          tags: string[] | null
-          unread_count: number | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contacts_kanban_stage_fk"
-            columns: ["kanban_stage_id"]
-            isOneToOne: false
-            referencedRelation: "kanban_stages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contacts_responsible_user_fk"
-            columns: ["responsible_user"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contacts_session_fk"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["session_id"]
-          },
-        ]
       }
     }
     Functions: {
