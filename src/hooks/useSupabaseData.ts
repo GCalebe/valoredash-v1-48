@@ -120,8 +120,9 @@ export const getContacts = async (filters?: ContactFilters): Promise<SupabaseRes
     // Transform data to match Contact interface
     const transformedData = data?.map(contact => ({
       ...contact,
-      kanbanStage: contact.kanban_stage_id || 'Entraram', // Set kanbanStage from kanban_stage_id
-      custom_values: {} // Add missing property with default value
+      kanbanStage: contact.kanban_stage_id || 'Entraram',
+      kanban_stage: contact.kanban_stage_id || 'Entraram',
+      custom_values: {}
     })) as Contact[];
 
     return {
@@ -294,7 +295,8 @@ export const addContact = async (contact: ContactInsert): Promise<SupabaseRespon
     const transformedData = data ? {
       ...data,
       kanbanStage: data.kanban_stage_id || 'Entraram',
-      custom_values: {} // Add missing property with default value
+      kanban_stage: data.kanban_stage_id || 'Entraram',
+      custom_values: {}
     } as Contact : null;
 
     return {
@@ -325,7 +327,8 @@ export const updateContact = async (id: string, updates: ContactUpdate): Promise
     const transformedData = data ? {
       ...data,
       kanbanStage: data.kanban_stage_id || 'Entraram',
-      custom_values: {} // Add missing property with default value
+      kanban_stage: data.kanban_stage_id || 'Entraram',
+      custom_values: {}
     } as Contact : null;
 
     return {
@@ -387,10 +390,6 @@ export const addFunnelData = async (funnelItem: Omit<FunnelData, 'id' | 'created
   }
 };
 
-// =====================================================
-// HOOKS ESPECIALIZADOS
-// =====================================================
-
 // Hook para contatos com paginação
 export const useContacts = (filters?: ContactFilters, pageSize: number = 20) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -439,7 +438,8 @@ export const useContacts = (filters?: ContactFilters, pageSize: number = 20) => 
         const transformedData = data?.map(contact => ({
           ...contact,
           kanbanStage: contact.kanban_stage_id || 'Entraram',
-          custom_values: {} // Add missing property with default value
+          kanban_stage: contact.kanban_stage_id || 'Entraram',
+          custom_values: {}
         })) as Contact[] || [];
         setContacts(transformedData);
         setTotalCount(count || 0);
