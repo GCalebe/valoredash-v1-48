@@ -14,19 +14,29 @@ interface DateRange {
   to: Date;
 }
 
+interface KanbanStageLocal {
+  id: string;
+  title: string;
+  ordering: number;
+  settings?: {
+    color?: string;
+  };
+}
+
 interface UseKanbanStagesFunnelDataParams {
   stageIds: string[];
   dateRange: DateRange;
+  allStages: KanbanStageLocal[];
 }
 
-export function useKanbanStagesFunnelData({ stageIds, dateRange }: UseKanbanStagesFunnelDataParams) {
+export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages }: UseKanbanStagesFunnelDataParams) {
   const [data, setData] = useState<FunnelStageData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchFunnelData = useCallback(async () => {
-    if (stageIds.length === 0) {
-      console.log('⚠️ Nenhum estágio selecionado para busca');
+    if (stageIds.length === 0 || allStages.length === 0) {
+      console.log('⚠️ Nenhum estágio selecionado ou disponível para busca');
       setData([]);
       return;
     }
@@ -35,67 +45,60 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange }: UseKanbanStag
     setError(null);
 
     try {
-      console.log('🔍 Buscando dados do funil com JOIN correto:', { 
+      console.log('🔍 Buscando dados do funil:', { 
         stageIds, 
         dateRange,
+        allStagesCount: allStages.length,
         startDate: dateRange.from.toISOString(),
         endDate: dateRange.to.toISOString()
       });
 
-      // Query otimizada com JOIN entre contacts e kanban_stages
-      const { data: contacts, error: queryError } = await supabase
-        .from('contacts')
-        .select(`
-          id,
-          kanban_stage_id,
-          created_at,
-          kanban_stages!inner (
-            id,
-            title,
-            ordering
-          )
-        `)
-        .is('deleted_at', null)
-        .gte('created_at', dateRange.from.toISOString())
-        .lte('created_at', dateRange.to.toISOString())
-        .in('kanban_stage_id', stageIds)
-        .order('created_at', { ascending: false });
-
-      if (queryError) {
-        console.error('❌ Erro na query com JOIN:', queryError);
-        throw queryError;
-      }
-
-      console.log('📊 Contatos encontrados com JOIN:', contacts?.length || 0);
-      console.log('📋 Amostra dos dados:', contacts?.slice(0, 3));
-
-      // Processar dados para contagem por estágio
+      // Initialize all stages with zero count using the provided stage list
       const stageCounts: Record<string, { count: number, title: string, ordering: number }> = {};
-
-      // Inicializar contadores para os estágios selecionados
-      stageIds.forEach(stageId => {
-        stageCounts[stageId] = { count: 0, title: 'Desconhecido', ordering: 999 };
-      });
-
-      // Contar contatos por estágio
-      contacts?.forEach(contact => {
-        const stageId = contact.kanban_stage_id;
-        const stageInfo = contact.kanban_stages;
-        
-        if (stageId && stageInfo && stageCounts[stageId] !== undefined) {
-          stageCounts[stageId].count++;
-          stageCounts[stageId].title = stageInfo.title;
-          stageCounts[stageId].ordering = stageInfo.ordering || 999;
+      
+      allStages.forEach(stage => {
+        if (stageIds.includes(stage.id)) {
+          stageCounts[stage.id] = {
+            count: 0,
+            title: stage.title,
+            ordering: stage.ordering
+          };
         }
       });
 
-      console.log('📈 Contagem por estágio (JOIN):', stageCounts);
+      console.log('🎯 Estágios inicializados:', Object.keys(stageCounts));
 
-      // Calcular total para percentuais
+      // Query contacts and count by stage
+      const { data: contacts, error: queryError } = await supabase
+        .from('contacts')
+        .select('id, kanban_stage_id, created_at')
+        .is('deleted_at', null)
+        .gte('created_at', dateRange.from.toISOString())
+        .lte('created_at', dateRange.to.toISOString())
+        .in('kanban_stage_id', stageIds);
+
+      if (queryError) {
+        console.error('❌ Erro na query:', queryError);
+        throw queryError;
+      }
+
+      console.log('📊 Contatos encontrados:', contacts?.length || 0);
+
+      // Count contacts by stage
+      contacts?.forEach(contact => {
+        const stageId = contact.kanban_stage_id;
+        if (stageId && stageCounts[stageId] !== undefined) {
+          stageCounts[stageId].count++;
+        }
+      });
+
+      console.log('📈 Contagem final por estágio:', stageCounts);
+
+      // Calculate total for percentages
       const totalCount = Object.values(stageCounts).reduce((sum, stage) => sum + stage.count, 0);
-      console.log('🔢 Total de contatos processados:', totalCount);
+      console.log('🔢 Total de contatos:', totalCount);
 
-      // Converter para formato do funil e ordenar por ordering
+      // Convert to funnel format and sort by ordering
       const funnelData: FunnelStageData[] = Object.entries(stageCounts)
         .map(([stageId, stageData]) => ({
           stage: stageData.title,
@@ -105,9 +108,9 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange }: UseKanbanStag
           ordering: stageData.ordering,
         }))
         .sort((a, b) => a.ordering - b.ordering)
-        .map(({ ordering, ...rest }) => rest); // Remove ordering do resultado final
+        .map(({ ordering, ...rest }) => rest); // Remove ordering from final result
 
-      console.log('🎯 Dados do funil finais (ordenados):', funnelData);
+      console.log('🎯 Dados do funil finais (todos os estágios):', funnelData);
       setData(funnelData);
 
     } catch (err) {
@@ -115,69 +118,23 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange }: UseKanbanStag
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido ao buscar dados';
       setError(errorMessage);
       
-      // Fallback: buscar dados sem JOIN para debug
-      console.log('🔄 Tentando busca alternativa sem JOIN...');
-      try {
-        const { data: fallbackContacts, error: fallbackError } = await supabase
-          .from('contacts')
-          .select('id, kanban_stage_id, created_at')
-          .is('deleted_at', null)
-          .gte('created_at', dateRange.from.toISOString())
-          .lte('created_at', dateRange.to.toISOString())
-          .in('kanban_stage_id', stageIds);
-
-        if (!fallbackError && fallbackContacts) {
-          console.log('📊 Dados de fallback encontrados:', fallbackContacts.length);
-          
-          // Buscar informações dos estágios separadamente
-          const { data: stagesInfo, error: stagesError } = await supabase
-            .from('kanban_stages')
-            .select('id, title, ordering')
-            .in('id', stageIds);
-
-          if (!stagesError && stagesInfo) {
-            // Mapear e contar
-            const stageCounts: Record<string, { count: number, title: string, ordering: number }> = {};
-            
-            stagesInfo.forEach(stage => {
-              stageCounts[stage.id] = { 
-                count: 0, 
-                title: stage.title, 
-                ordering: stage.ordering || 999 
-              };
-            });
-
-            fallbackContacts.forEach(contact => {
-              if (contact.kanban_stage_id && stageCounts[contact.kanban_stage_id]) {
-                stageCounts[contact.kanban_stage_id].count++;
-              }
-            });
-
-            const totalCount = Object.values(stageCounts).reduce((sum, stage) => sum + stage.count, 0);
-            
-            const fallbackFunnelData: FunnelStageData[] = Object.entries(stageCounts)
-              .map(([stageId, stageData]) => ({
-                stage: stageData.title,
-                stageId: stageId,
-                count: stageData.count,
-                percentage: totalCount > 0 ? (stageData.count / totalCount) * 100 : 0,
-                ordering: stageData.ordering,
-              }))
-              .sort((a, b) => a.ordering - b.ordering)
-              .map(({ ordering, ...rest }) => rest);
-
-            console.log('✅ Dados de fallback processados:', fallbackFunnelData);
-            setData(fallbackFunnelData);
-            setError(null); // Limpar erro se fallback funcionou
-          }
-        }
-      } catch (fallbackErr) {
-        console.error('❌ Erro no fallback também:', fallbackErr);
-      }
+      // Create empty data for all stages on error
+      const fallbackData: FunnelStageData[] = allStages
+        .filter(stage => stageIds.includes(stage.id))
+        .sort((a, b) => a.ordering - b.ordering)
+        .map(stage => ({
+          stage: stage.title,
+          stageId: stage.id,
+          count: 0,
+          percentage: 0,
+        }));
+      
+      console.log('🔄 Dados de fallback (estágios vazios):', fallbackData);
+      setData(fallbackData);
     } finally {
       setLoading(false);
     }
-  }, [stageIds, dateRange]);
+  }, [stageIds, dateRange, allStages]);
 
   useEffect(() => {
     fetchFunnelData();

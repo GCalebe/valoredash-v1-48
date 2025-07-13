@@ -8,7 +8,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useKanbanStagesFunnelData } from "@/hooks/useKanbanStagesFunnelData";
-import { useKanbanStagesSupabase } from "@/hooks/useKanbanStagesSupabase";
+import { useKanbanStagesLocal } from "@/hooks/useKanbanStagesLocal";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -32,11 +32,14 @@ const KanbanStagesFunnelChart: React.FC = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  // Usar hook padronizado do Supabase
-  const { stages, loading: stagesLoading } = useKanbanStagesSupabase();
+  // Use the new local hook that combines Supabase with fallback
+  const { stages, loading: stagesLoading, stageNameMap } = useKanbanStagesLocal();
+  
+  // Pass the complete stage list to the funnel data hook
   const { data: funnelData, loading, refetch, error } = useKanbanStagesFunnelData({
     stageIds: selectedStageIds,
     dateRange,
+    allStages: stages,
   });
 
   // Cores do funil seguindo o padrão da imagem
@@ -61,18 +64,13 @@ const KanbanStagesFunnelChart: React.FC = () => {
     }
   }, [stages, selectedStageIds.length]);
 
-  // Preparar dados do funil com cores e mapeamento correto
-  const funnelStageData: FunnelStageData[] = funnelData.map((item, index) => {
-    // Encontrar o estágio correspondente pelo ID para obter informações adicionais
-    const stageInfo = stages.find(s => s.id === item.stageId || s.title === item.stage);
-    
-    return {
-      stage: item.stage,
-      count: item.count,
-      percentage: item.percentage,
-      color: funnelColors[index % funnelColors.length],
-    };
-  });
+  // Preparar dados do funil com cores
+  const funnelStageData: FunnelStageData[] = funnelData.map((item, index) => ({
+    stage: item.stage,
+    count: item.count,
+    percentage: item.percentage,
+    color: funnelColors[index % funnelColors.length],
+  }));
 
   const maxCount = Math.max(...funnelStageData.map(item => item.count), 1);
 
@@ -299,20 +297,15 @@ const KanbanStagesFunnelChart: React.FC = () => {
                 <strong>Total de contatos criados no período:</strong> {funnelStageData.reduce((sum, stage) => sum + stage.count, 0)}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-500 mt-2 italic">
-                Este funil mostra a distribuição atual dos contatos criados no período selecionado pelos estágios do kanban.
+                ✅ Todos os estágios selecionados são exibidos, mesmo sem contatos
               </div>
             </div>
           </div>
         ) : (
           <div className="h-96 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
             <AlertCircle className="h-12 w-12 mb-4" />
-            <p className="text-lg font-medium">Nenhum dado encontrado</p>
-            <p className="text-sm">Ajuste os filtros para ver dados do funil</p>
-            {stages.length === 0 && (
-              <p className="text-xs mt-2 text-red-500">
-                Nenhum estágio de kanban configurado
-              </p>
-            )}
+            <p className="text-lg font-medium">Nenhum estágio selecionado</p>
+            <p className="text-sm">Selecione estágios nos filtros para ver o funil</p>
           </div>
         )}
       </CardContent>
