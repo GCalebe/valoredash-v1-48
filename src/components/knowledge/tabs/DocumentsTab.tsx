@@ -160,15 +160,15 @@ const DocumentsTab = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Send className="h-4 w-4" />
-            Configuração do n8n
+            Configuração do webhook
           </CardTitle>
           <CardDescription>
-            Configure a URL do webhook do n8n para enviar os documentos
+            Configure a URL do webhook para enviar os documentos
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="webhook-url">URL do Webhook do n8n</Label>
+            <Label htmlFor="webhook-url">URL do Webhook</Label>
             <Input
               id="webhook-url"
               type="url"
