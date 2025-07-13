@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, CalendarIcon, Filter, AlertCircle } from "lucide-react";
@@ -7,7 +8,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useKanbanStagesFunnelData } from "@/hooks/useKanbanStagesFunnelData";
-import { useKanbanStages } from "@/hooks/useKanbanStages";
+import { useKanbanStagesSupabase } from "@/hooks/useKanbanStagesSupabase";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -24,16 +25,17 @@ interface DateRange {
 }
 
 const KanbanStagesFunnelChart: React.FC = () => {
-  const [selectedStages, setSelectedStages] = useState<string[]>([]);
+  const [selectedStageIds, setSelectedStageIds] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 dias atrás
     to: new Date(),
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  const { stages } = useKanbanStages();
-  const { data: funnelData, loading, refetch } = useKanbanStagesFunnelData({
-    stages: selectedStages,
+  // Usar hook padronizado do Supabase
+  const { stages, loading: stagesLoading } = useKanbanStagesSupabase();
+  const { data: funnelData, loading, refetch, error } = useKanbanStagesFunnelData({
+    stageIds: selectedStageIds,
     dateRange,
   });
 
@@ -53,32 +55,79 @@ const KanbanStagesFunnelChart: React.FC = () => {
 
   // Inicializar com todos os estágios selecionados
   useEffect(() => {
-    if (stages.length > 0 && selectedStages.length === 0) {
-      setSelectedStages(stages.map((stage) => stage.title));
+    if (stages.length > 0 && selectedStageIds.length === 0) {
+      console.log('🎯 Inicializando estágios selecionados:', stages.map(s => s.id));
+      setSelectedStageIds(stages.map((stage) => stage.id));
     }
-  }, [stages, selectedStages.length]);
+  }, [stages, selectedStageIds.length]);
 
-  // Preparar dados do funil com cores
-  const funnelStageData: FunnelStageData[] = funnelData.map((item, index) => ({
-    ...item,
-    color: funnelColors[index % funnelColors.length],
-  }));
+  // Preparar dados do funil com cores e mapeamento correto
+  const funnelStageData: FunnelStageData[] = funnelData.map((item, index) => {
+    // Encontrar o estágio correspondente pelo ID para obter informações adicionais
+    const stageInfo = stages.find(s => s.id === item.stageId || s.title === item.stage);
+    
+    return {
+      stage: item.stage,
+      count: item.count,
+      percentage: item.percentage,
+      color: funnelColors[index % funnelColors.length],
+    };
+  });
 
   const maxCount = Math.max(...funnelStageData.map(item => item.count), 1);
 
-  const handleStageToggle = (stageTitle: string) => {
-    setSelectedStages(prev => 
-      prev.includes(stageTitle)
-        ? prev.filter(s => s !== stageTitle)
-        : [...prev, stageTitle]
+  const handleStageToggle = (stageId: string) => {
+    console.log('🔄 Alternando estágio:', stageId);
+    setSelectedStageIds(prev => 
+      prev.includes(stageId)
+        ? prev.filter(s => s !== stageId)
+        : [...prev, stageId]
     );
   };
 
   const handleDateRangeChange = (field: 'from' | 'to', date: Date | undefined) => {
     if (date) {
+      console.log(`📅 Alterando ${field}:`, date);
       setDateRange(prev => ({ ...prev, [field]: date }));
     }
   };
+
+  // Log para debug
+  useEffect(() => {
+    console.log('📊 Estado atual do componente:', {
+      stagesCount: stages.length,
+      selectedStageIds,
+      funnelDataCount: funnelData.length,
+      loading,
+      stagesLoading,
+      error
+    });
+  }, [stages, selectedStageIds, funnelData, loading, stagesLoading, error]);
+
+  if (stagesLoading) {
+    return (
+      <Card className="dark:bg-gray-800 transition-all duration-300">
+        <CardContent className="h-96 flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="dark:bg-gray-800 transition-all duration-300">
+        <CardContent className="h-96 flex flex-col items-center justify-center text-red-500">
+          <AlertCircle className="h-12 w-12 mb-4" />
+          <p className="text-lg font-medium">Erro ao carregar dados</p>
+          <p className="text-sm text-center">{error}</p>
+          <Button onClick={refetch} className="mt-4" variant="outline">
+            Tentar novamente
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="dark:bg-gray-800 transition-all duration-300 hover:shadow-lg">
@@ -142,8 +191,8 @@ const KanbanStagesFunnelChart: React.FC = () => {
                       <div key={stage.id} className="flex items-center space-x-2">
                         <Checkbox
                           id={stage.id}
-                          checked={selectedStages.includes(stage.title)}
-                          onCheckedChange={() => handleStageToggle(stage.title)}
+                          checked={selectedStageIds.includes(stage.id)}
+                          onCheckedChange={() => handleStageToggle(stage.id)}
                         />
                         <Label htmlFor={stage.id} className="text-sm">
                           {stage.title}
@@ -157,8 +206,9 @@ const KanbanStagesFunnelChart: React.FC = () => {
                   onClick={() => refetch()} 
                   className="w-full" 
                   size="sm"
+                  disabled={loading}
                 >
-                  Aplicar Filtros
+                  {loading ? 'Carregando...' : 'Aplicar Filtros'}
                 </Button>
               </div>
             </PopoverContent>
@@ -180,7 +230,7 @@ const KanbanStagesFunnelChart: React.FC = () => {
                 const height = 40;
                 
                 return (
-                  <div key={stage.stage} className="w-full flex flex-col items-center">
+                  <div key={`${stage.stage}-${index}`} className="w-full flex flex-col items-center">
                     {/* Barra do Funil */}
                     <div className="relative w-full max-w-lg">
                       <div
@@ -223,7 +273,7 @@ const KanbanStagesFunnelChart: React.FC = () => {
             {/* Legenda */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
               {funnelStageData.map((stage, index) => (
-                <div key={stage.stage} className="flex items-center gap-2">
+                <div key={`legend-${stage.stage}-${index}`} className="flex items-center gap-2">
                   <div
                     className="w-4 h-4 rounded-sm"
                     style={{ backgroundColor: stage.color }}
@@ -258,6 +308,11 @@ const KanbanStagesFunnelChart: React.FC = () => {
             <AlertCircle className="h-12 w-12 mb-4" />
             <p className="text-lg font-medium">Nenhum dado encontrado</p>
             <p className="text-sm">Ajuste os filtros para ver dados do funil</p>
+            {stages.length === 0 && (
+              <p className="text-xs mt-2 text-red-500">
+                Nenhum estágio de kanban configurado
+              </p>
+            )}
           </div>
         )}
       </CardContent>

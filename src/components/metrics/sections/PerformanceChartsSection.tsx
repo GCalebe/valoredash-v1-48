@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ConversationChart from '../ConversationChart';
 import ConversionFunnelChart from '../ConversionFunnelChart';
@@ -53,8 +54,10 @@ const PerformanceChartsSection: React.FC<PerformanceChartsSectionProps> = ({
         />
       </div>
 
-      {/* Funil de Estágios do Kanban */}
-      <KanbanStagesFunnelChart />
+      {/* Funil de Estágios do Kanban - Agora com hook correto */}
+      <div className="w-full">
+        <KanbanStagesFunnelChart />
+      </div>
 
       <ConversionByTimeChart
         data={conversionByTimeData}
