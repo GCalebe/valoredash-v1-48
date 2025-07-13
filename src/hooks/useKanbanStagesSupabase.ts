@@ -23,6 +23,21 @@ const DEFAULT_STAGES = [
   "Converteram",
 ];
 
+// Helper function to safely parse settings from database Json
+const parseStageSettings = (settings: any): { color?: string } => {
+  if (!settings) return { color: '#6b7280' };
+  
+  // If settings is already an object with color property
+  if (typeof settings === 'object' && settings !== null && !Array.isArray(settings)) {
+    return {
+      color: typeof settings.color === 'string' ? settings.color : '#6b7280'
+    };
+  }
+  
+  // Default fallback
+  return { color: '#6b7280' };
+};
+
 export function useKanbanStagesSupabase() {
   const { user } = useAuth();
   const [stages, setStages] = useState<KanbanStage[]>([]);
@@ -58,11 +73,11 @@ export function useKanbanStagesSupabase() {
         return;
       }
 
-      const transformedStages = data.map(stage => ({
+      const transformedStages: KanbanStage[] = data.map(stage => ({
         id: stage.id,
         title: stage.title,
         ordering: stage.ordering,
-        settings: stage.settings || { color: '#6b7280' }
+        settings: parseStageSettings(stage.settings)
       }));
 
       setStages(transformedStages);
@@ -103,11 +118,11 @@ export function useKanbanStagesSupabase() {
 
       console.log("Created default stages:", data);
 
-      const transformedStages = data.map(stage => ({
+      const transformedStages: KanbanStage[] = data.map(stage => ({
         id: stage.id,
         title: stage.title,
         ordering: stage.ordering,
-        settings: stage.settings || { color: '#6b7280' }
+        settings: parseStageSettings(stage.settings)
       }));
 
       setStages(transformedStages);
@@ -147,11 +162,11 @@ export function useKanbanStagesSupabase() {
 
       if (error) throw error;
 
-      const newStage = {
+      const newStage: KanbanStage = {
         id: data.id,
         title: data.title,
         ordering: data.ordering,
-        settings: data.settings || { color: '#6b7280' }
+        settings: parseStageSettings(data.settings)
       };
 
       setStages(prev => [...prev, newStage]);

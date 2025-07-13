@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChromePicker } from "react-color";
-import { KanbanStage } from "@/hooks/useKanbanStages";
+import { KanbanStage } from "@/hooks/useKanbanStagesSupabase";
 
 interface EditStageDialogProps {
   isOpen: boolean;
@@ -18,7 +19,6 @@ interface EditStageDialogProps {
   stage: KanbanStage | null;
   onSave: (stageId: string, title: string, color: string) => void;
 }
-
 
 const EditStageDialog: React.FC<EditStageDialogProps> = ({
   isOpen,

@@ -7,7 +7,7 @@ import { Droppable, Draggable } from "react-beautiful-dnd";
 import { Edit3 } from "lucide-react";
 import KanbanClientCard from "./KanbanClientCard";
 import { Contact } from "@/types/client";
-import { KanbanStage } from "@/hooks/useKanbanStages";
+import { KanbanStage } from "@/hooks/useKanbanStagesSupabase";
 
 interface KanbanStageColumnProps {
   stage: KanbanStage;
