@@ -1,5 +1,6 @@
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { ptBR } from "date-fns/locale";
 
 interface CalendarProps {
   selected?: Date | null;
@@ -13,7 +14,8 @@ export function Calendar({ selected, onSelect, className }: CalendarProps) {
       mode="single"
       selected={selected}
       onSelect={onSelect}
-      className={`calendar ${className || ""}`}
+      locale={ptBR}
+      className={`calendar pointer-events-auto ${className || ""}`}
     />
   );
 }
