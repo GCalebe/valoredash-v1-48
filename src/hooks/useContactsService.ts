@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Contact } from "@/types/client";
 
@@ -64,7 +65,8 @@ export const useContactsService = () => {
           ].includes(contact.consultation_stage)
             ? (contact.consultation_stage as Contact["consultationStage"])
             : "Nova consulta",
-        kanbanStage: contact.kanban_stage || "Entraram",
+        kanbanStage: contact.kanban_stage_id || "Entraram",
+        kanban_stage_id: contact.kanban_stage_id,
       }));
     } catch (error) {
       console.error("Error in fetchAllContacts:", error);
@@ -74,13 +76,13 @@ export const useContactsService = () => {
 
   const updateContactKanbanStage = async (
     contactId: string,
-    stageTitle: string,
+    stageId: string,
   ) => {
     try {
-      // Update the contact with the stage directly
+      // Update the contact with the stage ID directly
       const { error: updateError } = await supabase
         .from("contacts")
-        .update({ kanban_stage: stageTitle })
+        .update({ kanban_stage_id: stageId })
         .eq("id", contactId);
 
       if (updateError) {

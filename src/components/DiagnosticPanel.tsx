@@ -86,9 +86,9 @@ const DiagnosticPanel: React.FC = () => {
       details: { pathname: location.pathname, search: location.search, hash: location.hash }
     });
 
-    // Test 6: Supabase Connection
+    // Test 6: Supabase Connection - Fixed to use correct table name
     try {
-      const { data, error } = await supabase.from('dados_cliente').select('count', { count: 'exact', head: true });
+      const { data, error } = await supabase.from('contacts').select('count', { count: 'exact', head: true });
       results.push({
         category: 'Database',
         test: 'Supabase Connection',

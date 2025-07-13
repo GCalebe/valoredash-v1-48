@@ -1,3 +1,4 @@
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { queryKeys, cacheConfig } from '@/lib/queryClient';
@@ -28,7 +29,7 @@ export const useDashboardMetricsQuery = () => {
         leadsResult,
         scheduleResult
       ] = await Promise.allSettled([
-        supabase.from('contacts').select('id, kanban_stage, sales, budget').limit(1000),
+        supabase.from('contacts').select('id, kanban_stage_id, sales, budget').limit(1000),
         supabase.from('conversation_metrics').select('*').limit(100),
         supabase.from('contacts').select('id, sales, budget').limit(100),
         supabase.from('calendar_events').select('*').gte('start_time', new Date().toISOString().split('T')[0])
@@ -44,7 +45,7 @@ export const useDashboardMetricsQuery = () => {
       const totalClients = clients.length;
       const activeConversations = conversations.length;
       const pendingLeads = clients.filter(c => 
-        c.kanban_stage === 'lead' || c.kanban_stage === 'contato-inicial'
+        c.kanban_stage_id === 'lead' || c.kanban_stage_id === 'contato-inicial'
       ).length;
       
       const conversionRate = 0; // Set to 0 since conversion_probability doesn't exist

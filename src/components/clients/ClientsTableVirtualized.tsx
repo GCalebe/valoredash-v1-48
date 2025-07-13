@@ -1,3 +1,4 @@
+
 import React, { useMemo, useCallback } from 'react';
 import { VirtualizedTable } from '@/components/ui/virtualized-list';
 import { Badge } from '@/components/ui/badge';
@@ -63,7 +64,7 @@ export const ClientsTableVirtualized = React.memo<ClientsTableVirtualizedProps>(
       render: (contact: Contact) => (
         <div className="flex flex-col">
           <span className="text-sm">
-            {contact.company || '-'}
+            {contact.company || contact.clientName || '-'}
           </span>
           {contact.position && (
             <span className="text-xs text-gray-500">
@@ -74,7 +75,7 @@ export const ClientsTableVirtualized = React.memo<ClientsTableVirtualizedProps>(
       ),
     },
     {
-      key: 'kanban_stage' as keyof Contact,
+      key: 'kanban_stage_id' as keyof Contact,
       header: 'Status',
       width: 120,
       render: (contact: Contact) => {
@@ -86,7 +87,7 @@ export const ClientsTableVirtualized = React.memo<ClientsTableVirtualizedProps>(
           'perdido': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
         };
         
-        const stage = contact.kanban_stage || 'lead';
+        const stage = contact.kanbanStage || 'lead';
         const colorClass = stageColors[stage as keyof typeof stageColors] || stageColors.lead;
         
         return (
@@ -104,6 +105,8 @@ export const ClientsTableVirtualized = React.memo<ClientsTableVirtualizedProps>(
         <span className="text-sm font-medium">
           {contact.lead_value 
             ? `R$ ${contact.lead_value.toLocaleString('pt-BR')}` 
+            : contact.sales
+            ? `R$ ${contact.sales.toLocaleString('pt-BR')}`
             : '-'
           }
         </span>
@@ -141,7 +144,7 @@ export const ClientsTableVirtualized = React.memo<ClientsTableVirtualizedProps>(
         try {
           return (
             <span className="text-xs text-gray-500">
-              {formatDistanceToNow(new Date(contact.created_at), {
+              {contact.created_at && formatDistanceToNow(new Date(contact.created_at), {
                 addSuffix: true,
                 locale: ptBR,
               })}
@@ -198,7 +201,6 @@ export const ClientsTableVirtualized = React.memo<ClientsTableVirtualizedProps>(
     }
   }, [onViewContact]);
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="w-full border rounded-lg">
@@ -212,7 +214,6 @@ export const ClientsTableVirtualized = React.memo<ClientsTableVirtualizedProps>(
     );
   }
 
-  // Empty state
   if (contacts.length === 0) {
     return (
       <div className="w-full border rounded-lg">
