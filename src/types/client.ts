@@ -16,7 +16,7 @@ export interface Contact {
   
   // Status e estágio
   status?: "Active" | "Inactive" | string;
-  kanbanStage?: string;
+  kanbanStage?: string; // Optional - derived from kanban_stage_id
   kanban_stage_id?: string; // Database field name
   
   // Dados financeiros

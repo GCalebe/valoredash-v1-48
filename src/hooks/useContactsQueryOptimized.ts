@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -8,7 +9,7 @@ interface SimpleContact {
   name: string;
   email?: string;
   phone?: string;
-  kanban_stage?: string;
+  kanban_stage_id?: string;
   created_at?: string;
   updated_at?: string;
   sales?: number;
@@ -28,12 +29,12 @@ interface ContactFilters {
 const fetchContacts = async (filters: ContactFilters = {}): Promise<SimpleContact[]> => {
   let query = supabase
     .from('contacts')
-    .select('id, name, email, phone, kanban_stage, created_at, sales, budget')
+    .select('id, name, email, phone, kanban_stage_id, created_at, sales, budget')
     .order('created_at', { ascending: false });
 
   // Apply filters
   if (filters.kanban_stage) {
-    query = query.eq('kanban_stage', filters.kanban_stage);
+    query = query.eq('kanban_stage_id', filters.kanban_stage);
   }
 
   if (filters.search) {
@@ -74,8 +75,8 @@ export const useContactsByStageOptimized = (stage: string) => {
     queryFn: async (): Promise<SimpleContact[]> => {
       const { data, error } = await supabase
         .from('contacts')
-        .select('id, name, email, phone, kanban_stage, created_at, sales, budget')
-        .eq('kanban_stage', stage)
+        .select('id, name, email, phone, kanban_stage_id, created_at, sales, budget')
+        .eq('kanban_stage_id', stage)
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -97,7 +98,7 @@ export const useContactsStatsOptimized = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('contacts')
-        .select('kanban_stage, created_at')
+        .select('kanban_stage_id, created_at')
         .limit(1000);
 
       if (error) {
@@ -109,11 +110,12 @@ export const useContactsStatsOptimized = () => {
       const stats = {
         total: contacts.length,
         byStage: contacts.reduce((acc, contact) => {
-          const stage = contact.kanban_stage || 'unknown';
+          const stage = contact.kanban_stage_id || 'unknown';
           acc[stage] = (acc[stage] || 0) + 1;
           return acc;
         }, {} as Record<string, number>),
         thisMonth: contacts.filter(c => {
+          if (!c.created_at) return false;
           const created = new Date(c.created_at);
           const thisMonth = new Date();
           return created.getMonth() === thisMonth.getMonth() && created.getFullYear() === thisMonth.getFullYear();

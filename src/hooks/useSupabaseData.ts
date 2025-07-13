@@ -101,7 +101,7 @@ export const getContacts = async (filters?: ContactFilters): Promise<SupabaseRes
       query = query.eq('status', filters.status);
     }
     if (filters?.kanbanStage) {
-      query = query.eq('kanban_stage', filters.kanbanStage);
+      query = query.eq('kanban_stage_id', filters.kanbanStage);
     }
     if (filters?.responsibleUser) {
       query = query.eq('responsible_user', filters.responsibleUser);
@@ -117,14 +117,15 @@ export const getContacts = async (filters?: ContactFilters): Promise<SupabaseRes
 
     const { data, error } = await query.order('created_at', { ascending: false });
 
-    // Add custom_values property to match expected type
-    const dataWithCustomValues = data?.map(contact => ({
+    // Transform data to match Contact interface
+    const transformedData = data?.map(contact => ({
       ...contact,
+      kanbanStage: contact.kanban_stage_id || 'Entraram', // Set kanbanStage from kanban_stage_id
       custom_values: {} // Add missing property with default value
-    }));
+    })) as Contact[];
 
     return {
-      data: dataWithCustomValues,
+      data: transformedData,
       error,
       success: !error
     };
@@ -289,14 +290,15 @@ export const addContact = async (contact: ContactInsert): Promise<SupabaseRespon
       .select()
       .single();
 
-    // Add custom_values property to match expected type
-    const dataWithCustomValues = data ? {
+    // Transform data to match Contact interface
+    const transformedData = data ? {
       ...data,
+      kanbanStage: data.kanban_stage_id || 'Entraram',
       custom_values: {} // Add missing property with default value
-    } : null;
+    } as Contact : null;
 
     return {
-      data: dataWithCustomValues,
+      data: transformedData,
       error,
       success: !error
     };
@@ -319,14 +321,15 @@ export const updateContact = async (id: string, updates: ContactUpdate): Promise
       .select()
       .single();
 
-    // Add custom_values property to match expected type
-    const dataWithCustomValues = data ? {
+    // Transform data to match Contact interface
+    const transformedData = data ? {
       ...data,
+      kanbanStage: data.kanban_stage_id || 'Entraram',
       custom_values: {} // Add missing property with default value
-    } : null;
+    } as Contact : null;
 
     return {
-      data: dataWithCustomValues,
+      data: transformedData,
       error,
       success: !error
     };
@@ -408,7 +411,7 @@ export const useContacts = (filters?: ContactFilters, pageSize: number = 20) => 
         query = query.eq('status', filters.status);
       }
       if (filters?.kanbanStage) {
-        query = query.eq('kanban_stage', filters.kanbanStage);
+        query = query.eq('kanban_stage_id', filters.kanbanStage);
       }
       if (filters?.responsibleUser) {
         query = query.eq('responsible_user', filters.responsibleUser);
@@ -432,12 +435,13 @@ export const useContacts = (filters?: ContactFilters, pageSize: number = 20) => 
       if (error) {
         setError(error.message);
       } else {
-        // Add custom_values property to match expected type
-        const dataWithCustomValues = data?.map(contact => ({
+        // Transform data to match Contact interface
+        const transformedData = data?.map(contact => ({
           ...contact,
+          kanbanStage: contact.kanban_stage_id || 'Entraram',
           custom_values: {} // Add missing property with default value
-        })) || [];
-        setContacts(dataWithCustomValues);
+        })) as Contact[] || [];
+        setContacts(transformedData);
         setTotalCount(count || 0);
         setPage(currentPage);
       }
