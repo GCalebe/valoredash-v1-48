@@ -96,76 +96,79 @@ const ConversationList = ({
                     setSelectedChat(conversation.id);
                   }}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                          {conversation.name}
-                        </h3>
-                        {conversation.unread > 0 && (
-                          <Badge className="bg-red-500 text-white text-xs px-2 py-0.5">
-                            {conversation.unread}
-                          </Badge>
-                        )}
+                <div className="flex flex-col gap-2">
+                    {/* Cabeçalho principal */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                            {conversation.name}
+                          </h3>
+                          {conversation.unread > 0 && (
+                            <Badge className="bg-red-500 text-white text-xs px-2 py-0.5">
+                              {conversation.unread}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-1">
+                          {conversation.phone}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
+                          {conversation.lastMessage}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-1">
-                        {conversation.phone}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
-                        {conversation.lastMessage}
-                      </p>
+                      <div className="flex flex-col items-end gap-1 ml-2">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {conversation.time}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {conversation.time}
-                      </span>
 
-                      {/* Bot control buttons */}
-                      <div className="flex gap-1">
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          onClick={(e) =>
-                            openPauseDialog(conversation.phone, e)
-                          }
-                          disabled={isLoading[`pause-${conversation.phone}`]}
-                          className="h-6 px-2 text-xs"
-                          style={{
-                            borderColor: settings.primaryColor,
-                            color: settings.primaryColor,
-                          }}
-                        >
-                          {isLoading[`pause-${conversation.phone}`] ? (
-                            <RefreshCw className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <>
-                              <Pause className="h-3 w-3 mr-1" />
-                              Pausar Aurora
-                            </>
-                          )}
-                        </Button>
+                    {/* Botões de controle do bot */}
+                    <div className="flex gap-2 justify-end pt-1 border-t border-gray-100 dark:border-gray-700">
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={(e) =>
+                          openPauseDialog(conversation.phone, e)
+                        }
+                        disabled={isLoading[`pause-${conversation.phone}`]}
+                        className="h-6 px-2 text-xs flex-1 max-w-[100px]"
+                        style={{
+                          borderColor: settings.primaryColor,
+                          color: settings.primaryColor,
+                        }}
+                      >
+                        {isLoading[`pause-${conversation.phone}`] ? (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <>
+                            <Pause className="h-3 w-3 mr-1" />
+                            <span className="truncate">Pausar</span>
+                          </>
+                        )}
+                      </Button>
 
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          onClick={(e) => startBot(conversation.phone, e)}
-                          disabled={isLoading[`start-${conversation.phone}`]}
-                          className="h-6 px-2 text-xs"
-                          style={{
-                            borderColor: settings.secondaryColor,
-                            color: settings.secondaryColor,
-                          }}
-                        >
-                          {isLoading[`start-${conversation.phone}`] ? (
-                            <RefreshCw className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <>
-                              <Play className="h-3 w-3 mr-1" />
-                              Iniciar Aurora
-                            </>
-                          )}
-                        </Button>
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={(e) => startBot(conversation.phone, e)}
+                        disabled={isLoading[`start-${conversation.phone}`]}
+                        className="h-6 px-2 text-xs flex-1 max-w-[100px]"
+                        style={{
+                          borderColor: settings.secondaryColor,
+                          color: settings.secondaryColor,
+                        }}
+                      >
+                        {isLoading[`start-${conversation.phone}`] ? (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <>
+                            <Play className="h-3 w-3 mr-1" />
+                            <span className="truncate">Iniciar</span>
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </div>
