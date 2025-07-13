@@ -14,12 +14,12 @@ export const contactsService = {
   async fetchContacts(filters: ContactFilters = {}): Promise<any[]> {
     let query = supabase
       .from('contacts')
-      .select('id, name, email, phone, kanban_stage, created_at, updated_at, sales, budget')
+      .select('id, name, email, phone, kanban_stage_id, created_at, updated_at, sales, budget')
       .order('created_at', { ascending: false });
 
     // Apply filters
     if (filters.kanban_stage) {
-      query = query.eq('kanban_stage', filters.kanban_stage);
+      query = query.eq('kanban_stage_id', filters.kanban_stage);
     }
 
     if (filters.search) {
@@ -45,8 +45,8 @@ export const contactsService = {
   async fetchContactsByKanbanStage(stage: string): Promise<any[]> {
     const { data, error } = await supabase
       .from('contacts')
-      .select('id, name, email, phone, kanban_stage, created_at, updated_at')
-      .eq('kanban_stage', stage)
+      .select('id, name, email, phone, kanban_stage_id, created_at, updated_at')
+      .eq('kanban_stage_id', stage)
       .order('created_at', { ascending: false });
 
     if (error) {

@@ -35,7 +35,7 @@ export const useClientStatsQueryOptimized = (filters?: ClientStatsFilters) => {
     queryFn: async (): Promise<ClientStats> => {
       let query = supabase.from('contacts').select(`
         id,
-        kanban_stage,
+        kanban_stage_id,
         created_at,
         sales,
         budget
@@ -49,7 +49,7 @@ export const useClientStatsQueryOptimized = (filters?: ClientStatsFilters) => {
       }
 
       if (filters?.stage) {
-        query = query.eq('kanban_stage', filters.stage);
+        query = query.eq('kanban_stage_id', filters.stage);
       }
 
       // Skip source filter since lead_source doesn't exist in contacts table
@@ -91,7 +91,7 @@ export const useClientStatsQueryOptimized = (filters?: ClientStatsFilters) => {
         }
 
         // Por estágio
-        const stage = contact.kanban_stage || 'unknown';
+        const stage = contact.kanban_stage_id || 'unknown';
         stats.byStage[stage] = (stats.byStage[stage] || 0) + 1;
 
         // Skip source tracking since lead_source doesn't exist
@@ -135,7 +135,7 @@ export const useClientStatsRealtime = () => {
       // Query mais leve para dados em tempo real
       const { data, error } = await supabase
         .from('contacts')
-        .select('id, kanban_stage, created_at')
+        .select('id, kanban_stage_id, created_at')
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -152,7 +152,7 @@ export const useClientStatsRealtime = () => {
           c.created_at && c.created_at.startsWith(today)
         ).length,
         byStage: contacts.reduce((acc, contact) => {
-          const stage = contact.kanban_stage || 'unknown';
+          const stage = contact.kanban_stage_id || 'unknown';
           acc[stage] = (acc[stage] || 0) + 1;
           return acc;
         }, {} as Record<string, number>),

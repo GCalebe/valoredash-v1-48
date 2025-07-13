@@ -22,10 +22,10 @@ export function useContactsByKanbanStage(
 
     // Agrupa, usando fallback se necessário
     for (const contact of contacts) {
-      let assignedStage = contact.kanbanStage;
+      let assignedStage = contact.kanban_stage_id || contact.kanbanStage;
       if (!stageTitles.includes(assignedStage)) {
         console.warn(
-          `[useContactsByKanbanStage] Cliente "${contact.name}" (ID ${contact.id}) está com kanbanStage="${assignedStage}" não encontrado. Realocando para "${stageTitles[0]}"`,
+          `[useContactsByKanbanStage] Cliente "${contact.name}" (ID ${contact.id}) está com kanban_stage_id="${assignedStage}" não encontrado. Realocando para "${stageTitles[0]}"`,
         );
         assignedStage = stageTitles[0] || "";
       }

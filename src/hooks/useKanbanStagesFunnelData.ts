@@ -35,12 +35,12 @@ export function useKanbanStagesFunnelData({ stages, dateRange }: UseKanbanStages
       console.log('🔍 Buscando dados do funil normalizado:', { stages, dateRange });
 
       // Buscar contatos ativos com estágios normalizados
-      // Priorizar kanban_stage que foi normalizado pelos triggers
+      // Priorizar kanban_stage_id que foi normalizado pelos triggers
       const { data: contacts, error: queryError } = await supabase
         .from('contacts')
         .select(`
           id,
-          kanban_stage,
+          kanban_stage_id,
           created_at,
           deleted_at
         `)
@@ -59,7 +59,7 @@ export function useKanbanStagesFunnelData({ stages, dateRange }: UseKanbanStages
       // Normalizar estágios ausentes para "Novo Lead"
       const normalizedContacts = contacts?.map(contact => ({
         ...contact,
-        kanban_stage: contact.kanban_stage || 'Novo Lead'
+        kanban_stage_id: contact.kanban_stage_id || 'Novo Lead'
       })) || [];
 
       console.log('📋 Amostra dos contatos normalizados:', normalizedContacts.slice(0, 5));
@@ -74,7 +74,7 @@ export function useKanbanStagesFunnelData({ stages, dateRange }: UseKanbanStages
 
       // Contar os contatos por estágio normalizado
       normalizedContacts.forEach(contact => {
-        const currentStage = contact.kanban_stage;
+        const currentStage = contact.kanban_stage_id;
         
         if (currentStage && stages.includes(currentStage)) {
           stageCounts[currentStage]++;
