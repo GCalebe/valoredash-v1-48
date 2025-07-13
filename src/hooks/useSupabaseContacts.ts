@@ -1,13 +1,52 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
-import type { Database } from '../integrations/supabase/types';
 
-type Contact = Database['public']['Tables']['contacts']['Row'];
-type ContactInsert = Database['public']['Tables']['contacts']['Insert'];
-type ContactUpdate = Database['public']['Tables']['contacts']['Update'];
+// Use the database types directly from Supabase
+type DatabaseContact = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  client_name: string | null;
+  client_size: string | null;
+  client_type: string | null;
+  cpf_cnpj: string | null;
+  asaas_customer_id: string | null;
+  status: string | null;
+  notes: string | null;
+  last_contact: string | null;
+  kanban_stage_id: string | null;
+  last_message: string | null;
+  last_message_time: string | null;
+  unread_count: number | null;
+  session_id: string | null;
+  tags: string[] | null;
+  responsible_user: string | null;
+  sales: number | null;
+  client_sector: string | null;
+  budget: number | null;
+  payment_method: string | null;
+  client_objective: string | null;
+  loss_reason: string | null;
+  contract_number: string | null;
+  contract_date: string | null;
+  payment: string | null;
+  uploaded_files: string[] | null;
+  consultation_stage: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+type ContactInsert = Partial<DatabaseContact> & {
+  name: string;
+};
+
+type ContactUpdate = Partial<DatabaseContact>;
 
 export const useSupabaseContacts = () => {
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<DatabaseContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +75,7 @@ export const useSupabaseContacts = () => {
         .order('created_at', { ascending: false });
 
       if (stage) {
-        query = query.eq('kanban_stage', stage);
+        query = query.eq('kanban_stage_id', stage);
       }
 
       const { data, error } = await query;
