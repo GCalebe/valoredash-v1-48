@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +5,7 @@ import { Contact } from "@/types/client";
 import { DynamicCategory } from "@/components/clients/DynamicCategoryManager";
 import ClientUTMData from "./ClientUTMData";
 import EditableField from "./EditableField";
+import CustomFieldsTab from "./CustomFieldsTab";
 
 interface UnifiedClientInfoProps {
   clientData: Contact | null;
@@ -257,45 +257,20 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
     </Card>
   );
 
-  const renderCustomFields = () => {
-    if (!dynamicFields.personalized.length) {
-      return (
-        <Card className={compact ? "p-3" : "p-4"}>
-          <CardHeader className="p-0 pb-3">
-            <CardTitle className="text-lg">Campos Personalizados</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-              Nenhum campo personalizado configurado.
-            </p>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    return (
-      <Card className={compact ? "p-3" : "p-4"}>
-        <CardHeader className="p-0 pb-3">
-          <CardTitle className="text-lg">Campos Personalizados</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 space-y-2">
-          {dynamicFields.personalized.map((field) => {
-            const value = clientData?.customValues?.[field.id];
-            return (
-              <EditableField
-                key={field.id}
-                label={field.name}
-                value={value}
-                fieldId={`custom_${field.id}`}
-                readOnly={readOnly}
-                onChange={onFieldUpdate}
-              />
-            );
-          })}
-        </CardContent>
-      </Card>
-    );
-  };
+  const renderCustomFields = () => (
+    <Card className={compact ? "p-3" : "p-4"}>
+      <CardHeader className="p-0 pb-3">
+        <CardTitle className="text-lg">Campos Personalizados</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <CustomFieldsTab
+          clientId={clientData?.id}
+          onFieldUpdate={onFieldUpdate}
+          readOnly={readOnly}
+        />
+      </CardContent>
+    </Card>
+  );
 
   const renderDocuments = () => {
     if (!dynamicFields.documents.length) {
