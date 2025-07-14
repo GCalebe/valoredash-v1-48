@@ -87,7 +87,7 @@ const TagsField = ({ selectedChat }: TagsFieldProps) => {
       {/* Add new tag */}
       <div className="flex gap-2 items-center">
         <Input
-          placeholder="Novo marcador..."
+          placeholder="Nova Etiqueta..."
           value={newTagTitle}
           onChange={(e) => setNewTagTitle(e.target.value)}
           className="flex-1 h-8"
