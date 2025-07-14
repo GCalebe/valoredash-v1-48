@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Contact } from "@/types/client";
 import UnifiedClientInfo from "./UnifiedClientInfo";
 import { DynamicCategory } from "./DynamicCategoryManager";
@@ -38,44 +38,36 @@ const ClientInfo: React.FC<ClientInfoProps> = ({
   // Configurações específicas para cada contexto
   const contextConfig = {
     chat: {
-      title: "Informações do Cliente",
-      description: "Detalhes do cliente na conversa atual",
       showTabs: ["basic", "commercial", "utm", "custom", "docs"],
       readOnly: true,
       compact: true,
+      className: "h-full"
     },
     table: {
-      title: "Resumo do Cliente",
-      description: "Informações resumidas",
       showTabs: ["basic", "commercial"],
       readOnly: true,
       compact: true,
+      className: "max-h-96"
     },
     details: {
-      title: "Detalhes do Cliente",
-      description: "Informações completas",
       showTabs: ["basic", "commercial", "utm", "custom", "docs"],
       readOnly: true,
       compact: false,
+      className: "min-h-[600px]"
     },
     edit: {
-      title: "Editar Cliente",
-      description: "Edite as informações do cliente",
       showTabs: ["basic", "commercial", "utm", "custom", "docs"],
       readOnly: false,
       compact: false,
+      className: "min-h-[600px]"
     },
   };
 
   const config = contextConfig[context];
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{config.title}</CardTitle>
-        <p className="text-sm text-gray-500">{config.description}</p>
-      </CardHeader>
-      <CardContent>
+    <Card className={`w-full overflow-hidden ${config.className}`}>
+      <CardContent className="p-0 h-full">
         <UnifiedClientInfo
           clientData={clientData}
           dynamicFields={dynamicFields}
