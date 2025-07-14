@@ -34,6 +34,7 @@ export type Database = {
           tone: string | null
           updated_at: string | null
           updated_by: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -54,6 +55,7 @@ export type Database = {
           tone?: string | null
           updated_at?: string | null
           updated_by?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
@@ -74,6 +76,7 @@ export type Database = {
           tone?: string | null
           updated_at?: string | null
           updated_by?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -133,6 +136,7 @@ export type Database = {
           trigger_conditions: Json | null
           updated_at: string | null
           updated_by: string | null
+          user_id: string
         }
         Insert: {
           actions?: Json | null
@@ -150,6 +154,7 @@ export type Database = {
           trigger_conditions?: Json | null
           updated_at?: string | null
           updated_by?: string | null
+          user_id: string
         }
         Update: {
           actions?: Json | null
@@ -167,6 +172,7 @@ export type Database = {
           trigger_conditions?: Json | null
           updated_at?: string | null
           updated_by?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -201,6 +207,7 @@ export type Database = {
           preparation_notes: string | null
           status: string | null
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           appointment_date: string
@@ -217,6 +224,7 @@ export type Database = {
           preparation_notes?: string | null
           status?: string | null
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           appointment_date?: string
@@ -233,6 +241,7 @@ export type Database = {
           preparation_notes?: string | null
           status?: string | null
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -352,6 +361,7 @@ export type Database = {
           status: string | null
           title: string
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           all_day?: boolean | null
@@ -370,6 +380,7 @@ export type Database = {
           status?: string | null
           title: string
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           all_day?: boolean | null
@@ -388,6 +399,7 @@ export type Database = {
           status?: string | null
           title?: string
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -764,6 +776,7 @@ export type Database = {
           unread_count: number | null
           updated_at: string | null
           uploaded_files: string[] | null
+          user_id: string
         }
         Insert: {
           address?: string | null
@@ -801,6 +814,7 @@ export type Database = {
           unread_count?: number | null
           updated_at?: string | null
           uploaded_files?: string[] | null
+          user_id: string
         }
         Update: {
           address?: string | null
@@ -838,6 +852,7 @@ export type Database = {
           unread_count?: number | null
           updated_at?: string | null
           uploaded_files?: string[] | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -1080,6 +1095,7 @@ export type Database = {
           session_id: string
           unread_count: number | null
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           avatar?: string | null
@@ -1094,6 +1110,7 @@ export type Database = {
           session_id: string
           unread_count?: number | null
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           avatar?: string | null
@@ -1108,6 +1125,7 @@ export type Database = {
           session_id?: string
           unread_count?: number | null
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1279,6 +1297,7 @@ export type Database = {
           id: string
           is_required: boolean
           updated_at: string
+          user_id: string
         }
         Insert: {
           category?: string
@@ -1290,6 +1309,7 @@ export type Database = {
           id?: string
           is_required?: boolean
           updated_at?: string
+          user_id: string
         }
         Update: {
           category?: string
@@ -1301,6 +1321,7 @@ export type Database = {
           id?: string
           is_required?: boolean
           updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1371,6 +1392,7 @@ export type Database = {
           id: number
           metadata: Json | null
           titulo: string | null
+          user_id: string
         }
         Insert: {
           content?: string | null
@@ -1378,6 +1400,7 @@ export type Database = {
           id?: number
           metadata?: Json | null
           titulo?: string | null
+          user_id: string
         }
         Update: {
           content?: string | null
@@ -1385,6 +1408,7 @@ export type Database = {
           id?: number
           metadata?: Json | null
           titulo?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1441,6 +1465,7 @@ export type Database = {
           question: string
           tags: string[] | null
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           answer: string
@@ -1452,6 +1477,7 @@ export type Database = {
           question: string
           tags?: string[] | null
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           answer?: string
@@ -1463,6 +1489,7 @@ export type Database = {
           question?: string
           tags?: string[] | null
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1499,18 +1526,21 @@ export type Database = {
           drive_id: string
           id: number
           nome: string
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           drive_id: string
           id?: number
           nome: string
+          user_id: string
         }
         Update: {
           created_at?: string | null
           drive_id?: string
           id?: number
           nome?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1797,6 +1827,7 @@ export type Database = {
           message_type: string | null
           phone: string | null
           session_id: string
+          user_id: string
           user_message: string | null
         }
         Insert: {
@@ -1808,6 +1839,7 @@ export type Database = {
           message_type?: string | null
           phone?: string | null
           session_id: string
+          user_id: string
           user_message?: string | null
         }
         Update: {
@@ -1819,6 +1851,7 @@ export type Database = {
           message_type?: string | null
           phone?: string | null
           session_id?: string
+          user_id?: string
           user_message?: string | null
         }
         Relationships: []
