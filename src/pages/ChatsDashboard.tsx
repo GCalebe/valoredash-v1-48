@@ -11,6 +11,7 @@ import { useConversationFilters } from "@/hooks/useConversationFilters";
 import { useConversationTableFilters } from "@/hooks/useConversationTableFilters";
 import ConversationFilterDialog from "@/components/chat/ConversationFilterDialog";
 import PauseDurationDialog from "@/components/PauseDurationDialog";
+import { SearchResult } from "@/hooks/useAdvancedSearch";
 
 const ChatsDashboard = () => {
   const { user, signOut } = useAuth();
@@ -189,6 +190,24 @@ const ChatsDashboard = () => {
     setFilterDialogOpen(false);
   };
 
+  const handleSearchResultClick = (result: SearchResult) => {
+    console.log("Search result clicked:", result);
+    
+    // Se o resultado tem um sessionId, encontrar a conversa correspondente
+    if (result.sessionId) {
+      const conversation = conversations.find(conv => conv.sessionId === result.sessionId);
+      if (conversation) {
+        setSelectedChat(conversation.id);
+        
+        // Mostrar toast informativo sobre o tipo de resultado
+        toast({
+          title: "Resultado da busca",
+          description: `Navegando para: ${result.title}`,
+        });
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
       <ChatHeader 
@@ -197,6 +216,7 @@ const ChatsDashboard = () => {
         onSearchChange={filters.setSearchTerm}
         onOpenFilters={handleOpenFilters}
         hasActiveFilters={filters.hasActiveFilters}
+        onSearchResultClick={handleSearchResultClick}
       />
 
       <ConversationFilterDialog

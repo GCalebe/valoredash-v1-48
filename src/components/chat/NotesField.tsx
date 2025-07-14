@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Note {
   id: string;
@@ -18,8 +20,119 @@ interface NotesFieldProps {
 const NotesField = ({ selectedChat }: NotesFieldProps) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
-  const addNote = () => {
+  // Carregar notas do banco de dados
+  useEffect(() => {
+    if (selectedChat) {
+      loadNotes();
+    }
+  }, [selectedChat]);
+
+  const loadNotes = async () => {
+    if (!selectedChat) return;
+    
+    setLoading(true);
+    try {
+      // Primeiro buscar o session_id pela conversa
+      const { data: conversationData, error: conversationError } = await supabase
+        .from("conversations")
+        .select("session_id")
+        .eq("id", selectedChat)
+        .single();
+
+      if (conversationError && conversationError.code !== "PGRST116") {
+        throw conversationError;
+      }
+
+      if (conversationData?.session_id) {
+        // Buscar as notas na tabela contacts
+        const { data: contactData, error: contactError } = await supabase
+          .from("contacts")
+          .select("notes")
+          .eq("session_id", conversationData.session_id)
+          .single();
+
+        if (contactError && contactError.code !== "PGRST116") {
+          throw contactError;
+        }
+
+        if (contactData?.notes) {
+          try {
+            // Se as notas já estão em JSON, parsear
+            const parsedNotes = typeof contactData.notes === "string" 
+              ? JSON.parse(contactData.notes) 
+              : contactData.notes;
+            
+            setNotes(Array.isArray(parsedNotes) ? parsedNotes : []);
+          } catch (parseError) {
+            console.error("Error parsing notes:", parseError);
+            // Se não conseguir parsear, tratar como string simples
+            setNotes([{
+              id: Date.now().toString(),
+              content: contactData.notes,
+              timestamp: new Date().toLocaleString("pt-BR"),
+            }]);
+          }
+        } else {
+          setNotes([]);
+        }
+      } else {
+        setNotes([]);
+      }
+    } catch (error) {
+      console.error("Error loading notes:", error);
+      toast({
+        title: "Erro ao carregar anotações",
+        description: "Não foi possível carregar as anotações.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveNotes = async (updatedNotes: Note[]) => {
+    if (!selectedChat) return;
+    
+    setSaving(true);
+    try {
+      // Primeiro buscar o session_id pela conversa
+      const { data: conversationData, error: conversationError } = await supabase
+        .from("conversations")
+        .select("session_id")
+        .eq("id", selectedChat)
+        .single();
+
+      if (conversationError) {
+        throw conversationError;
+      }
+
+      if (conversationData?.session_id) {
+        // Salvar na tabela contacts
+        const { error } = await supabase
+          .from("contacts")
+          .update({ notes: JSON.stringify(updatedNotes) })
+          .eq("session_id", conversationData.session_id);
+
+        if (error) throw error;
+      }
+
+    } catch (error) {
+      console.error("Error saving notes:", error);
+      toast({
+        title: "Erro ao salvar anotações",
+        description: "Não foi possível salvar as anotações.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addNote = async () => {
     if (!newNote.trim()) return;
 
     const note: Note = {
@@ -28,12 +141,18 @@ const NotesField = ({ selectedChat }: NotesFieldProps) => {
       timestamp: new Date().toLocaleString("pt-BR"),
     };
 
-    setNotes([note, ...notes]);
+    const updatedNotes = [note, ...notes];
+    setNotes(updatedNotes);
     setNewNote("");
+    
+    await saveNotes(updatedNotes);
   };
 
-  const removeNote = (noteId: string) => {
-    setNotes(notes.filter((note) => note.id !== noteId));
+  const removeNote = async (noteId: string) => {
+    const updatedNotes = notes.filter((note) => note.id !== noteId);
+    setNotes(updatedNotes);
+    
+    await saveNotes(updatedNotes);
   };
 
   if (!selectedChat) {
@@ -59,9 +178,10 @@ const NotesField = ({ selectedChat }: NotesFieldProps) => {
           size="sm"
           onClick={addNote}
           className="w-full"
+          disabled={saving || !newNote.trim()}
         >
           <Plus className="h-4 w-4 mr-2" />
-          Adicionar Anotação
+          {saving ? "Salvando..." : "Adicionar Anotação"}
         </Button>
       </div>
 
