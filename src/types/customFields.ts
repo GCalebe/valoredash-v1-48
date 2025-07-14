@@ -6,6 +6,15 @@ export interface CustomField {
   is_required: boolean;
   created_at: string;
   updated_at: string;
+  visibility_settings?: {
+    visible_in_client_info?: boolean;
+    visible_in_tabs?: {
+      basic?: boolean;
+      commercial?: boolean;
+      utm?: boolean;
+      docs?: boolean;
+    };
+  };
 }
 
 export interface ClientCustomValue {

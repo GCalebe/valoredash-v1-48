@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Contact } from "@/types/client";
@@ -34,6 +34,8 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
   compact = false,
   showTabs = ["basic", "commercial", "utm", "custom", "docs"],
 }) => {
+  const [fieldVisibility, setFieldVisibility] = useState<Record<string, boolean>>({});
+
   const consultationStageOptions = [
     "Nova consulta",
     "Qualificado", 
@@ -60,6 +62,16 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
     "Grande"
   ];
 
+  const handleVisibilityChange = (fieldId: string, visible: boolean) => {
+    setFieldVisibility(prev => ({
+      ...prev,
+      [fieldId]: visible
+    }));
+    
+    // Aqui você pode implementar a lógica para salvar a configuração de visibilidade
+    console.log(`Campo ${fieldId} visibilidade alterada para: ${visible}`);
+  };
+
   const renderBasicInfo = () => (
     <Card className={compact ? "p-3" : "p-4"}>
       <CardHeader className="p-0 pb-3">
@@ -72,6 +84,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           fieldId="name"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.name !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Email"
@@ -80,6 +95,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           type="email"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.email !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Telefone"
@@ -88,6 +106,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           type="tel"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.phone !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Nome do Cliente"
@@ -95,6 +116,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           fieldId="clientName"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.clientName !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Tipo de Cliente"
@@ -104,6 +128,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           options={clientTypeOptions}
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.clientType !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Tamanho do Cliente"
@@ -113,6 +140,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           options={clientSizeOptions}
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.clientSize !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="CPF/CNPJ"
@@ -120,6 +150,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           fieldId="cpfCnpj"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.cpfCnpj !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Endereço"
@@ -128,6 +161,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           type="textarea"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.address !== false}
+          showVisibilityControl={!readOnly}
         />
       </CardContent>
     </Card>
@@ -147,6 +183,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           options={["Active", "Inactive"]}
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.status !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Etapa da Consulta"
@@ -156,6 +195,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           options={consultationStageOptions}
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.consultationStage !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Setor do Cliente"
@@ -163,6 +205,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           fieldId="clientSector"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.clientSector !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Usuário Responsável"
@@ -170,6 +215,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           fieldId="responsibleUser"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.responsibleUser !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Vendas"
@@ -178,6 +226,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           type="money"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.sales !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Orçamento"
@@ -186,6 +237,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           type="money"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.budget !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Método de Pagamento"
@@ -193,6 +247,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           fieldId="paymentMethod"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.paymentMethod !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Objetivo do Cliente"
@@ -201,6 +258,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           type="textarea"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.clientObjective !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Motivo de Perda"
@@ -209,6 +269,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           type="textarea"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.lossReason !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Número de Contrato"
@@ -216,6 +279,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           fieldId="contractNumber"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.contractNumber !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Data de Contrato"
@@ -224,6 +290,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           type="text"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.contractDate !== false}
+          showVisibilityControl={!readOnly}
         />
         <EditableField
           label="Pagamento"
@@ -231,6 +300,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           fieldId="payment"
           readOnly={readOnly}
           onChange={onFieldUpdate}
+          onVisibilityChange={handleVisibilityChange}
+          isVisible={fieldVisibility.payment !== false}
+          showVisibilityControl={!readOnly}
         />
       </CardContent>
     </Card>
@@ -247,6 +319,8 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
             contactId={clientData.id} 
             readOnly={readOnly}
             onFieldUpdate={onFieldUpdate}
+            onVisibilityChange={handleVisibilityChange}
+            showVisibilityControl={!readOnly}
           />
         ) : (
           <p className="text-gray-500 dark:text-gray-400 text-center py-4">
@@ -304,6 +378,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
                 fieldId={`custom_${field.id}`}
                 readOnly={readOnly}
                 onChange={onFieldUpdate}
+                onVisibilityChange={handleVisibilityChange}
+                isVisible={fieldVisibility[`custom_${field.id}`] !== false}
+                showVisibilityControl={!readOnly}
               />
             );
           })}
