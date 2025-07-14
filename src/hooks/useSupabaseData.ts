@@ -291,9 +291,13 @@ export const getAIProducts = async (): Promise<SupabaseResponse<AIProduct[]>> =>
 // Adicionar novo contato
 export const addContact = async (contact: ContactInsert): Promise<SupabaseResponse<Contact>> => {
   try {
+    // Get the current user from the auth session
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('contacts')
-      .insert(contact)
+      .insert({ ...contact, user_id: user.id })
       .select()
       .single();
 
@@ -596,6 +600,10 @@ export const testSupabaseConnection = async (): Promise<SupabaseResponse<boolean
 // Função para popular dados de teste
 export const seedTestData = async (): Promise<SupabaseResponse<boolean>> => {
   try {
+    // Get the current user from the auth session
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     // Adicionar alguns contatos de teste
     const testContacts: ContactInsert[] = [
       {
@@ -616,7 +624,13 @@ export const seedTestData = async (): Promise<SupabaseResponse<boolean>> => {
       }
     ];
 
-    const { error } = await supabase.from('contacts').insert(testContacts);
+    // Add user_id to each contact
+    const testContactsWithUserId = testContacts.map(contact => ({
+      ...contact,
+      user_id: user.id
+    }));
+
+    const { error } = await supabase.from('contacts').insert(testContactsWithUserId);
 
     return {
       data: !error,

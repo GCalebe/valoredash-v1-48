@@ -77,6 +77,10 @@ export function useCustomFields() {
     field: Omit<CustomField, "id" | "created_at" | "updated_at">,
   ) => {
     try {
+      // Get the current user from the auth session
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from("custom_fields")
         .insert({
@@ -85,6 +89,7 @@ export function useCustomFields() {
           field_options: field.field_options,
           is_required: field.is_required,
           category: "basic", // Default category, can be modified later
+          user_id: user.id,
         })
         .select()
         .single();

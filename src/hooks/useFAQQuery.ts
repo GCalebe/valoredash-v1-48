@@ -65,9 +65,13 @@ const fetchFAQItemsByCategory = async (category: string): Promise<FAQItem[]> => 
 
 // Create FAQ item
 const createFAQItem = async (faqItem: FAQInsert): Promise<FAQItem> => {
+  // Get the current user from the auth session
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   const { data, error } = await supabase
     .from('faq_items')
-    .insert(faqItem)
+    .insert({ ...faqItem, user_id: user.id })
     .select()
     .single();
 

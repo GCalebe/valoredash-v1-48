@@ -89,9 +89,13 @@ export const useSupabaseContacts = () => {
 
   const createContact = async (contactData: ContactInsert) => {
     try {
+      // Get the current user from the auth session
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from('contacts')
-        .insert(contactData)
+        .insert({ ...contactData, user_id: user.id })
         .select()
         .single();
 
