@@ -51,6 +51,15 @@ const ClientsModals = ({
   handleMessageSubmit,
   handlePauseDurationConfirm,
 }: ClientsModalsProps) => {
+  
+  const handleSaveContact = async (updatedContact: Contact) => {
+    console.log("handleSaveContact called with:", updatedContact);
+    
+    // Usar a função handleEditContact que já existe no useClientManagement
+    // Isso vai chamar updateContact com os dados corretos
+    await handleEditContact();
+  };
+
   return (
     <>
       {selectedContact && (
@@ -67,10 +76,7 @@ const ClientsModals = ({
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
             selectedContact={selectedContact}
-            onSave={async (updatedContact: Contact) => {
-              // Handle the save logic here
-              handleEditContact();
-            }}
+            onSave={handleSaveContact}
           />
           {isMessageDialogOpen && (
             <SendMessageDialog

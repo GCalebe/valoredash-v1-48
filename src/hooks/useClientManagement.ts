@@ -1,3 +1,4 @@
+
 import { useContactsData } from "./useContactsData";
 import { useClientState } from "./useClientState";
 import { useClientActions } from "./useClientActions";
@@ -69,9 +70,16 @@ export const useClientManagement = () => {
   };
 
   const handleEditContactWrapper = async () => {
-    if (!selectedContact) return;
+    if (!selectedContact) {
+      console.log("No selected contact to edit");
+      return;
+    }
 
-    await updateContact(selectedContact, newContact, () => {
+    console.log("Editing contact:", selectedContact);
+
+    // O EditClientForm já passou o contato completo atualizado
+    // Agora precisamos apenas salvar usando o selectedContact atual
+    await updateContact(selectedContact, selectedContact, () => {
       fetchClients();
       setIsEditModalOpen(false);
     });

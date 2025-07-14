@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Contact } from "@/types/client";
 
@@ -42,27 +43,11 @@ export const useClientState = () => {
     const contactToEdit = contact || selectedContact;
     if (!contactToEdit) return;
 
+    console.log("Opening edit modal for contact:", contactToEdit);
     setSelectedContact(contactToEdit);
-    setNewContact({
-      name: contactToEdit.name,
-      email: contactToEdit.email,
-      phone: contactToEdit.phone,
-      clientName: contactToEdit.clientName,
-      tags: contactToEdit.tags || [],
-      notes: contactToEdit.notes || "",
-      consultationStage: contactToEdit.consultationStage || "Nova consulta",
-      responsibleUser: contactToEdit.responsibleUser,
-      sales: contactToEdit.sales,
-      clientType: contactToEdit.clientType,
-      clientSector: contactToEdit.clientSector,
-      budget: contactToEdit.budget,
-      paymentMethod: contactToEdit.paymentMethod,
-      clientObjective: contactToEdit.clientObjective,
-      lossReason: contactToEdit.lossReason,
-      contractNumber: contactToEdit.contractNumber,
-      contractDate: contactToEdit.contractDate,
-      payment: contactToEdit.payment,
-    });
+    
+    // Não precisamos mais definir newContact aqui, pois o EditClientForm 
+    // agora gerencia seu próprio estado interno
     setIsEditModalOpen(true);
   };
 

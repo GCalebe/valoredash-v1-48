@@ -1,3 +1,4 @@
+
 import { Contact } from "@/types/client";
 import { useContactsActions } from "./useContactsActions";
 import { useContactsMessages } from "./useContactsMessages";
@@ -26,9 +27,12 @@ export const useClientActions = () => {
 
   const updateContact = async (
     selectedContact: Contact,
-    contactData: Partial<Contact>,
+    contactData: Contact,
     onSuccess?: () => void,
   ) => {
+    console.log("updateContact called with:", { selectedContact, contactData });
+    
+    // Usar os dados completos do contactData ao invés de dados parciais
     await handleEditContact(selectedContact, contactData, onSuccess);
   };
 

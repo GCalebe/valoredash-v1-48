@@ -9,10 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Contact } from "@/types/client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDynamicFields } from "@/hooks/useDynamicFields";
 import ClientInfo from "./ClientInfo";
-import ClientUTMData from "./ClientUTMData";
 
 interface EditClientFormProps {
   isOpen: boolean;
@@ -31,12 +29,12 @@ const EditClientForm: React.FC<EditClientFormProps> = ({
   onSave,
 }) => {
   const [contact, setContact] = useState<Contact | null>(null);
-  const [activeTab, setActiveTab] = useState("principal");
   const [isSaving, setIsSaving] = useState(false);
   const { dynamicFields, refetch } = useDynamicFields(selectedContact?.sessionId || null);
 
   useEffect(() => {
     if (isOpen && selectedContact) {
+      console.log("Setting contact data for editing:", selectedContact);
       setContact({ ...selectedContact });
       refetch();
     }
@@ -45,13 +43,16 @@ const EditClientForm: React.FC<EditClientFormProps> = ({
   const handleFieldUpdate = (fieldId: string, newValue: any) => {
     if (!contact) return;
 
+    console.log("Field updated:", fieldId, newValue);
+
     // Verifica se é um campo personalizado ou um campo padrão
     if (fieldId.startsWith("custom_")) {
+      const actualFieldId = fieldId.replace("custom_", "");
       setContact({
         ...contact,
         customValues: {
           ...contact.customValues,
-          [fieldId]: newValue,
+          [actualFieldId]: newValue,
         },
       });
     } else {
@@ -67,6 +68,7 @@ const EditClientForm: React.FC<EditClientFormProps> = ({
 
     try {
       setIsSaving(true);
+      console.log("Saving contact:", contact);
       await onSave(contact);
       onClose();
     } catch (error) {
@@ -76,69 +78,31 @@ const EditClientForm: React.FC<EditClientFormProps> = ({
     }
   };
 
+  const handleClose = () => {
+    setContact(null);
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Cliente: {selectedContact?.name}</DialogTitle>
         </DialogHeader>
 
         <div className="py-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-4 mb-4">
-              <TabsTrigger value="principal">Principal</TabsTrigger>
-              <TabsTrigger value="utm">UTM</TabsTrigger>
-              <TabsTrigger value="custom">Personalizado</TabsTrigger>
-              <TabsTrigger value="docs">Documentos</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="principal" className="space-y-4">
-              {contact && (
-                <ClientInfo
-                  clientData={contact}
-                  dynamicFields={dynamicFields}
-                  onFieldUpdate={handleFieldUpdate}
-                  context="edit"
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="utm" className="space-y-4">
-              {contact?.id ? (
-                <ClientUTMData contactId={contact.id} />
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p>Os dados UTM estarão disponíveis após salvar o cliente.</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="custom" className="space-y-4">
-              {contact && (
-                <ClientInfo
-                  clientData={contact}
-                  dynamicFields={dynamicFields}
-                  onFieldUpdate={handleFieldUpdate}
-                  context="edit"
-                />
-              )}
-            </TabsContent>
-
-            <TabsContent value="docs" className="space-y-4">
-              {contact && (
-                <ClientInfo
-                  clientData={contact}
-                  dynamicFields={dynamicFields}
-                  onFieldUpdate={handleFieldUpdate}
-                  context="edit"
-                />
-              )}
-            </TabsContent>
-          </Tabs>
+          {contact && (
+            <ClientInfo
+              clientData={contact}
+              dynamicFields={dynamicFields}
+              onFieldUpdate={handleFieldUpdate}
+              context="edit"
+            />
+          )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={handleClose}>
             Cancelar
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>

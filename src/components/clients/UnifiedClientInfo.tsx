@@ -1,10 +1,11 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Contact } from "@/types/client";
 import { DynamicCategory } from "@/components/clients/DynamicCategoryManager";
 import ClientUTMData from "./ClientUTMData";
+import EditableField from "./EditableField";
 
 interface UnifiedClientInfoProps {
   clientData: Contact | null;
@@ -33,30 +34,31 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
   compact = false,
   showTabs = ["basic", "commercial", "utm", "custom", "docs"],
 }) => {
-  const renderField = (
-    label: string,
-    value: any,
-    type: "text" | "badge" | "money" = "text",
-  ) => {
-    if (!value && value !== 0) {
-      value = "Não informado";
-    }
+  const consultationStageOptions = [
+    "Nova consulta",
+    "Qualificado", 
+    "Chamada agendada",
+    "Preparando proposta",
+    "Proposta enviada",
+    "Acompanhamento",
+    "Negociação",
+    "Fatura enviada",
+    "Fatura paga – ganho",
+    "Projeto cancelado – perdido"
+  ];
 
-    return (
-      <div className={`${compact ? "mb-2" : "mb-4"}`}>
-        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-          {label}
-        </h3>
-        {type === "badge" ? (
-          <Badge variant="outline">{value}</Badge>
-        ) : type === "money" ? (
-          <p>{typeof value === "number" ? `R$ ${value.toFixed(2)}` : value}</p>
-        ) : (
-          <p>{value}</p>
-        )}
-      </div>
-    );
-  };
+  const clientTypeOptions = [
+    "Pessoa Física",
+    "Pessoa Jurídica",
+    "MEI",
+    "Empresa"
+  ];
+
+  const clientSizeOptions = [
+    "Pequeno",
+    "Médio", 
+    "Grande"
+  ];
 
   const renderBasicInfo = () => (
     <Card className={compact ? "p-3" : "p-4"}>
@@ -64,14 +66,69 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
         <CardTitle className="text-lg">Informações Básicas</CardTitle>
       </CardHeader>
       <CardContent className="p-0 space-y-2">
-        {renderField("Nome", clientData?.name)}
-        {renderField("Email", clientData?.email)}
-        {renderField("Telefone", clientData?.phone)}
-        {renderField("Nome do Cliente", clientData?.clientName)}
-        {renderField("Tipo de Cliente", clientData?.clientType)}
-        {renderField("Tamanho do Cliente", clientData?.clientSize)}
-        {renderField("CPF/CNPJ", clientData?.cpfCnpj)}
-        {renderField("Endereço", clientData?.address)}
+        <EditableField
+          label="Nome"
+          value={clientData?.name}
+          fieldId="name"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Email"
+          value={clientData?.email}
+          fieldId="email"
+          type="email"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Telefone"
+          value={clientData?.phone}
+          fieldId="phone"
+          type="tel"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Nome do Cliente"
+          value={clientData?.clientName}
+          fieldId="clientName"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Tipo de Cliente"
+          value={clientData?.clientType}
+          fieldId="clientType"
+          type="select"
+          options={clientTypeOptions}
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Tamanho do Cliente"
+          value={clientData?.clientSize}
+          fieldId="clientSize"
+          type="select"
+          options={clientSizeOptions}
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="CPF/CNPJ"
+          value={clientData?.cpfCnpj}
+          fieldId="cpfCnpj"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Endereço"
+          value={clientData?.address}
+          fieldId="address"
+          type="textarea"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
       </CardContent>
     </Card>
   );
@@ -82,23 +139,99 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
         <CardTitle className="text-lg">Informações Comerciais</CardTitle>
       </CardHeader>
       <CardContent className="p-0 space-y-2">
-        {renderField("Status", clientData?.status, "badge")}
-        {renderField("Etapa do Funil", clientData?.kanbanStage, "badge")}
-        {renderField(
-          "Etapa da Consulta",
-          clientData?.consultationStage,
-          "badge",
-        )}
-        {renderField("Setor do Cliente", clientData?.clientSector)}
-        {renderField("Usuário Responsável", clientData?.responsibleUser)}
-        {renderField("Vendas", clientData?.sales)}
-        {renderField("Orçamento", clientData?.budget, "money")}
-        {renderField("Método de Pagamento", clientData?.paymentMethod)}
-        {renderField("Objetivo do Cliente", clientData?.clientObjective)}
-        {renderField("Motivo de Perda", clientData?.lossReason)}
-        {renderField("Número de Contrato", clientData?.contractNumber)}
-        {renderField("Data de Contrato", clientData?.contractDate)}
-        {renderField("Pagamento", clientData?.payment)}
+        <EditableField
+          label="Status"
+          value={clientData?.status}
+          fieldId="status"
+          type={readOnly ? "badge" : "select"}
+          options={["Active", "Inactive"]}
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Etapa da Consulta"
+          value={clientData?.consultationStage}
+          fieldId="consultationStage"
+          type={readOnly ? "badge" : "select"}
+          options={consultationStageOptions}
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Setor do Cliente"
+          value={clientData?.clientSector}
+          fieldId="clientSector"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Usuário Responsável"
+          value={clientData?.responsibleUser}
+          fieldId="responsibleUser"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Vendas"
+          value={clientData?.sales}
+          fieldId="sales"
+          type="money"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Orçamento"
+          value={clientData?.budget}
+          fieldId="budget"
+          type="money"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Método de Pagamento"
+          value={clientData?.paymentMethod}
+          fieldId="paymentMethod"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Objetivo do Cliente"
+          value={clientData?.clientObjective}
+          fieldId="clientObjective"
+          type="textarea"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Motivo de Perda"
+          value={clientData?.lossReason}
+          fieldId="lossReason"
+          type="textarea"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Número de Contrato"
+          value={clientData?.contractNumber}
+          fieldId="contractNumber"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Data de Contrato"
+          value={clientData?.contractDate}
+          fieldId="contractDate"
+          type="text"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
+        <EditableField
+          label="Pagamento"
+          value={clientData?.payment}
+          fieldId="payment"
+          readOnly={readOnly}
+          onChange={onFieldUpdate}
+        />
       </CardContent>
     </Card>
   );
@@ -144,7 +277,16 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
         <CardContent className="p-0 space-y-2">
           {dynamicFields.personalized.map((field) => {
             const value = clientData?.customValues?.[field.id];
-            return renderField(field.name, value);
+            return (
+              <EditableField
+                key={field.id}
+                label={field.name}
+                value={value}
+                fieldId={`custom_${field.id}`}
+                readOnly={readOnly}
+                onChange={onFieldUpdate}
+              />
+            );
           })}
         </CardContent>
       </Card>
@@ -175,7 +317,16 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
         <CardContent className="p-0 space-y-2">
           {dynamicFields.documents.map((field) => {
             const value = clientData?.customValues?.[field.id];
-            return renderField(field.name, value);
+            return (
+              <EditableField
+                key={field.id}
+                label={field.name}
+                value={value}
+                fieldId={`custom_${field.id}`}
+                readOnly={readOnly}
+                onChange={onFieldUpdate}
+              />
+            );
           })}
         </CardContent>
       </Card>
