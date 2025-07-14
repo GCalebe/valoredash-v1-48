@@ -66,8 +66,8 @@ const ClientInfo: React.FC<ClientInfoProps> = ({
   const config = contextConfig[context];
 
   return (
-    <Card className={`w-full overflow-hidden ${config.className}`}>
-      <CardContent className="p-0 h-full">
+    <Card className={`w-full overflow-hidden bg-background border-border ${config.className}`}>
+      <CardContent className="p-0 h-full bg-background">
         <UnifiedClientInfo
           clientData={clientData}
           dynamicFields={dynamicFields}
