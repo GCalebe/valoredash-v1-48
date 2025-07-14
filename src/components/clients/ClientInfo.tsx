@@ -42,7 +42,7 @@ const ClientInfo: React.FC<ClientInfoProps> = ({
       description: "Detalhes do cliente na conversa atual",
       showTabs: ["basic", "commercial", "utm", "custom", "docs"],
       readOnly: true,
-      compact: false,
+      compact: true,
     },
     table: {
       title: "Resumo do Cliente",
