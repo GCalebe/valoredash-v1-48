@@ -6,6 +6,8 @@ import { DynamicCategory } from "@/components/clients/DynamicCategoryManager";
 import ClientUTMData from "./ClientUTMData";
 import EditableField from "./EditableField";
 import CustomFieldsTab from "./CustomFieldsTab";
+import { useCustomFields } from "@/hooks/useCustomFields";
+import CustomFieldRenderer from "./CustomFieldRenderer";
 
 interface UnifiedClientInfoProps {
   clientData: Contact | null;
@@ -35,6 +37,7 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
   showTabs = ["basic", "commercial", "utm", "custom", "docs"],
 }) => {
   const [fieldVisibility, setFieldVisibility] = useState<Record<string, boolean>>({});
+  const { customFields } = useCustomFields();
 
   const consultationStageOptions = [
     "Nova consulta",
@@ -165,6 +168,18 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           isVisible={fieldVisibility.address !== false}
           showVisibilityControl={!readOnly}
         />
+        
+        {/* Campos personalizados da aba básica */}
+        {customFields
+          .filter(field => field.visibility_settings?.visible_in_tabs?.basic)
+          .map(field => (
+            <CustomFieldRenderer
+              key={field.id}
+              field={field}
+              value={clientData?.customValues?.[field.id]}
+              onChange={(value) => onFieldUpdate?.(`custom_${field.id}`, value)}
+            />
+          ))}
       </CardContent>
     </Card>
   );
@@ -304,6 +319,18 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           isVisible={fieldVisibility.payment !== false}
           showVisibilityControl={!readOnly}
         />
+        
+        {/* Campos personalizados da aba comercial */}
+        {customFields
+          .filter(field => field.visibility_settings?.visible_in_tabs?.commercial)
+          .map(field => (
+            <CustomFieldRenderer
+              key={field.id}
+              field={field}
+              value={clientData?.customValues?.[field.id]}
+              onChange={(value) => onFieldUpdate?.(`custom_${field.id}`, value)}
+            />
+          ))}
       </CardContent>
     </Card>
   );
@@ -315,13 +342,27 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
       </CardHeader>
       <CardContent className="p-0">
         {clientData?.id ? (
-          <ClientUTMData 
-            contactId={clientData.id} 
-            readOnly={readOnly}
-            onFieldUpdate={onFieldUpdate}
-            onVisibilityChange={handleVisibilityChange}
-            showVisibilityControl={!readOnly}
-          />
+          <div className="space-y-2">
+            <ClientUTMData 
+              contactId={clientData.id} 
+              readOnly={readOnly}
+              onFieldUpdate={onFieldUpdate}
+              onVisibilityChange={handleVisibilityChange}
+              showVisibilityControl={!readOnly}
+            />
+            
+            {/* Campos personalizados da aba UTM */}
+            {customFields
+              .filter(field => field.visibility_settings?.visible_in_tabs?.utm)
+              .map(field => (
+                <CustomFieldRenderer
+                  key={field.id}
+                  field={field}
+                  value={clientData?.customValues?.[field.id]}
+                  onChange={(value) => onFieldUpdate?.(`custom_${field.id}`, value)}
+                />
+              ))}
+          </div>
         ) : (
           <p className="text-gray-500 dark:text-gray-400 text-center py-4">
             Dados UTM não disponíveis para este cliente.
@@ -384,6 +425,18 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
               />
             );
           })}
+          
+          {/* Campos personalizados da aba documentos */}
+          {customFields
+            .filter(field => field.visibility_settings?.visible_in_tabs?.docs)
+            .map(field => (
+              <CustomFieldRenderer
+                key={field.id}
+                field={field}
+                value={clientData?.customValues?.[field.id]}
+                onChange={(value) => onFieldUpdate?.(`custom_${field.id}`, value)}
+              />
+            ))}
         </CardContent>
       </Card>
     );

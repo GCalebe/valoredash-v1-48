@@ -1,24 +1,24 @@
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import EditableField from "./EditableField";
 
 interface UTMData {
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-  utm_term?: string;
-  utm_content?: string;
-  device_type?: string;
-  browser?: string;
-  location?: string;
-  referrer?: string;
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
+  utm_term?: string | null;
+  utm_content?: string | null;
+  device_type?: string | null;
+  referrer?: string | null;
+  user_agent?: string | null;
+  landing_page?: string | null;
+  ip_address?: string | null;
 }
 
 interface ClientUTMDataProps {
   contactId: string;
   readOnly?: boolean;
-  onFieldUpdate?: (fieldId: string, newValue: any) => void;
+  onFieldUpdate?: (fieldId: string, newValue: string | number) => void;
   onVisibilityChange?: (fieldId: string, visible: boolean) => void;
   showVisibilityControl?: boolean;
 }
@@ -39,27 +39,32 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
       try {
         const { data, error } = await supabase
           .from("utm_tracking")
-          .select("*")
-          .eq("contact_id", contactId)
+          .select("utm_source, utm_medium, utm_campaign, utm_term, utm_content, device_type, referrer, user_agent, landing_page, ip_address")
+          .eq("lead_id", contactId)
           .order("created_at", { ascending: false })
           .limit(1);
 
         if (error) {
           console.error("Erro ao buscar dados UTM:", error);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          setUtmData(data[0]);
+          setUtmData(null);
+        } else if (data && data.length > 0) {
+          setUtmData(data[0] as UTMData);
+        } else {
+          setUtmData(null);
         }
       } catch (error) {
         console.error("Erro ao buscar dados UTM:", error);
+        setUtmData(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUTMData();
+    if (contactId) {
+      fetchUTMData();
+    } else {
+      setLoading(false);
+    }
   }, [contactId]);
 
   const handleVisibilityChange = (fieldId: string, visible: boolean) => {
@@ -76,7 +81,7 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-4">
-        <div className="text-gray-500">Carregando dados UTM...</div>
+        <div className="text-muted-foreground">Carregando dados UTM...</div>
       </div>
     );
   }
@@ -84,7 +89,7 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
   if (!utmData) {
     return (
       <div className="text-center py-4">
-        <p className="text-gray-500">Nenhum dado UTM encontrado para este cliente.</p>
+        <p className="text-muted-foreground">Nenhum dado UTM encontrado para este cliente.</p>
       </div>
     );
   }
@@ -93,7 +98,7 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
     <div className="space-y-2">
       <EditableField
         label="Fonte UTM"
-        value={utmData.utm_source}
+        value={utmData.utm_source || ""}
         fieldId="utm_source"
         readOnly={readOnly}
         onChange={onFieldUpdate}
@@ -103,7 +108,7 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
       />
       <EditableField
         label="Meio UTM"
-        value={utmData.utm_medium}
+        value={utmData.utm_medium || ""}
         fieldId="utm_medium"
         readOnly={readOnly}
         onChange={onFieldUpdate}
@@ -113,7 +118,7 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
       />
       <EditableField
         label="Campanha UTM"
-        value={utmData.utm_campaign}
+        value={utmData.utm_campaign || ""}
         fieldId="utm_campaign"
         readOnly={readOnly}
         onChange={onFieldUpdate}
@@ -123,7 +128,7 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
       />
       <EditableField
         label="Termo UTM"
-        value={utmData.utm_term}
+        value={utmData.utm_term || ""}
         fieldId="utm_term"
         readOnly={readOnly}
         onChange={onFieldUpdate}
@@ -133,7 +138,7 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
       />
       <EditableField
         label="Conteúdo UTM"
-        value={utmData.utm_content}
+        value={utmData.utm_content || ""}
         fieldId="utm_content"
         readOnly={readOnly}
         onChange={onFieldUpdate}
@@ -143,7 +148,7 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
       />
       <EditableField
         label="Tipo de Dispositivo"
-        value={utmData.device_type}
+        value={utmData.device_type || ""}
         fieldId="device_type"
         readOnly={readOnly}
         onChange={onFieldUpdate}
@@ -152,33 +157,43 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="Navegador"
-        value={utmData.browser}
-        fieldId="browser"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.browser !== false}
-        showVisibilityControl={showVisibilityControl}
-      />
-      <EditableField
-        label="Localização"
-        value={utmData.location}
-        fieldId="location"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.location !== false}
-        showVisibilityControl={showVisibilityControl}
-      />
-      <EditableField
         label="Referenciador"
-        value={utmData.referrer}
+        value={utmData.referrer || ""}
         fieldId="referrer"
         readOnly={readOnly}
         onChange={onFieldUpdate}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.referrer !== false}
+        showVisibilityControl={showVisibilityControl}
+      />
+      <EditableField
+        label="User Agent"
+        value={utmData.user_agent || ""}
+        fieldId="user_agent"
+        readOnly={readOnly}
+        onChange={onFieldUpdate}
+        onVisibilityChange={handleVisibilityChange}
+        isVisible={fieldVisibility.user_agent !== false}
+        showVisibilityControl={showVisibilityControl}
+      />
+      <EditableField
+        label="Landing Page"
+        value={utmData.landing_page || ""}
+        fieldId="landing_page"
+        readOnly={readOnly}
+        onChange={onFieldUpdate}
+        onVisibilityChange={handleVisibilityChange}
+        isVisible={fieldVisibility.landing_page !== false}
+        showVisibilityControl={showVisibilityControl}
+      />
+      <EditableField
+        label="IP Address"
+        value={utmData.ip_address || ""}
+        fieldId="ip_address"
+        readOnly={readOnly}
+        onChange={onFieldUpdate}
+        onVisibilityChange={handleVisibilityChange}
+        isVisible={fieldVisibility.ip_address !== false}
         showVisibilityControl={showVisibilityControl}
       />
     </div>

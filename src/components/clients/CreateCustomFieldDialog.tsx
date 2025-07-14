@@ -36,6 +36,7 @@ const CreateCustomFieldDialog: React.FC<CreateCustomFieldDialogProps> = ({
   const [options, setOptions] = useState<string[]>([]);
   const [newOption, setNewOption] = useState("");
   const [isRequired, setIsRequired] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<string>("basic");
   const [isCreating, setIsCreating] = useState(false);
 
   const { createCustomField } = useCustomFields();
@@ -78,6 +79,12 @@ const CreateCustomFieldDialog: React.FC<CreateCustomFieldDialogProps> = ({
         field_type: fieldType,
         field_options: (fieldType === "single_select" || fieldType === "multi_select") ? options : null,
         is_required: isRequired,
+        visibility_settings: {
+          visible_in_client_info: true,
+          visible_in_tabs: {
+            [selectedTab]: true
+          }
+        }
       });
 
       // Reset form
@@ -86,6 +93,7 @@ const CreateCustomFieldDialog: React.FC<CreateCustomFieldDialogProps> = ({
       setOptions([]);
       setNewOption("");
       setIsRequired(false);
+      setSelectedTab("basic");
       
       onClose();
       
@@ -111,6 +119,7 @@ const CreateCustomFieldDialog: React.FC<CreateCustomFieldDialogProps> = ({
       setOptions([]);
       setNewOption("");
       setIsRequired(false);
+      setSelectedTab("basic");
       onClose();
     }
   };
@@ -200,6 +209,25 @@ const CreateCustomFieldDialog: React.FC<CreateCustomFieldDialogProps> = ({
               )}
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label htmlFor="selectedTab">Aba onde o campo aparecerá</Label>
+            <Select
+              value={selectedTab}
+              onValueChange={setSelectedTab}
+              disabled={isCreating}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="basic">Básico</SelectItem>
+                <SelectItem value="commercial">Comercial</SelectItem>
+                <SelectItem value="utm">UTM</SelectItem>
+                <SelectItem value="docs">Documentos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="flex items-center space-x-2">
             <input

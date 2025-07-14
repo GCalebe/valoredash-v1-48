@@ -45,6 +45,15 @@ export function useCustomFields() {
         is_required: field.is_required,
         created_at: field.created_at,
         updated_at: field.updated_at,
+        visibility_settings: {
+          visible_in_client_info: true,
+          visible_in_tabs: {
+            basic: true,
+            commercial: false,
+            utm: false,
+            docs: false,
+          },
+        },
       }));
 
       setCustomFields(transformedFields);
@@ -103,6 +112,15 @@ export function useCustomFields() {
         is_required: data.is_required,
         created_at: data.created_at,
         updated_at: data.updated_at,
+        visibility_settings: field.visibility_settings || {
+          visible_in_client_info: true,
+          visible_in_tabs: {
+            basic: true,
+            commercial: false,
+            utm: false,
+            docs: false,
+          },
+        },
       };
 
       setCustomFields((prev) => [...prev, newField]);
@@ -129,14 +147,16 @@ export function useCustomFields() {
 
   const updateCustomField = async (id: string, field: Partial<CustomField>) => {
     try {
+      const updateData: any = {};
+      
+      if (field.field_name !== undefined) updateData.field_name = field.field_name;
+      if (field.field_type !== undefined) updateData.field_type = field.field_type;
+      if (field.field_options !== undefined) updateData.field_options = field.field_options;
+      if (field.is_required !== undefined) updateData.is_required = field.is_required;
+      
       const { error } = await supabase
         .from("custom_fields")
-        .update({
-          field_name: field.field_name,
-          field_type: field.field_type,
-          field_options: field.field_options,
-          is_required: field.is_required,
-        })
+        .update(updateData)
         .eq("id", id);
 
       if (error) {
