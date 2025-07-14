@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -433,7 +432,7 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Carousel Tab Navigation */}
-      <div className="relative border-b border-border bg-background">
+      <div className="relative border-b border-border bg-background flex-shrink-0">
         {/* Left scroll button */}
         <Button
           variant="ghost"
@@ -485,9 +484,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
       </div>
 
       {/* Tab Content with fixed height and scroll */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0">
         <div className="h-full overflow-y-auto">
-          <div className="p-6">
+          <div className="p-4">
             {renderTabContent()}
           </div>
         </div>

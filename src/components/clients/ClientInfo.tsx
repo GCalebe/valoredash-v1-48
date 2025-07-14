@@ -41,7 +41,7 @@ const ClientInfo: React.FC<ClientInfoProps> = ({
       showTabs: ["basic", "commercial", "utm", "custom", "docs"],
       readOnly: true,
       compact: true,
-      className: "h-full"
+      className: "h-[500px] max-h-[500px]"
     },
     table: {
       showTabs: ["basic", "commercial"],
