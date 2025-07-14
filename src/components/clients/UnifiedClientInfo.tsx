@@ -243,7 +243,11 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
       </CardHeader>
       <CardContent className="p-0">
         {clientData?.id ? (
-          <ClientUTMData contactId={clientData.id} />
+          <ClientUTMData 
+            contactId={clientData.id} 
+            readOnly={readOnly}
+            onFieldUpdate={onFieldUpdate}
+          />
         ) : (
           <p className="text-gray-500 dark:text-gray-400 text-center py-4">
             Dados UTM não disponíveis para este cliente.
