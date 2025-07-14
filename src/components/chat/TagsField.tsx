@@ -55,7 +55,7 @@ const TagsField = ({ selectedChat }: TagsFieldProps) => {
   return (
     <Card className="p-4 mb-4">
       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
-        Marcadores
+        Etiquetas
       </h3>
 
       {/* Existing tags */}
