@@ -224,7 +224,7 @@ const CreateCustomFieldDialog: React.FC<CreateCustomFieldDialogProps> = ({
                 <SelectItem value="basic">Básico</SelectItem>
                 <SelectItem value="commercial">Comercial</SelectItem>
                 <SelectItem value="utm">UTM</SelectItem>
-                <SelectItem value="docs">Documentos</SelectItem>
+                <SelectItem value="docs">Arquivos</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -6,6 +6,7 @@ import { DynamicCategory } from "@/components/clients/DynamicCategoryManager";
 import ClientUTMData from "./ClientUTMData";
 import EditableField from "./EditableField";
 import CustomFieldsTab from "./CustomFieldsTab";
+import ClientFilesTab from "./ClientFilesTab";
 import { useCustomFields } from "@/hooks/useCustomFields";
 import CustomFieldRenderer from "./CustomFieldRenderer";
 
@@ -387,60 +388,33 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
     </Card>
   );
 
-  const renderDocuments = () => {
-    if (!dynamicFields.documents.length) {
-      return (
-        <Card className={compact ? "p-3" : "p-4"}>
-          <CardHeader className="p-0 pb-3">
-            <CardTitle className="text-lg">Documentos</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-              Nenhum documento configurado.
-            </p>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    return (
-      <Card className={compact ? "p-3" : "p-4"}>
-        <CardHeader className="p-0 pb-3">
-          <CardTitle className="text-lg">Documentos</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 space-y-2">
-          {dynamicFields.documents.map((field) => {
-            const value = clientData?.customValues?.[field.id];
-            return (
-              <EditableField
-                key={field.id}
-                label={field.name}
-                value={value}
-                fieldId={`custom_${field.id}`}
-                readOnly={readOnly}
-                onChange={onFieldUpdate}
-                onVisibilityChange={handleVisibilityChange}
-                isVisible={fieldVisibility[`custom_${field.id}`] !== false}
-                showVisibilityControl={!readOnly}
-              />
-            );
-          })}
-          
-          {/* Campos personalizados da aba documentos */}
-          {customFields
-            .filter(field => field.visibility_settings?.visible_in_tabs?.docs)
-            .map(field => (
+  const renderFiles = () => (
+    <Card className={compact ? "p-3" : "p-4"}>
+      <CardContent className="p-0">
+        <ClientFilesTab
+          clientId={clientData?.id}
+          onFileUpdate={(files) => {
+            // Callback para quando arquivos são atualizados
+            console.log('Arquivos atualizados:', files);
+          }}
+          readOnly={readOnly}
+        />
+        
+        {/* Campos personalizados da aba arquivos */}
+        {customFields
+          .filter(field => field.visibility_settings?.visible_in_tabs?.docs)
+          .map(field => (
+            <div key={field.id} className="mt-4">
               <CustomFieldRenderer
-                key={field.id}
                 field={field}
                 value={clientData?.customValues?.[field.id]}
                 onChange={(value) => onFieldUpdate?.(`custom_${field.id}`, value)}
               />
-            ))}
-        </CardContent>
-      </Card>
-    );
-  };
+            </div>
+          ))}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-4">
@@ -462,7 +436,7 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
             <TabsTrigger value="custom">Personalizado</TabsTrigger>
           )}
           {showTabs.includes("docs") && (
-            <TabsTrigger value="docs">Documentos</TabsTrigger>
+            <TabsTrigger value="docs">Arquivos</TabsTrigger>
           )}
         </TabsList>
 
@@ -492,7 +466,7 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
 
         {showTabs.includes("docs") && (
           <TabsContent value="docs" className="mt-4">
-            {renderDocuments()}
+            {renderFiles()}
           </TabsContent>
         )}
       </Tabs>

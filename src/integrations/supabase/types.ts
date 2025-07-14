@@ -744,6 +744,7 @@ export type Database = {
           created_at: string | null
           deleted_at: string | null
           email: string | null
+          files_metadata: Json | null
           id: string
           kanban_stage_id: string | null
           last_contact: string | null
@@ -780,6 +781,7 @@ export type Database = {
           created_at?: string | null
           deleted_at?: string | null
           email?: string | null
+          files_metadata?: Json | null
           id?: string
           kanban_stage_id?: string | null
           last_contact?: string | null
@@ -816,6 +818,7 @@ export type Database = {
           created_at?: string | null
           deleted_at?: string | null
           email?: string | null
+          files_metadata?: Json | null
           id?: string
           kanban_stage_id?: string | null
           last_contact?: string | null
@@ -2202,6 +2205,33 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_storage_usage: {
+        Row: {
+          created_at: string | null
+          id: string
+          max_bytes: number | null
+          updated_at: string | null
+          used_bytes: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          max_bytes?: number | null
+          updated_at?: string | null
+          used_bytes?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          max_bytes?: number | null
+          updated_at?: string | null
+          used_bytes?: number | null
           user_id?: string
         }
         Relationships: []
