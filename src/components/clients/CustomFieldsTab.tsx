@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useCustomFields } from "@/hooks/useCustomFields";
 import { CustomFieldWithValue } from "@/types/customFields";
 import CustomFieldRenderer from "./CustomFieldRenderer";
@@ -9,6 +9,13 @@ import CreateCustomFieldDialog from "./CreateCustomFieldDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,26 +67,41 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
     }
   };
 
-  const handleTabVisibilityChange = async (fieldId: string, tabName: string, visible: boolean) => {
+  const handleTabSelectionChange = async (fieldId: string, selectedTab: string) => {
     const field = customFields.find(f => f.id === fieldId);
     if (!field) return;
 
     const currentSettings = field.visibility_settings || {};
-    const tabSettings = currentSettings.visible_in_tabs || {};
+    
+    // Reset all tabs to false, then set the selected one to true
+    const newTabSettings = {
+      basic: false,
+      commercial: false,
+      utm: false,
+      docs: false,
+      [selectedTab]: true
+    };
     
     try {
       await updateCustomField(fieldId, {
         visibility_settings: {
           ...currentSettings,
-          visible_in_tabs: {
-            ...tabSettings,
-            [tabName]: visible
-          }
+          visible_in_tabs: newTabSettings
         }
       });
     } catch (error) {
-      console.error("Erro ao atualizar visibilidade da aba:", error);
+      console.error("Erro ao atualizar aba do campo:", error);
     }
+  };
+
+  // Helper function to get the currently selected tab for a field
+  const getSelectedTab = (field: any) => {
+    const tabSettings = field.visibility_settings?.visible_in_tabs || {};
+    if (tabSettings.basic) return 'basic';
+    if (tabSettings.commercial) return 'commercial';
+    if (tabSettings.utm) return 'utm';
+    if (tabSettings.docs) return 'docs';
+    return 'basic'; // default
   };
 
   if (loading) {
@@ -183,30 +205,23 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
                       </AlertDialog>
                     </div>
 
-                    {/* Configurações de visibilidade por aba */}
+                    {/* Configuração de aba - agora como dropdown único */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Exibir nas abas:</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { key: 'basic', label: 'Básico' },
-                          { key: 'commercial', label: 'Comercial' },
-                          { key: 'utm', label: 'UTM' },
-                          { key: 'docs', label: 'Documentos' }
-                        ].map(tab => (
-                          <div key={tab.key} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`tab-${tab.key}-${field.id}`}
-                              checked={field.visibility_settings?.visible_in_tabs?.[tab.key] !== false}
-                              onCheckedChange={(checked) => 
-                                handleTabVisibilityChange(field.id, tab.key, checked as boolean)
-                              }
-                            />
-                            <Label htmlFor={`tab-${tab.key}-${field.id}`} className="text-sm">
-                              {tab.label}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
+                      <Label className="text-sm font-medium">Exibir na aba:</Label>
+                      <Select
+                        value={getSelectedTab(field)}
+                        onValueChange={(value) => handleTabSelectionChange(field.id, value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione uma aba" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="basic">Básico</SelectItem>
+                          <SelectItem value="commercial">Comercial</SelectItem>
+                          <SelectItem value="utm">UTM</SelectItem>
+                          <SelectItem value="docs">Documentos</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )}
