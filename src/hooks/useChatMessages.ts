@@ -48,11 +48,18 @@ export function useChatMessages(selectedChat: string | null) {
       try {
         console.log(`Fetching messages for conversation: ${conversationId}`);
         
-        // Buscar mensagens da nova tabela unificada
+        // Check if user is authenticated
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error("User not authenticated");
+        }
+        
+        // Buscar mensagens da nova tabela unificada filtradas por user_id
         const { data: messagesData, error } = await supabase
           .from("n8n_chat_messages")
           .select("*")
           .eq("session_id", conversationId)
+          .eq("user_id", user.id)
           .eq("active", true)
           .order("created_at", { ascending: true });
 

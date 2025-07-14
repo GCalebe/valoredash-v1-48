@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentAuthUser } from '@/hooks/useAuthUser';
 
 export interface ContactFilters {
   kanban_stage?: string;
@@ -13,9 +14,13 @@ export interface ContactFilters {
 
 export const contactsService = {
   async fetchContacts(filters: ContactFilters = {}): Promise<any[]> {
+    // Verify user authentication
+    const user = await getCurrentAuthUser();
+    
     let query = supabase
       .from('contacts')
       .select('id, name, email, phone, kanban_stage_id, created_at, updated_at, sales, budget')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     // Apply filters
@@ -44,9 +49,13 @@ export const contactsService = {
   },
 
   async fetchContactsByKanbanStage(stage: string): Promise<any[]> {
+    // Verify user authentication
+    const user = await getCurrentAuthUser();
+    
     const { data, error } = await supabase
       .from('contacts')
       .select('id, name, email, phone, kanban_stage_id, created_at, updated_at')
+      .eq('user_id', user.id)
       .eq('kanban_stage_id', stage)
       .order('created_at', { ascending: false });
 
@@ -74,10 +83,14 @@ export const contactsService = {
   },
 
   async updateContact({ id, ...updates }: any): Promise<any> {
+    // Verify user authentication and ownership
+    const user = await getCurrentAuthUser();
+    
     const { data, error } = await supabase
       .from('contacts')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -90,10 +103,14 @@ export const contactsService = {
   },
 
   async deleteContact(id: string): Promise<void> {
+    // Verify user authentication and ownership
+    const user = await getCurrentAuthUser();
+    
     const { error } = await supabase
       .from('contacts')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id);
 
     if (error) {
       console.error('Error deleting contact:', error);
