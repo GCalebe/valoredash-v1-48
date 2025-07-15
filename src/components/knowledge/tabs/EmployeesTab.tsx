@@ -16,16 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { Database } from "@/integrations/supabase/types";
 
-interface Employee {
-  id: string;
-  name: string;
-  role: string;
-  description: string;
-  available_hours: string[];
-  created_at: string;
-  user_id: string;
-}
+type Employee = Database['public']['Tables']['employees']['Row'];
 
 const EmployeesTab = () => {
   const { user } = useAuth();

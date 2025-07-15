@@ -1463,6 +1463,39 @@ export type Database = {
         }
         Relationships: []
       }
+      employees: {
+        Row: {
+          available_hours: string[] | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_hours?: string[] | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_hours?: string[] | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       faq_items: {
         Row: {
           answer: string
