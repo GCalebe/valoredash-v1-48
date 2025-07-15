@@ -9,6 +9,8 @@
 
 ### ✅ Prioridade MÉDIA - Concluídas
 4. **AddClientDialog.tsx refatorado** - 680 linhas → 170 linhas com 4 componentes + 1 hook especializado
+
+5. **FAQTab.tsx refatorado** - 464 linhas → 260 linhas com 1 hook e 1 componente reutilizável
 5. **AITestTab.tsx refatorado** - 518 linhas → 168 linhas com hook e componentes dedicados
 
 ## 📁 Arquivos de Poluição (Para mover para `archive/`)
