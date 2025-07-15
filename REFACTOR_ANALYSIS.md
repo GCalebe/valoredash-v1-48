@@ -9,6 +9,7 @@
 
 ### ✅ Prioridade MÉDIA - Concluídas  
 4. **AddClientDialog.tsx refatorado** - 680 linhas → 170 linhas com 4 componentes + 1 hook especializado
+5. **PermissionsManager.tsx refatorado** - 480+ linhas quebradas em 3 componentes e 1 hook de estado
 
 ## 📁 Arquivos de Poluição (Para mover para `archive/`)
 
