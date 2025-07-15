@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,10 +12,10 @@ export function useRealtimeUpdates({
   fetchConversations,
 }: UseRealtimeUpdatesProps) {
   useEffect(() => {
-    console.log("Setting up realtime updates for chat history");
+    console.log("🔄 Configurando atualizações em tempo real para chat");
 
-    // Create a single subscription for unified chat messages
-    const subscription = supabase
+    // Subscribe to new messages in n8n_chat_messages
+    const messagesSubscription = supabase
       .channel("n8n_chat_messages_updates")
       .on(
         "postgres_changes",
@@ -24,30 +25,72 @@ export function useRealtimeUpdates({
           table: "n8n_chat_messages",
         },
         (payload) => {
-          console.log("New chat message detected:", payload);
+          console.log("📨 Nova mensagem de chat detectada:", payload);
 
           const sessionId = payload.new.session_id;
-          console.log(`Processing message for session: ${sessionId}`);
+          console.log(`🔄 Processando mensagem para sessão: ${sessionId}`);
 
-          // Update the last message in the conversation list
+          // Update the conversation last message
           updateConversationLastMessage(sessionId)
             .then(() =>
-              console.log(
-                `Updated last message for conversation: ${sessionId}`,
-              ),
+              console.log(`✅ Última mensagem atualizada para conversa: ${sessionId}`)
             )
             .catch((error) =>
-              console.error(`Error updating conversation: ${error}`),
+              console.error(`❌ Erro ao atualizar conversa: ${error}`)
             );
         },
       )
       .subscribe();
 
-    console.log("Realtime subscription established");
+    // Subscribe to conversations table changes
+    const conversationsSubscription = supabase
+      .channel("conversations_updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "conversations",
+        },
+        (payload) => {
+          console.log("🔄 Mudança na tabela de conversas:", payload.eventType);
+          
+          // Refresh conversations list when there are changes
+          fetchConversations()
+            .then(() => console.log("✅ Lista de conversas atualizada"))
+            .catch((error) => console.error("❌ Erro ao atualizar lista:", error));
+        },
+      )
+      .subscribe();
+
+    // Subscribe to contacts table changes as fallback
+    const contactsSubscription = supabase
+      .channel("contacts_updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "contacts",
+        },
+        (payload) => {
+          console.log("👤 Mudança na tabela de contatos:", payload.eventType);
+          
+          // If conversations table is empty, this might help populate it
+          fetchConversations()
+            .then(() => console.log("✅ Lista de conversas atualizada via contatos"))
+            .catch((error) => console.error("❌ Erro ao atualizar via contatos:", error));
+        },
+      )
+      .subscribe();
+
+    console.log("✅ Assinaturas de tempo real estabelecidas");
 
     return () => {
-      console.log("Cleaning up realtime subscription");
-      subscription.unsubscribe();
+      console.log("🧹 Limpando assinaturas de tempo real");
+      messagesSubscription.unsubscribe();
+      conversationsSubscription.unsubscribe();
+      contactsSubscription.unsubscribe();
     };
   }, [updateConversationLastMessage, fetchConversations]);
 }

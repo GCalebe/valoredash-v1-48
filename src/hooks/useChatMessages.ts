@@ -1,44 +1,48 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ChatMessage } from "@/types/chat";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
-import { useContactsQuery } from "@/hooks/useContactsQuery";
 
 // Mensagens mockup para demonstração
-const generateMockMessages = (sessionId: string, availableContacts: any[]): ChatMessage[] => {
-  const client = availableContacts.find((c) => c.sessionId === sessionId);
-  if (!client) return [];
-
-  const messages: ChatMessage[] = [];
-
-  // Mensagem inicial do cliente
-  messages.push({
-    role: "human",
-    content: "Olá! Estou interessado em saber mais sobre os serviços de vocês.",
-    timestamp: "14:30",
-    type: "human",
-  });
-
-  // Resposta da Aurora
-  messages.push({
-    role: "assistant",
-    content: `Olá ${client.name}! Seja muito bem-vindo(a)! 🌟\n\nSou a Aurora, assistente virtual da empresa. Fico feliz em saber do seu interesse!\n\nPosso te ajudar com informações sobre nossos serviços. Sobre qual área você gostaria de saber mais?`,
-    timestamp: "14:31",
-    type: "ai",
-  });
-
-  return messages;
+const generateMockMessages = (sessionId: string): ChatMessage[] => {
+  return [
+    {
+      id: "1",
+      role: "human",
+      content: "Olá! Estou interessado em saber mais sobre os serviços de vocês.",
+      timestamp: new Date(Date.now() - 30000).toISOString(),
+      type: "human",
+    },
+    {
+      id: "2",
+      role: "assistant",
+      content: `Olá! Seja muito bem-vindo(a)! 🌟\n\nSou a Aurora, assistente virtual da empresa. Fico feliz em saber do seu interesse!\n\nPosso te ajudar com informações sobre nossos serviços. Sobre qual área você gostaria de saber mais?`,
+      timestamp: new Date(Date.now() - 25000).toISOString(),
+      type: "ai",
+    },
+    {
+      id: "3",
+      role: "human",
+      content: "Quais são os valores dos seus produtos?",
+      timestamp: new Date(Date.now() - 20000).toISOString(),
+      type: "human",
+    },
+    {
+      id: "4",
+      role: "assistant",
+      content: "Nossos produtos têm valores variados dependendo de suas necessidades específicas. Vou te explicar nossas principais opções:\n\n• **Plano Básico**: A partir de R$ 99/mês\n• **Plano Profissional**: R$ 199/mês\n• **Plano Enterprise**: R$ 399/mês\n\nCada plano inclui diferentes funcionalidades. Gostaria que eu detalhe algum específico?",
+      timestamp: new Date(Date.now() - 15000).toISOString(),
+      type: "ai",
+    },
+  ];
 };
 
 export function useChatMessages(selectedChat: string | null) {
-  const { data: contacts = [], isLoading: contactsLoading } = useContactsQuery();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-
-  // Use contacts from React Query
-  const availableContacts = contacts || [];
 
   const fetchMessages = useCallback(
     async (conversationId: string) => {
@@ -46,33 +50,80 @@ export function useChatMessages(selectedChat: string | null) {
       
       setLoading(true);
       try {
-        console.log(`Fetching messages for conversation: ${conversationId}`);
+        console.log(`📱 Buscando mensagens para conversa: ${conversationId}`);
         
         // Check if user is authenticated
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          throw new Error("User not authenticated");
+          console.log("❌ Usuário não autenticado");
+          // Show mock messages for demo
+          const mockMessages = generateMockMessages(conversationId);
+          setMessages(mockMessages);
+          setLoading(false);
+          return;
         }
         
-        // Buscar mensagens da nova tabela unificada filtradas por user_id
+        // First, try to find the session_id from conversations or contacts
+        let sessionId = conversationId;
+        
+        // Try to get session_id from conversations table
+        const { data: convData } = await supabase
+          .from("conversations")
+          .select("session_id")
+          .eq("id", conversationId)
+          .eq("user_id", user.id)
+          .single();
+
+        if (convData?.session_id) {
+          sessionId = convData.session_id;
+        } else {
+          // Try to get session_id from contacts table
+          const { data: contactData } = await supabase
+            .from("contacts")
+            .select("session_id")
+            .eq("id", conversationId)
+            .eq("user_id", user.id)
+            .single();
+
+          if (contactData?.session_id) {
+            sessionId = contactData.session_id;
+          }
+        }
+
+        console.log(`🔍 Usando session_id: ${sessionId}`);
+        
+        // Fetch messages from the unified table filtered by user_id and session_id
         const { data: messagesData, error } = await supabase
           .from("n8n_chat_messages")
           .select("*")
-          .eq("session_id", conversationId)
+          .eq("session_id", sessionId)
           .eq("user_id", user.id)
           .eq("active", true)
           .order("created_at", { ascending: true });
 
         if (error) {
-          console.error("Error fetching messages:", error);
-          // Fallback para dados fictícios se houver erro
-          const mockMessages = generateMockMessages(conversationId, availableContacts);
+          console.error("❌ Erro ao buscar mensagens:", error);
+          // Fallback to mock messages
+          const mockMessages = generateMockMessages(conversationId);
+          setMessages(mockMessages);
+          
+          toast({
+            title: "Usando mensagens de exemplo",
+            description: "Exibindo conversa de demonstração.",
+          });
+          return;
+        }
+
+        if (!messagesData || messagesData.length === 0) {
+          console.log("📝 Nenhuma mensagem encontrada, usando dados de exemplo");
+          // Show mock messages for better UX
+          const mockMessages = generateMockMessages(conversationId);
           setMessages(mockMessages);
           return;
         }
 
-        // Converter para o formato esperado
-        const formattedMessages: ChatMessage[] = (messagesData || []).map((msg) => ({
+        // Convert to the expected format
+        const formattedMessages: ChatMessage[] = messagesData.map((msg) => ({
           id: msg.id.toString(),
           content: msg.user_message || msg.bot_message || "",
           role: msg.user_message ? "user" : "assistant",
@@ -80,23 +131,25 @@ export function useChatMessages(selectedChat: string | null) {
           type: (msg.message_type || "text") as "text" | "image" | "file" | "human" | "ai",
         }));
 
-        console.log(`Fetched ${formattedMessages.length} real messages for conversation ${conversationId}`);
+        console.log(`✅ ${formattedMessages.length} mensagens carregadas para conversa ${conversationId}`);
         setMessages(formattedMessages);
+        
       } catch (error) {
-        console.error("Error fetching messages:", error);
-        // Fallback para dados fictícios
-        const mockMessages = generateMockMessages(conversationId, availableContacts);
+        console.error("❌ Erro ao buscar mensagens:", error);
+        // Fallback to mock messages
+        const mockMessages = generateMockMessages(conversationId);
         setMessages(mockMessages);
         
         toast({
-          title: "Usando mensagens de exemplo",
+          title: "Erro ao carregar mensagens",
           description: "Exibindo conversa de demonstração.",
+          variant: "destructive",
         });
       } finally {
         setLoading(false);
       }
     },
-    [availableContacts, toast],
+    [toast],
   );
 
   // Fetch messages when selected chat changes
@@ -110,7 +163,7 @@ export function useChatMessages(selectedChat: string | null) {
   }, [selectedChat, fetchMessages]);
 
   const handleNewMessage = (message: ChatMessage) => {
-    logger.debug("Adding new message to local state:", message);
+    logger.debug("📨 Adicionando nova mensagem ao estado local:", message);
     setMessages((currentMessages) => [...currentMessages, message]);
   };
 
