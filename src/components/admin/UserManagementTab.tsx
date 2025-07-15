@@ -39,7 +39,7 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({
     (user) =>
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.full_name &&
-        user.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
+        user.full_name.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   return (
@@ -76,9 +76,7 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({
             disabled={loading}
             className="flex items-center gap-2 w-full sm:w-auto"
           >
-            <RefreshCw
-              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
-            />
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             {loading ? "Carregando..." : "Atualizar"}
           </Button>
         </div>
@@ -90,8 +88,12 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Papel</TableHead>
-                <TableHead className="hidden md:table-cell">IAs Acessíveis</TableHead>
-                <TableHead className="hidden lg:table-cell">Criado em</TableHead>
+                <TableHead className="hidden md:table-cell">
+                  IAs Acessíveis
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  Criado em
+                </TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -124,7 +126,9 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Badge
-                        variant={user.role === "admin" ? "default" : "secondary"}
+                        variant={
+                          user.role === "admin" ? "default" : "secondary"
+                        }
                       >
                         {user.role === "admin" ? "Admin" : "Usuário"}
                       </Badge>
@@ -135,9 +139,15 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({
                           user.ai_access.length > 3 ? (
                             <>
                               {user.ai_access.slice(0, 2).map((aiId) => {
-                                const ai = aiProducts.find(p => p.id === aiId);
+                                const ai = aiProducts.find(
+                                  (p) => p.id === aiId,
+                                );
                                 return (
-                                  <Badge key={aiId} variant="outline" className="text-xs">
+                                  <Badge
+                                    key={aiId}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
                                     {ai ? ai.name : aiId}
                                   </Badge>
                                 );
@@ -148,16 +158,22 @@ export const UserManagementTab: React.FC<UserManagementTabProps> = ({
                             </>
                           ) : (
                             user.ai_access.map((aiId) => {
-                              const ai = aiProducts.find(p => p.id === aiId);
+                              const ai = aiProducts.find((p) => p.id === aiId);
                               return (
-                                <Badge key={aiId} variant="outline" className="text-xs">
+                                <Badge
+                                  key={aiId}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
                                   {ai ? ai.name : aiId}
                                 </Badge>
                               );
                             })
                           )
                         ) : (
-                          <span className="text-muted-foreground text-sm">Nenhuma</span>
+                          <span className="text-muted-foreground text-sm">
+                            Nenhuma
+                          </span>
                         )}
                       </div>
                     </TableCell>

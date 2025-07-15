@@ -169,7 +169,10 @@ export const UserDialogs: React.FC<UserDialogsProps> = ({
       </Dialog>
 
       {/* Edit User Dialog */}
-      <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
+      <Dialog
+        open={isEditUserDialogOpen}
+        onOpenChange={setIsEditUserDialogOpen}
+      >
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Editar Usuário</DialogTitle>
@@ -246,13 +249,17 @@ export const UserDialogs: React.FC<UserDialogsProps> = ({
       </Dialog>
 
       {/* Delete User Dialog */}
-      <Dialog open={isDeleteUserDialogOpen} onOpenChange={setIsDeleteUserDialogOpen}>
+      <Dialog
+        open={isDeleteUserDialogOpen}
+        onOpenChange={setIsDeleteUserDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmar Exclusão</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir o usuário {selectedUser?.full_name || selectedUser?.email}?
-              Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir o usuário{" "}
+              {selectedUser?.full_name || selectedUser?.email}? Esta ação não
+              pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
