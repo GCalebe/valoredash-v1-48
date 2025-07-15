@@ -1463,8 +1463,47 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_services: {
+        Row: {
+          available_days: string[] | null
+          created_at: string
+          employee_id: string
+          id: string
+          product_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_days?: string[] | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          product_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_days?: string[] | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          product_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_services_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
+          available_days: string[] | null
           available_hours: string[] | null
           created_at: string
           description: string | null
@@ -1475,6 +1514,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          available_days?: string[] | null
           available_hours?: string[] | null
           created_at?: string
           description?: string | null
@@ -1485,6 +1525,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          available_days?: string[] | null
           available_hours?: string[] | null
           created_at?: string
           description?: string | null
