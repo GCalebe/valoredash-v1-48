@@ -9,6 +9,7 @@
 
 ### ✅ Prioridade MÉDIA - Concluídas  
 4. **AddClientDialog.tsx refatorado** - 680 linhas → 170 linhas com 4 componentes + 1 hook especializado
+5. **Subscription.tsx refatorado** - 770 linhas → 374 linhas com componentes de diálogo e hooks especializados
 
 ## 📁 Arquivos de Poluição (Para mover para `archive/`)
 
