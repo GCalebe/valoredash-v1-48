@@ -26,7 +26,7 @@ psql -h localhost -U postgres -d valore_crm_v2 -f complete_database_migration.sq
 
 ```bash
 # Verifique se tudo foi criado corretamente
-psql -h localhost -U postgres -d valore_crm_v2 -f verify_database_structure.sql
+psql -h localhost -U postgres -d valore_crm_v2 -f docs_supabase/verify_database_structure.sql
 ```
 
 ## 📁 Arquivos de Migração Disponíveis
@@ -36,7 +36,7 @@ psql -h localhost -U postgres -d valore_crm_v2 -f verify_database_structure.sql
 | Arquivo | Descrição | Quando Usar |
 |---------|-----------|-------------|
 | `complete_database_migration.sql` | **Migração completa** - Cria todas as tabelas | ✅ **Recomendado para novos projetos** |
-| `verify_database_structure.sql` | **Verificação completa** - Valida estrutura | ✅ **Sempre após migrações** |
+| `docs_supabase/verify_database_structure.sql` | **Verificação completa** - Valida estrutura | ✅ **Sempre após migrações** |
 
 ### 🎯 Scripts Específicos
 
@@ -178,7 +178,7 @@ psql -d valore_crm_v2 -c "SELECT tablename, rowsecurity FROM pg_tables WHERE sch
 #### ❌ Dados órfãos
 ```bash
 # Solução: Execute a verificação de integridade
-psql -d valore_crm_v2 -f verify_database_structure.sql
+psql -d valore_crm_v2 -f docs_supabase/verify_database_structure.sql
 ```
 
 ## 📊 Views e Relatórios
@@ -263,7 +263,7 @@ CREATE TRIGGER set_updated_at
 
 Se encontrar problemas:
 
-1. **Execute a verificação:** `verify_database_structure.sql`
+1. **Execute a verificação:** `docs_supabase/verify_database_structure.sql`
 2. **Consulte os logs:** Verifique mensagens de erro detalhadas
 3. **Revise as políticas:** Confirme se RLS está funcionando
 4. **Teste as queries:** Use as views para validar dados

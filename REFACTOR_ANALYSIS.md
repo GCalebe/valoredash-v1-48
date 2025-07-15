@@ -9,9 +9,11 @@
 3. **useDashboardRealtimeQuery.ts otimizado** - 216 linhas → 72 linhas com 3 hooks separados
 
 ### ✅ Prioridade MÉDIA - Concluídas
-
 4. **AddClientDialog.tsx refatorado** - 680 linhas → 170 linhas com 4 componentes + 1 hook especializado
 5. **supabase.ts dividido** - tipos reorganizados em `src/types/supabase/`
+
+5. **FAQTab.tsx refatorado** - 464 linhas → 260 linhas com 1 hook e 1 componente reutilizável
+5. **AITestTab.tsx refatorado** - 518 linhas → 168 linhas com hook e componentes dedicados
 
 ## 📁 Arquivos de Poluição (Para mover para `archive/`)
 
@@ -127,6 +129,13 @@
 - [x] **Testabilidade**: Hooks testáveis separados
 - [x] **SOLID**: Uma responsabilidade por função
 - [x] **Status**: ✅ REFATORADO - Criados 5 componentes focados + usa hook existente
+
+#### ✅ 6. AITestTab.tsx - 518 linhas → 168 linhas
+**Localização**: `src/components/knowledge/tabs/AITestTab.tsx`
+- [x] **Legibilidade**: Separar lista de testes e diálogo em componentes
+- [x] **Reutilização**: Extrair estado e lógica em hook dedicado
+- [x] **SOLID**: Aplicar princípio de responsabilidade única
+- [x] **Status**: ✅ REFATORADO - Criados 2 componentes + 1 hook
 
 ## 🎯 Prioridades de Refatoração
 
