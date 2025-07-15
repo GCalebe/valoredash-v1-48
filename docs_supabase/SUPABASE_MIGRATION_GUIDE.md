@@ -15,9 +15,11 @@ Este guia explica como migrar os dados mockados do projeto Valore V2 para o Supa
 ## 📁 Arquivos Criados
 
 ### 1. **SQL Migration Script**
+
 ```
 supabase-migration.sql
 ```
+
 - Schema completo das tabelas
 - Dados de exemplo baseados nos mocks
 - Índices para performance
@@ -25,18 +27,22 @@ supabase-migration.sql
 - Funções SQL para filtros de data
 
 ### 2. **TypeScript Types**
+
 ```
-src/types/supabase.ts
+src/types/supabase/
 ```
+
 - Tipos TypeScript gerados automaticamente
 - Interfaces para todas as tabelas
 - Tipos auxiliares para filtros e parâmetros
 - Constantes para validação
 
 ### 3. **Custom Hooks**
+
 ```
 src/hooks/useSupabaseData.ts
 ```
+
 - Hook principal `useSupabaseData`
 - Hook para contatos com paginação `useContacts`
 - Hook para métricas em tempo real `useRealTimeMetrics`
@@ -44,9 +50,11 @@ src/hooks/useSupabaseData.ts
 - Utilitários para testes
 
 ### 4. **Example Component**
+
 ```
 src/components/examples/SupabaseDataExample.tsx
 ```
+
 - Componente demonstrativo
 - Implementação de filtros de data
 - Paginação de contatos
@@ -71,17 +79,19 @@ src/components/examples/SupabaseDataExample.tsx
 ### Passo 2: Verificar Configuração
 
 1. **Confirme as Variáveis de Ambiente**
+
    ```env
    VITE_SUPABASE_URL=sua_url_do_supabase
    VITE_SUPABASE_ANON_KEY=sua_chave_anonima
    ```
 
 2. **Teste a Conexão**
+
    ```tsx
-   import { SupabaseConnectionTest } from './components/examples/SupabaseDataExample';
-   
+   import { SupabaseConnectionTest } from "./components/examples/SupabaseDataExample";
+
    // Use o componente para testar
-   <SupabaseConnectionTest />
+   <SupabaseConnectionTest />;
    ```
 
 ### Passo 3: Substituir Dados Mockados
@@ -89,9 +99,10 @@ src/components/examples/SupabaseDataExample.tsx
 #### 3.1 Atualizar Componentes Existentes
 
 **Antes (usando mocks):**
+
 ```tsx
-import { metricsMock } from '../data/metricsMock';
-import { clientsMock } from '../data/clientsMock';
+import { metricsMock } from "../data/metricsMock";
+import { clientsMock } from "../data/clientsMock";
 
 const MyComponent = () => {
   const [metrics] = useState(metricsMock);
@@ -101,12 +112,13 @@ const MyComponent = () => {
 ```
 
 **Depois (usando Supabase):**
+
 ```tsx
-import { useSupabaseData } from '../hooks/useSupabaseData';
+import { useSupabaseData } from "../hooks/useSupabaseData";
 
 const MyComponent = () => {
   const { metrics, contacts, funnelData, loading, error } = useSupabaseData();
-  
+
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage error={error} />;
   // ...
@@ -118,8 +130,8 @@ const MyComponent = () => {
 ```tsx
 const ConversionFunnelWithFilters = () => {
   const [dateRange, setDateRange] = useState({
-    startDate: '2024-01-01',
-    endDate: '2024-12-31'
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
   });
 
   const { funnelData, loading, refetch } = useSupabaseData({ dateRange });
@@ -131,10 +143,7 @@ const ConversionFunnelWithFilters = () => {
 
   return (
     <div>
-      <DateRangeFilter 
-        value={dateRange} 
-        onChange={handleDateChange} 
-      />
+      <DateRangeFilter value={dateRange} onChange={handleDateChange} />
       <FunnelChart data={funnelData} loading={loading} />
     </div>
   );
@@ -147,19 +156,13 @@ const ConversionFunnelWithFilters = () => {
 
 ```tsx
 const ContactsList = () => {
-  const {
-    contacts,
-    loading,
-    page,
-    totalPages,
-    nextPage,
-    prevPage
-  } = useContacts({ status: 'Active' }, 20);
+  const { contacts, loading, page, totalPages, nextPage, prevPage } =
+    useContacts({ status: "Active" }, 20);
 
   return (
     <div>
       <ContactsTable contacts={contacts} loading={loading} />
-      <Pagination 
+      <Pagination
         page={page}
         totalPages={totalPages}
         onNext={nextPage}
@@ -207,7 +210,7 @@ O script inclui índices otimizados, mas você pode adicionar mais:
 
 ```sql
 -- Índice para busca por texto
-CREATE INDEX idx_contacts_search ON contacts 
+CREATE INDEX idx_contacts_search ON contacts
 USING gin(to_tsvector('portuguese', name || ' ' || coalesce(email, '') || ' ' || coalesce(client_name, '')));
 
 -- Índice para filtros de data
@@ -240,26 +243,29 @@ CREATE INDEX idx_funnel_data_date ON funnel_data (created_at DESC);
 ### 1. Teste de Conexão
 
 ```tsx
-import { testSupabaseConnection, checkTablesExist } from '../hooks/useSupabaseData';
+import {
+  testSupabaseConnection,
+  checkTablesExist,
+} from "../hooks/useSupabaseData";
 
 const runTests = async () => {
   const connection = await testSupabaseConnection();
   const tables = await checkTablesExist();
-  
-  console.log('Conexão:', connection.success);
-  console.log('Tabelas existem:', tables);
+
+  console.log("Conexão:", connection.success);
+  console.log("Tabelas existem:", tables);
 };
 ```
 
 ### 2. Popular Dados de Teste
 
 ```tsx
-import { seedTestData } from '../hooks/useSupabaseData';
+import { seedTestData } from "../hooks/useSupabaseData";
 
 const populateTestData = async () => {
   const result = await seedTestData();
   if (result.success) {
-    console.log('Dados de teste inseridos com sucesso!');
+    console.log("Dados de teste inseridos com sucesso!");
   }
 };
 ```
@@ -268,37 +274,44 @@ const populateTestData = async () => {
 
 ```tsx
 const testDateFilters = async () => {
-  const { getFunnelByDateRange } = await import('../hooks/useSupabaseData');
-  
-  const result = await getFunnelByDateRange('2024-01-01', '2024-12-31');
-  console.log('Dados do funil:', result.data);
+  const { getFunnelByDateRange } = await import("../hooks/useSupabaseData");
+
+  const result = await getFunnelByDateRange("2024-01-01", "2024-12-31");
+  console.log("Dados do funil:", result.data);
 };
 ```
 
 ## 🚨 Troubleshooting
 
 ### Problema: "relation does not exist"
+
 **Solução:** Execute o script SQL completo no Supabase Dashboard
 
 ### Problema: "RLS policy violation"
+
 **Solução:** Verifique as políticas de RLS ou desabilite temporariamente:
+
 ```sql
 ALTER TABLE contacts DISABLE ROW LEVEL SECURITY;
 ```
 
 ### Problema: Dados não aparecem
+
 **Solução:** Verifique se os dados foram inseridos:
+
 ```sql
 SELECT COUNT(*) FROM contacts;
 SELECT COUNT(*) FROM funnel_data;
 ```
 
 ### Problema: Filtros de data não funcionam
+
 **Solução:** Verifique o formato das datas (ISO 8601):
+
 ```tsx
 const dateRange = {
-  startDate: '2024-01-01T00:00:00.000Z',
-  endDate: '2024-12-31T23:59:59.999Z'
+  startDate: "2024-01-01T00:00:00.000Z",
+  endDate: "2024-12-31T23:59:59.999Z",
 };
 ```
 
@@ -327,6 +340,6 @@ const dateRange = {
 
 ---
 
-**✅ Migração Completa!** 
+**✅ Migração Completa!**
 
 Agora você pode trabalhar com dados reais do Supabase em vez de dados mockados, com filtros de data funcionais e atualizações em tempo real.

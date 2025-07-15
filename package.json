@@ -14,8 +14,9 @@
     "seed": "node supabase-data-seeder.js",
     "migrate": "node execute-database-migration.js",
     "verify-migration": "node verify-migration.js",
-    "db-check": "node verify_database_structure.sql"
-    ,"test": "vitest"
+    "db-check": "node verify_database_structure.sql",
+    "test": "vitest"
+
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
