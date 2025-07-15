@@ -120,7 +120,6 @@
 - [x] **Status**: ✅ REFATORADO - Criados 4 componentes + 1 hook especializado
 
 #### ✅ 5. EventFormDialog.tsx - 1235 linhas → 200 linhas
-
 **Localização**: `src/components/EventFormDialog.tsx`
 
 - [x] **Legibilidade**: Simplificar lógica do formulário
@@ -130,12 +129,19 @@
 - [x] **SOLID**: Uma responsabilidade por função
 - [x] **Status**: ✅ REFATORADO - Criados 5 componentes focados + usa hook existente
 
+
+#### ✅ 6. AIPersonalityTab.tsx - 549 linhas → 103 linhas
+- [x] **Legibilidade**: UI dividida em seções menores
+- [x] **Manutenibilidade**: Lógica movida para hook dedicado
+- [x] **Reutilização**: Componentes independentes para cada seção
+- [x] **Status**: ✅ REFATORADO - Hook useAIPersonalityForm + 5 componentes
+
 #### ✅ 6. AITestTab.tsx - 518 linhas → 168 linhas
-**Localização**: `src/components/knowledge/tabs/AITestTab.tsx`
 - [x] **Legibilidade**: Separar lista de testes e diálogo em componentes
 - [x] **Reutilização**: Extrair estado e lógica em hook dedicado
 - [x] **SOLID**: Aplicar princípio de responsabilidade única
 - [x] **Status**: ✅ REFATORADO - Criados 2 componentes + 1 hook
+
 
 ## 🎯 Prioridades de Refatoração
 
