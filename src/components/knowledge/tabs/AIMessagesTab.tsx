@@ -1,59 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useKanbanStages } from '@/hooks/useKanbanStages';
+import { useAIMessagesQuery } from '@/hooks/useAIMessagesQuery';
+import { useAIMessagesCrud } from '@/hooks/useAIMessagesCrud';
+import AddMessageDialog from '../messages/AddMessageDialog';
+import EditMessageDialog from '../messages/EditMessageDialog';
+import MessageList from '../messages/MessageList';
 import { AIMessage } from '@/types/ai';
-import { Plus, Edit, Trash2, Save, MessageSquare, Copy, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useKanbanStages } from "@/hooks/useKanbanStages";
-import { useAIMessagesQuery, useCreateAIMessageMutation, useUpdateAIMessageMutation, useDeleteAIMessageMutation } from "@/hooks/useAIMessagesQuery";
+import { useToast } from '@/hooks/use-toast';
 
 const AIMessagesTab = () => {
   const { toast } = useToast();
   const { stages, loading: stagesLoading } = useKanbanStages();
-  const [activeCategory, setActiveCategory] = useState<string>("");
+  const [activeCategory, setActiveCategory] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingMessage, setEditingMessage] = useState<any>(null);
-
-  // Use Supabase hooks
-  const { data: messages = [], isLoading, error } = useAIMessagesQuery();
-  const createMessageMutation = useCreateAIMessageMutation();
-  const updateMessageMutation = useUpdateAIMessageMutation();
-  const deleteMessageMutation = useDeleteAIMessageMutation();
+  const [editingMessage, setEditingMessage] = useState<AIMessage | null>(null);
+  const { data: messages = [], isLoading } = useAIMessagesQuery();
+  const {
+    addMessage,
+    updateMessage,
+    deleteMessage,
+    toggleMessage,
+    copyToClipboard,
+    createPending,
+    updatePending,
+  } = useAIMessagesCrud();
 
   const [newMessage, setNewMessage] = useState({
-    category: "",
-    name: "",
-    content: "",
-    variables: "",
-    context: "",
+    category: '',
+    name: '',
+    content: '',
+    context: '',
   });
 
-  // Set initial active category when stages are loaded
   useEffect(() => {
     if (stages.length > 0 && !activeCategory) {
       setActiveCategory(stages[0].title);
-      
-      // Update newMessage with the first stage as default
-      setNewMessage(prev => ({
-        ...prev,
-        category: stages[0].title
-      }));
+      setNewMessage((prev) => ({ ...prev, category: stages[0].title }));
     }
   }, [stages, activeCategory]);
 
@@ -63,149 +48,44 @@ const AIMessagesTab = () => {
   const handleAddMessage = async () => {
     if (!newMessage.name || !newMessage.content) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Nome e conteúdo são obrigatórios.",
-        variant: "destructive",
+        title: 'Campos obrigatórios',
+        description: 'Nome e conteúdo são obrigatórios.',
+        variant: 'destructive',
       });
       return;
     }
-
-    const extractVariables = (content: string) => {
-      const matches = content.match(/\{([^}]+)\}/g);
-      return matches ? matches.map((match) => match.slice(1, -1)) : [];
-    };
-
-    const messageData = {
-      category: newMessage.category,
-      name: newMessage.name,
-      content: newMessage.content,
-      variables: extractVariables(newMessage.content),
-      context: newMessage.context,
-      is_active: true,
-    };
-
-    try {
-      await createMessageMutation.mutateAsync(messageData);
-      setNewMessage({
-        category: activeCategory,
-        name: "",
-        content: "",
-        variables: "",
-        context: "",
-      });
-      setIsAddDialogOpen(false);
-
-      toast({
-        title: "Mensagem adicionada",
-        description: "Nova mensagem criada com sucesso!",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao criar mensagem.",
-        variant: "destructive",
-      });
-    }
+    await addMessage(newMessage);
+    setNewMessage({ category: activeCategory, name: '', content: '', context: '' });
+    setIsAddDialogOpen(false);
   };
 
   const handleEditMessage = (message: AIMessage) => {
     setEditingMessage(message);
     setNewMessage({
-      category: message.category,
-      name: message.name,
-      content: message.content,
-      variables: message.variables.join(", "),
-      context: message.context,
+      category: message.category || '',
+      name: message.name || '',
+      content: message.content || '',
+      context: message.context || '',
     });
     setIsEditDialogOpen(true);
   };
 
   const handleUpdateMessage = async () => {
-    if (!editingMessage || !newMessage.name || !newMessage.content) return;
-
-    const extractVariables = (content: string) => {
-      const matches = content.match(/\{([^}]+)\}/g);
-      return matches ? matches.map((match) => match.slice(1, -1)) : [];
-    };
-
-    const updatedData = {
-      name: newMessage.name,
-      content: newMessage.content,
-      variables: extractVariables(newMessage.content),
-      context: newMessage.context,
-      category: newMessage.category,
-    };
-
-    try {
-      await updateMessageMutation.mutateAsync({
-        id: editingMessage.id,
-        ...updatedData,
-      });
-
-      setNewMessage({
-        category: activeCategory,
-        name: "",
-        content: "",
-        variables: "",
-        context: "",
-      });
-      setEditingMessage(null);
-      setIsEditDialogOpen(false);
-
-      toast({
-        title: "Mensagem atualizada",
-        description: "Mensagem atualizada com sucesso!",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar mensagem.",
-        variant: "destructive",
-      });
-    }
+    if (!editingMessage) return;
+    if (!newMessage.name || !newMessage.content) return;
+    await updateMessage(editingMessage.id, newMessage);
+    setNewMessage({ category: activeCategory, name: '', content: '', context: '' });
+    setEditingMessage(null);
+    setIsEditDialogOpen(false);
   };
 
   const handleDeleteMessage = async (id: string) => {
-    try {
-      await deleteMessageMutation.mutateAsync(id);
-      toast({
-        title: "Mensagem excluída",
-        description: "Mensagem removida com sucesso!",
-        variant: "destructive",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir mensagem.",
-        variant: "destructive",
-      });
-    }
+    await deleteMessage(id);
   };
 
-  const handleToggleMessage = async (id: string) => {
-    const message = messages.find(msg => msg.id === id);
-    if (!message) return;
-
-    try {
-      await updateMessageMutation.mutateAsync({
-        id: id,
-        is_active: !message.is_active,
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao alterar status da mensagem.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const copyToClipboard = (content: string) => {
-    navigator.clipboard.writeText(content);
-    toast({
-      title: "Copiado!",
-      description: "Conteúdo copiado para a área de transferência.",
-    });
+  const handleToggleMessage = (id: string) => {
+    const msg = messages.find((m) => m.id === id);
+    if (msg) toggleMessage(msg);
   };
 
   return (
@@ -220,104 +100,18 @@ const AIMessagesTab = () => {
           </p>
         </div>
 
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Mensagem
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Adicionar Nova Mensagem</DialogTitle>
-              <DialogDescription>
-                Crie uma nova mensagem para a IA utilizar em situações
-                específicas.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Nome da Mensagem *</Label>
-                  <Input
-                    id="name"
-                    value={newMessage.name}
-                    onChange={(e) =>
-                      setNewMessage({ ...newMessage, name: e.target.value })
-                    }
-                    placeholder="Ex: Saudação Matinal"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Etapa do Funil</Label>
-                  <select
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                    value={newMessage.category}
-                    onChange={(e) =>
-                      setNewMessage({ ...newMessage, category: e.target.value })
-                    }
-                  >
-                    {stagesLoading ? (
-                      <option value="">Carregando etapas...</option>
-                    ) : (
-                      stages.map((stage) => (
-                        <option key={stage.id} value={stage.title}>
-                          {stage.title}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="content">Conteúdo da Mensagem *</Label>
-                <Textarea
-                  id="content"
-                  value={newMessage.content}
-                  onChange={(e) =>
-                    setNewMessage({ ...newMessage, content: e.target.value })
-                  }
-                  placeholder="Digite a mensagem... Use {variavel} para inserir variáveis"
-                  rows={4}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Use {`{nomeVariavel}`} para inserir variáveis dinâmicas na
-                  mensagem
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="context">Contexto de Uso</Label>
-                <Input
-                  id="context"
-                  value={newMessage.context}
-                  onChange={(e) =>
-                    setNewMessage({ ...newMessage, context: e.target.value })
-                  }
-                  placeholder="Ex: Horário comercial, Fora do horário..."
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsAddDialogOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleAddMessage}
-                disabled={createMessageMutation.isPending}
-              >
-                {createMessageMutation.isPending ? "Adicionando..." : "Adicionar"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <AddMessageDialog
+          open={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+          onAdd={handleAddMessage}
+          isAdding={createPending}
+          stages={stages}
+          stagesLoading={stagesLoading}
+        />
       </div>
 
-      {/* Kanban Stages Tabs */}
       {stagesLoading || isLoading ? (
         <div className="space-y-4">
           <div className="flex justify-center py-8">
@@ -334,11 +128,7 @@ const AIMessagesTab = () => {
         <Tabs value={activeCategory} onValueChange={setActiveCategory}>
           <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${stages.length}, 1fr)` }}>
             {stages.map((stage) => (
-              <TabsTrigger
-                key={stage.id}
-                value={stage.title}
-                className="text-xs"
-              >
+              <TabsTrigger key={stage.id} value={stage.title} className="text-xs">
                 {stage.title}
               </TabsTrigger>
             ))}
@@ -346,193 +136,30 @@ const AIMessagesTab = () => {
 
           {stages.map((stage) => (
             <TabsContent key={stage.id} value={stage.title} className="mt-6">
-              <div className="space-y-4">
-                {getMessagesByCategory(stage.title).length === 0 ? (
-                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <MessageSquare className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                    <h3 className="text-lg font-medium mb-1">
-                      Nenhuma mensagem em {stage.title}
-                    </h3>
-                    <p className="text-sm">
-                      Adicione mensagens para esta etapa do funil.
-                    </p>
-                  </div>
-                ) : (
-                  getMessagesByCategory(stage.title).map((message) => (
-                    <Card
-                      key={message.id}
-                      className={`${!message.is_active ? "opacity-50" : ""}`}
-                    >
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-base">
-                              {message.name}
-                            </CardTitle>
-                            {message.context && (
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Contexto: {message.context}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => copyToClipboard(message.content)}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditMessage(message)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteMessage(message.id)}
-                              className="text-red-500 hover:text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                            <p className="text-sm">{message.content}</p>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant={
-                                  message.is_active ? "default" : "secondary"
-                                }
-                              >
-                                {message.is_active ? "Ativa" : "Inativa"}
-                              </Badge>
-                              {message.variables.length > 0 && (
-                                <div className="flex gap-1">
-                                  {message.variables.map((variable, index) => (
-                                    <Badge
-                                      key={index}
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {variable}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleToggleMessage(message.id)}
-                              disabled={updateMessageMutation.isPending}
-                            >
-                              {message.is_active ? "Desativar" : "Ativar"}
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
+              <MessageList
+                stageTitle={stage.title}
+                messages={getMessagesByCategory(stage.title)}
+                onEdit={handleEditMessage}
+                onDelete={handleDeleteMessage}
+                onToggle={handleToggleMessage}
+                onCopy={copyToClipboard}
+                updating={updatePending}
+              />
             </TabsContent>
           ))}
         </Tabs>
       )}
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Editar Mensagem</DialogTitle>
-            <DialogDescription>
-              Modifique o conteúdo da mensagem.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-name">Nome da Mensagem *</Label>
-                <Input
-                  id="edit-name"
-                  value={newMessage.name}
-                  onChange={(e) =>
-                    setNewMessage({ ...newMessage, name: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-category">Etapa do Funil</Label>
-                <select
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  value={newMessage.category}
-                  onChange={(e) =>
-                    setNewMessage({ ...newMessage, category: e.target.value })
-                  }
-                >
-                  {stagesLoading ? (
-                    <option value="">Carregando etapas...</option>
-                  ) : (
-                    stages.map((stage) => (
-                      <option key={stage.id} value={stage.title}>
-                        {stage.title}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="edit-content">Conteúdo da Mensagem *</Label>
-              <Textarea
-                id="edit-content"
-                value={newMessage.content}
-                onChange={(e) =>
-                  setNewMessage({ ...newMessage, content: e.target.value })
-                }
-                rows={4}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="edit-context">Contexto de Uso</Label>
-              <Input
-                id="edit-context"
-                value={newMessage.context}
-                onChange={(e) =>
-                  setNewMessage({ ...newMessage, context: e.target.value })
-                }
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleUpdateMessage}
-              disabled={updateMessageMutation.isPending}
-            >
-              {updateMessageMutation.isPending ? "Atualizando..." : "Atualizar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EditMessageDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        newMessage={newMessage}
+        setNewMessage={setNewMessage}
+        onUpdate={handleUpdateMessage}
+        isUpdating={updatePending}
+        stages={stages}
+        stagesLoading={stagesLoading}
+      />
     </div>
   );
 };
