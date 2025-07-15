@@ -1,3 +1,1 @@
 # Refactor Checkup
-
-status: concluído
