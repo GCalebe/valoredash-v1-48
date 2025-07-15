@@ -20,7 +20,8 @@ const AdminDashboard = () => {
   const { settings } = useThemeSettings();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { users, loading, fetchUsers, addUser, updateUser, deleteUser } = useUsers();
+  const { users, loading, fetchUsers, addUser, updateUser, deleteUser } =
+    useUsers();
   const { data: aiProducts = [] } = useAIProductsQuery();
 
   const [activeTab, setActiveTab] = useState("users");
@@ -96,7 +97,7 @@ const AdminDashboard = () => {
 
   // Handler functions for user management
   const handleAddUserClick = () => setIsAddUserDialogOpen(true);
-  
+
   const handleEditUserClick = (user: User) => {
     setSelectedUser(user);
     setNewUser({
@@ -141,7 +142,10 @@ const AdminDashboard = () => {
               <Bot className="h-4 w-4" />
               <span className="hidden sm:inline">Acesso às IAs</span>
             </TabsTrigger>
-            <TabsTrigger value="permissions" className="flex items-center gap-2">
+            <TabsTrigger
+              value="permissions"
+              className="flex items-center gap-2"
+            >
               <LockKeyhole className="h-4 w-4" />
               <span className="hidden sm:inline">Permissões</span>
             </TabsTrigger>

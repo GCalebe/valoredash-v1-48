@@ -1,5 +1,11 @@
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Bot, Users, TrendingUp } from "lucide-react";
@@ -10,25 +16,37 @@ interface AIAccessTabProps {
   aiProducts: any[];
 }
 
-export const AIAccessTab: React.FC<AIAccessTabProps> = ({ users, aiProducts }) => {
+export const AIAccessTab: React.FC<AIAccessTabProps> = ({
+  users,
+  aiProducts,
+}) => {
   // Calculate AI usage statistics
-  const aiUsageStats = aiProducts.map(product => {
-    const usersWithAccess = users.filter(user => user.ai_access.includes(product.id));
-    const percentage = users.length > 0 ? (usersWithAccess.length / users.length) * 100 : 0;
-    
-    return {
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      category: product.category,
-      usersCount: usersWithAccess.length,
-      percentage: Math.round(percentage),
-      users: usersWithAccess,
-    };
-  }).sort((a, b) => b.usersCount - a.usersCount);
+  const aiUsageStats = aiProducts
+    .map((product) => {
+      const usersWithAccess = users.filter((user) =>
+        user.ai_access.includes(product.id),
+      );
+      const percentage =
+        users.length > 0 ? (usersWithAccess.length / users.length) * 100 : 0;
 
-  const totalAIAccess = users.reduce((acc, user) => acc + user.ai_access.length, 0);
-  const averageAIPerUser = users.length > 0 ? Math.round(totalAIAccess / users.length * 10) / 10 : 0;
+      return {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        usersCount: usersWithAccess.length,
+        percentage: Math.round(percentage),
+        users: usersWithAccess,
+      };
+    })
+    .sort((a, b) => b.usersCount - a.usersCount);
+
+  const totalAIAccess = users.reduce(
+    (acc, user) => acc + user.ai_access.length,
+    0,
+  );
+  const averageAIPerUser =
+    users.length > 0 ? Math.round((totalAIAccess / users.length) * 10) / 10 : 0;
 
   return (
     <div className="space-y-6">
@@ -102,7 +120,7 @@ export const AIAccessTab: React.FC<AIAccessTabProps> = ({ users, aiProducts }) =
                       <div>
                         <h4 className="font-semibold">{ai.name}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {ai.description || 'IA sem descrição'}
+                          {ai.description || "IA sem descrição"}
                         </p>
                         {ai.category && (
                           <Badge variant="outline" className="text-xs mt-1">
@@ -118,13 +136,17 @@ export const AIAccessTab: React.FC<AIAccessTabProps> = ({ users, aiProducts }) =
                       </div>
                     </div>
                   </div>
-                  
+
                   <Progress value={ai.percentage} className="h-2" />
-                  
+
                   {ai.users.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {ai.users.slice(0, 5).map((user) => (
-                        <Badge key={user.id} variant="secondary" className="text-xs">
+                        <Badge
+                          key={user.id}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {user.full_name || user.email}
                         </Badge>
                       ))}
