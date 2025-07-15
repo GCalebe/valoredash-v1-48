@@ -1,15 +1,12 @@
-import React, { useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Contact } from "@/types/client";
 import { DynamicCategory } from "@/components/clients/DynamicCategoryManager";
-import ClientUTMData from "./ClientUTMData";
-import EditableField from "./EditableField";
-import CustomFieldsTab from "./CustomFieldsTab";
-import ClientFilesTab from "./ClientFilesTab";
-import { useCustomFields } from "@/hooks/useCustomFields";
-import CustomFieldRenderer from "./CustomFieldRenderer";
+import ClientDetails from "./ClientDetails";
+import ClientStats from "./ClientStats";
+import ClientActions from "./ClientActions";
+import { useUnifiedClientInfo } from "@/hooks/useUnifiedClientInfo";
 
 interface UnifiedClientInfoProps {
   clientData: Contact | null;
@@ -38,36 +35,17 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
   compact = false,
   showTabs = ["basic", "commercial", "utm", "custom", "docs"],
 }) => {
-  const [activeTab, setActiveTab] = useState(showTabs[0] || "basic");
-  const [fieldVisibility, setFieldVisibility] = useState<Record<string, boolean>>({});
-  const { customFields } = useCustomFields();
-  const tabsScrollRef = useRef<HTMLDivElement>(null);
-
-  const consultationStageOptions = [
-    "Nova consulta",
-    "Qualificado", 
-    "Chamada agendada",
-    "Preparando proposta",
-    "Proposta enviada",
-    "Acompanhamento",
-    "Negociação",
-    "Fatura enviada",
-    "Fatura paga – ganho",
-    "Projeto cancelado – perdido"
-  ];
-
-  const clientTypeOptions = [
-    "Pessoa Física",
-    "Pessoa Jurídica",
-    "MEI",
-    "Empresa"
-  ];
-
-  const clientSizeOptions = [
-    "Pequeno",
-    "Médio", 
-    "Grande"
-  ];
+  const {
+    activeTab,
+    setActiveTab,
+    fieldVisibility,
+    setFieldVisibility,
+    tabsScrollRef,
+    customFields,
+    consultationStageOptions,
+    clientTypeOptions,
+    clientSizeOptions,
+  } = useUnifiedClientInfo(showTabs);
 
   const tabConfig = {
     basic: { label: "Básico", icon: "👤" },
@@ -80,7 +58,7 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
   const scrollTabs = (direction: 'left' | 'right') => {
     if (tabsScrollRef.current) {
       const scrollAmount = 150;
-      const newScrollLeft = tabsScrollRef.current.scrollLeft + 
+      const newScrollLeft = tabsScrollRef.current.scrollLeft +
         (direction === 'right' ? scrollAmount : -scrollAmount);
       
       tabsScrollRef.current.scrollTo({
@@ -93,339 +71,73 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
   const handleVisibilityChange = (fieldId: string, visible: boolean) => {
     setFieldVisibility(prev => ({
       ...prev,
-      [fieldId]: visible
+      [fieldId]: visible,
     }));
-    
-    console.log(`Campo ${fieldId} visibilidade alterada para: ${visible}`);
   };
-
-  const renderBasicInfo = () => (
-    <div className="space-y-4">
-      <EditableField
-        label="Nome"
-        value={clientData?.name}
-        fieldId="name"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.name !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Email"
-        value={clientData?.email}
-        fieldId="email"
-        type="email"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.email !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Telefone"
-        value={clientData?.phone}
-        fieldId="phone"
-        type="tel"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.phone !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Nome do Cliente"
-        value={clientData?.clientName}
-        fieldId="clientName"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.clientName !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Tipo de Cliente"
-        value={clientData?.clientType}
-        fieldId="clientType"
-        type="select"
-        options={clientTypeOptions}
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.clientType !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Tamanho do Cliente"
-        value={clientData?.clientSize}
-        fieldId="clientSize"
-        type="select"
-        options={clientSizeOptions}
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.clientSize !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="CPF/CNPJ"
-        value={clientData?.cpfCnpj}
-        fieldId="cpfCnpj"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.cpfCnpj !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Endereço"
-        value={clientData?.address}
-        fieldId="address"
-        type="textarea"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.address !== false}
-        showVisibilityControl={!readOnly}
-      />
-      
-      {customFields
-        .filter(field => field.visibility_settings?.visible_in_tabs?.basic)
-        .map(field => (
-          <CustomFieldRenderer
-            key={field.id}
-            field={field}
-            value={clientData?.customValues?.[field.id]}
-            onChange={(value) => onFieldUpdate?.(`custom_${field.id}`, value)}
-          />
-        ))}
-    </div>
-  );
-
-  const renderCommercialInfo = () => (
-    <div className="space-y-4">
-      <EditableField
-        label="Status"
-        value={clientData?.status}
-        fieldId="status"
-        type={readOnly ? "badge" : "select"}
-        options={["Active", "Inactive"]}
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.status !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Etapa da Consulta"
-        value={clientData?.consultationStage}
-        fieldId="consultationStage"
-        type={readOnly ? "badge" : "select"}
-        options={consultationStageOptions}
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.consultationStage !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Setor do Cliente"
-        value={clientData?.clientSector}
-        fieldId="clientSector"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.clientSector !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Usuário Responsável"
-        value={clientData?.responsibleUser}
-        fieldId="responsibleUser"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.responsibleUser !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Vendas"
-        value={clientData?.sales}
-        fieldId="sales"
-        type="money"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.sales !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Orçamento"
-        value={clientData?.budget}
-        fieldId="budget"
-        type="money"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.budget !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Método de Pagamento"
-        value={clientData?.paymentMethod}
-        fieldId="paymentMethod"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.paymentMethod !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Objetivo do Cliente"
-        value={clientData?.clientObjective}
-        fieldId="clientObjective"
-        type="textarea"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.clientObjective !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Motivo de Perda"
-        value={clientData?.lossReason}
-        fieldId="lossReason"
-        type="textarea"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.lossReason !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Número de Contrato"
-        value={clientData?.contractNumber}
-        fieldId="contractNumber"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.contractNumber !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Data de Contrato"
-        value={clientData?.contractDate}
-        fieldId="contractDate"
-        type="text"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.contractDate !== false}
-        showVisibilityControl={!readOnly}
-      />
-      <EditableField
-        label="Pagamento"
-        value={clientData?.payment}
-        fieldId="payment"
-        readOnly={readOnly}
-        onChange={onFieldUpdate}
-        onVisibilityChange={handleVisibilityChange}
-        isVisible={fieldVisibility.payment !== false}
-        showVisibilityControl={!readOnly}
-      />
-      
-      {customFields
-        .filter(field => field.visibility_settings?.visible_in_tabs?.commercial)
-        .map(field => (
-          <CustomFieldRenderer
-            key={field.id}
-            field={field}
-            value={clientData?.customValues?.[field.id]}
-            onChange={(value) => onFieldUpdate?.(`custom_${field.id}`, value)}
-          />
-        ))}
-    </div>
-  );
-
-  const renderUTMData = () => (
-    <div className="space-y-4">
-      {clientData?.id ? (
-        <>
-          <ClientUTMData 
-            contactId={clientData.id} 
-            readOnly={readOnly}
-            onFieldUpdate={onFieldUpdate}
-            onVisibilityChange={handleVisibilityChange}
-            showVisibilityControl={!readOnly}
-          />
-          
-          {customFields
-            .filter(field => field.visibility_settings?.visible_in_tabs?.utm)
-            .map(field => (
-              <CustomFieldRenderer
-                key={field.id}
-                field={field}
-                value={clientData?.customValues?.[field.id]}
-                onChange={(value) => onFieldUpdate?.(`custom_${field.id}`, value)}
-              />
-            ))}
-        </>
-      ) : (
-        <p className="text-muted-foreground text-center py-8">
-          Dados UTM não disponíveis para este cliente.
-        </p>
-      )}
-    </div>
-  );
-
-  const renderCustomFields = () => (
-    <div className="space-y-4">
-      <CustomFieldsTab
-        clientId={clientData?.id}
-        onFieldUpdate={onFieldUpdate}
-        readOnly={readOnly}
-      />
-    </div>
-  );
-
-  const renderFiles = () => (
-    <div className="space-y-4">
-      <ClientFilesTab
-        clientId={clientData?.id}
-        onFileUpdate={(files) => {
-          console.log('Arquivos atualizados:', files);
-        }}
-        readOnly={readOnly}
-      />
-      
-      {customFields
-        .filter(field => field.visibility_settings?.visible_in_tabs?.docs)
-        .map(field => (
-          <div key={field.id}>
-            <CustomFieldRenderer
-              field={field}
-              value={clientData?.customValues?.[field.id]}
-              onChange={(value) => onFieldUpdate?.(`custom_${field.id}`, value)}
-            />
-          </div>
-        ))}
-    </div>
-  );
 
   const renderTabContent = () => {
     switch (activeTab) {
       case "basic":
-        return renderBasicInfo();
+        return (
+          <ClientDetails
+            clientData={clientData}
+            customFields={customFields}
+            clientTypeOptions={clientTypeOptions}
+            clientSizeOptions={clientSizeOptions}
+            fieldVisibility={fieldVisibility}
+            onFieldUpdate={onFieldUpdate}
+            onVisibilityChange={handleVisibilityChange}
+            readOnly={readOnly}
+          />
+        );
       case "commercial":
-        return renderCommercialInfo();
+        return (
+          <ClientStats
+            section="commercial"
+            clientData={clientData}
+            customFields={customFields}
+            consultationStageOptions={consultationStageOptions}
+            fieldVisibility={fieldVisibility}
+            onFieldUpdate={onFieldUpdate}
+            onVisibilityChange={handleVisibilityChange}
+            readOnly={readOnly}
+          />
+        );
       case "utm":
-        return renderUTMData();
+        return (
+          <ClientStats
+            section="utm"
+            clientData={clientData}
+            customFields={customFields}
+            consultationStageOptions={consultationStageOptions}
+            fieldVisibility={fieldVisibility}
+            onFieldUpdate={onFieldUpdate}
+            onVisibilityChange={handleVisibilityChange}
+            readOnly={readOnly}
+          />
+        );
       case "custom":
-        return renderCustomFields();
+        return (
+          <ClientActions
+            section="custom"
+            clientData={clientData}
+            customFields={customFields}
+            onFieldUpdate={onFieldUpdate}
+            readOnly={readOnly}
+          />
+        );
       case "docs":
-        return renderFiles();
+        return (
+          <ClientActions
+            section="docs"
+            clientData={clientData}
+            customFields={customFields}
+            onFieldUpdate={onFieldUpdate}
+            readOnly={readOnly}
+          />
+        );
       default:
-        return renderBasicInfo();
+        return null;
     }
   };
 

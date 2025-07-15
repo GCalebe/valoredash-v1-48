@@ -9,8 +9,11 @@
 3. **useDashboardRealtimeQuery.ts otimizado** - 216 linhas → 72 linhas com 3 hooks separados
 
 ### ✅ Prioridade MÉDIA - Concluídas
-
 4. **AddClientDialog.tsx refatorado** - 680 linhas → 170 linhas com 4 componentes + 1 hook especializado
+5. **supabase.ts dividido** - tipos reorganizados em `src/types/supabase/`
+
+5. **FAQTab.tsx refatorado** - 464 linhas → 260 linhas com 1 hook e 1 componente reutilizável
+5. **AITestTab.tsx refatorado** - 518 linhas → 168 linhas com hook e componentes dedicados
 
 ## 📁 Arquivos de Poluição (Para mover para `archive/`)
 
@@ -116,6 +119,7 @@
 - [x] **SOLID**: Single Responsibility por campo
 - [x] **Status**: ✅ REFATORADO - Criados 4 componentes + 1 hook especializado
 
+#### ✅ 5. EventFormDialog.tsx - 1235 linhas → 200 linhas
 **Localização**: `src/components/EventFormDialog.tsx`
 
 - [x] **Legibilidade**: Simplificar lógica do formulário
@@ -125,14 +129,19 @@
 - [x] **SOLID**: Uma responsabilidade por função
 - [x] **Status**: ✅ REFATORADO - Criados 5 componentes focados + usa hook existente
 
+
 #### ✅ 6. AIPersonalityTab.tsx - 549 linhas → 103 linhas
-
-**Localização**: `src/components/knowledge/tabs/AIPersonalityTab.tsx`
-
 - [x] **Legibilidade**: UI dividida em seções menores
 - [x] **Manutenibilidade**: Lógica movida para hook dedicado
 - [x] **Reutilização**: Componentes independentes para cada seção
 - [x] **Status**: ✅ REFATORADO - Hook useAIPersonalityForm + 5 componentes
+
+#### ✅ 6. AITestTab.tsx - 518 linhas → 168 linhas
+- [x] **Legibilidade**: Separar lista de testes e diálogo em componentes
+- [x] **Reutilização**: Extrair estado e lógica em hook dedicado
+- [x] **SOLID**: Aplicar princípio de responsabilidade única
+- [x] **Status**: ✅ REFATORADO - Criados 2 componentes + 1 hook
+
 
 ## 🎯 Prioridades de Refatoração
 

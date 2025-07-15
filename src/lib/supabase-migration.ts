@@ -3,14 +3,8 @@
 // Substitui dados mockup por dados reais do banco
 // =====================================================
 
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/types/supabase';
-
-// Configuração do cliente Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
+import type { Database } from "@/types/supabase";
+import { supabase } from "./supabaseClient";
 
 // =====================================================
 // TIPOS PARA DADOS DO SUPABASE
@@ -27,7 +21,7 @@ export interface SupabaseContact {
   client_type: string | null;
   cpf_cnpj: string | null;
   asaas_customer_id: string | null;
-  status: 'Active' | 'Inactive';
+  status: "Active" | "Inactive";
   notes?: string;
   last_contact: string;
   kanban_stage: string;
@@ -80,25 +74,27 @@ export interface SupabaseFunnelData {
  */
 export async function executeMigration() {
   try {
-    console.log('🚀 Iniciando migração para Supabase...');
-    
+    console.log("🚀 Iniciando migração para Supabase...");
+
     // Nota: O script SQL deve ser executado diretamente no painel do Supabase
     // ou via CLI, pois o cliente JavaScript não suporta DDL commands
-    console.log('⚠️  Execute o arquivo supabase-migration.sql no painel do Supabase:');
-    console.log('1. Acesse https://supabase.com/dashboard');
-    console.log('2. Vá para SQL Editor');
-    console.log('3. Cole o conteúdo do arquivo supabase-migration.sql');
-    console.log('4. Execute o script');
-    
+    console.log(
+      "⚠️  Execute o arquivo supabase-migration.sql no painel do Supabase:",
+    );
+    console.log("1. Acesse https://supabase.com/dashboard");
+    console.log("2. Vá para SQL Editor");
+    console.log("3. Cole o conteúdo do arquivo supabase-migration.sql");
+    console.log("4. Execute o script");
+
     return {
       success: false,
-      message: 'Execute o script SQL manualmente no painel do Supabase'
+      message: "Execute o script SQL manualmente no painel do Supabase",
     };
   } catch (error) {
-    console.error('❌ Erro na migração:', error);
+    console.error("❌ Erro na migração:", error);
     return {
       success: false,
-      error: error
+      error: error,
     };
   }
 }
@@ -114,21 +110,21 @@ export async function executeMigration() {
 export async function getContactsFromSupabase(): Promise<SupabaseContact[]> {
   try {
     const { data, error } = await supabase
-      .from('contacts')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("contacts")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error('Erro ao buscar contatos:', error);
+      console.error("Erro ao buscar contatos:", error);
       return [];
     }
 
-    return (data || []).map(contact => ({
+    return (data || []).map((contact) => ({
       ...contact,
-      status: (contact.status as 'Active' | 'Inactive') || 'Active'
+      status: (contact.status as "Active" | "Inactive") || "Active",
     }));
   } catch (error) {
-    console.error('Erro na função getContactsFromSupabase:', error);
+    console.error("Erro na função getContactsFromSupabase:", error);
     return [];
   }
 }
@@ -140,19 +136,19 @@ export async function getContactsFromSupabase(): Promise<SupabaseContact[]> {
 export async function getMetricsFromSupabase(): Promise<SupabaseMetrics | null> {
   try {
     const { data, error } = await supabase
-      .from('dashboard_metrics')
-      .select('*')
+      .from("dashboard_metrics")
+      .select("*")
       .limit(1)
       .single();
 
     if (error) {
-      console.error('Erro ao buscar métricas:', error);
+      console.error("Erro ao buscar métricas:", error);
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error('Erro na função getMetricsFromSupabase:', error);
+    console.error("Erro na função getMetricsFromSupabase:", error);
     return null;
   }
 }
@@ -163,37 +159,36 @@ export async function getMetricsFromSupabase(): Promise<SupabaseMetrics | null> 
  */
 export async function getFunnelDataFromSupabase(
   startDate?: string,
-  endDate?: string
+  endDate?: string,
 ): Promise<SupabaseFunnelData[]> {
   try {
-    let query = supabase.from('funnel_data').select('*');
-    
+    let query = supabase.from("funnel_data").select("*");
+
     if (startDate && endDate) {
       // Usar função SQL para filtro por data
-      const { data, error } = await supabase
-        .rpc('get_funnel_by_date_range', {
-          start_date: startDate,
-          end_date: endDate
-        });
-      
+      const { data, error } = await supabase.rpc("get_funnel_by_date_range", {
+        start_date: startDate,
+        end_date: endDate,
+      });
+
       if (error) {
-        console.error('Erro ao buscar funil com filtro:', error);
+        console.error("Erro ao buscar funil com filtro:", error);
         return [];
       }
-      
+
       return data || [];
     } else {
-      const { data, error } = await query.order('value', { ascending: false });
-      
+      const { data, error } = await query.order("value", { ascending: false });
+
       if (error) {
-        console.error('Erro ao buscar funil:', error);
+        console.error("Erro ao buscar funil:", error);
         return [];
       }
-      
+
       return data || [];
     }
   } catch (error) {
-    console.error('Erro na função getFunnelDataFromSupabase:', error);
+    console.error("Erro na função getFunnelDataFromSupabase:", error);
     return [];
   }
 }
@@ -206,18 +201,18 @@ export async function getConversionByTimeFromSupabase() {
   try {
     // Using funnel_data as alternative since conversion_by_time doesn't exist in types
     const { data, error } = await supabase
-      .from('funnel_data')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("funnel_data")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error('Erro ao buscar conversão por tempo:', error);
+      console.error("Erro ao buscar conversão por tempo:", error);
       return [];
     }
 
     return data || [];
   } catch (error) {
-    console.error('Erro na função getConversionByTimeFromSupabase:', error);
+    console.error("Erro na função getConversionByTimeFromSupabase:", error);
     return [];
   }
 }
@@ -230,18 +225,18 @@ export async function getLeadsBySourceFromSupabase() {
   try {
     // Using utm_tracking as alternative since leads_by_source doesn't exist in types
     const { data, error } = await supabase
-      .from('utm_tracking')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("utm_tracking")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error('Erro ao buscar leads por fonte:', error);
+      console.error("Erro ao buscar leads por fonte:", error);
       return [];
     }
 
     return data || [];
   } catch (error) {
-    console.error('Erro na função getLeadsBySourceFromSupabase:', error);
+    console.error("Erro na função getLeadsBySourceFromSupabase:", error);
     return [];
   }
 }
@@ -253,18 +248,18 @@ export async function getLeadsBySourceFromSupabase() {
 export async function getAIProductsFromSupabase() {
   try {
     const { data, error } = await supabase
-      .from('ai_products')
-      .select('*')
-      .order('popular', { ascending: false });
+      .from("ai_products")
+      .select("*")
+      .order("popular", { ascending: false });
 
     if (error) {
-      console.error('Erro ao buscar produtos AI:', error);
+      console.error("Erro ao buscar produtos AI:", error);
       return [];
     }
 
     return data || [];
   } catch (error) {
-    console.error('Erro na função getAIProductsFromSupabase:', error);
+    console.error("Erro na função getAIProductsFromSupabase:", error);
     return [];
   }
 }
@@ -276,22 +271,28 @@ export async function getAIProductsFromSupabase() {
 export async function getUTMDataFromSupabase() {
   try {
     const [metricsResult, campaignsResult, trackingResult] = await Promise.all([
-      supabase.from('utm_metrics').select('*').limit(1).single(),
-      supabase.from('utm_tracking').select('*').order('created_at', { ascending: false }),
-      supabase.from('utm_tracking').select('*').order('created_at', { ascending: false })
+      supabase.from("utm_metrics").select("*").limit(1).single(),
+      supabase
+        .from("utm_tracking")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("utm_tracking")
+        .select("*")
+        .order("created_at", { ascending: false }),
     ]);
 
     return {
       metrics: metricsResult.data,
       campaigns: campaignsResult.data || [],
-      tracking: trackingResult.data || []
+      tracking: trackingResult.data || [],
     };
   } catch (error) {
-    console.error('Erro na função getUTMDataFromSupabase:', error);
+    console.error("Erro na função getUTMDataFromSupabase:", error);
     return {
       metrics: null,
       campaigns: [],
-      tracking: []
+      tracking: [],
     };
   }
 }
@@ -303,22 +304,24 @@ export async function getUTMDataFromSupabase() {
 /**
  * Adiciona um novo contato
  */
-export async function addContact(contact: Omit<SupabaseContact, 'id' | 'created_at' | 'updated_at'>) {
+export async function addContact(
+  contact: Omit<SupabaseContact, "id" | "created_at" | "updated_at">,
+) {
   try {
     const { data, error } = await supabase
-      .from('contacts')
+      .from("contacts")
       .insert([contact])
       .select()
       .single();
 
     if (error) {
-      console.error('Erro ao adicionar contato:', error);
+      console.error("Erro ao adicionar contato:", error);
       return { success: false, error };
     }
 
     return { success: true, data };
   } catch (error) {
-    console.error('Erro na função addContact:', error);
+    console.error("Erro na função addContact:", error);
     return { success: false, error };
   }
 }
@@ -326,23 +329,26 @@ export async function addContact(contact: Omit<SupabaseContact, 'id' | 'created_
 /**
  * Atualiza um contato existente
  */
-export async function updateContact(id: string, updates: Partial<SupabaseContact>) {
+export async function updateContact(
+  id: string,
+  updates: Partial<SupabaseContact>,
+) {
   try {
     const { data, error } = await supabase
-      .from('contacts')
+      .from("contacts")
       .update(updates)
-      .eq('id', id)
+      .eq("id", id)
       .select()
       .single();
 
     if (error) {
-      console.error('Erro ao atualizar contato:', error);
+      console.error("Erro ao atualizar contato:", error);
       return { success: false, error };
     }
 
     return { success: true, data };
   } catch (error) {
-    console.error('Erro na função updateContact:', error);
+    console.error("Erro na função updateContact:", error);
     return { success: false, error };
   }
 }
@@ -350,22 +356,24 @@ export async function updateContact(id: string, updates: Partial<SupabaseContact
 /**
  * Adiciona dados ao funil (para testes)
  */
-export async function addFunnelData(funnelData: Omit<SupabaseFunnelData, 'id' | 'created_at'>) {
+export async function addFunnelData(
+  funnelData: Omit<SupabaseFunnelData, "id" | "created_at">,
+) {
   try {
     const { data, error } = await supabase
-      .from('funnel_data')
+      .from("funnel_data")
       .insert([funnelData])
       .select()
       .single();
 
     if (error) {
-      console.error('Erro ao adicionar dados do funil:', error);
+      console.error("Erro ao adicionar dados do funil:", error);
       return { success: false, error };
     }
 
     return { success: true, data };
   } catch (error) {
-    console.error('Erro na função addFunnelData:', error);
+    console.error("Erro na função addFunnelData:", error);
     return { success: false, error };
   }
 }
@@ -374,7 +382,7 @@ export async function addFunnelData(funnelData: Omit<SupabaseFunnelData, 'id' | 
 // HOOK PERSONALIZADO PARA USAR NO REACT
 // =====================================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * Hook para buscar dados do Supabase com loading state
@@ -394,14 +402,14 @@ export function useSupabaseData() {
       const [contactsData, metricsData, funnelDataResult] = await Promise.all([
         getContactsFromSupabase(),
         getMetricsFromSupabase(),
-        getFunnelDataFromSupabase(dateFilter?.start, dateFilter?.end)
+        getFunnelDataFromSupabase(dateFilter?.start, dateFilter?.end),
       ]);
 
       setContacts(contactsData);
       setMetrics(metricsData);
       setFunnelData(funnelDataResult);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setError(err instanceof Error ? err.message : "Erro desconhecido");
     } finally {
       setLoading(false);
     }
@@ -417,7 +425,7 @@ export function useSupabaseData() {
     funnelData,
     loading,
     error,
-    refetch: loadData
+    refetch: loadData,
   };
 }
 
@@ -430,44 +438,58 @@ export function useSupabaseData() {
  */
 export async function checkTablesExist() {
   try {
-    const tables = ['contacts', 'conversation_metrics', 'funnel_data', 'ai_products'];
+    const tables = [
+      "contacts",
+      "conversation_metrics",
+      "funnel_data",
+      "ai_products",
+    ];
     const results = [];
 
     for (const table of tables) {
       try {
         // Only check tables that exist in types
-        const validTables = ['contacts', 'ai_products', 'client_stats', 'conversation_metrics', 'funnel_data', 'utm_metrics', 'utm_tracking'];
+        const validTables = [
+          "contacts",
+          "ai_products",
+          "client_stats",
+          "conversation_metrics",
+          "funnel_data",
+          "utm_metrics",
+          "utm_tracking",
+        ];
         if (!validTables.includes(table)) {
           results.push({
             table,
             exists: false,
-            error: `Table ${table} not found in types`
+            error: `Table ${table} not found in types`,
           });
           continue;
         }
-        
+
         const { data, error } = await supabase
           .from(table as any)
-          .select('id')
+          .select("id")
           .limit(1);
-      
+
         results.push({
           table,
           exists: !error,
-          error: error?.message
+          error: error?.message,
         });
       } catch (tableError) {
         results.push({
           table,
           exists: false,
-          error: tableError instanceof Error ? tableError.message : 'Unknown error'
+          error:
+            tableError instanceof Error ? tableError.message : "Unknown error",
         });
       }
     }
 
     return results;
   } catch (error) {
-    console.error('Erro ao verificar tabelas:', error);
+    console.error("Erro ao verificar tabelas:", error);
     return [];
   }
 }
@@ -478,25 +500,27 @@ export async function checkTablesExist() {
 export async function testSupabaseConnection() {
   try {
     const { data, error } = await supabase
-      .from('contacts')
-      .select('count')
+      .from("contacts")
+      .select("count")
       .limit(1);
 
     if (error) {
       return {
         success: false,
-        message: 'Erro na conexão: ' + error.message
+        message: "Erro na conexão: " + error.message,
       };
     }
 
     return {
       success: true,
-      message: 'Conexão com Supabase estabelecida com sucesso!'
+      message: "Conexão com Supabase estabelecida com sucesso!",
     };
   } catch (error) {
     return {
       success: false,
-      message: 'Erro na conexão: ' + (error instanceof Error ? error.message : 'Erro desconhecido')
+      message:
+        "Erro na conexão: " +
+        (error instanceof Error ? error.message : "Erro desconhecido"),
     };
   }
 }
