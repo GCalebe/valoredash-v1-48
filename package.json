@@ -10,11 +10,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "create-tables": "node create-missing-tables.js",
-    "verify": "node supabase-verify.js",
-    "seed": "node supabase-data-seeder.js",
-    "migrate": "node execute-database-migration.js",
-    "verify-migration": "node verify-migration.js",
-    "db-check": "node verify_database_structure.sql"
+    "verify": "node docs_supabase/supabase-verify.js",
+    "seed": "node docs_supabase/supabase-data-seeder.js",
+    "migrate": "node docs_supabase/execute-database-migration.js",
+    "verify-migration": "node docs_supabase/verify-migration.js",
+    "db-check": "node docs_supabase/verify_database_structure.sql"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

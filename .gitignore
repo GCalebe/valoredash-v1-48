@@ -28,3 +28,6 @@ dist-ssr
 docs
 bmad.db
 
+# Backup files
+*.ai-backup
+*.backup
