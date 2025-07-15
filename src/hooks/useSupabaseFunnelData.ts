@@ -9,6 +9,16 @@ export const useSupabaseFunnelData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch raw funnel data optionally filtered by date range
+  const getFunnelData = async (start?: string, end?: string) => {
+    let query = supabase.from('funnel_data').select('*');
+    if (start) query = query.gte('created_at', start);
+    if (end) query = query.lte('created_at', end);
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  };
+
   const fetchFunnelData = async () => {
     try {
       setLoading(true);
@@ -80,6 +90,16 @@ export const useSupabaseFunnelData = () => {
     }
   };
 
+  const addFunnelData = async (item: Omit<FunnelData, 'id' | 'created_at'>) => {
+    const { data, error } = await supabase
+      .from('funnel_data')
+      .insert(item)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as FunnelData;
+  };
+
   useEffect(() => {
     fetchFunnelData();
   }, []);
@@ -89,7 +109,9 @@ export const useSupabaseFunnelData = () => {
     loading,
     error,
     refetch: fetchFunnelData,
+    getFunnelData,
     getFunnelByDateRange,
-    getFunnelSummary
+    getFunnelSummary,
+    addFunnelData
   };
 };
