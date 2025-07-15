@@ -5,7 +5,7 @@
 
 ## 🗂️ Scripts Executados
 
-### 1. Script Principal de Dados (`supabase-data-seeder.js`)
+### 1. Script Principal de Dados (`docs_supabase/supabase-data-seeder.js`)
 **Status:** ✅ Executado com sucesso
 
 **Dados inseridos:**
@@ -20,7 +20,7 @@
 - Alguns erros de violação de restrição durante inserção de regras de validação (esperado devido a dados aleatórios)
 - Dados base necessários para o dashboard foram criados
 
-### 2. Script de Métricas de Chat (`seed-chat-metrics.js`)
+### 2. Script de Métricas de Chat (`docs_supabase/seed-chat-metrics.js`)
 **Status:** ✅ Executado com sucesso
 
 **Dados inseridos:**
@@ -33,7 +33,7 @@
 - Erros relacionados à coluna `conversion_rate` na tabela `funnel_data` (coluna não existe no schema atual)
 - Dados suficientes para análises de chat e conversação
 
-### 3. Script de Métricas de IA (`seed-ai-metrics.js`)
+### 3. Script de Métricas de IA (`docs_supabase/seed-ai-metrics.js`)
 **Status:** ✅ Executado com sucesso (após correções)
 
 **Dados inseridos:**
@@ -93,12 +93,12 @@
 
 ```bash
 # Executar verificação do banco (se resolver problemas de módulos)
-node verify-database.cjs
+node docs_supabase/verify-database.cjs
 
 # Re-executar seeding se necessário
-node supabase-data-seeder.js
-node seed-chat-metrics.js
-node seed-ai-metrics.js
+node docs_supabase/supabase-data-seeder.js
+node docs_supabase/seed-chat-metrics.js
+node docs_supabase/seed-ai-metrics.js
 ```
 
 ## ⚠️ Observações Importantes

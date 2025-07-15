@@ -66,6 +66,15 @@ This project is built with .
 - shadcn-ui
 - Tailwind CSS
 
+## Where are the Supabase scripts?
+
+All database documentation and seeding scripts now live under the
+`docs_supabase/` folder. Run them with the folder prefix, for example:
+
+```bash
+npm run seed        # runs "node docs_supabase/supabase-data-seeder.js"
+```
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/3b798310-9314-49a9-9604-c5927962c5fd) and click on Share -> Publish.
