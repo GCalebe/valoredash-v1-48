@@ -176,4 +176,4 @@ export function useAIStageManager() {
   };
 }
 
-export type { StageFormValues };
+// StageFormValues is already exported as interface above

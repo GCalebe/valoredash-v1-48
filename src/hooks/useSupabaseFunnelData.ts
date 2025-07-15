@@ -115,3 +115,54 @@ export const useSupabaseFunnelData = () => {
     addFunnelData
   };
 };
+
+// Individual functions are already available through the hook
+// Export them directly for backwards compatibility
+const getFunnelDataCompat = async (start?: string, end?: string) => {
+  let query = supabase.from('funnel_data').select('*');
+  if (start) query = query.gte('created_at', start);
+  if (end) query = query.lte('created_at', end);
+  const { data, error } = await query.order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+};
+
+const getFunnelByDateRangeCompat = async (startDate: string, endDate: string) => {
+  try {
+    let { data, error } = await supabase
+      .from('conversion_funnel_view')
+      .select('*')
+      .gte('created_at', startDate)
+      .lte('created_at', endDate)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      const fallback = await supabase
+        .from('funnel_data')
+        .select('*')
+        .gte('created_at', startDate)
+        .lte('created_at', endDate)
+        .order('created_at', { ascending: false });
+      
+      if (fallback.error) throw fallback.error;
+      return fallback.data || [];
+    }
+    
+    return data || [];
+  } catch (err) {
+    console.error('Erro ao buscar funil por período:', err);
+    return [];
+  }
+};
+
+const addFunnelDataCompat = async (item: Omit<FunnelData, 'id' | 'created_at'>) => {
+  const { data, error } = await supabase
+    .from('funnel_data')
+    .insert(item)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as FunnelData;
+};
+
+export { getFunnelDataCompat as getFunnelData, getFunnelByDateRangeCompat as getFunnelByDateRange, addFunnelDataCompat as addFunnelData };

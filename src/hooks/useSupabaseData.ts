@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import type {
   Contact,
+  ContactInsert,
   AIProduct,
   DashboardMetrics,
   FunnelData,
@@ -52,7 +53,7 @@ export const useSupabaseData = (initialFilters?: MetricsFilters): UseSupabaseDat
       const [contactsResult, metricsResult, funnelResult] = await Promise.all([
         getContacts(),
         getDashboardMetrics(),
-        getFunnelData(filters?.dateRange)
+        getFunnelData()
       ]);
 
       if (contactsResult.success) {
@@ -63,12 +64,11 @@ export const useSupabaseData = (initialFilters?: MetricsFilters): UseSupabaseDat
         setMetrics(metricsResult.data);
       }
 
-      if (funnelResult.success) {
-        setFunnelData(funnelResult.data || []);
-      }
+      // funnelResult is just an array, not a SupabaseResponse
+      setFunnelData(funnelResult || []);
 
       // Se algum erro ocorreu, mostrar o primeiro
-      const errors = [contactsResult, metricsResult, funnelResult]
+      const errors = [contactsResult, metricsResult]
         .filter(result => !result.success)
         .map(result => result.error?.message || 'Erro desconhecido');
       

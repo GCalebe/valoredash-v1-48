@@ -282,7 +282,7 @@ const Subscription: React.FC = () => {
                     </p>
                     <p className="text-gray-600 dark:text-gray-400">
                       R$ {currentPlan?.price.toFixed(2) || "0.00"}/
-                      {currentPlan?.billingPeriod === "monthly" ? "mês" : "ano"}
+                      {currentPlan?.billing_period === "monthly" ? "mês" : "ano"}
                     </p>
                   </div>
 

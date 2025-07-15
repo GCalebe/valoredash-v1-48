@@ -76,7 +76,7 @@ const ChangePlanDialog: React.FC<Props> = ({
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <p className="font-medium mb-1">Instâncias:</p>
-                    <p className="text-gray-600 dark:text-gray-400">{plan.instances}</p>
+                    <p className="text-gray-600 dark:text-gray-400">{plan.instances || 1}</p>
                   </div>
                   <div className="flex justify-between">
                     <p className="font-medium mb-1">Mensagens:</p>
@@ -87,7 +87,7 @@ const ChangePlanDialog: React.FC<Props> = ({
                   <div className="flex justify-between">
                     <p className="font-medium mb-1">IAs incluídas:</p>
                     <p className="text-gray-600 dark:text-gray-400">
-                      {plan.aiProducts.length} inteligências artificiais
+                      {plan.ai_products?.length || 0} inteligências artificiais
                     </p>
                   </div>
                 </div>

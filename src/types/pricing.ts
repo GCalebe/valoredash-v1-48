@@ -7,6 +7,8 @@ export interface PricingPlan {
   features: string[];
   popular?: boolean;
   ai_products?: string[]; // IDs of AI products included in this plan
+  instances?: number; // Number of instances included
+  messages?: number; // Number of messages included (0 = unlimited)
 }
 
 export interface UserSubscription {

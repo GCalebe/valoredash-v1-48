@@ -7,8 +7,13 @@ export interface SupabaseResponse<T> {
 
 export interface PaginatedResponse<T> {
   data: T[];
-  count: number;
+  loading: boolean;
+  error: string | null;
   page: number;
-  pageSize: number;
+  totalCount: number;
   totalPages: number;
+  nextPage: () => void;
+  prevPage: () => void;
+  goToPage: (page: number) => void;
+  refetch: () => void;
 }

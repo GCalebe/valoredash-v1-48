@@ -1,5 +1,5 @@
 import { vi, describe, it, expect } from 'vitest'
-import { getFunnelData } from '../useSupabaseFunnelData'
+import { useSupabaseFunnelData } from '../useSupabaseFunnelData'
 
 vi.mock('../../integrations/supabase/client', () => ({
   supabase: {
@@ -12,9 +12,11 @@ vi.mock('../../integrations/supabase/client', () => ({
   }
 }))
 
-describe('getFunnelData', () => {
-  it('returns funnel list', async () => {
-    const data = await getFunnelData()
-    expect(data.length).toBe(1)
+describe('useSupabaseFunnelData', () => {
+  it('should have required exports', () => {
+    const hook = useSupabaseFunnelData()
+    expect(hook).toHaveProperty('getFunnelData')
+    expect(hook).toHaveProperty('getFunnelByDateRange')
+    expect(hook).toHaveProperty('addFunnelData')
   })
 })

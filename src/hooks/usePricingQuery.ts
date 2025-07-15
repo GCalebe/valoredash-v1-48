@@ -6,203 +6,243 @@ import { toast } from '@/hooks/use-toast';
 interface SimplePricingPlan {
   id: string;
   name: string;
-  description?: string;
+  description: string; // Make required to match PricingPlan
   price: number;
   currency: string;
   billing_period: 'monthly' | 'yearly';
   billingPeriod: 'monthly' | 'yearly'; // Add for compatibility
   features: string[];
   is_popular?: boolean;
+  instances?: number;
+  messages?: number;
+  ai_products?: string[];
   popular?: boolean; // Add for compatibility
   is_active: boolean;
   created_at: string;
   updated_at: string;
   aiProducts: string[]; // Add for compatibility
-  instances?: number; // Add for compatibility  
-  messages?: number; // Add for compatibility
+}
+
+interface CreatePricingPlan {
+  name: string;
+  description?: string;
+  price: number;
+  currency: string;
+  billing_period: 'monthly' | 'yearly';
+  features: string[];
 }
 
 // Mock data since pricing_plans table doesn't exist in schema
 const mockPricingPlans: SimplePricingPlan[] = [
   {
-    id: '1',
-    name: 'Basic',
-    description: 'Perfect for small businesses',
-    price: 29.99,
+    id: 'basic',
+    name: 'Básico',
+    description: 'Plano básico para pequenas empresas',
+    price: 29.90,
     currency: 'BRL',
     billing_period: 'monthly',
     billingPeriod: 'monthly',
-    features: ['Basic chat support', 'Up to 100 contacts', 'Email integration'],
+    features: ['1 instância', '1000 mensagens/mês', '1 IA incluída', 'Suporte por email'],
     is_popular: false,
     popular: false,
-    is_active: true,
-    aiProducts: ['chat-basic', 'analytics-basic'],
     instances: 1,
     messages: 1000,
+    ai_products: ['chatbot-basic'],
+    aiProducts: ['chatbot-basic'],
+    is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
   {
-    id: '2',
-    name: 'Pro',
-    description: 'For growing businesses',
-    price: 79.99,
+    id: 'professional',
+    name: 'Profissional',
+    description: 'Plano profissional para médias empresas',
+    price: 79.90,
     currency: 'BRL',
     billing_period: 'monthly',
     billingPeriod: 'monthly',
-    features: ['Advanced chat support', 'Up to 1000 contacts', 'CRM integration', 'Analytics'],
+    features: ['3 instâncias', '5000 mensagens/mês', '3 IAs incluídas', 'Suporte prioritário'],
     is_popular: true,
     popular: true,
+    instances: 3,
+    messages: 5000,
+    ai_products: ['chatbot-basic', 'chatbot-advanced', 'assistant'],
+    aiProducts: ['chatbot-basic', 'chatbot-advanced', 'assistant'],
     is_active: true,
-    aiProducts: ['chat-pro', 'analytics-pro', 'crm-integration'],
-    instances: 5,
-    messages: 10000,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'enterprise',
+    name: 'Empresarial',
+    description: 'Plano empresarial para grandes empresas',
+    price: 199.90,
+    currency: 'BRL',
+    billing_period: 'monthly',
+    billingPeriod: 'monthly',
+    features: ['Instâncias ilimitadas', 'Mensagens ilimitadas', 'Todas as IAs', 'Suporte 24/7'],
+    is_popular: false,
+    popular: false,
+    instances: 0, // 0 means unlimited
+    messages: 0, // 0 means unlimited
+    ai_products: ['chatbot-basic', 'chatbot-advanced', 'assistant', 'analytics', 'automation'],
+    aiProducts: ['chatbot-basic', 'chatbot-advanced', 'assistant', 'analytics', 'automation'],
+    is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
 ];
 
-// Query keys
-export const pricingKeys = {
-  all: ['pricing'] as const,
-  lists: () => [...pricingKeys.all, 'list'] as const,
-  list: (filters: string) => [...pricingKeys.lists(), { filters }] as const,
-  byPeriod: (period: string) => [...pricingKeys.all, 'period', period] as const,
-};
-
-// Fetch pricing plans (mock data)
-const fetchPricingPlans = async (): Promise<SimplePricingPlan[]> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return mockPricingPlans.filter(plan => plan.is_active);
-};
-
-// Fetch pricing plans by period
-const fetchPricingPlansByPeriod = async (period: 'monthly' | 'yearly'): Promise<SimplePricingPlan[]> => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return mockPricingPlans.filter(plan => plan.is_active && plan.billing_period === period);
-};
-
-// Hook for fetching all pricing plans
+// Query to fetch pricing plans
 export const usePricingQuery = () => {
   return useQuery({
-    queryKey: pricingKeys.lists(),
-    queryFn: fetchPricingPlans,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false,
+    queryKey: ['pricing-plans'],
+    queryFn: async (): Promise<SimplePricingPlan[]> => {
+      // Since the pricing_plans table doesn't exist, return mock data
+      // In a real app, this would query the pricing_plans table
+      return mockPricingPlans;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
-// Hook for fetching pricing plans by period
-export const usePricingByPeriodQuery = (period: 'monthly' | 'yearly') => {
+// Query to fetch a single pricing plan
+export const usePricingPlanQuery = (planId: string) => {
   return useQuery({
-    queryKey: pricingKeys.byPeriod(period),
-    queryFn: () => fetchPricingPlansByPeriod(period),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false,
-    enabled: !!period,
+    queryKey: ['pricing-plan', planId],
+    queryFn: async (): Promise<SimplePricingPlan | null> => {
+      // Since the pricing_plans table doesn't exist, return mock data
+      const plan = mockPricingPlans.find(p => p.id === planId);
+      return plan || null;
+    },
+    enabled: !!planId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
-// Hook for creating pricing plan (mock)
+// Mutation to create a pricing plan
 export const useCreatePricingPlanMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (plan: Omit<SimplePricingPlan, 'id' | 'created_at' | 'updated_at'>): Promise<SimplePricingPlan> => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const newPlan: SimplePricingPlan = {
-        ...plan,
-        id: Date.now().toString(),
+    mutationFn: async (newPlan: CreatePricingPlan): Promise<SimplePricingPlan> => {
+      // Mock implementation since table doesn't exist
+      const plan: SimplePricingPlan = {
+        id: `plan-${Date.now()}`,
+        ...newPlan,
+        description: newPlan.description || 'No description',
+        billingPeriod: newPlan.billing_period,
+        is_popular: false,
+        popular: false,
+        instances: 1,
+        messages: 1000,
+        ai_products: [],
+        aiProducts: [],
+        is_active: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      return newPlan;
+      
+      mockPricingPlans.push(plan);
+      return plan;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pricingKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['pricing-plans'] });
       toast({
-        title: "Success",
-        description: "Pricing plan created successfully",
+        title: 'Plano criado',
+        description: 'Plano de preços criado com sucesso!',
       });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Falha ao criar plano de preços',
+        variant: 'destructive',
       });
+      console.error('Error creating pricing plan:', error);
     },
   });
 };
 
-// Hook for updating pricing plan (mock)
+// Mutation to update a pricing plan
 export const useUpdatePricingPlanMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<SimplePricingPlan> & { id: string }): Promise<SimplePricingPlan> => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const updatedPlan: SimplePricingPlan = {
-        ...mockPricingPlans.find(p => p.id === id)!,
+    mutationFn: async ({ id, ...updates }: { id: string } & Partial<CreatePricingPlan>): Promise<SimplePricingPlan> => {
+      // Mock implementation since table doesn't exist
+      const planIndex = mockPricingPlans.findIndex(p => p.id === id);
+      if (planIndex === -1) {
+        throw new Error('Plan not found');
+      }
+      
+      mockPricingPlans[planIndex] = {
+        ...mockPricingPlans[planIndex],
         ...updates,
         updated_at: new Date().toISOString(),
       };
-      return updatedPlan;
+      
+      return mockPricingPlans[planIndex];
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pricingKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['pricing-plans'] });
       toast({
-        title: "Success",
-        description: "Pricing plan updated successfully",
+        title: 'Plano atualizado',
+        description: 'Plano de preços atualizado com sucesso!',
       });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Falha ao atualizar plano de preços',
+        variant: 'destructive',
       });
+      console.error('Error updating pricing plan:', error);
     },
   });
 };
 
-// Hook for deleting pricing plan (mock)
+// Mutation to delete a pricing plan
 export const useDeletePricingPlanMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string): Promise<void> => {
-      await new Promise(resolve => setTimeout(resolve, 500));
+    mutationFn: async (planId: string): Promise<void> => {
+      // Mock implementation since table doesn't exist
+      const planIndex = mockPricingPlans.findIndex(p => p.id === planId);
+      if (planIndex === -1) {
+        throw new Error('Plan not found');
+      }
+      
+      mockPricingPlans.splice(planIndex, 1);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pricingKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['pricing-plans'] });
       toast({
-        title: "Success",
-        description: "Pricing plan deleted successfully",
+        title: 'Plano excluído',
+        description: 'Plano de preços excluído com sucesso!',
       });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Falha ao excluir plano de preços',
+        variant: 'destructive',
       });
+      console.error('Error deleting pricing plan:', error);
     },
   });
 };
 
-// Utility functions
-export const pricingUtils = {
-  invalidateAll: (queryClient: ReturnType<typeof useQueryClient>) => {
-    queryClient.invalidateQueries({ queryKey: pricingKeys.all });
-  },
-  prefetchPlans: (queryClient: ReturnType<typeof useQueryClient>) => {
-    queryClient.prefetchQuery({
-      queryKey: pricingKeys.lists(),
-      queryFn: fetchPricingPlans,
-      staleTime: 10 * 60 * 1000,
-    });
-  },
+// Add missing query function
+export const usePricingByPeriodQuery = (billingPeriod: 'monthly' | 'yearly') => {
+  return useQuery({
+    queryKey: ['pricing-plans', billingPeriod],
+    queryFn: async (): Promise<SimplePricingPlan[]> => {
+      return mockPricingPlans.filter(plan => plan.billing_period === billingPeriod);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 };
+
+export type { SimplePricingPlan, CreatePricingPlan };

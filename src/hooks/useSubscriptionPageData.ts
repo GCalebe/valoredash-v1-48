@@ -11,10 +11,14 @@ export const useSubscriptionPageData = () => {
   const availablePlans = supabasePlans.length > 0 ? supabasePlans : [];
 
   const currentPlan = useMemo<PricingPlan | null>(() => {
-    return (
-      availablePlans.find((plan) => plan.id === subscriptionData.subscription?.planId) ||
-      null
-    );
+    const plan = availablePlans.find((plan) => plan.id === subscriptionData.subscription?.planId);
+    if (!plan) return null;
+    
+    // Ensure the plan has required description field
+    return {
+      ...plan,
+      description: plan.description || 'Plan description not available'
+    } as PricingPlan;
   }, [availablePlans, subscriptionData.subscription]);
 
   const daysLeft = useMemo(() => {

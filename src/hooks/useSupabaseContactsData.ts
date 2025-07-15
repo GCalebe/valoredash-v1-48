@@ -165,7 +165,7 @@ export const useContacts = (filters?: ContactFilters, pageSize = 20): PaginatedR
   const goToPage = (p: number) => { if (p >= 1 && p <= Math.ceil(totalCount / pageSize)) load(p) }
 
   return {
-    contacts,
+    data: contacts,
     loading,
     error,
     page,
