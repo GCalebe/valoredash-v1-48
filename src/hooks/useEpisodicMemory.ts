@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { episodicMemoryService } from '@/lib/episodicMemoryService';
 import { N8nChatMemory, EpisodicMemory, Memory } from '@/types/memory';
+import { useSupabaseEpisodicMemory } from './useSupabaseEpisodicMemory';
 import { logger } from '@/utils/logger';
 
 interface UseEpisodicMemoryOptions {
@@ -36,6 +36,14 @@ export function useEpisodicMemory({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
+  const {
+    fetchMemories,
+    fetchTimeline,
+    fetchMemoriesByPeriod,
+    updateImportance: updateImportanceQuery,
+    storeMemory: storeMemoryQuery,
+  } = useSupabaseEpisodicMemory();
+
   // Função para carregar todos os dados episódicos
   const loadEpisodicData = useCallback(async () => {
     if (!sessionId) return;
@@ -45,8 +53,8 @@ export function useEpisodicMemory({
 
       // Carregar memórias e linha do tempo em paralelo
       const [memoriesData, timelineData] = await Promise.all([
-        episodicMemoryService.getEpisodicMemories(sessionId, 50, useCache),
-        episodicMemoryService.generateTimeline(sessionId, useCache),
+        fetchMemories(sessionId, 50),
+        fetchTimeline(sessionId),
       ]);
 
       // Convert N8nChatMemory to Memory format
@@ -77,12 +85,7 @@ export function useEpisodicMemory({
       if (!sessionId) return [];
 
       try {
-        const results = await episodicMemoryService.getEpisodicMemoriesByPeriod(
-          sessionId,
-          startDate,
-          endDate,
-          useCache
-        );
+        const results = await fetchMemoriesByPeriod(sessionId, startDate, endDate);
         
         // Convert N8nChatMemory to Memory format
         return results.map(item => ({
@@ -108,10 +111,7 @@ export function useEpisodicMemory({
       if (!sessionId) return null;
 
       try {
-        const newMemory = await episodicMemoryService.storeEpisodicMemory({
-          ...memory,
-          session_id: sessionId,
-        });
+        const newMemory = await storeMemoryQuery({ ...memory, session_id: sessionId });
 
         if (newMemory) {
           // Convert and update local state
@@ -128,7 +128,7 @@ export function useEpisodicMemory({
           setMemories(prev => [convertedMemory, ...prev]);
           
           // Recarregar linha do tempo
-          const updatedTimeline = await episodicMemoryService.generateTimeline(sessionId, false);
+          const updatedTimeline = await fetchTimeline(sessionId);
           setTimeline(updatedTimeline);
         }
 
@@ -145,7 +145,7 @@ export function useEpisodicMemory({
   const updateImportance = useCallback(
     async (memoryId: number, importance: number): Promise<boolean> => {
       try {
-        const success = await episodicMemoryService.updateImportance(memoryId, importance);
+        const success = await updateImportanceQuery(memoryId, importance);
 
         if (success) {
           // Atualizar estado local
@@ -156,7 +156,7 @@ export function useEpisodicMemory({
           );
           
           // Recarregar linha do tempo
-          const updatedTimeline = await episodicMemoryService.generateTimeline(sessionId, false);
+          const updatedTimeline = await fetchTimeline(sessionId);
           setTimeline(updatedTimeline);
         }
 
@@ -170,8 +170,8 @@ export function useEpisodicMemory({
   );
 
   // Função para limpar cache
-  const clearCache = useCallback((pattern?: string): void => {
-    episodicMemoryService.clearCache(pattern);
+  const clearCache = useCallback((): void => {
+    // noop - cache layer not implemented
   }, []);
 
   // Carregar dados iniciais
