@@ -1,9 +1,59 @@
 import { CalendarEvent } from "@/types/calendar";
 import { format } from "date-fns";
-import { retryFetch } from "./utils/retryFetch";
+import { supabase } from "@/integrations/supabase/client";
 
-// Função isolada de busca da API (utilizada pelo hook principal)
+// Função principal de busca - agora usa Supabase como fonte primária
 export async function fetchCalendarEvents(
+  date?: Date,
+  range?: { start: Date; end: Date },
+): Promise<CalendarEvent[]> {
+  try {
+    let query = supabase
+      .from('calendar_events')
+      .select('*')
+      .order('start_time', { ascending: true });
+
+    // Filtrar por range de datas
+    if (range) {
+      const start = format(range.start, "yyyy-MM-dd") + "T00:00:00.000Z";
+      const end = format(range.end, "yyyy-MM-dd") + "T23:59:59.999Z";
+      query = query.gte('start_time', start).lte('start_time', end);
+    } else if (date) {
+      const start = format(date, "yyyy-MM-dd") + "T00:00:00.000Z";
+      const end = format(date, "yyyy-MM-dd") + "T23:59:59.999Z";
+      query = query.gte('start_time', start).lte('start_time', end);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Erro ao buscar eventos do Supabase:', error);
+      throw error;
+    }
+
+    // Mapear dados do Supabase para CalendarEvent
+    return (data || []).map((event: any) => ({
+      id: event.id,
+      summary: event.summary || event.title || "Evento sem título",
+      description: event.description || "",
+      start: event.start_time,
+      end: event.end_time,
+      status: event.status || "confirmed",
+      htmlLink: event.html_link || "#",
+      attendees: [], // Pode ser expandido para buscar de calendar_attendees
+      hostName: event.host_name || "",
+    }));
+
+  } catch (error) {
+    console.error('Erro ao buscar eventos:', error);
+    return [];
+  }
+}
+
+// ========== API EXTERNA DESATIVADA ==========
+// Mantida para referência mas não utilizada
+/*
+export async function fetchCalendarEventsFromExternalAPI(
   date?: Date,
   range?: { start: Date; end: Date },
 ): Promise<CalendarEvent[]> {
@@ -30,7 +80,6 @@ export async function fetchCalendarEvents(
       });
 
       if (!response.ok) {
-        // Mensagem de erro mais clara
         const msg = await response.text();
         throw new Error(
           `Erro na requisição (${response.status}): ${
@@ -40,10 +89,8 @@ export async function fetchCalendarEvents(
       }
 
       const data = await response.json();
-
-      // Accepts both array or object with .events
       const eventsArray = Array.isArray(data) ? data : data.events || [];
-      // Map para CalendarEvent (segue lógica original)
+      
       return eventsArray
         .map((event: any) => ({
           id: event.id || `event-${Date.now()}-${Math.random()}`,
@@ -63,5 +110,6 @@ export async function fetchCalendarEvents(
     },
     2,
     800,
-  ); // 2 tentativas extras (total 3), delay inicial 800ms
+  );
 }
+*/

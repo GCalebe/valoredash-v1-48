@@ -352,6 +352,8 @@ export type Database = {
           description: string | null
           end_time: string
           event_type: string | null
+          host_name: string | null
+          html_link: string | null
           id: string
           location: string | null
           metadata: Json | null
@@ -359,6 +361,7 @@ export type Database = {
           recurrence_rule: string | null
           start_time: string
           status: string | null
+          summary: string | null
           title: string
           updated_at: string | null
           user_id: string
@@ -371,6 +374,8 @@ export type Database = {
           description?: string | null
           end_time: string
           event_type?: string | null
+          host_name?: string | null
+          html_link?: string | null
           id?: string
           location?: string | null
           metadata?: Json | null
@@ -378,6 +383,7 @@ export type Database = {
           recurrence_rule?: string | null
           start_time: string
           status?: string | null
+          summary?: string | null
           title: string
           updated_at?: string | null
           user_id: string
@@ -390,6 +396,8 @@ export type Database = {
           description?: string | null
           end_time?: string
           event_type?: string | null
+          host_name?: string | null
+          html_link?: string | null
           id?: string
           location?: string | null
           metadata?: Json | null
@@ -397,6 +405,7 @@ export type Database = {
           recurrence_rule?: string | null
           start_time?: string
           status?: string | null
+          summary?: string | null
           title?: string
           updated_at?: string | null
           user_id?: string

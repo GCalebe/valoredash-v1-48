@@ -1,12 +1,130 @@
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import type { CalendarEvent, EventFormData } from "@/types/calendar";
 
 /**
- * Adiciona um evento na agenda.
+ * Adiciona um evento na agenda usando Supabase.
  * Retorna true em caso de sucesso.
  */
 export async function addCalendarEvent(
+  formData: EventFormData,
+): Promise<boolean> {
+  try {
+    const startDateTime = `${format(formData.date, "yyyy-MM-dd")}T${
+      formData.startTime
+    }:00.000Z`;
+    const endDateTime = `${format(formData.date, "yyyy-MM-dd")}T${
+      formData.endTime
+    }:00.000Z`;
+    
+    const eventData = {
+      title: formData.summary,
+      summary: formData.summary,
+      description: formData.description,
+      start_time: startDateTime,
+      end_time: endDateTime,
+      host_name: formData.hostName,
+      status: 'scheduled',
+      event_type: 'meeting',
+      user_id: (await supabase.auth.getUser()).data.user?.id,
+    };
+
+    const { data, error } = await supabase
+      .from('calendar_events')
+      .insert(eventData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[calendarEventActions] Erro do Supabase:", error);
+      throw error;
+    }
+
+    toast.success("Evento adicionado com sucesso!");
+    return true;
+  } catch (err) {
+    console.error("[calendarEventActions] Erro ao adicionar evento:", err);
+    toast.error("Erro ao adicionar evento. Tente novamente.");
+    return false;
+  }
+}
+
+/**
+ * Edita um evento existente usando Supabase.
+ */
+export async function editCalendarEvent(
+  eventId: string,
+  formData: EventFormData,
+): Promise<boolean> {
+  try {
+    const startDateTime = `${format(formData.date, "yyyy-MM-dd")}T${
+      formData.startTime
+    }:00.000Z`;
+    const endDateTime = `${format(formData.date, "yyyy-MM-dd")}T${
+      formData.endTime
+    }:00.000Z`;
+    
+    const updateData = {
+      title: formData.summary,
+      summary: formData.summary,
+      description: formData.description,
+      start_time: startDateTime,
+      end_time: endDateTime,
+      host_name: formData.hostName,
+    };
+
+    const { data, error } = await supabase
+      .from('calendar_events')
+      .update(updateData)
+      .eq('id', eventId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[calendarEventActions] Erro do Supabase:", error);
+      throw error;
+    }
+
+    toast.success("Evento editado com sucesso!");
+    return true;
+  } catch (err) {
+    console.error("[calendarEventActions] Erro ao editar evento:", err);
+    toast.error("Erro ao editar evento. Tente novamente.");
+    return false;
+  }
+}
+
+/**
+ * Remove um evento usando Supabase.
+ */
+export async function deleteCalendarEvent(
+  event: CalendarEvent,
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('calendar_events')
+      .delete()
+      .eq('id', event.id);
+
+    if (error) {
+      console.error("[calendarEventActions] Erro do Supabase:", error);
+      throw error;
+    }
+
+    toast.success("Evento excluído com sucesso!");
+    return true;
+  } catch (err) {
+    console.error("[calendarEventActions] Erro ao excluir evento:", err);
+    toast.error("Erro ao excluir evento. Tente novamente.");
+    return false;
+  }
+}
+
+// ========== FUNÇÕES DA API EXTERNA DESATIVADAS ==========
+// Mantidas para referência mas não utilizadas
+/*
+export async function addCalendarEventToExternalAPI(
   formData: EventFormData,
 ): Promise<boolean> {
   try {
@@ -45,10 +163,7 @@ export async function addCalendarEvent(
   }
 }
 
-/**
- * Edita um evento existente.
- */
-export async function editCalendarEvent(
+export async function editCalendarEventFromExternalAPI(
   eventId: string,
   formData: EventFormData,
 ): Promise<boolean> {
@@ -89,10 +204,7 @@ export async function editCalendarEvent(
   }
 }
 
-/**
- * Remove um evento via id, recebendo o próprio evento para manter compatibilidade.
- */
-export async function deleteCalendarEvent(
+export async function deleteCalendarEventFromExternalAPI(
   event: CalendarEvent,
 ): Promise<boolean> {
   try {
@@ -125,3 +237,4 @@ export async function deleteCalendarEvent(
     return false;
   }
 }
+*/
