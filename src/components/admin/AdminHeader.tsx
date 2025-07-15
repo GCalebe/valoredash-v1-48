@@ -46,7 +46,9 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
             />
           )}
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-            <h1 className="text-lg sm:text-2xl font-bold">{settings.brandName}</h1>
+            <h1 className="text-lg sm:text-2xl font-bold">
+              {settings.brandName}
+            </h1>
             <span className="text-sm sm:text-lg">Administração</span>
           </div>
         </div>
