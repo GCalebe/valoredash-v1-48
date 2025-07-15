@@ -5,10 +5,17 @@ import { Contact } from "@/types/client";
 export const useContactsService = () => {
   const fetchAllContacts = async (): Promise<Contact[]> => {
     try {
-      // Since the view doesn't exist, we'll use the contacts table directly
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // Fetch contacts filtered by user_id automatically
       const { data: contactsData, error: contactsError } = await supabase
         .from("contacts")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (contactsError) {
@@ -79,11 +86,18 @@ export const useContactsService = () => {
     stageId: string,
   ) => {
     try {
-      // Update the contact with the stage ID directly
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // Update the contact with the stage ID directly, ensuring user ownership
       const { error: updateError } = await supabase
         .from("contacts")
         .update({ kanban_stage_id: stageId })
-        .eq("id", contactId);
+        .eq("id", contactId)
+        .eq("user_id", user.id);
 
       if (updateError) {
         throw new Error(`Failed to update contact: ${updateError.message}`);

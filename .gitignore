@@ -28,5 +28,6 @@ dist-ssr
 docs
 bmad.db
 
-
-bun.lockb
+# Backup files
+*.ai-backup
+*.backup

@@ -60,9 +60,9 @@ const config: Config = {
           "5": "hsl(var(--chart-5))",
         },
         // Valore Náutico theme colors
-        "valore-blue": "var(--valore-blue)",
-        "valore-gold": "var(--valore-gold)",
-        "valore-navy": "var(--valore-navy)",
+        "valore-blue": "hsl(var(--valore-blue))",
+        "valore-gold": "hsl(var(--valore-gold))",
+        "valore-navy": "hsl(var(--valore-navy))",
       },
       borderRadius: {
         lg: "var(--radius)",

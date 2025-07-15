@@ -80,9 +80,13 @@ const fetchActiveAIStages = async (): Promise<AIStage[]> => {
 
 // Create AI stage
 const createAIStage = async (stage: AIStageInsert): Promise<AIStage> => {
+  // Get the current user from the auth session
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   const { data, error } = await supabase
     .from('ai_stages')
-    .insert(stage)
+    .insert({ ...stage, user_id: user.id })
     .select()
     .single();
 

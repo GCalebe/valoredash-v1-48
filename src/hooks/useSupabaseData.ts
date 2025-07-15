@@ -94,7 +94,13 @@ export const useSupabaseData = (initialFilters?: MetricsFilters): UseSupabaseDat
 // Buscar todos os contatos
 export const getContacts = async (filters?: ContactFilters): Promise<SupabaseResponse<Contact[]>> => {
   try {
-    let query = supabase.from('contacts').select('*');
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    let query = supabase.from('contacts').select('*').eq('user_id', user.id);
 
     // Aplicar filtros se fornecidos
     if (filters?.status) {
@@ -285,9 +291,13 @@ export const getAIProducts = async (): Promise<SupabaseResponse<AIProduct[]>> =>
 // Adicionar novo contato
 export const addContact = async (contact: ContactInsert): Promise<SupabaseResponse<Contact>> => {
   try {
+    // Get the current user from the auth session
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const { data, error } = await supabase
       .from('contacts')
-      .insert(contact)
+      .insert({ ...contact, user_id: user.id })
       .select()
       .single();
 
@@ -316,10 +326,17 @@ export const addContact = async (contact: ContactInsert): Promise<SupabaseRespon
 // Atualizar contato existente
 export const updateContact = async (id: string, updates: ContactUpdate): Promise<SupabaseResponse<Contact>> => {
   try {
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
     const { data, error } = await supabase
       .from('contacts')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -348,10 +365,17 @@ export const updateContact = async (id: string, updates: ContactUpdate): Promise
 // Deletar contato
 export const deleteContact = async (id: string): Promise<SupabaseResponse<boolean>> => {
   try {
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
     const { error } = await supabase
       .from('contacts')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id);
 
     return {
       data: !error,
@@ -403,7 +427,13 @@ export const useContacts = (filters?: ContactFilters, pageSize: number = 20) => 
       setLoading(true);
       setError(null);
 
-      let query = supabase.from('contacts').select('*', { count: 'exact' });
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      let query = supabase.from('contacts').select('*', { count: 'exact' }).eq('user_id', user.id);
 
       // Aplicar filtros
       if (filters?.status) {
@@ -570,6 +600,10 @@ export const testSupabaseConnection = async (): Promise<SupabaseResponse<boolean
 // Função para popular dados de teste
 export const seedTestData = async (): Promise<SupabaseResponse<boolean>> => {
   try {
+    // Get the current user from the auth session
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     // Adicionar alguns contatos de teste
     const testContacts: ContactInsert[] = [
       {
@@ -590,7 +624,13 @@ export const seedTestData = async (): Promise<SupabaseResponse<boolean>> => {
       }
     ];
 
-    const { error } = await supabase.from('contacts').insert(testContacts);
+    // Add user_id to each contact
+    const testContactsWithUserId = testContacts.map(contact => ({
+      ...contact,
+      user_id: user.id
+    }));
+
+    const { error } = await supabase.from('contacts').insert(testContactsWithUserId);
 
     return {
       data: !error,

@@ -89,17 +89,21 @@ const fetchActiveAIPersonalitySettings = async (): Promise<AIPersonalitySettings
 
 // Create AI personality settings
 const createAIPersonalitySettings = async (settings: AIPersonalityInsert): Promise<AIPersonalitySettings> => {
+  // Get the current user from the auth session
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   // First, deactivate all existing settings if this one is active
   if (settings.is_active) {
     await supabase
       .from('ai_personality_settings')
       .update({ is_active: false })
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Update all existing records
+      .eq('user_id', user.id);
   }
 
   const { data, error } = await supabase
     .from('ai_personality_settings')
-    .insert(settings)
+    .insert({ ...settings, user_id: user.id })
     .select()
     .single();
 

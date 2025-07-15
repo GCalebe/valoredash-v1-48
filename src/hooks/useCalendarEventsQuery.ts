@@ -113,9 +113,13 @@ const fetchEventsByMonth = async (date: Date): Promise<CalendarEvent[]> => {
 
 // Criar novo evento
 const createCalendarEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at' | 'date' | 'time' | 'salesperson' | 'color'>): Promise<CalendarEvent> => {
+  // Get the current user from the auth session
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   const { data, error } = await supabase
     .from('calendar_events')
-    .insert([eventData])
+    .insert([{ ...eventData, user_id: user.id }])
     .select(`
       *,
       contacts!calendar_events_contact_id_fkey(name)

@@ -134,9 +134,13 @@ export const useCreateContactOptimized = () => {
 
   return useMutation({
     mutationFn: async (newContact: Omit<SimpleContact, 'id' | 'created_at' | 'updated_at'>) => {
+      // Get the current user from the auth session
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from('contacts')
-        .insert([newContact])
+        .insert([{ ...newContact, user_id: user.id }])
         .select()
         .single();
 
