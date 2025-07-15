@@ -111,6 +111,13 @@
 - [x] **SOLID**: Uma responsabilidade por função
 - [x] **Status**: ✅ REFATORADO - Criados 5 componentes focados + usa hook existente
 
+#### ✅ 6. AIStagesTab.tsx - 582 linhas → 198 linhas
+**Localização**: `src/components/knowledge/tabs/AIStagesTab.tsx`
+- [x] **Legibilidade**: Extraído formulário para componentes
+- [x] **Manutenibilidade**: Lógica de etapas movida para hook
+- [x] **Reutilização**: Componentes AddStageDialog/EditStageDialog
+- [x] **Status**: ✅ REFATORADO - Hook e 3 componentes criados
+
 ## 🎯 Prioridades de Refatoração
 
 ### 1. CRÍTICO - Resolver Conflitos de Tipos
