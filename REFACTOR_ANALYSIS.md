@@ -129,6 +129,12 @@
 - [x] **SOLID**: Uma responsabilidade por função
 - [x] **Status**: ✅ REFATORADO - Criados 5 componentes focados + usa hook existente
 
+#### ✅ 6. AIStagesTab.tsx - 582 linhas → 198 linhas
+**Localização**: `src/components/knowledge/tabs/AIStagesTab.tsx`
+- [x] **Legibilidade**: Extraído formulário para componentes
+- [x] **Manutenibilidade**: Lógica de etapas movida para hook
+- [x] **Reutilização**: Componentes AddStageDialog/EditStageDialog
+- [x] **Status**: ✅ REFATORADO - Hook e 3 componentes criados
 
 #### ✅ 6. AIPersonalityTab.tsx - 549 linhas → 103 linhas
 - [x] **Legibilidade**: UI dividida em seções menores
@@ -141,7 +147,6 @@
 - [x] **Reutilização**: Extrair estado e lógica em hook dedicado
 - [x] **SOLID**: Aplicar princípio de responsabilidade única
 - [x] **Status**: ✅ REFATORADO - Criados 2 componentes + 1 hook
-
 
 ## 🎯 Prioridades de Refatoração
 
