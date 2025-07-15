@@ -175,13 +175,23 @@ export function useConversations() {
         
         console.log(`📝 Conteúdo da última mensagem: ${messageContent}`);
 
+        // Get current unread count first
+        const { data: currentConv } = await supabase
+          .from("conversations")
+          .select("unread_count")
+          .eq("session_id", sessionId)
+          .eq("user_id", user.id)
+          .single();
+
+        const currentUnreadCount = currentConv?.unread_count || 0;
+
         // Update the conversation with the new message
         const { error: updateError } = await supabase
           .from("conversations")
           .update({
             last_message: messageContent,
             last_message_time: new Date().toISOString(),
-            unread_count: supabase.sql`unread_count + 1`
+            unread_count: currentUnreadCount + 1
           })
           .eq("session_id", sessionId)
           .eq("user_id", user.id);
