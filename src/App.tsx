@@ -16,6 +16,7 @@ import AIStore from "./pages/AIStore";
 import Pricing from "./pages/Pricing";
 import Subscription from "./pages/Subscription";
 import UserManagement from "./pages/UserManagement";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -46,6 +47,7 @@ const App = () => (
                   <Route path="/theme-settings" element={<ThemeSettings />} />
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/user-management" element={<UserManagement />} />
+                  <Route path="/profile" element={<Profile />} />
                   {/* Temporariamente redirecionando a loja IA para o dashboard */}
                   <Route path="/ai-store" element={<Navigate to="/dashboard" replace />} />
                   {/* Redirecionando contratos para o dashboard */}

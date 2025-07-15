@@ -16,6 +16,7 @@ import {
   User,
   LogOut,
   Star,
+  RefreshCw,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
