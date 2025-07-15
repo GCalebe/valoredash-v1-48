@@ -15,36 +15,38 @@ export interface SupabaseContact {
   name: string;
   email: string | null;
   phone: string | null;
-  address?: string;
+  address: string | null;
   client_name: string | null;
   client_size: string | null;
   client_type: string | null;
   cpf_cnpj: string | null;
   asaas_customer_id: string | null;
-  status: "Active" | "Inactive";
-  notes?: string;
-  last_contact: string;
-  kanban_stage: string;
-  last_message?: string;
-  last_message_time?: string;
-  unread_count?: number;
-  session_id?: string;
-  tags?: string[];
-  responsible_user?: string;
-  sales?: number;
-  client_sector?: string;
-  budget?: number;
-  payment_method?: string;
-  client_objective?: string;
-  loss_reason?: string;
-  contract_number?: string;
-  contract_date?: string;
-  payment?: string;
-  uploaded_files?: string[];
-  consultation_stage?: string;
-  custom_values?: any;
-  created_at?: string;
-  updated_at?: string;
+  status: string | null;
+  notes: string | null;
+  last_contact: string | null;
+  kanban_stage_id: string | null;
+  last_message: string | null;
+  last_message_time: string | null;
+  unread_count: number | null;
+  session_id: string | null;
+  tags: string[] | null;
+  responsible_user: string | null;
+  sales: number | null;
+  client_sector: string | null;
+  budget: number | null;
+  payment_method: string | null;
+  client_objective: string | null;
+  loss_reason: string | null;
+  contract_number: string | null;
+  contract_date: string | null;
+  payment: string | null;
+  uploaded_files: string[] | null;
+  consultation_stage: string | null;
+  files_metadata: any;
+  deleted_at: string | null;
+  user_id: string;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface SupabaseMetrics {
@@ -119,10 +121,7 @@ export async function getContactsFromSupabase(): Promise<SupabaseContact[]> {
       return [];
     }
 
-    return (data || []).map((contact) => ({
-      ...contact,
-      status: (contact.status as "Active" | "Inactive") || "Active",
-    }));
+    return data || [];
   } catch (error) {
     console.error("Erro na função getContactsFromSupabase:", error);
     return [];
@@ -310,7 +309,7 @@ export async function addContact(
   try {
     const { data, error } = await supabase
       .from("contacts")
-      .insert([contact])
+      .insert(contact)
       .select()
       .single();
 
