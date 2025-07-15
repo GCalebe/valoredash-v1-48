@@ -7,6 +7,8 @@ Esta pasta contém arquivos que foram identificados como "poluição" do código
 - **Scripts de verificação**: Scripts .js, .cjs, .bat para setup inicial
 - **Arquivos SQL de teste**: Scripts de verificação e inspeção
 - **Documentação duplicada**: Conteúdo da pasta docs_supabase/
+- **Backups de types.ts**: Arquivos gerados automaticamente (types.ts.backup e
+  types.ts.ai-backup) contendo versões antigas das definições de tipos do Supabase
 
 ## Status
 🔍 **Para Revisão** - Estes arquivos podem ser removidos após confirmação de que não são mais necessários para o desenvolvimento ativo.
