@@ -39,16 +39,6 @@ const EmployeesTab = () => {
     available_hours: [] as string[],
   });
 
-  const weekDays = [
-    "Segunda-feira",
-    "Terça-feira", 
-    "Quarta-feira",
-    "Quinta-feira",
-    "Sexta-feira",
-    "Sábado",
-    "Domingo"
-  ];
-
   const timeSlots = [
     "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", 
     "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"
@@ -62,14 +52,14 @@ const EmployeesTab = () => {
 
   const fetchEmployees = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("employees")
         .select("*")
         .eq("user_id", user?.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setEmployees(data || []);
+      setEmployees(data as Employee[] || []);
     } catch (error) {
       console.error("Erro ao buscar funcionários:", error);
       toast({
@@ -94,7 +84,7 @@ const EmployeesTab = () => {
 
     try {
       if (editingEmployee) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from("employees")
           .update({
             name: formData.name,
@@ -111,7 +101,7 @@ const EmployeesTab = () => {
           description: "Funcionário atualizado com sucesso!",
         });
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from("employees")
           .insert({
             name: formData.name,
@@ -158,7 +148,7 @@ const EmployeesTab = () => {
     if (!confirm("Tem certeza que deseja excluir este funcionário?")) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("employees")
         .delete()
         .eq("id", id);
