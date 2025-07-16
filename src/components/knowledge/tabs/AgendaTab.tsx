@@ -211,15 +211,116 @@ const AgendaTab = () => {
 
               {step === 3 && (
                 <>
-                  <FormField label="Horário" tooltipText={tooltipTexts.operatingHours}>
-                      <Input id="operatingHours" value={currentAgenda.operatingHours} onChange={handleInputChange} placeholder="ex: 09:00-17:00" />
-                  </FormField>
+                  {/* Datas Disponíveis Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold">Datas Disponíveis</h3>
+                      <InfoTooltip text={tooltipTexts.availableDates} />
+                    </div>
+                    <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+                      {[
+                        { name: 'Janeiro', days: 31 },
+                        { name: 'Fevereiro', days: 29 },
+                        { name: 'Março', days: 31 },
+                        { name: 'Abril', days: 30 },
+                        { name: 'Maio', days: 31 },
+                        { name: 'Junho', days: 30 },
+                        { name: 'Julho', days: 31 },
+                        { name: 'Agosto', days: 31 },
+                        { name: 'Setembro', days: 30 },
+                        { name: 'Outubro', days: 31 },
+                        { name: 'Novembro', days: 30 },
+                        { name: 'Dezembro', days: 31 }
+                      ].map((month) => (
+                        <div key={month.name} className="flex items-center gap-4">
+                          <div className="flex items-center space-x-2 w-24">
+                            <input type="checkbox" className="rounded" defaultChecked />
+                            <span className="text-sm font-medium">{month.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Select defaultValue="1">
+                              <SelectTrigger className="w-16">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (
+                                  <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <span className="text-sm text-muted-foreground">até</span>
+                            <Select defaultValue={month.days.toString()}>
+                              <SelectTrigger className="w-16">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (
+                                  <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Horário de Funcionamento Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold">Horário de Funcionamento</h3>
+                      <InfoTooltip text={tooltipTexts.operatingHours} />
+                    </div>
+                    <div className="bg-muted/30 rounded-lg p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <p className="text-sm text-muted-foreground">
+                          Nesta seção você define o horário de abertura e fechamento do seu negócio. 
+                          Caso você necessite de intervalos entre turnos (como horário de almoço, por exemplo), 
+                          você pode acrescentar faixas de horários clicando no '+'.
+                        </p>
+                        <span className="text-sm text-muted-foreground">Eastern Time - US & Canada</span>
+                      </div>
+                      <div className="space-y-3">
+                        {[
+                          'Domingo',
+                          'Segunda-Feira', 
+                          'Terça-Feira',
+                          'Quarta-Feira',
+                          'Quinta-Feira',
+                          'Sexta-Feira',
+                          'Sábado'
+                        ].map((day) => (
+                          <div key={day} className="flex items-center gap-4">
+                            <div className="flex items-center space-x-2 w-32">
+                              <input type="checkbox" className="rounded" defaultChecked />
+                              <span className="text-sm font-medium">{day}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Input 
+                                type="time" 
+                                defaultValue="08:00" 
+                                className="w-24"
+                              />
+                              <span className="text-sm text-muted-foreground">até</span>
+                              <Input 
+                                type="time" 
+                                defaultValue="17:00" 
+                                className="w-24"
+                              />
+                              <Button variant="ghost" size="sm" className="w-8 h-8 p-0 text-blue-500 hover:text-blue-600">
+                                +
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                   <FormField label="Antecedência (horas)">
                       <Input id="minNotice" type="number" value={currentAgenda.minNotice} onChange={handleInputChange} />
                   </FormField>
-                   <FormField label="Datas Disponíveis" tooltipText={tooltipTexts.availableDates}>
-                      <Input id="availableDates" onChange={handleInputChange} placeholder="ex: 2024-12-01 a 2024-12-31" />
-                  </FormField>
+
                   {currentAgenda.category === 'evento' && (
                     <FormField label="Limite de Inscrições">
                         <Input id="maxParticipants" type="number" value={currentAgenda.maxParticipants || ''} onChange={handleInputChange} />
