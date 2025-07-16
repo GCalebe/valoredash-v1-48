@@ -84,22 +84,22 @@ const InfoTooltip = ({ text }: { text: string }) => (
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger asChild>
-        <Info className="h-4 w-4 text-gray-500 cursor-pointer ml-2" />
+        <Info className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
       </TooltipTrigger>
-      <TooltipContent>
-        <p className="max-w-xs">{text}</p>
+      <TooltipContent className="max-w-sm p-3">
+        <p className="text-sm leading-relaxed">{text}</p>
       </TooltipContent>
     </Tooltip>
   </TooltipProvider>
 );
 
 const FormField = ({ label, tooltipText, children }: { label: string, tooltipText?: string, children: React.ReactNode }) => (
-    <div className="grid grid-cols-4 items-center gap-4">
-        <div className="flex items-center justify-end text-right">
-            <Label>{label}</Label>
+    <div className="space-y-3">
+        <div className="flex items-center gap-2">
+            <Label className="text-base font-semibold text-foreground">{label}</Label>
             {tooltipText && <InfoTooltip text={tooltipText} />}
         </div>
-        <div className="col-span-3">{children}</div>
+        <div className="w-full">{children}</div>
     </div>
 );
 
@@ -137,22 +137,39 @@ const AgendaTab = () => {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Controle de Agenda</h2>
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-foreground">Controle de Agenda</h2>
+          <p className="text-lg text-muted-foreground mt-1">Gerencie suas agendas e horários de atendimento</p>
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openDialog}>Criar Nova Agenda</Button>
+            <Button onClick={openDialog} size="lg" className="font-semibold">
+              Criar Nova Agenda
+            </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Nova Agenda - Etapa {step} de 3</DialogTitle>
-              <DialogDescription>
-                Preencha os detalhes para criar uma nova agenda.
+          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="space-y-4 pb-6">
+              <div>
+                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de 3</DialogTitle>
+                <div className="flex gap-2 mt-3">
+                  {[1, 2, 3].map((stepNumber) => (
+                    <div
+                      key={stepNumber}
+                      className={`h-2 flex-1 rounded-full transition-colors ${
+                        stepNumber <= step ? 'bg-primary' : 'bg-muted'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <DialogDescription className="text-base text-muted-foreground">
+                Preencha os detalhes para criar uma nova agenda de atendimento.
               </DialogDescription>
             </DialogHeader>
             
-            <div className="grid gap-4 py-4">
+            <div className="space-y-6 py-4">
               {step === 1 && (
                 <>
                   <FormField label="Título" tooltipText={tooltipTexts.title}>
@@ -227,31 +244,40 @@ const AgendaTab = () => {
       </div>
 
       {agendas.length === 0 ? (
-        <div className="border rounded-lg p-4 text-center">
-          <p className="text-gray-500 dark:text-gray-400">Nenhuma agenda criada ainda. Clique em "Criar Nova Agenda" para começar.</p>
+        <div className="border-2 border-dashed border-muted rounded-xl p-12 text-center bg-muted/20">
+          <p className="text-lg text-muted-foreground">Nenhuma agenda criada ainda.</p>
+          <p className="text-base text-muted-foreground mt-2">Clique em "Criar Nova Agenda" para começar.</p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {agendas.map((agenda) => (
-            <Card key={agenda.id}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>{agenda.title}</CardTitle>
-                    <CardDescription>{agenda.host}</CardDescription>
+            <Card key={agenda.id} className="hover:shadow-lg transition-shadow duration-200">
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1">
+                    <CardTitle className="text-xl font-bold text-foreground">{agenda.title}</CardTitle>
+                    <CardDescription className="text-base text-muted-foreground mt-1">{agenda.host}</CardDescription>
                   </div>
-                  <Badge variant="secondary">{agenda.category}</Badge>
+                  <Badge variant="secondary" className="text-sm px-3 py-1 font-medium">{agenda.category}</Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">{agenda.description}</p>
-                <div className="flex items-center mt-4 text-sm">
-                  <span className="mr-4">Dur: {agenda.duration} min</span>
-                  <span>Intervalo: {agenda.breakTime} min</span>
+              <CardContent className="pt-0">
+                <p className="text-base text-muted-foreground leading-relaxed">{agenda.description}</p>
+                <div className="flex items-center gap-6 mt-6 text-sm font-medium text-foreground">
+                  <span className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Duração:</span>
+                    {agenda.duration} min
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Intervalo:</span>
+                    {agenda.breakTime} min
+                  </span>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end">
-                <Button variant="outline" size="sm">Editar</Button>
+              <CardFooter className="pt-4">
+                <Button variant="outline" size="default" className="w-full font-semibold">
+                  Editar Agenda
+                </Button>
               </CardFooter>
             </Card>
           ))}
