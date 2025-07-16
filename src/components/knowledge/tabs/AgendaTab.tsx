@@ -28,6 +28,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
+import { Info } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type AgendaCategory = 'consulta' | 'evento' | 'classes' | 'recorrente' | '';
 
@@ -63,10 +70,44 @@ const initialAgendaState: Omit<Agenda, 'id'> = {
   minNotice: 24,
 };
 
+const tooltipTexts = {
+  title: "O titulo da agenda que será visivel para seus cliente",
+  host: "Anfitriões são as pessoas responsáveis pela organização, execução e atendimento do agendamento. Por exemplo, se você estiver criando um calendário para uma clínica odontológica, o anfitrião será o dentista.",
+  availabilityInterval: "Com esse recurso, você pode definir os intervalos de tempo que podem ser agendados, quanto menor o tempo, maior a quantidade de horários disponíveis. ex: o cliente pode marcar a cada 30 minutos.",
+  duration: "A duração da sessão determina a duração de cada agendamento. Por exemplo, se você é cabeleireiro, é aqui que você determina quanto tempo leva para cortar o cabelo.",
+  breakTime: "Defina um intervalo de tempo livre entre seus agendamentos. Você pode utilizar esse intervalo para descansar, se planejar.",
+  operatingHours: "Especifique quais dias e horários da semana estarão disponíveis. O horário de abertura e fechamento do seu negócio.",
+  availableDates: "Especifique quais meses e o intervalo de datas que estar�� com essa agenda disponível.",
+};
+
+const InfoTooltip = ({ text }: { text: string }) => (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Info className="h-4 w-4 text-gray-500 cursor-pointer ml-2" />
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className="max-w-xs">{text}</p>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
+
+const FormField = ({ label, tooltipText, children }: { label: string, tooltipText?: string, children: React.ReactNode }) => (
+    <div className="grid grid-cols-4 items-center gap-4">
+        <div className="flex items-center justify-end text-right">
+            <Label>{label}</Label>
+            {tooltipText && <InfoTooltip text={tooltipText} />}
+        </div>
+        <div className="col-span-3">{children}</div>
+    </div>
+);
+
 const AgendaTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [agendas, setAgendas] = useState<Agenda[]>(mockAgendas);
   const [currentAgenda, setCurrentAgenda] = useState<Omit<Agenda, 'id'>>(initialAgendaState);
+  const [step, setStep] = useState(1);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -86,7 +127,14 @@ const AgendaTab = () => {
     setAgendas(prev => [...prev, { ...currentAgenda, id: Math.random() }]);
     setIsDialogOpen(false);
     setCurrentAgenda(initialAgendaState);
+    setStep(1);
   };
+  
+  const openDialog = () => {
+    setCurrentAgenda(initialAgendaState);
+    setStep(1);
+    setIsDialogOpen(true);
+  }
 
   return (
     <div>
@@ -94,70 +142,85 @@ const AgendaTab = () => {
         <h2 className="text-2xl font-bold">Controle de Agenda</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setCurrentAgenda(initialAgendaState)}>Criar Nova Agenda</Button>
+            <Button onClick={openDialog}>Criar Nova Agenda</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Nova Agenda</DialogTitle>
+              <DialogTitle>Nova Agenda - Etapa {step} de 3</DialogTitle>
               <DialogDescription>
                 Preencha os detalhes para criar uma nova agenda.
               </DialogDescription>
             </DialogHeader>
+            
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="title" className="text-right">Título</Label>
-                <Input id="title" value={currentAgenda.title} onChange={handleInputChange} className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="description" className="text-right">Descrição</Label>
-                <Textarea id="description" value={currentAgenda.description} onChange={handleInputChange} className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="category" className="text-right">Categoria</Label>
-                <Select onValueChange={handleSelectChange} value={currentAgenda.category}>
-                  <SelectTrigger className="col-span-3"><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="consulta">Consulta</SelectItem>
-                    <SelectItem value="evento">Evento</SelectItem>
-                    <SelectItem value="classes">Classes</SelectItem>
-                    <SelectItem value="recorrente">Recorrente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="host" className="text-right">Anfitrião</Label>
-                <Input id="host" value={currentAgenda.host} onChange={handleInputChange} className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="duration" className="text-right">Duração (min)</Label>
-                <Input id="duration" type="number" value={currentAgenda.duration} onChange={handleInputChange} className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="breakTime" className="text-right">Intervalo (min)</Label>
-                <Input id="breakTime" type="number" value={currentAgenda.breakTime} onChange={handleInputChange} className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="availabilityInterval" className="text-right">Incremento (min)</Label>
-                <Input id="availabilityInterval" type="number" value={currentAgenda.availabilityInterval} onChange={handleInputChange} className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="operatingHours" className="text-right">Horário</Label>
-                <Input id="operatingHours" value={currentAgenda.operatingHours} onChange={handleInputChange} className="col-span-3" placeholder="ex: 09:00-17:00" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="minNotice" className="text-right">Antecedência (horas)</Label>
-                <Input id="minNotice" type="number" value={currentAgenda.minNotice} onChange={handleInputChange} className="col-span-3" />
-              </div>
-              {currentAgenda.category === 'evento' && (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="maxParticipants" className="text-right">Limite de Inscrições</Label>
-                  <Input id="maxParticipants" type="number" value={currentAgenda.maxParticipants || ''} onChange={handleInputChange} className="col-span-3" />
-                </div>
+              {step === 1 && (
+                <>
+                  <FormField label="Título" tooltipText={tooltipTexts.title}>
+                      <Input id="title" value={currentAgenda.title} onChange={handleInputChange} />
+                  </FormField>
+                  <FormField label="Descrição">
+                      <Textarea id="description" value={currentAgenda.description} onChange={handleInputChange} />
+                  </FormField>
+                  <FormField label="Categoria">
+                      <Select onValueChange={handleSelectChange} value={currentAgenda.category}>
+                          <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="consulta">Consulta</SelectItem>
+                              <SelectItem value="evento">Evento</SelectItem>
+                              <SelectItem value="classes">Classes</SelectItem>
+                              <SelectItem value="recorrente">Recorrente</SelectItem>
+                          </SelectContent>
+                      </Select>
+                  </FormField>
+                  <FormField label="Anfitrião" tooltipText={tooltipTexts.host}>
+                      <Input id="host" value={currentAgenda.host} onChange={handleInputChange} />
+                  </FormField>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <FormField label="Duração (min)" tooltipText={tooltipTexts.duration}>
+                      <Input id="duration" type="number" value={currentAgenda.duration} onChange={handleInputChange} />
+                  </FormField>
+                  <FormField label="Intervalo (min)" tooltipText={tooltipTexts.breakTime}>
+                      <Input id="breakTime" type="number" value={currentAgenda.breakTime} onChange={handleInputChange} />
+                  </FormField>
+                  <FormField label="Incremento (min)" tooltipText={tooltipTexts.availabilityInterval}>
+                      <Input id="availabilityInterval" type="number" value={currentAgenda.availabilityInterval} onChange={handleInputChange} />
+                  </FormField>
+                </>
+              )}
+
+              {step === 3 && (
+                <>
+                  <FormField label="Horário" tooltipText={tooltipTexts.operatingHours}>
+                      <Input id="operatingHours" value={currentAgenda.operatingHours} onChange={handleInputChange} placeholder="ex: 09:00-17:00" />
+                  </FormField>
+                  <FormField label="Antecedência (horas)">
+                      <Input id="minNotice" type="number" value={currentAgenda.minNotice} onChange={handleInputChange} />
+                  </FormField>
+                   <FormField label="Datas Disponíveis" tooltipText={tooltipTexts.availableDates}>
+                      <Input id="availableDates" onChange={handleInputChange} placeholder="ex: 2024-12-01 a 2024-12-31" />
+                  </FormField>
+                  {currentAgenda.category === 'evento' && (
+                    <FormField label="Limite de Inscrições">
+                        <Input id="maxParticipants" type="number" value={currentAgenda.maxParticipants || ''} onChange={handleInputChange} />
+                    </FormField>
+                  )}
+                </>
               )}
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" onClick={handleSave}>Salvar</Button>
+
+            <DialogFooter className="flex justify-between w-full">
+                <div>
+                    {step > 1 && <Button variant="outline" onClick={() => setStep(s => s - 1)}>Voltar</Button>}
+                </div>
+                <div className="flex gap-2">
+                    <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+                    {step < 3 && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
+                    {step === 3 && <Button onClick={handleSave}>Salvar</Button>}
+                </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
