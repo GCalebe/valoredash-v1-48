@@ -13,7 +13,7 @@ import { useAIProductsQuery } from "@/hooks/useAIProductsQuery";
 import ProductsTab from "@/components/knowledge/tabs/ProductsTab";
 import EmployeesTab from "@/components/knowledge/tabs/EmployeesTab";
 import FAQTab from "@/components/knowledge/tabs/FAQTab";
-import DocumentsTab from "@/components/knowledge/tabs/DocumentsTab";
+import AgendaTab from "@/components/knowledge/tabs/AgendaTab";
 import AIPersonalityTab from "@/components/knowledge/tabs/AIPersonalityTab";
 // import AIStagesTab from "@/components/knowledge/tabs/AIStagesTab";
 import AIMessagesTab from "@/components/knowledge/tabs/AIMessagesTab";
@@ -153,8 +153,8 @@ const KnowledgeManager = () => {
               <TabsTrigger value="faq" className="text-sm">
                 FAQ
               </TabsTrigger>
-              <TabsTrigger value="documents-tab" className="text-sm">
-                Documentos
+              <TabsTrigger value="agenda" className="text-sm">
+                Agenda
               </TabsTrigger>
               <TabsTrigger value="ai-personality" className="text-sm">
                 Personalidade
@@ -183,8 +183,8 @@ const KnowledgeManager = () => {
                 <FAQTab />
               </TabsContent>
 
-              <TabsContent value="documents-tab" className="mt-0">
-                <DocumentsTab />
+              <TabsContent value="agenda" className="mt-0">
+                <AgendaTab />
               </TabsContent>
 
               <TabsContent value="ai-personality" className="mt-0">
