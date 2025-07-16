@@ -18,8 +18,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
-import DaySelector from "./DaySelector";
-import ProductSelector from "./ProductSelector";
 
 type Employee = Database['public']['Tables']['employees']['Row'];
 type EmployeeService = Database['public']['Tables']['employee_services']['Row'];
@@ -34,18 +32,8 @@ const EmployeesTab = () => {
     name: "",
     role: "",
     description: "",
-    available_hours: [] as string[],
-    available_days: [] as string[],
-    selectedProducts: [] as Array<{
-      product_id: string;
-      available_days: string[];
-    }>,
   });
 
-  const timeSlots = [
-    "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", 
-    "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"
-  ];
 
   useEffect(() => {
     if (user) {
@@ -111,19 +99,12 @@ const EmployeesTab = () => {
             name: formData.name,
             role: formData.role,
             description: formData.description,
-            available_hours: formData.available_hours,
-            available_days: formData.available_days,
           })
           .eq("id", editingEmployee.id);
 
         if (error) throw error;
         employeeId = editingEmployee.id;
 
-        // Delete existing employee services
-        await supabase
-          .from("employee_services")
-          .delete()
-          .eq("employee_id", employeeId);
         
         toast({
           title: "Sucesso",
@@ -137,8 +118,6 @@ const EmployeesTab = () => {
             name: formData.name,
             role: formData.role,
             description: formData.description,
-            available_hours: formData.available_hours,
-            available_days: formData.available_days,
             user_id: user?.id,
           })
           .select()
@@ -153,21 +132,6 @@ const EmployeesTab = () => {
         });
       }
 
-      // Insert employee services
-      if (formData.selectedProducts.length > 0) {
-        const serviceInserts = formData.selectedProducts.map(product => ({
-          employee_id: employeeId,
-          product_id: product.product_id,
-          available_days: product.available_days,
-          user_id: user?.id,
-        }));
-
-        const { error: servicesError } = await supabase
-          .from("employee_services")
-          .insert(serviceInserts);
-
-        if (servicesError) throw servicesError;
-      }
 
       resetForm();
       setIsDialogOpen(false);
@@ -186,24 +150,10 @@ const EmployeesTab = () => {
   const handleEdit = async (employee: Employee) => {
     setEditingEmployee(employee);
     
-    // Fetch employee services
-    const { data: services } = await supabase
-      .from("employee_services")
-      .select("*")
-      .eq("employee_id", employee.id);
-
-    const selectedProducts = services?.map(service => ({
-      product_id: service.product_id,
-      available_days: service.available_days || [],
-    })) || [];
-
     setFormData({
       name: employee.name,
       role: employee.role,
       description: employee.description || "",
-      available_hours: employee.available_hours || [],
-      available_days: employee.available_days || [],
-      selectedProducts,
     });
     setIsDialogOpen(true);
   };
@@ -236,23 +186,12 @@ const EmployeesTab = () => {
     }
   };
 
-  const toggleAvailableHour = (hour: string) => {
-    setFormData(prev => ({
-      ...prev,
-      available_hours: prev.available_hours.includes(hour)
-        ? prev.available_hours.filter(h => h !== hour)
-        : [...prev.available_hours, hour]
-    }));
-  };
 
   const resetForm = () => {
     setFormData({ 
       name: "", 
       role: "", 
-      description: "", 
-      available_hours: [], 
-      available_days: [],
-      selectedProducts: []
+      description: ""
     });
     setEditingEmployee(null);
   };
@@ -325,34 +264,6 @@ const EmployeesTab = () => {
                 />
               </div>
 
-              <DaySelector
-                selectedDays={formData.available_days}
-                onSelectionChange={(days) => setFormData(prev => ({ ...prev, available_days: days }))}
-                label="Dias da Semana Disponíveis"
-              />
-
-              <div className="space-y-2">
-                <Label>Horários Disponíveis</Label>
-                <div className="grid grid-cols-4 gap-2">
-                  {timeSlots.map((hour) => (
-                    <Button
-                      key={hour}
-                      type="button"
-                      variant={formData.available_hours.includes(hour) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => toggleAvailableHour(hour)}
-                      className="text-xs"
-                    >
-                      {hour}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <ProductSelector
-                selectedProducts={formData.selectedProducts}
-                onSelectionChange={(products) => setFormData(prev => ({ ...prev, selectedProducts: products }))}
-              />
 
               <div className="flex justify-end gap-2 pt-4">
                 <Button
