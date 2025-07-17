@@ -24,7 +24,7 @@ const KnowledgeManager = () => {
   const { settings } = useThemeSettings();
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("documents");
+  const [activeTab, setActiveTab] = useState("agenda");
   const [selectedAIProduct, setSelectedAIProduct] = useState<string | null>(null);
   const { data: aiProducts = [] } = useAIProductsQuery();
 
@@ -144,6 +144,9 @@ const KnowledgeManager = () => {
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-7 lg:grid-cols-7 bg-gray-100 dark:bg-gray-700 p-1 rounded-t-lg">
+              <TabsTrigger value="agenda" className="text-sm">
+                Agenda
+              </TabsTrigger>
               <TabsTrigger value="documents" className="text-sm">
                 Produtos
               </TabsTrigger>
@@ -152,9 +155,6 @@ const KnowledgeManager = () => {
               </TabsTrigger>
               <TabsTrigger value="faq" className="text-sm">
                 FAQ
-              </TabsTrigger>
-              <TabsTrigger value="agenda" className="text-sm">
-                Agenda
               </TabsTrigger>
               <TabsTrigger value="ai-personality" className="text-sm">
                 Personalidade
@@ -171,6 +171,10 @@ const KnowledgeManager = () => {
             </TabsList>
 
             <div className="p-6">
+              <TabsContent value="agenda" className="mt-0">
+                <AgendaTab />
+              </TabsContent>
+
               <TabsContent value="documents" className="mt-0">
                 <ProductsTab />
               </TabsContent>
@@ -181,10 +185,6 @@ const KnowledgeManager = () => {
 
               <TabsContent value="faq" className="mt-0">
                 <FAQTab />
-              </TabsContent>
-
-              <TabsContent value="agenda" className="mt-0">
-                <AgendaTab />
               </TabsContent>
 
               <TabsContent value="ai-personality" className="mt-0">
