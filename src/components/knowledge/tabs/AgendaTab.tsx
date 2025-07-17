@@ -28,13 +28,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
-import { Info, Bell, Calendar } from 'lucide-react';
+import { Info, Edit, Trash2 } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+
 
 type AgendaCategory = 'consulta' | 'evento' | 'classes' | 'recorrente' | '';
 
@@ -66,54 +69,53 @@ type Agenda = {
 };
 
 const mockAgendas: Agenda[] = [
-  { 
-    id: 1, 
-    title: "Consulta de Terapia", 
-    description: "Sessão individual de terapia.", 
-    category: "consulta", 
-    host: "Dr. Freud", 
-    duration: 50, 
-    breakTime: 10, 
-    availabilityInterval: 15, 
-    operatingHours: "09:00-18:00", 
-    minNotice: 24, 
-    actionAfterRegistration: 'success_message', 
+  {
+    id: 1,
+    title: "Consulta de Terapia",
+    description: "Sessão individual de terapia para bem-estar mental.",
+    category: "consulta",
+    host: "Dr. Freud",
+    duration: 50,
+    breakTime: 10,
+    availabilityInterval: 15,
+    operatingHours: "09:00-18:00",
+    minNotice: 24,
+    actionAfterRegistration: 'success_message',
     successMessage: 'Obrigado por agendar sua consulta!',
     sendReminders: false,
     reminders: []
   },
-  { 
-    id: 2, 
-    title: "Webinar de Marketing", 
-    description: "Aprenda as novas estratégias de marketing digital.", 
-    category: "evento", 
-    host: "Neil Patel", 
-    duration: 90, 
-    breakTime: 0, 
-    availabilityInterval: 30, 
-    operatingHours: "19:00-21:00", 
-    minNotice: 48, 
-    maxParticipants: 100, 
-    actionAfterRegistration: 'redirect_url', 
+  {
+    id: 2,
+    title: "Webinar de Marketing",
+    description: "Aprenda as novas estratégias de marketing digital com especialistas.",
+    category: "evento",
+    host: "Neil Patel",
+    duration: 90,
+    breakTime: 0,
+    availabilityInterval: 30,
+    operatingHours: "19:00-21:00",
+    minNotice: 48,
+    maxParticipants: 100,
+    actionAfterRegistration: 'redirect_url',
     redirectUrl: 'https://example.com/webinar',
     sendReminders: true,
     reminders: [
-      { id: 1, when: "0 Dia(s) 1 Hora(s) 0 Minuto(s) antes", subject: "1 hora para a reunião...", sendTo: "inscrito", channel: "email" },
-      { id: 2, when: "0 Dia(s) 1 Hora(s) 0 Minuto(s) antes", subject: "1 hora para a reunião...", sendTo: "anfitriao", channel: "email" }
+      { id: 1, when: "0 Dia(s) 1 Hora(s) 0 Minuto(s) antes", subject: "1 hora para a reunião...", sendTo: "inscrito", channel: "email" }
     ]
   },
-  { 
-    id: 3, 
-    title: "Aula de Yoga", 
-    description: "Yoga para iniciantes.", 
-    category: "classes", 
-    host: "Adriene Mishler", 
-    duration: 60, 
-    breakTime: 0, 
-    availabilityInterval: 60, 
-    operatingHours: "08:00-12:00", 
-    minNotice: 12, 
-    actionAfterRegistration: 'success_message', 
+  {
+    id: 3,
+    title: "Aula de Yoga",
+    description: "Yoga para iniciantes, focando em postura e respiração.",
+    category: "classes",
+    host: "Adriene Mishler",
+    duration: 60,
+    breakTime: 0,
+    availabilityInterval: 60,
+    operatingHours: "08:00-12:00",
+    minNotice: 12,
+    actionAfterRegistration: 'success_message',
     successMessage: 'Obrigado por se inscrever na aula!',
     sendReminders: false,
     reminders: []
@@ -153,8 +155,8 @@ const InfoTooltip = ({ text }: { text: string }) => (
       <TooltipTrigger asChild>
         <Info className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
       </TooltipTrigger>
-      <TooltipContent className="max-w-sm p-3">
-        <p className="text-sm leading-relaxed">{text}</p>
+      <TooltipContent className="max-w-sm p-3 bg-background border">
+        <p className="text-sm leading-relaxed text-foreground">{text}</p>
       </TooltipContent>
     </Tooltip>
   </TooltipProvider>
@@ -189,6 +191,10 @@ const AgendaTab = () => {
   const handleSelectChange = (value: AgendaCategory) => {
     setCurrentAgenda((prev) => ({ ...prev, category: value }));
   };
+  
+  const handleSwitchChange = (checked: boolean) => {
+    setCurrentAgenda(prev => ({ ...prev, sendReminders: checked }));
+  };
 
   const handleSave = () => {
     setAgendas(prev => [...prev, { ...currentAgenda, id: Math.random() }]);
@@ -216,7 +222,7 @@ const AgendaTab = () => {
               Criar Nova Agenda
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto bg-background border">
             <DialogHeader className="space-y-4 pb-6">
               <div>
                 <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de 5</DialogTitle>
@@ -278,7 +284,6 @@ const AgendaTab = () => {
 
               {step === 3 && (
                 <>
-                  {/* Datas Disponíveis Section */}
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <h3 className="text-lg font-semibold">Datas Disponíveis</h3>
@@ -286,104 +291,45 @@ const AgendaTab = () => {
                     </div>
                     <div className="bg-muted/30 rounded-lg p-4 space-y-3">
                       {[
-                        { name: 'Janeiro', days: 31 },
-                        { name: 'Fevereiro', days: 29 },
-                        { name: 'Março', days: 31 },
-                        { name: 'Abril', days: 30 },
-                        { name: 'Maio', days: 31 },
-                        { name: 'Junho', days: 30 },
-                        { name: 'Julho', days: 31 },
-                        { name: 'Agosto', days: 31 },
-                        { name: 'Setembro', days: 30 },
-                        { name: 'Outubro', days: 31 },
-                        { name: 'Novembro', days: 30 },
-                        { name: 'Dezembro', days: 31 }
+                        { name: 'Janeiro', days: 31 }, { name: 'Fevereiro', days: 29 }, { name: 'Março', days: 31 },
+                        { name: 'Abril', days: 30 }, { name: 'Maio', days: 31 }, { name: 'Junho', days: 30 },
+                        { name: 'Julho', days: 31 }, { name: 'Agosto', days: 31 }, { name: 'Setembro', days: 30 },
+                        { name: 'Outubro', days: 31 }, { name: 'Novembro', days: 30 }, { name: 'Dezembro', days: 31 }
                       ].map((month) => (
                         <div key={month.name} className="flex items-center gap-4">
-                          <div className="flex items-center space-x-2 w-24">
-                            <input 
-                              type="checkbox" 
-                              className="w-4 h-4 text-primary bg-background border-2 border-border rounded focus:ring-2 focus:ring-primary checked:bg-primary checked:border-primary" 
-                              defaultChecked 
-                            />
-                            <span className="text-sm font-medium text-foreground">{month.name}</span>
+                          <div className="flex items-center space-x-3 w-28">
+                            <Checkbox defaultChecked id={`month-${month.name}`} />
+                            <Label htmlFor={`month-${month.name}`} className="text-sm font-medium text-foreground cursor-pointer">{month.name}</Label>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Select defaultValue="1">
-                              <SelectTrigger className="w-16">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (
-                                  <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Select defaultValue="1"><SelectTrigger className="w-16"><SelectValue /></SelectTrigger><SelectContent>{Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (<SelectItem key={day} value={day.toString()}>{day}</SelectItem>))}</SelectContent></Select>
                             <span className="text-sm text-muted-foreground">até</span>
-                            <Select defaultValue={month.days.toString()}>
-                              <SelectTrigger className="w-16">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (
-                                  <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Select defaultValue={month.days.toString()}><SelectTrigger className="w-16"><SelectValue /></SelectTrigger><SelectContent>{Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (<SelectItem key={day} value={day.toString()}>{day}</SelectItem>))}</SelectContent></Select>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Horário de Funcionamento Section */}
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <h3 className="text-lg font-semibold">Horário de Funcionamento</h3>
                       <InfoTooltip text={tooltipTexts.operatingHours} />
                     </div>
                     <div className="bg-muted/30 rounded-lg p-4">
-                      <div className="flex justify-between items-center mb-4">
-                        <p className="text-sm text-muted-foreground">
-                          Nesta seção você define o horário de abertura e fechamento do seu negócio. 
-                          Caso você necessite de intervalos entre turnos (como horário de almoço, por exemplo), 
-                          você pode acrescentar faixas de horários clicando no '+'.
-                        </p>
-                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">Defina o horário de abertura e fechamento. Para intervalos (como almoço), clique no '+' para adicionar mais faixas de horário.</p>
                       <div className="space-y-3">
-                        {[
-                          'Domingo',
-                          'Segunda-Feira', 
-                          'Terça-Feira',
-                          'Quarta-Feira',
-                          'Quinta-Feira',
-                          'Sexta-Feira',
-                          'Sábado'
-                        ].map((day) => (
+                        {['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'].map((day) => (
                           <div key={day} className="flex items-center gap-4">
-                            <div className="flex items-center space-x-2 w-32">
-                              <input 
-                                type="checkbox" 
-                                className="w-4 h-4 text-primary bg-background border-2 border-border rounded focus:ring-2 focus:ring-primary checked:bg-primary checked:border-primary" 
-                                defaultChecked 
-                              />
-                              <span className="text-sm font-medium text-foreground">{day}</span>
+                            <div className="flex items-center space-x-3 w-36">
+                              <Checkbox defaultChecked id={`day-${day}`} />
+                              <Label htmlFor={`day-${day}`} className="text-sm font-medium text-foreground cursor-pointer">{day}</Label>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Input 
-                                type="time" 
-                                defaultValue="08:00" 
-                                className="w-24"
-                              />
+                              <Input type="time" defaultValue="08:00" className="w-24" />
                               <span className="text-sm text-muted-foreground">até</span>
-                              <Input 
-                                type="time" 
-                                defaultValue="17:00" 
-                                className="w-24"
-                              />
-                              <Button variant="ghost" size="sm" className="w-8 h-8 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold">
-                                +
-                              </Button>
+                              <Input type="time" defaultValue="17:00" className="w-24" />
+                              <Button variant="ghost" size="icon" className="w-8 h-8 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold">+</Button>
                             </div>
                           </div>
                         ))}
@@ -391,295 +337,68 @@ const AgendaTab = () => {
                     </div>
                   </div>
 
-                  <FormField label="Antecedência (horas)">
-                      <Input id="minNotice" type="number" value={currentAgenda.minNotice} onChange={handleInputChange} />
-                  </FormField>
-
-                  {currentAgenda.category === 'evento' && (
-                    <FormField label="Limite de Inscrições">
-                        <Input id="maxParticipants" type="number" value={currentAgenda.maxParticipants || ''} onChange={handleInputChange} />
-                    </FormField>
-                  )}
+                  <FormField label="Antecedência (horas)"><Input id="minNotice" type="number" value={currentAgenda.minNotice} onChange={handleInputChange} /></FormField>
+                  {currentAgenda.category === 'evento' && (<FormField label="Limite de Inscrições"><Input id="maxParticipants" type="number" value={currentAgenda.maxParticipants || ''} onChange={handleInputChange} /></FormField>)}
                 </>
               )}
 
               {step === 4 && (
-                <>
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">Ação após a inscrição</h3>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex gap-4">
-                        {/* Exibir mensagem de sucesso */}
-                        <div 
-                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                            currentAgenda.actionAfterRegistration === 'success_message' 
-                              ? 'border-primary' 
-                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
-                          }`}
-                          onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'success_message' }))}
-                        >
-                          <div className="text-center space-y-2">
-                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
-                              currentAgenda.actionAfterRegistration === 'success_message' 
-                                ? 'bg-primary' 
-                                : 'bg-muted'
-                            }`}>
-                              {currentAgenda.actionAfterRegistration === 'success_message' && (
-                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                                  <span className="text-primary text-sm">✓</span>
-                                </div>
-                              )}
-                              <div className={`w-8 h-8 rounded flex items-center justify-center ${
-                                currentAgenda.actionAfterRegistration === 'success_message' 
-                                  ? 'bg-white text-primary' 
-                                  : 'bg-muted-foreground/20 text-muted-foreground'
-                              }`}>
-                                💬
-                              </div>
-                            </div>
-                            <h4 className={`font-semibold ${
-                              currentAgenda.actionAfterRegistration === 'success_message' 
-                                ? 'text-foreground' 
-                                : 'text-foreground'
-                            }`}>Exibir mensagem de sucesso</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Após realizar o agendamento, seu cliente verá uma mensagem escrita por você.
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Redirecionar para URL */}
-                        <div 
-                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                            currentAgenda.actionAfterRegistration === 'redirect_url' 
-                              ? 'border-primary' 
-                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
-                          }`}
-                          onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'redirect_url' }))}
-                        >
-                          <div className="text-center space-y-2">
-                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
-                              currentAgenda.actionAfterRegistration === 'redirect_url' 
-                                ? 'bg-primary' 
-                                : 'bg-muted'
-                            }`}>
-                              {currentAgenda.actionAfterRegistration === 'redirect_url' && (
-                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                                  <span className="text-primary text-sm">✓</span>
-                                </div>
-                              )}
-                              <div className={`w-8 h-8 rounded flex items-center justify-center ${
-                                currentAgenda.actionAfterRegistration === 'redirect_url' 
-                                  ? 'bg-white text-primary' 
-                                  : 'bg-muted-foreground/20 text-muted-foreground'
-                              }`}>
-                                🌐
-                              </div>
-                            </div>
-                            <h4 className={`font-semibold ${
-                              currentAgenda.actionAfterRegistration === 'redirect_url' 
-                                ? 'text-foreground' 
-                                : 'text-foreground'
-                            }`}>Redirecionar para URL</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Após realizar o agendamento, o cliente será redirecionado para sua URL ou Site.
-                            </p>
-                          </div>
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold">Ação após a inscrição</h3>
+                  <div className="space-y-4">
+                    <div className="flex gap-4">
+                      <div className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${currentAgenda.actionAfterRegistration === 'success_message' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/60'}`} onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'success_message' }))}>
+                        <div className="text-center space-y-2">
+                          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${currentAgenda.actionAfterRegistration === 'success_message' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}><span className="text-2xl">💬</span></div>
+                          <h4 className="font-semibold text-foreground">Exibir mensagem de sucesso</h4>
+                          <p className="text-sm text-muted-foreground">Seu cliente verá uma mensagem de confirmação.</p>
                         </div>
                       </div>
-                      
-                      {/* Conditional input based on selection */}
-                      {currentAgenda.actionAfterRegistration === 'success_message' && (
-                        <div className="space-y-2">
-                          <Label className="text-base font-semibold text-foreground">
-                            Mensagem de sucesso <span className="text-red-500">*</span>
-                          </Label>
-                          <div className="relative">
-                            <Textarea 
-                              id="successMessage"
-                              value={currentAgenda.successMessage || ''}
-                              onChange={handleInputChange}
-                              placeholder="Obrigado por se inscrever!"
-                              className="resize-none"
-                              maxLength={255}
-                            />
-                            <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
-                              {(currentAgenda.successMessage || '').length}/255
-                            </div>
-                          </div>
+                      <div className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${currentAgenda.actionAfterRegistration === 'redirect_url' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/60'}`} onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'redirect_url' }))}>
+                        <div className="text-center space-y-2">
+                          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${currentAgenda.actionAfterRegistration === 'redirect_url' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}><span className="text-2xl">🌐</span></div>
+                          <h4 className="font-semibold text-foreground">Redirecionar para URL</h4>
+                          <p className="text-sm text-muted-foreground">O cliente será redirecionado para um site externo.</p>
                         </div>
-                      )}
-                      
-                      {currentAgenda.actionAfterRegistration === 'redirect_url' && (
-                        <div className="space-y-2">
-                          <Label className="text-base font-semibold text-foreground">
-                            URL de redirecionamento <span className="text-red-500">*</span>
-                          </Label>
-                          <Input 
-                            id="redirectUrl"
-                            value={currentAgenda.redirectUrl || ''}
-                            onChange={handleInputChange}
-                            placeholder="https://example.com"
-                            type="url"
-                          />
-                        </div>
-                      )}
+                      </div>
                     </div>
+                    {currentAgenda.actionAfterRegistration === 'success_message' && (<div className="space-y-2"><Label className="text-base font-semibold text-foreground">Mensagem de sucesso <span className="text-red-500">*</span></Label><div className="relative"><Textarea id="successMessage" value={currentAgenda.successMessage || ''} onChange={handleInputChange} placeholder="Obrigado por se inscrever!" className="resize-none" maxLength={255} /><div className="absolute bottom-2 right-2 text-xs text-muted-foreground">{(currentAgenda.successMessage || '').length}/255</div></div></div>)}
+                    {currentAgenda.actionAfterRegistration === 'redirect_url' && (<div className="space-y-2"><Label className="text-base font-semibold text-foreground">URL de redirecionamento <span className="text-red-500">*</span></Label><Input id="redirectUrl" value={currentAgenda.redirectUrl || ''} onChange={handleInputChange} placeholder="https://example.com" type="url" /></div>)}
                   </div>
-                </>
+                </div>
               )}
 
               {step === 5 && (
-                <>
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">Lembretes</h3>
-                    </div>
-                    
-                    <div className="space-y-4">
-                       {/* Grupo 1 Tab */}
-                      <div className="border-b border-border">
-                        <div className="flex gap-4">
-                          <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5 rounded-t-md">
-                            Grupo 1
-                          </button>
-                        </div>
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold">Lembretes</h3>
+                  <div className="p-4 border rounded-lg bg-muted/30">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="sendReminders" className="text-base font-semibold text-foreground cursor-pointer">Enviar lembretes automáticos</Label>
+                        <p className="text-sm text-muted-foreground">Notifique os participantes antes do evento.</p>
                       </div>
-
-                       {/* Reminder Options */}
-                      <div className="flex gap-4">
-                        {/* Não enviar lembretes */}
-                        <div 
-                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                            !currentAgenda.sendReminders 
-                              ? 'border-primary bg-primary/10 shadow-md' 
-                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
-                          }`}
-                          onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: false, reminders: [] }))}
-                        >
-                          <div className="text-center space-y-3">
-                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center relative ${
-                              !currentAgenda.sendReminders 
-                                ? 'bg-primary' 
-                                : 'bg-muted'
-                            }`}>
-                              <Calendar className={`w-8 h-8 ${
-                                !currentAgenda.sendReminders 
-                                  ? 'text-white' 
-                                  : 'text-muted-foreground'
-                              }`} />
-                              {!currentAgenda.sendReminders && (
-                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-white border-2 border-primary rounded-full flex items-center justify-center shadow-sm">
-                                  <span className="text-primary text-xs font-bold">✓</span>
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-left">Não, não envie nenhum lembrete</h4>
-                              <p className="text-sm text-muted-foreground text-left">
-                                Você não quer que o sistema dispare nenhum lembrete.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Enviar lembretes */}
-                        <div 
-                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                            currentAgenda.sendReminders 
-                              ? 'border-primary bg-primary/10 shadow-md' 
-                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
-                          }`}
-                          onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: true }))}
-                        >
-                          <div className="text-center space-y-3">
-                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center relative ${
-                              currentAgenda.sendReminders 
-                                ? 'bg-primary' 
-                                : 'bg-muted'
-                            }`}>
-                              <Bell className={`w-8 h-8 ${
-                                currentAgenda.sendReminders 
-                                  ? 'text-white' 
-                                  : 'text-muted-foreground'
-                              }`} />
-                              {currentAgenda.sendReminders && (
-                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-white border-2 border-primary rounded-full flex items-center justify-center shadow-sm">
-                                  <span className="text-primary text-xs font-bold">✓</span>
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-left">Sim, enviar lembretes</h4>
-                              <p className="text-sm text-muted-foreground text-left">
-                                Você deseja que o sistema envie lembretes.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Reminder Form */}
-                        {currentAgenda.sendReminders && (
-                        <div className="space-y-6">
-                          <div className="border border-border rounded-lg p-6 bg-muted/30">
-                            <h4 className="text-lg font-semibold mb-4 text-foreground">Configurar Lembrete</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <FormField label="Quando">
-                                <Input 
-                                  type="text" 
-                                  defaultValue="0 Dia(s) 1 Hora(s) 0 Minuto(s) antes"
-                                  className="w-full"
-                                />
-                              </FormField>
-                              
-                              <FormField label="Assunto">
-                                <Input 
-                                  type="text" 
-                                  defaultValue="1 hora para a reunião"
-                                  className="w-full"
-                                />
-                              </FormField>
-                              
-                              <FormField label="Send to">
-                                <Select defaultValue="inscrito">
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="inscrito">Inscrito</SelectItem>
-                                    <SelectItem value="anfitriao">Anfitrião</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </FormField>
-                              
-                              <FormField label="Canais">
-                                <Select defaultValue="whatsapp">
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="whatsapp">Whatsapp</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </FormField>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                      <Switch id="sendReminders" checked={currentAgenda.sendReminders} onCheckedChange={handleSwitchChange} />
                     </div>
                   </div>
-                </>
+                  {currentAgenda.sendReminders && (
+                    <div className="space-y-6 border-t pt-6">
+                      <div className="border border-border rounded-lg p-6 bg-muted/30">
+                        <h4 className="text-lg font-semibold mb-4 text-foreground">Configurar Lembrete</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField label="Quando"><Input type="text" defaultValue="0 Dia(s) 1 Hora(s) 0 Minuto(s) antes" className="w-full" /></FormField>
+                          <FormField label="Assunto"><Input type="text" defaultValue="1 hora para a reunião" className="w-full" /></FormField>
+                          <FormField label="Enviar para"><Select defaultValue="inscrito"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="inscrito">Inscrito</SelectItem><SelectItem value="anfitriao">Anfitrião</SelectItem></SelectContent></Select></FormField>
+                          <FormField label="Canais"><Select defaultValue="whatsapp"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="whatsapp">Whatsapp</SelectItem></SelectContent></Select></FormField>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
-            <DialogFooter className="flex justify-between w-full">
-                <div>
-                    {step > 1 && <Button variant="outline" onClick={() => setStep(s => s - 1)}>Voltar</Button>}
-                </div>
+            <DialogFooter className="flex justify-between w-full pt-6">
+                <div>{step > 1 && <Button variant="outline" onClick={() => setStep(s => s - 1)}>Voltar</Button>}</div>
                 <div className="flex gap-2">
                     <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
                     {step < 5 && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
@@ -691,40 +410,30 @@ const AgendaTab = () => {
       </div>
 
       {agendas.length === 0 ? (
-        <div className="border-2 border-dashed border-muted rounded-xl p-12 text-center bg-muted/20">
+        <div className="border-2 border-dashed border-muted rounded-xl p-12 text-center bg-background">
           <p className="text-lg text-muted-foreground">Nenhuma agenda criada ainda.</p>
           <p className="text-base text-muted-foreground mt-2">Clique em "Criar Nova Agenda" para começar.</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {agendas.map((agenda) => (
-            <Card key={agenda.id} className="hover:shadow-lg transition-shadow duration-200">
+            <Card key={agenda.id} className="flex flex-col justify-between bg-background border hover:shadow-md transition-shadow duration-200">
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start gap-3">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl font-bold text-foreground">{agenda.title}</CardTitle>
-                    <CardDescription className="text-base text-muted-foreground mt-1">{agenda.host}</CardDescription>
-                  </div>
+                  <div className="flex-1"><CardTitle className="text-xl font-bold text-foreground">{agenda.title}</CardTitle><CardDescription className="text-base text-muted-foreground mt-1">{agenda.host}</CardDescription></div>
                   <Badge variant="secondary" className="text-sm px-3 py-1 font-medium">{agenda.category}</Badge>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-base text-muted-foreground leading-relaxed">{agenda.description}</p>
+                <p className="text-base text-muted-foreground leading-relaxed line-clamp-2 h-12">{agenda.description}</p>
                 <div className="flex items-center gap-6 mt-6 text-sm font-medium text-foreground">
-                  <span className="flex items-center gap-1">
-                    <span className="text-muted-foreground">Duração:</span>
-                    {agenda.duration} min
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="text-muted-foreground">Intervalo:</span>
-                    {agenda.breakTime} min
-                  </span>
+                  <span className="flex items-center gap-1.5"><span className="text-muted-foreground">Duração:</span>{agenda.duration} min</span>
+                  <span className="flex items-center gap-1.5"><span className="text-muted-foreground">Intervalo:</span>{agenda.breakTime} min</span>
                 </div>
               </CardContent>
-              <CardFooter className="pt-4">
-                <Button variant="outline" size="default" className="w-full font-semibold">
-                  Editar Agenda
-                </Button>
+              <CardFooter className="pt-4 flex justify-end gap-2 bg-muted/30 p-3 mt-4">
+                <Button variant="destructive" size="icon" className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-0"><Trash2 className="h-4 w-4" /></Button>
+                <Button variant="default" className="flex-1 font-semibold"><Edit className="h-4 w-4 mr-2" />Editar Agenda</Button>
               </CardFooter>
             </Card>
           ))}
