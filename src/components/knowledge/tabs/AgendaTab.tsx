@@ -28,15 +28,31 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
-import { Info } from 'lucide-react';
+import { Info, Mail, Bell, Calendar, Edit, Trash } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type AgendaCategory = 'consulta' | 'evento' | 'classes' | 'recorrente' | '';
+
+type Reminder = {
+  id: number;
+  when: string;
+  subject: string;
+  sendTo: 'inscrito' | 'anfitriao';
+  channel: 'email' | 'sms';
+};
 
 type Agenda = {
   id: number;
@@ -53,12 +69,63 @@ type Agenda = {
   actionAfterRegistration: 'success_message' | 'redirect_url';
   successMessage?: string;
   redirectUrl?: string;
+  sendReminders: boolean;
+  reminders: Reminder[];
 };
 
 const mockAgendas: Agenda[] = [
-  { id: 1, title: "Consulta de Terapia", description: "Sessão individual de terapia.", category: "consulta", host: "Dr. Freud", duration: 50, breakTime: 10, availabilityInterval: 15, operatingHours: "09:00-18:00", minNotice: 24, actionAfterRegistration: 'success_message', successMessage: 'Obrigado por agendar sua consulta!' },
-  { id: 2, title: "Webinar de Marketing", description: "Aprenda as novas estratégias de marketing digital.", category: "evento", host: "Neil Patel", duration: 90, breakTime: 0, availabilityInterval: 30, operatingHours: "19:00-21:00", minNotice: 48, maxParticipants: 100, actionAfterRegistration: 'redirect_url', redirectUrl: 'https://example.com/webinar' },
-  { id: 3, title: "Aula de Yoga", description: "Yoga para iniciantes.", category: "classes", host: "Adriene Mishler", duration: 60, breakTime: 0, availabilityInterval: 60, operatingHours: "08:00-12:00", minNotice: 12, actionAfterRegistration: 'success_message', successMessage: 'Obrigado por se inscrever na aula!' },
+  { 
+    id: 1, 
+    title: "Consulta de Terapia", 
+    description: "Sessão individual de terapia.", 
+    category: "consulta", 
+    host: "Dr. Freud", 
+    duration: 50, 
+    breakTime: 10, 
+    availabilityInterval: 15, 
+    operatingHours: "09:00-18:00", 
+    minNotice: 24, 
+    actionAfterRegistration: 'success_message', 
+    successMessage: 'Obrigado por agendar sua consulta!',
+    sendReminders: false,
+    reminders: []
+  },
+  { 
+    id: 2, 
+    title: "Webinar de Marketing", 
+    description: "Aprenda as novas estratégias de marketing digital.", 
+    category: "evento", 
+    host: "Neil Patel", 
+    duration: 90, 
+    breakTime: 0, 
+    availabilityInterval: 30, 
+    operatingHours: "19:00-21:00", 
+    minNotice: 48, 
+    maxParticipants: 100, 
+    actionAfterRegistration: 'redirect_url', 
+    redirectUrl: 'https://example.com/webinar',
+    sendReminders: true,
+    reminders: [
+      { id: 1, when: "0 Dia(s) 1 Hora(s) 0 Minuto(s) antes", subject: "1 hora para a reunião...", sendTo: "inscrito", channel: "email" },
+      { id: 2, when: "0 Dia(s) 1 Hora(s) 0 Minuto(s) antes", subject: "1 hora para a reunião...", sendTo: "anfitriao", channel: "email" }
+    ]
+  },
+  { 
+    id: 3, 
+    title: "Aula de Yoga", 
+    description: "Yoga para iniciantes.", 
+    category: "classes", 
+    host: "Adriene Mishler", 
+    duration: 60, 
+    breakTime: 0, 
+    availabilityInterval: 60, 
+    operatingHours: "08:00-12:00", 
+    minNotice: 12, 
+    actionAfterRegistration: 'success_message', 
+    successMessage: 'Obrigado por se inscrever na aula!',
+    sendReminders: false,
+    reminders: []
+  },
 ];
 
 const initialAgendaState: Omit<Agenda, 'id'> = {
@@ -74,6 +141,8 @@ const initialAgendaState: Omit<Agenda, 'id'> = {
   actionAfterRegistration: 'success_message',
   successMessage: 'Obrigado por se inscrever!',
   redirectUrl: '',
+  sendReminders: false,
+  reminders: [],
 };
 
 const tooltipTexts = {
@@ -158,9 +227,9 @@ const AgendaTab = () => {
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader className="space-y-4 pb-6">
               <div>
-                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de 4</DialogTitle>
+                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de 5</DialogTitle>
                 <div className="flex gap-2 mt-3">
-                  {[1, 2, 3, 4].map((stepNumber) => (
+                  {[1, 2, 3, 4, 5].map((stepNumber) => (
                     <div
                       key={stepNumber}
                       className={`h-2 flex-1 rounded-full transition-colors ${
@@ -454,6 +523,152 @@ const AgendaTab = () => {
                   </div>
                 </>
               )}
+
+              {step === 5 && (
+                <>
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold">Lembretes</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {/* Grupo 1 Tab */}
+                      <div className="border-b">
+                        <div className="flex gap-4">
+                          <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary">
+                            Grupo 1
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Reminder Options */}
+                      <div className="flex gap-4">
+                        {/* Não enviar lembretes */}
+                        <div 
+                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            !currentAgenda.sendReminders 
+                              ? 'border-primary bg-primary/5' 
+                              : 'border-dashed border-muted hover:border-primary/50'
+                          }`}
+                          onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: false, reminders: [] }))}
+                        >
+                          <div className="text-center space-y-3">
+                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
+                              !currentAgenda.sendReminders 
+                                ? 'bg-primary' 
+                                : 'bg-muted'
+                            }`}>
+                              {!currentAgenda.sendReminders && (
+                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                                  <span className="text-primary text-sm">✓</span>
+                                </div>
+                              )}
+                              <Calendar className={`w-8 h-8 ${
+                                !currentAgenda.sendReminders 
+                                  ? 'text-white' 
+                                  : 'text-muted-foreground'
+                              }`} />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-left">Não, não envie nenhum lembrete</h4>
+                              <p className="text-sm text-muted-foreground text-left">
+                                Você não quer que o sistema dispare nenhum lembrete.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Enviar lembretes */}
+                        <div 
+                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            currentAgenda.sendReminders 
+                              ? 'border-primary bg-primary/5' 
+                              : 'border-dashed border-muted hover:border-primary/50'
+                          }`}
+                          onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: true }))}
+                        >
+                          <div className="text-center space-y-3">
+                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
+                              currentAgenda.sendReminders 
+                                ? 'bg-primary' 
+                                : 'bg-muted'
+                            }`}>
+                              {currentAgenda.sendReminders && (
+                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                                  <span className="text-primary text-sm">✓</span>
+                                </div>
+                              )}
+                              <Bell className={`w-8 h-8 ${
+                                currentAgenda.sendReminders 
+                                  ? 'text-white' 
+                                  : 'text-muted-foreground'
+                              }`} />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-left">Sim, enviar lembretes</h4>
+                              <p className="text-sm text-muted-foreground text-left">
+                                Você deseja que o sistema envie lembretes.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Add Reminder Button and Table */}
+                      {currentAgenda.sendReminders && (
+                        <div className="space-y-4">
+                          <Button className="bg-primary text-white font-semibold">
+                            <Mail className="w-4 h-4 mr-2" />
+                            NOVO LEMBRETE
+                          </Button>
+
+                          {/* Reminders Table */}
+                          <div className="border rounded-lg">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Quando</TableHead>
+                                  <TableHead>Assunto</TableHead>
+                                  <TableHead>Send to</TableHead>
+                                  <TableHead>Canais</TableHead>
+                                  <TableHead className="w-20"></TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {currentAgenda.reminders.map((reminder) => (
+                                  <TableRow key={reminder.id}>
+                                    <TableCell className="text-sm">{reminder.when}</TableCell>
+                                    <TableCell className="text-sm">{reminder.subject}</TableCell>
+                                    <TableCell className="text-sm capitalize">{reminder.sendTo}</TableCell>
+                                    <TableCell className="text-sm capitalize">{reminder.channel}</TableCell>
+                                    <TableCell className="text-right">
+                                      <div className="flex gap-1">
+                                        <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                                          <Edit className="w-4 h-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="sm" className="w-8 h-8 p-0 text-red-500">
+                                          <Trash className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                                {currentAgenda.reminders.length === 0 && (
+                                  <TableRow>
+                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                                      Nenhum lembrete configurado. Clique em "NOVO LEMBRETE" para adicionar.
+                                    </TableCell>
+                                  </TableRow>
+                                )}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <DialogFooter className="flex justify-between w-full">
@@ -462,8 +677,8 @@ const AgendaTab = () => {
                 </div>
                 <div className="flex gap-2">
                     <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                    {step < 4 && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
-                    {step === 4 && <Button onClick={handleSave}>Salvar</Button>}
+                    {step < 5 && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
+                    {step === 5 && <Button onClick={handleSave}>Salvar</Button>}
                 </div>
             </DialogFooter>
           </DialogContent>
