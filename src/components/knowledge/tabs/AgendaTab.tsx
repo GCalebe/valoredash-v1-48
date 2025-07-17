@@ -28,7 +28,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
-import { Info } from 'lucide-react';
+import { Info, Bell, Calendar } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -37,6 +37,14 @@ import {
 } from "@/components/ui/tooltip";
 
 type AgendaCategory = 'consulta' | 'evento' | 'classes' | 'recorrente' | '';
+
+type Reminder = {
+  id: number;
+  when: string;
+  subject: string;
+  sendTo: 'inscrito' | 'anfitriao';
+  channel: 'email' | 'sms';
+};
 
 type Agenda = {
   id: number;
@@ -53,12 +61,63 @@ type Agenda = {
   actionAfterRegistration: 'success_message' | 'redirect_url';
   successMessage?: string;
   redirectUrl?: string;
+  sendReminders: boolean;
+  reminders: Reminder[];
 };
 
 const mockAgendas: Agenda[] = [
-  { id: 1, title: "Consulta de Terapia", description: "Sessão individual de terapia.", category: "consulta", host: "Dr. Freud", duration: 50, breakTime: 10, availabilityInterval: 15, operatingHours: "09:00-18:00", minNotice: 24, actionAfterRegistration: 'success_message', successMessage: 'Obrigado por agendar sua consulta!' },
-  { id: 2, title: "Webinar de Marketing", description: "Aprenda as novas estratégias de marketing digital.", category: "evento", host: "Neil Patel", duration: 90, breakTime: 0, availabilityInterval: 30, operatingHours: "19:00-21:00", minNotice: 48, maxParticipants: 100, actionAfterRegistration: 'redirect_url', redirectUrl: 'https://example.com/webinar' },
-  { id: 3, title: "Aula de Yoga", description: "Yoga para iniciantes.", category: "classes", host: "Adriene Mishler", duration: 60, breakTime: 0, availabilityInterval: 60, operatingHours: "08:00-12:00", minNotice: 12, actionAfterRegistration: 'success_message', successMessage: 'Obrigado por se inscrever na aula!' },
+  { 
+    id: 1, 
+    title: "Consulta de Terapia", 
+    description: "Sessão individual de terapia.", 
+    category: "consulta", 
+    host: "Dr. Freud", 
+    duration: 50, 
+    breakTime: 10, 
+    availabilityInterval: 15, 
+    operatingHours: "09:00-18:00", 
+    minNotice: 24, 
+    actionAfterRegistration: 'success_message', 
+    successMessage: 'Obrigado por agendar sua consulta!',
+    sendReminders: false,
+    reminders: []
+  },
+  { 
+    id: 2, 
+    title: "Webinar de Marketing", 
+    description: "Aprenda as novas estratégias de marketing digital.", 
+    category: "evento", 
+    host: "Neil Patel", 
+    duration: 90, 
+    breakTime: 0, 
+    availabilityInterval: 30, 
+    operatingHours: "19:00-21:00", 
+    minNotice: 48, 
+    maxParticipants: 100, 
+    actionAfterRegistration: 'redirect_url', 
+    redirectUrl: 'https://example.com/webinar',
+    sendReminders: true,
+    reminders: [
+      { id: 1, when: "0 Dia(s) 1 Hora(s) 0 Minuto(s) antes", subject: "1 hora para a reunião...", sendTo: "inscrito", channel: "email" },
+      { id: 2, when: "0 Dia(s) 1 Hora(s) 0 Minuto(s) antes", subject: "1 hora para a reunião...", sendTo: "anfitriao", channel: "email" }
+    ]
+  },
+  { 
+    id: 3, 
+    title: "Aula de Yoga", 
+    description: "Yoga para iniciantes.", 
+    category: "classes", 
+    host: "Adriene Mishler", 
+    duration: 60, 
+    breakTime: 0, 
+    availabilityInterval: 60, 
+    operatingHours: "08:00-12:00", 
+    minNotice: 12, 
+    actionAfterRegistration: 'success_message', 
+    successMessage: 'Obrigado por se inscrever na aula!',
+    sendReminders: false,
+    reminders: []
+  },
 ];
 
 const initialAgendaState: Omit<Agenda, 'id'> = {
@@ -74,6 +133,8 @@ const initialAgendaState: Omit<Agenda, 'id'> = {
   actionAfterRegistration: 'success_message',
   successMessage: 'Obrigado por se inscrever!',
   redirectUrl: '',
+  sendReminders: false,
+  reminders: [],
 };
 
 const tooltipTexts = {
@@ -158,9 +219,9 @@ const AgendaTab = () => {
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader className="space-y-4 pb-6">
               <div>
-                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de 4</DialogTitle>
+                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de 5</DialogTitle>
                 <div className="flex gap-2 mt-3">
-                  {[1, 2, 3, 4].map((stepNumber) => (
+                  {[1, 2, 3, 4, 5].map((stepNumber) => (
                     <div
                       key={stepNumber}
                       className={`h-2 flex-1 rounded-full transition-colors ${
@@ -240,8 +301,12 @@ const AgendaTab = () => {
                       ].map((month) => (
                         <div key={month.name} className="flex items-center gap-4">
                           <div className="flex items-center space-x-2 w-24">
-                            <input type="checkbox" className="rounded" defaultChecked />
-                            <span className="text-sm font-medium">{month.name}</span>
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 text-primary bg-background border-2 border-border rounded focus:ring-2 focus:ring-primary checked:bg-primary checked:border-primary" 
+                              defaultChecked 
+                            />
+                            <span className="text-sm font-medium text-foreground">{month.name}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Select defaultValue="1">
@@ -297,8 +362,12 @@ const AgendaTab = () => {
                         ].map((day) => (
                           <div key={day} className="flex items-center gap-4">
                             <div className="flex items-center space-x-2 w-32">
-                              <input type="checkbox" className="rounded" defaultChecked />
-                              <span className="text-sm font-medium">{day}</span>
+                              <input 
+                                type="checkbox" 
+                                className="w-4 h-4 text-primary bg-background border-2 border-border rounded focus:ring-2 focus:ring-primary checked:bg-primary checked:border-primary" 
+                                defaultChecked 
+                              />
+                              <span className="text-sm font-medium text-foreground">{day}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Input 
@@ -312,7 +381,7 @@ const AgendaTab = () => {
                                 defaultValue="17:00" 
                                 className="w-24"
                               />
-                              <Button variant="ghost" size="sm" className="w-8 h-8 p-0 text-blue-500 hover:text-blue-600">
+                              <Button variant="ghost" size="sm" className="w-8 h-8 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold">
                                 +
                               </Button>
                             </div>
@@ -348,7 +417,7 @@ const AgendaTab = () => {
                           className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             currentAgenda.actionAfterRegistration === 'success_message' 
                               ? 'border-primary' 
-                              : 'border-dashed border-muted hover:border-primary/50'
+                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
                           }`}
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'success_message' }))}
                         >
@@ -371,7 +440,11 @@ const AgendaTab = () => {
                                 💬
                               </div>
                             </div>
-                            <h4 className="font-semibold">Exibir mensagem de sucesso</h4>
+                            <h4 className={`font-semibold ${
+                              currentAgenda.actionAfterRegistration === 'success_message' 
+                                ? 'text-foreground' 
+                                : 'text-foreground'
+                            }`}>Exibir mensagem de sucesso</h4>
                             <p className="text-sm text-muted-foreground">
                               Após realizar o agendamento, seu cliente verá uma mensagem escrita por você.
                             </p>
@@ -383,7 +456,7 @@ const AgendaTab = () => {
                           className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             currentAgenda.actionAfterRegistration === 'redirect_url' 
                               ? 'border-primary' 
-                              : 'border-dashed border-muted hover:border-primary/50'
+                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
                           }`}
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'redirect_url' }))}
                         >
@@ -406,7 +479,11 @@ const AgendaTab = () => {
                                 🌐
                               </div>
                             </div>
-                            <h4 className="font-semibold">Redirecionar para URL</h4>
+                            <h4 className={`font-semibold ${
+                              currentAgenda.actionAfterRegistration === 'redirect_url' 
+                                ? 'text-foreground' 
+                                : 'text-foreground'
+                            }`}>Redirecionar para URL</h4>
                             <p className="text-sm text-muted-foreground">
                               Após realizar o agendamento, o cliente será redirecionado para sua URL ou Site.
                             </p>
@@ -454,6 +531,149 @@ const AgendaTab = () => {
                   </div>
                 </>
               )}
+
+              {step === 5 && (
+                <>
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold">Lembretes</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                       {/* Grupo 1 Tab */}
+                      <div className="border-b border-border">
+                        <div className="flex gap-4">
+                          <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5 rounded-t-md">
+                            Grupo 1
+                          </button>
+                        </div>
+                      </div>
+
+                       {/* Reminder Options */}
+                      <div className="flex gap-4">
+                        {/* Não enviar lembretes */}
+                        <div 
+                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            !currentAgenda.sendReminders 
+                              ? 'border-primary bg-primary/10 shadow-md' 
+                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
+                          }`}
+                          onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: false, reminders: [] }))}
+                        >
+                          <div className="text-center space-y-3">
+                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center relative ${
+                              !currentAgenda.sendReminders 
+                                ? 'bg-primary' 
+                                : 'bg-muted'
+                            }`}>
+                              <Calendar className={`w-8 h-8 ${
+                                !currentAgenda.sendReminders 
+                                  ? 'text-white' 
+                                  : 'text-muted-foreground'
+                              }`} />
+                              {!currentAgenda.sendReminders && (
+                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-white border-2 border-primary rounded-full flex items-center justify-center shadow-sm">
+                                  <span className="text-primary text-xs font-bold">✓</span>
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-left">Não, não envie nenhum lembrete</h4>
+                              <p className="text-sm text-muted-foreground text-left">
+                                Você não quer que o sistema dispare nenhum lembrete.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Enviar lembretes */}
+                        <div 
+                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            currentAgenda.sendReminders 
+                              ? 'border-primary bg-primary/10 shadow-md' 
+                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
+                          }`}
+                          onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: true }))}
+                        >
+                          <div className="text-center space-y-3">
+                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center relative ${
+                              currentAgenda.sendReminders 
+                                ? 'bg-primary' 
+                                : 'bg-muted'
+                            }`}>
+                              <Bell className={`w-8 h-8 ${
+                                currentAgenda.sendReminders 
+                                  ? 'text-white' 
+                                  : 'text-muted-foreground'
+                              }`} />
+                              {currentAgenda.sendReminders && (
+                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-white border-2 border-primary rounded-full flex items-center justify-center shadow-sm">
+                                  <span className="text-primary text-xs font-bold">✓</span>
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-left">Sim, enviar lembretes</h4>
+                              <p className="text-sm text-muted-foreground text-left">
+                                Você deseja que o sistema envie lembretes.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Reminder Form */}
+                        {currentAgenda.sendReminders && (
+                        <div className="space-y-6">
+                          <div className="border border-border rounded-lg p-6 bg-muted/30">
+                            <h4 className="text-lg font-semibold mb-4 text-foreground">Configurar Lembrete</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <FormField label="Quando">
+                                <Input 
+                                  type="text" 
+                                  defaultValue="0 Dia(s) 1 Hora(s) 0 Minuto(s) antes"
+                                  className="w-full"
+                                />
+                              </FormField>
+                              
+                              <FormField label="Assunto">
+                                <Input 
+                                  type="text" 
+                                  defaultValue="1 hora para a reunião"
+                                  className="w-full"
+                                />
+                              </FormField>
+                              
+                              <FormField label="Send to">
+                                <Select defaultValue="inscrito">
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="inscrito">Inscrito</SelectItem>
+                                    <SelectItem value="anfitriao">Anfitrião</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormField>
+                              
+                              <FormField label="Canais">
+                                <Select defaultValue="whatsapp">
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="whatsapp">Whatsapp</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormField>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <DialogFooter className="flex justify-between w-full">
@@ -462,8 +682,8 @@ const AgendaTab = () => {
                 </div>
                 <div className="flex gap-2">
                     <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                    {step < 4 && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
-                    {step === 4 && <Button onClick={handleSave}>Salvar</Button>}
+                    {step < 5 && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
+                    {step === 5 && <Button onClick={handleSave}>Salvar</Button>}
                 </div>
             </DialogFooter>
           </DialogContent>
