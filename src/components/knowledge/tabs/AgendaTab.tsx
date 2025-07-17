@@ -309,8 +309,12 @@ const AgendaTab = () => {
                       ].map((month) => (
                         <div key={month.name} className="flex items-center gap-4">
                           <div className="flex items-center space-x-2 w-24">
-                            <input type="checkbox" className="rounded" defaultChecked />
-                            <span className="text-sm font-medium">{month.name}</span>
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 text-primary bg-background border-2 border-border rounded focus:ring-2 focus:ring-primary checked:bg-primary checked:border-primary" 
+                              defaultChecked 
+                            />
+                            <span className="text-sm font-medium text-foreground">{month.name}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Select defaultValue="1">
@@ -366,8 +370,12 @@ const AgendaTab = () => {
                         ].map((day) => (
                           <div key={day} className="flex items-center gap-4">
                             <div className="flex items-center space-x-2 w-32">
-                              <input type="checkbox" className="rounded" defaultChecked />
-                              <span className="text-sm font-medium">{day}</span>
+                              <input 
+                                type="checkbox" 
+                                className="w-4 h-4 text-primary bg-background border-2 border-border rounded focus:ring-2 focus:ring-primary checked:bg-primary checked:border-primary" 
+                                defaultChecked 
+                              />
+                              <span className="text-sm font-medium text-foreground">{day}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Input 
@@ -381,7 +389,7 @@ const AgendaTab = () => {
                                 defaultValue="17:00" 
                                 className="w-24"
                               />
-                              <Button variant="ghost" size="sm" className="w-8 h-8 p-0 text-blue-500 hover:text-blue-600">
+                              <Button variant="ghost" size="sm" className="w-8 h-8 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold">
                                 +
                               </Button>
                             </div>
@@ -416,8 +424,8 @@ const AgendaTab = () => {
                         <div 
                           className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             currentAgenda.actionAfterRegistration === 'success_message' 
-                              ? 'border-primary bg-primary/5' 
-                              : 'border-dashed border-muted hover:border-primary/50'
+                              ? 'border-primary bg-primary/10 shadow-md' 
+                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
                           }`}
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'success_message' }))}
                         >
@@ -440,7 +448,11 @@ const AgendaTab = () => {
                                 💬
                               </div>
                             </div>
-                            <h4 className="font-semibold">Exibir mensagem de sucesso</h4>
+                            <h4 className={`font-semibold ${
+                              currentAgenda.actionAfterRegistration === 'success_message' 
+                                ? 'text-foreground' 
+                                : 'text-foreground'
+                            }`}>Exibir mensagem de sucesso</h4>
                             <p className="text-sm text-muted-foreground">
                               Após realizar o agendamento, seu cliente verá uma mensagem escrita por você.
                             </p>
@@ -451,8 +463,8 @@ const AgendaTab = () => {
                         <div 
                           className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             currentAgenda.actionAfterRegistration === 'redirect_url' 
-                              ? 'border-primary bg-primary/5' 
-                              : 'border-dashed border-muted hover:border-primary/50'
+                              ? 'border-primary bg-primary/10 shadow-md' 
+                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
                           }`}
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'redirect_url' }))}
                         >
@@ -475,7 +487,11 @@ const AgendaTab = () => {
                                 🌐
                               </div>
                             </div>
-                            <h4 className="font-semibold">Redirecionar para URL</h4>
+                            <h4 className={`font-semibold ${
+                              currentAgenda.actionAfterRegistration === 'redirect_url' 
+                                ? 'text-foreground' 
+                                : 'text-foreground'
+                            }`}>Redirecionar para URL</h4>
                             <p className="text-sm text-muted-foreground">
                               Após realizar o agendamento, o cliente será redirecionado para sua URL ou Site.
                             </p>
@@ -532,10 +548,10 @@ const AgendaTab = () => {
                     </div>
                     
                     <div className="space-y-4">
-                      {/* Grupo 1 Tab */}
-                      <div className="border-b">
+                       {/* Grupo 1 Tab */}
+                      <div className="border-b border-border">
                         <div className="flex gap-4">
-                          <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary">
+                          <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5 rounded-t-md">
                             Grupo 1
                           </button>
                         </div>
@@ -547,8 +563,8 @@ const AgendaTab = () => {
                         <div 
                           className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             !currentAgenda.sendReminders 
-                              ? 'border-primary bg-primary/5' 
-                              : 'border-dashed border-muted hover:border-primary/50'
+                              ? 'border-primary bg-primary/10 shadow-md' 
+                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
                           }`}
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: false, reminders: [] }))}
                         >
@@ -582,8 +598,8 @@ const AgendaTab = () => {
                         <div 
                           className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             currentAgenda.sendReminders 
-                              ? 'border-primary bg-primary/5' 
-                              : 'border-dashed border-muted hover:border-primary/50'
+                              ? 'border-primary bg-primary/10 shadow-md' 
+                              : 'border-border hover:border-primary/60 hover:bg-muted/50'
                           }`}
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: true }))}
                         >
@@ -615,10 +631,10 @@ const AgendaTab = () => {
                       </div>
 
                       {/* Reminder Form */}
-                      {currentAgenda.sendReminders && (
+                        {currentAgenda.sendReminders && (
                         <div className="space-y-6">
-                          <div className="border rounded-lg p-6 bg-muted/20">
-                            <h4 className="text-lg font-semibold mb-4">Configurar Lembrete</h4>
+                          <div className="border border-border rounded-lg p-6 bg-muted/30">
+                            <h4 className="text-lg font-semibold mb-4 text-foreground">Configurar Lembrete</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <FormField label="Quando">
                                 <Input 
