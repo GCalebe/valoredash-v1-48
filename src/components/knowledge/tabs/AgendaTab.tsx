@@ -373,7 +373,7 @@ const AgendaTab = () => {
                             </div>
                             <h4 className="font-semibold">Exibir mensagem de sucesso</h4>
                             <p className="text-sm text-muted-foreground">
-                              Após realizar o agendamento, seu cliente verá uma mensagem escrita por você na página de obrigado do Booking
+                              Após realizar o agendamento, seu cliente verá uma mensagem escrita por você.
                             </p>
                           </div>
                         </div>
@@ -408,7 +408,7 @@ const AgendaTab = () => {
                             </div>
                             <h4 className="font-semibold">Redirecionar para URL</h4>
                             <p className="text-sm text-muted-foreground">
-                              Após realizar o agendamento, o cliente será redirecionado para a URL ou Site do Builderall Builder informada por você.
+                              Após realizar o agendamento, o cliente será redirecionado para sua URL ou Site.
                             </p>
                           </div>
                         </div>
