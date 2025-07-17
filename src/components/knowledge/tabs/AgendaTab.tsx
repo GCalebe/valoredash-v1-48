@@ -278,7 +278,6 @@ const AgendaTab = () => {
                           Caso você necessite de intervalos entre turnos (como horário de almoço, por exemplo), 
                           você pode acrescentar faixas de horários clicando no '+'.
                         </p>
-                        <span className="text-sm text-muted-foreground">Eastern Time - US & Canada</span>
                       </div>
                       <div className="space-y-3">
                         {[
