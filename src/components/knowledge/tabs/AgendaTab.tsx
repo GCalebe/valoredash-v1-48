@@ -580,7 +580,7 @@ const AgendaTab = () => {
                                   : 'text-muted-foreground'
                               }`} />
                               {!currentAgenda.sendReminders && (
-                                <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-white border-2 border-primary rounded-full flex items-center justify-center shadow-sm">
                                   <span className="text-primary text-xs font-bold">✓</span>
                                 </div>
                               )}
@@ -615,7 +615,7 @@ const AgendaTab = () => {
                                   : 'text-muted-foreground'
                               }`} />
                               {currentAgenda.sendReminders && (
-                                <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-white border-2 border-primary rounded-full flex items-center justify-center shadow-sm">
                                   <span className="text-primary text-xs font-bold">✓</span>
                                 </div>
                               )}
