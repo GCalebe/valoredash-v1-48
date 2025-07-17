@@ -50,12 +50,15 @@ type Agenda = {
   operatingHours: string;
   minNotice: number;
   maxParticipants?: number;
+  actionAfterRegistration: 'success_message' | 'redirect_url';
+  successMessage?: string;
+  redirectUrl?: string;
 };
 
 const mockAgendas: Agenda[] = [
-  { id: 1, title: "Consulta de Terapia", description: "Sessão individual de terapia.", category: "consulta", host: "Dr. Freud", duration: 50, breakTime: 10, availabilityInterval: 15, operatingHours: "09:00-18:00", minNotice: 24 },
-  { id: 2, title: "Webinar de Marketing", description: "Aprenda as novas estratégias de marketing digital.", category: "evento", host: "Neil Patel", duration: 90, breakTime: 0, availabilityInterval: 30, operatingHours: "19:00-21:00", minNotice: 48, maxParticipants: 100 },
-  { id: 3, title: "Aula de Yoga", description: "Yoga para iniciantes.", category: "classes", host: "Adriene Mishler", duration: 60, breakTime: 0, availabilityInterval: 60, operatingHours: "08:00-12:00", minNotice: 12 },
+  { id: 1, title: "Consulta de Terapia", description: "Sessão individual de terapia.", category: "consulta", host: "Dr. Freud", duration: 50, breakTime: 10, availabilityInterval: 15, operatingHours: "09:00-18:00", minNotice: 24, actionAfterRegistration: 'success_message', successMessage: 'Obrigado por agendar sua consulta!' },
+  { id: 2, title: "Webinar de Marketing", description: "Aprenda as novas estratégias de marketing digital.", category: "evento", host: "Neil Patel", duration: 90, breakTime: 0, availabilityInterval: 30, operatingHours: "19:00-21:00", minNotice: 48, maxParticipants: 100, actionAfterRegistration: 'redirect_url', redirectUrl: 'https://example.com/webinar' },
+  { id: 3, title: "Aula de Yoga", description: "Yoga para iniciantes.", category: "classes", host: "Adriene Mishler", duration: 60, breakTime: 0, availabilityInterval: 60, operatingHours: "08:00-12:00", minNotice: 12, actionAfterRegistration: 'success_message', successMessage: 'Obrigado por se inscrever na aula!' },
 ];
 
 const initialAgendaState: Omit<Agenda, 'id'> = {
@@ -68,6 +71,9 @@ const initialAgendaState: Omit<Agenda, 'id'> = {
   breakTime: 15,
   operatingHours: '09:00-18:00',
   minNotice: 24,
+  actionAfterRegistration: 'success_message',
+  successMessage: 'Obrigado por se inscrever!',
+  redirectUrl: '',
 };
 
 const tooltipTexts = {
@@ -152,9 +158,9 @@ const AgendaTab = () => {
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader className="space-y-4 pb-6">
               <div>
-                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de 3</DialogTitle>
+                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de 4</DialogTitle>
                 <div className="flex gap-2 mt-3">
-                  {[1, 2, 3].map((stepNumber) => (
+                  {[1, 2, 3, 4].map((stepNumber) => (
                     <div
                       key={stepNumber}
                       className={`h-2 flex-1 rounded-full transition-colors ${
@@ -327,6 +333,127 @@ const AgendaTab = () => {
                   )}
                 </>
               )}
+
+              {step === 4 && (
+                <>
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold">Ação após a inscrição</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex gap-4">
+                        {/* Exibir mensagem de sucesso */}
+                        <div 
+                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            currentAgenda.actionAfterRegistration === 'success_message' 
+                              ? 'border-primary bg-primary/5' 
+                              : 'border-dashed border-muted hover:border-primary/50'
+                          }`}
+                          onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'success_message' }))}
+                        >
+                          <div className="text-center space-y-2">
+                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
+                              currentAgenda.actionAfterRegistration === 'success_message' 
+                                ? 'bg-primary' 
+                                : 'bg-muted'
+                            }`}>
+                              {currentAgenda.actionAfterRegistration === 'success_message' && (
+                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                                  <span className="text-primary text-sm">✓</span>
+                                </div>
+                              )}
+                              <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                                currentAgenda.actionAfterRegistration === 'success_message' 
+                                  ? 'bg-white text-primary' 
+                                  : 'bg-muted-foreground/20 text-muted-foreground'
+                              }`}>
+                                💬
+                              </div>
+                            </div>
+                            <h4 className="font-semibold">Exibir mensagem de sucesso</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Após realizar o agendamento, seu cliente verá uma mensagem escrita por você na página de obrigado do Booking
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Redirecionar para URL */}
+                        <div 
+                          className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            currentAgenda.actionAfterRegistration === 'redirect_url' 
+                              ? 'border-primary bg-primary/5' 
+                              : 'border-dashed border-muted hover:border-primary/50'
+                          }`}
+                          onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'redirect_url' }))}
+                        >
+                          <div className="text-center space-y-2">
+                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
+                              currentAgenda.actionAfterRegistration === 'redirect_url' 
+                                ? 'bg-primary' 
+                                : 'bg-muted'
+                            }`}>
+                              {currentAgenda.actionAfterRegistration === 'redirect_url' && (
+                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                                  <span className="text-primary text-sm">✓</span>
+                                </div>
+                              )}
+                              <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                                currentAgenda.actionAfterRegistration === 'redirect_url' 
+                                  ? 'bg-white text-primary' 
+                                  : 'bg-muted-foreground/20 text-muted-foreground'
+                              }`}>
+                                🌐
+                              </div>
+                            </div>
+                            <h4 className="font-semibold">Redirecionar para URL</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Após realizar o agendamento, o cliente será redirecionado para a URL ou Site do Builderall Builder informada por você.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Conditional input based on selection */}
+                      {currentAgenda.actionAfterRegistration === 'success_message' && (
+                        <div className="space-y-2">
+                          <Label className="text-base font-semibold text-foreground">
+                            Mensagem de sucesso <span className="text-red-500">*</span>
+                          </Label>
+                          <div className="relative">
+                            <Textarea 
+                              id="successMessage"
+                              value={currentAgenda.successMessage || ''}
+                              onChange={handleInputChange}
+                              placeholder="Obrigado por se inscrever!"
+                              className="resize-none"
+                              maxLength={255}
+                            />
+                            <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
+                              {(currentAgenda.successMessage || '').length}/255
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {currentAgenda.actionAfterRegistration === 'redirect_url' && (
+                        <div className="space-y-2">
+                          <Label className="text-base font-semibold text-foreground">
+                            URL de redirecionamento <span className="text-red-500">*</span>
+                          </Label>
+                          <Input 
+                            id="redirectUrl"
+                            value={currentAgenda.redirectUrl || ''}
+                            onChange={handleInputChange}
+                            placeholder="https://example.com"
+                            type="url"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <DialogFooter className="flex justify-between w-full">
@@ -335,8 +462,8 @@ const AgendaTab = () => {
                 </div>
                 <div className="flex gap-2">
                     <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                    {step < 3 && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
-                    {step === 3 && <Button onClick={handleSave}>Salvar</Button>}
+                    {step < 4 && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
+                    {step === 4 && <Button onClick={handleSave}>Salvar</Button>}
                 </div>
             </DialogFooter>
           </DialogContent>
