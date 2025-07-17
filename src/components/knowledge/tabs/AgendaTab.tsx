@@ -541,7 +541,7 @@ const AgendaTab = () => {
                         </div>
                       </div>
 
-                      {/* Reminder Options */}
+                       {/* Reminder Options */}
                       <div className="flex gap-4">
                         {/* Não enviar lembretes */}
                         <div 
@@ -553,21 +553,21 @@ const AgendaTab = () => {
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: false, reminders: [] }))}
                         >
                           <div className="text-center space-y-3">
-                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
+                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center relative ${
                               !currentAgenda.sendReminders 
                                 ? 'bg-primary' 
                                 : 'bg-muted'
                             }`}>
-                              {!currentAgenda.sendReminders && (
-                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                                  <span className="text-primary text-sm">✓</span>
-                                </div>
-                              )}
                               <Calendar className={`w-8 h-8 ${
                                 !currentAgenda.sendReminders 
                                   ? 'text-white' 
                                   : 'text-muted-foreground'
                               }`} />
+                              {!currentAgenda.sendReminders && (
+                                <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                  <span className="text-primary text-xs font-bold">✓</span>
+                                </div>
+                              )}
                             </div>
                             <div>
                               <h4 className="font-semibold text-left">Não, não envie nenhum lembrete</h4>
@@ -588,21 +588,21 @@ const AgendaTab = () => {
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, sendReminders: true }))}
                         >
                           <div className="text-center space-y-3">
-                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
+                            <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center relative ${
                               currentAgenda.sendReminders 
                                 ? 'bg-primary' 
                                 : 'bg-muted'
                             }`}>
-                              {currentAgenda.sendReminders && (
-                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                                  <span className="text-primary text-sm">✓</span>
-                                </div>
-                              )}
                               <Bell className={`w-8 h-8 ${
                                 currentAgenda.sendReminders 
                                   ? 'text-white' 
                                   : 'text-muted-foreground'
                               }`} />
+                              {currentAgenda.sendReminders && (
+                                <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                  <span className="text-primary text-xs font-bold">✓</span>
+                                </div>
+                              )}
                             </div>
                             <div>
                               <h4 className="font-semibold text-left">Sim, enviar lembretes</h4>
@@ -614,54 +614,51 @@ const AgendaTab = () => {
                         </div>
                       </div>
 
-                      {/* Add Reminder Button and Table */}
+                      {/* Reminder Form */}
                       {currentAgenda.sendReminders && (
-                        <div className="space-y-4">
-                          <Button className="bg-primary text-white font-semibold">
-                            <Mail className="w-4 h-4 mr-2" />
-                            NOVO LEMBRETE
-                          </Button>
-
-                          {/* Reminders Table */}
-                          <div className="border rounded-lg">
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Quando</TableHead>
-                                  <TableHead>Assunto</TableHead>
-                                  <TableHead>Send to</TableHead>
-                                  <TableHead>Canais</TableHead>
-                                  <TableHead className="w-20"></TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {currentAgenda.reminders.map((reminder) => (
-                                  <TableRow key={reminder.id}>
-                                    <TableCell className="text-sm">{reminder.when}</TableCell>
-                                    <TableCell className="text-sm">{reminder.subject}</TableCell>
-                                    <TableCell className="text-sm capitalize">{reminder.sendTo}</TableCell>
-                                    <TableCell className="text-sm capitalize">{reminder.channel}</TableCell>
-                                    <TableCell className="text-right">
-                                      <div className="flex gap-1">
-                                        <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
-                                          <Edit className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="sm" className="w-8 h-8 p-0 text-red-500">
-                                          <Trash className="w-4 h-4" />
-                                        </Button>
-                                      </div>
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                                {currentAgenda.reminders.length === 0 && (
-                                  <TableRow>
-                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                                      Nenhum lembrete configurado. Clique em "NOVO LEMBRETE" para adicionar.
-                                    </TableCell>
-                                  </TableRow>
-                                )}
-                              </TableBody>
-                            </Table>
+                        <div className="space-y-6">
+                          <div className="border rounded-lg p-6 bg-muted/20">
+                            <h4 className="text-lg font-semibold mb-4">Configurar Lembrete</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <FormField label="Quando">
+                                <Input 
+                                  type="text" 
+                                  defaultValue="0 Dia(s) 1 Hora(s) 0 Minuto(s) antes"
+                                  className="w-full"
+                                />
+                              </FormField>
+                              
+                              <FormField label="Assunto">
+                                <Input 
+                                  type="text" 
+                                  defaultValue="1 hora para a reunião"
+                                  className="w-full"
+                                />
+                              </FormField>
+                              
+                              <FormField label="Send to">
+                                <Select defaultValue="inscrito">
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="inscrito">Inscrito</SelectItem>
+                                    <SelectItem value="anfitriao">Anfitrião</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormField>
+                              
+                              <FormField label="Canais">
+                                <Select defaultValue="whatsapp">
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="whatsapp">Whatsapp</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormField>
+                            </div>
                           </div>
                         </div>
                       )}
