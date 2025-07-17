@@ -347,7 +347,7 @@ const AgendaTab = () => {
                         <div 
                           className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             currentAgenda.actionAfterRegistration === 'success_message' 
-                              ? 'border-primary bg-primary/5' 
+                              ? 'border-primary' 
                               : 'border-dashed border-muted hover:border-primary/50'
                           }`}
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'success_message' }))}
@@ -382,7 +382,7 @@ const AgendaTab = () => {
                         <div 
                           className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             currentAgenda.actionAfterRegistration === 'redirect_url' 
-                              ? 'border-primary bg-primary/5' 
+                              ? 'border-primary' 
                               : 'border-dashed border-muted hover:border-primary/50'
                           }`}
                           onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'redirect_url' }))}
