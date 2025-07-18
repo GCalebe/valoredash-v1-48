@@ -20,66 +20,69 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'start',
-    slidesToScroll: 1,
-    breakpoints: {
-      '(min-width: 768px)': { slidesToScroll: 2 },
-      '(min-width: 1024px)': { slidesToScroll: 3 },
-      '(min-width: 1280px)': { slidesToScroll: 4 },
-    }
   });
 
   const [prevBtnDisabled, setPrevBtnDisabled] = useState(false);
   const [nextBtnDisabled, setNextBtnDisabled] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  console.log('KPICarousel render:', { cardsLength: cards.length, loading, emblaApi: !!emblaApi });
+
   const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
+    if (emblaApi) {
+      console.log('Scrolling prev');
+      emblaApi.scrollPrev();
+    }
   }, [emblaApi]);
 
   const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
+    if (emblaApi) {
+      console.log('Scrolling next');
+      emblaApi.scrollNext();
+    }
   }, [emblaApi]);
 
-  const onInit = useCallback((emblaApi: any) => {
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, []);
-
   const onSelect = useCallback((emblaApi: any) => {
-    setSelectedIndex(emblaApi.selectedScrollSnap());
+    const index = emblaApi.selectedScrollSnap();
+    console.log('Embla onSelect:', { index, canScrollPrev: emblaApi.canScrollPrev(), canScrollNext: emblaApi.canScrollNext() });
+    setSelectedIndex(index);
     setPrevBtnDisabled(!emblaApi.canScrollPrev());
     setNextBtnDisabled(!emblaApi.canScrollNext());
   }, []);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi) {
+      console.log('KPICarousel: emblaApi not ready');
+      return;
+    }
 
-    onInit(emblaApi);
+    console.log('KPICarousel: setting up embla listeners');
     onSelect(emblaApi);
-    emblaApi.on('reInit', onInit);
-    emblaApi.on('reInit', onSelect);
     emblaApi.on('select', onSelect);
-
-    // Auto-play functionality
-    const autoplay = setInterval(() => {
-      if (emblaApi.canScrollNext()) {
-        emblaApi.scrollNext();
-      } else {
-        emblaApi.scrollTo(0);
-      }
-    }, 5000);
+    emblaApi.on('reInit', onSelect);
 
     return () => {
-      clearInterval(autoplay);
-      emblaApi.off('select', onSelect);
-      emblaApi.off('reInit', onSelect);
-      emblaApi.off('reInit', onInit);
+      if (emblaApi) {
+        emblaApi.off('select', onSelect);
+        emblaApi.off('reInit', onSelect);
+      }
     };
-  }, [emblaApi, onInit, onSelect]);
+  }, [emblaApi, onSelect]);
 
   const scrollTo = useCallback(
-    (index: number) => emblaApi && emblaApi.scrollTo(index),
+    (index: number) => {
+      if (emblaApi) {
+        console.log('Scrolling to index:', index);
+        emblaApi.scrollTo(index);
+      }
+    },
     [emblaApi]
   );
+
+  if (!cards || cards.length === 0) {
+    console.log('KPICarousel: No cards to display');
+    return <div>Nenhum dado disponível</div>;
+  }
 
   return (
     <div className="relative">
@@ -97,7 +100,7 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
 
         {/* Dots indicator */}
         <div className="flex gap-2">
-          {Array.from({ length: cards.length }).map((_, index) => (
+          {cards.map((_, index) => (
             <button
               key={index}
               className={`h-2 w-2 rounded-full transition-all duration-300 ${
@@ -124,11 +127,11 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
 
       {/* Carousel */}
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex touch-pan-y">
+        <div className="flex">
           {cards.map((card, index) => (
             <div
               key={index}
-              className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%] pr-4"
+              className="flex-[0_0_100%] min-w-0 pl-4 first:pl-0"
             >
               <div className="transform transition-transform duration-300 hover:scale-105">
                 <StatCard

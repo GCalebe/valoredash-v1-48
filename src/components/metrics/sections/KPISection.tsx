@@ -20,6 +20,7 @@ const KPISection: React.FC<KPISectionProps> = ({
   conversionRate,
   loading,
 }) => {
+  console.log('KPISection props:', { totalConversations, responseRate, totalClients, newClientsThisMonth, conversionRate, loading });
   const kpiCards = [
     {
       title: "Total de Conversas",
