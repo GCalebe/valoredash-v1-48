@@ -20,11 +20,14 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'start',
+    dragFree: false,
+    containScroll: 'trimSnaps'
   });
 
   const [prevBtnDisabled, setPrevBtnDisabled] = useState(false);
   const [nextBtnDisabled, setNextBtnDisabled] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   console.log('KPICarousel render:', { cardsLength: cards.length, loading, emblaApi: !!emblaApi });
 
@@ -32,6 +35,9 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
     if (emblaApi) {
       console.log('Scrolling prev');
       emblaApi.scrollPrev();
+      // Pause auto-play when user interacts
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), 10000); // Resume after 10s
     }
   }, [emblaApi]);
 
@@ -39,6 +45,9 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
     if (emblaApi) {
       console.log('Scrolling next');
       emblaApi.scrollNext();
+      // Pause auto-play when user interacts
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), 10000); // Resume after 10s
     }
   }, [emblaApi]);
 
@@ -48,6 +57,12 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
     setSelectedIndex(index);
     setPrevBtnDisabled(!emblaApi.canScrollPrev());
     setNextBtnDisabled(!emblaApi.canScrollNext());
+  }, []);
+
+  // Handle user drag interaction
+  const onPointerDown = useCallback(() => {
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 10000); // Resume after 10s
   }, []);
 
   useEffect(() => {
@@ -60,20 +75,40 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
     onSelect(emblaApi);
     emblaApi.on('select', onSelect);
     emblaApi.on('reInit', onSelect);
+    emblaApi.on('pointerDown', onPointerDown);
 
     return () => {
       if (emblaApi) {
         emblaApi.off('select', onSelect);
         emblaApi.off('reInit', onSelect);
+        emblaApi.off('pointerDown', onPointerDown);
       }
     };
-  }, [emblaApi, onSelect]);
+  }, [emblaApi, onSelect, onPointerDown]);
+
+  // Auto-play effect
+  useEffect(() => {
+    if (!emblaApi || !isAutoPlaying) return;
+
+    const autoplay = setInterval(() => {
+      if (emblaApi.canScrollNext()) {
+        emblaApi.scrollNext();
+      } else {
+        emblaApi.scrollTo(0);
+      }
+    }, 4000); // Changed to 4 seconds for better UX
+
+    return () => clearInterval(autoplay);
+  }, [emblaApi, isAutoPlaying]);
 
   const scrollTo = useCallback(
     (index: number) => {
       if (emblaApi) {
         console.log('Scrolling to index:', index);
         emblaApi.scrollTo(index);
+        // Pause auto-play when user interacts
+        setIsAutoPlaying(false);
+        setTimeout(() => setIsAutoPlaying(true), 10000); // Resume after 10s
       }
     },
     [emblaApi]
@@ -85,7 +120,11 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
   }
 
   return (
-    <div className="relative">
+    <div className="relative group">
+      {/* Auto-play indicator */}
+      <div className="absolute top-2 right-2 z-10">
+        <div className={`w-2 h-2 rounded-full transition-colors ${isAutoPlaying ? 'bg-green-500' : 'bg-gray-400'}`} />
+      </div>
       {/* Navigation Buttons */}
       <div className="flex justify-between items-center mb-4">
         <Button
@@ -126,7 +165,12 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
       </div>
 
       {/* Carousel */}
-      <div className="overflow-hidden" ref={emblaRef}>
+      <div 
+        className="overflow-hidden cursor-grab active:cursor-grabbing" 
+        ref={emblaRef}
+        onMouseEnter={() => setIsAutoPlaying(false)}
+        onMouseLeave={() => setIsAutoPlaying(true)}
+      >
         <div className="flex">
           {cards.map((card, index) => (
             <div
