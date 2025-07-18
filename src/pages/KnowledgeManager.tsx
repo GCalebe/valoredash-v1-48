@@ -11,7 +11,7 @@ import { useAIProductsQuery } from "@/hooks/useAIProductsQuery";
 
 // Import all tab components
 import ProductsTab from "@/components/knowledge/tabs/ProductsTab";
-import EmployeesTab from "@/components/knowledge/tabs/EmployeesTab";
+import HostsTab from "@/components/knowledge/tabs/HostsTab";
 import FAQTab from "@/components/knowledge/tabs/FAQTab";
 import AgendaTab from "@/components/knowledge/tabs/AgendaTab";
 import AIPersonalityTab from "@/components/knowledge/tabs/AIPersonalityTab";
@@ -151,7 +151,7 @@ const KnowledgeManager = () => {
                 Produtos
               </TabsTrigger>
               <TabsTrigger value="employees" className="text-sm">
-                Funcionários
+                Anfitriões
               </TabsTrigger>
               <TabsTrigger value="faq" className="text-sm">
                 FAQ
@@ -180,7 +180,7 @@ const KnowledgeManager = () => {
               </TabsContent>
 
               <TabsContent value="employees" className="mt-0">
-                <EmployeesTab />
+                <HostsTab />
               </TabsContent>
 
               <TabsContent value="faq" className="mt-0">

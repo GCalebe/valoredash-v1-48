@@ -28,7 +28,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
-import { Info, Edit, Trash2 } from 'lucide-react';
+import { Info, Edit, Trash2, Users, Calendar, Clock, Repeat } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -68,7 +68,7 @@ type Agenda = {
   reminders: Reminder[];
 };
 
-const mockAgendas: Agenda[] = [
+export const mockAgendas: Agenda[] = [
   {
     id: 1,
     title: "Consulta de Terapia",
@@ -139,6 +139,29 @@ const initialAgendaState: Omit<Agenda, 'id'> = {
   reminders: [],
 };
 
+const categoryDetails = {
+    consulta: {
+        icon: Calendar,
+        title: "Consulta",
+        description: "Defina seu horário para receber seu convidado."
+    },
+    evento: {
+        icon: Users,
+        title: "Evento",
+        description: "Defina data, hora e limite de inscrições e permita muitos convidados no mesmo horário."
+    },
+    classes: {
+        icon: Clock,
+        title: "Classes",
+        description: "Defina seus horários e permita recorrência no mesmo horário para múltiplos convidados."
+    },
+    recorrente: {
+        icon: Repeat,
+        title: "Recorrente",
+        description: "Defina seus horários e permita recorrência no mesmo horário para um único convidado."
+    }
+}
+
 const tooltipTexts = {
   title: "O titulo da agenda que será visivel para seus cliente",
   host: "Anfitriões são as pessoas responsáveis pela organização, execução e atendimento do agendamento. Por exemplo, se você estiver criando um calendário para uma clínica odontológica, o anfitrião será o dentista.",
@@ -177,6 +200,7 @@ const AgendaTab = () => {
   const [agendas, setAgendas] = useState<Agenda[]>(mockAgendas);
   const [currentAgenda, setCurrentAgenda] = useState<Omit<Agenda, 'id'>>(initialAgendaState);
   const [step, setStep] = useState(1);
+  const totalSteps = 6;
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -188,8 +212,8 @@ const AgendaTab = () => {
     }));
   };
 
-  const handleSelectChange = (value: AgendaCategory) => {
-    setCurrentAgenda((prev) => ({ ...prev, category: value }));
+  const handleCategoryChange = (category: AgendaCategory) => {
+    setCurrentAgenda((prev) => ({ ...prev, category }));
   };
   
   const handleSwitchChange = (checked: boolean) => {
@@ -225,9 +249,9 @@ const AgendaTab = () => {
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto bg-background border">
             <DialogHeader className="space-y-4 pb-6">
               <div>
-                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de 5</DialogTitle>
+                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de {totalSteps}</DialogTitle>
                 <div className="flex gap-2 mt-3">
-                  {[1, 2, 3, 4, 5].map((stepNumber) => (
+                  {Array.from({ length: totalSteps }, (_, i) => i + 1).map((stepNumber) => (
                     <div
                       key={stepNumber}
                       className={`h-2 flex-1 rounded-full transition-colors ${
@@ -238,12 +262,34 @@ const AgendaTab = () => {
                 </div>
               </div>
               <DialogDescription className="text-base text-muted-foreground">
-                Preencha os detalhes para criar uma nova agenda de atendimento.
+                {step === 1 ? "Selecione o tipo de agenda que você deseja criar." : "Preencha os detalhes para criar uma nova agenda de atendimento."}
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-6 py-4">
               {step === 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(categoryDetails).map(([key, { icon: Icon, title, description }]) => (
+                        <div 
+                            key={key}
+                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${currentAgenda.category === key ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/60'}`}
+                            onClick={() => handleCategoryChange(key as AgendaCategory)}
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className={`mt-1 p-2 rounded-full ${currentAgenda.category === key ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                                    <Icon className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-foreground">{title}</h4>
+                                    <p className="text-sm text-muted-foreground">{description}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+              )}
+              
+              {step === 2 && (
                 <>
                   <FormField label="Título" tooltipText={tooltipTexts.title}>
                       <Input id="title" value={currentAgenda.title} onChange={handleInputChange} />
@@ -251,24 +297,13 @@ const AgendaTab = () => {
                   <FormField label="Descrição">
                       <Textarea id="description" value={currentAgenda.description} onChange={handleInputChange} />
                   </FormField>
-                  <FormField label="Categoria">
-                      <Select onValueChange={handleSelectChange} value={currentAgenda.category}>
-                          <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="consulta">Consulta</SelectItem>
-                              <SelectItem value="evento">Evento</SelectItem>
-                              <SelectItem value="classes">Classes</SelectItem>
-                              <SelectItem value="recorrente">Recorrente</SelectItem>
-                          </SelectContent>
-                      </Select>
-                  </FormField>
                   <FormField label="Anfitrião" tooltipText={tooltipTexts.host}>
                       <Input id="host" value={currentAgenda.host} onChange={handleInputChange} />
                   </FormField>
                 </>
               )}
 
-              {step === 2 && (
+              {step === 3 && (
                 <>
                   <FormField label="Duração (min)" tooltipText={tooltipTexts.duration}>
                       <Input id="duration" type="number" value={currentAgenda.duration} onChange={handleInputChange} />
@@ -282,7 +317,7 @@ const AgendaTab = () => {
                 </>
               )}
 
-              {step === 3 && (
+              {step === 4 && (
                 <>
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -342,7 +377,7 @@ const AgendaTab = () => {
                 </>
               )}
 
-              {step === 4 && (
+              {step === 5 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Ação após a inscrição</h3>
                   <div className="space-y-4">
@@ -368,7 +403,7 @@ const AgendaTab = () => {
                 </div>
               )}
 
-              {step === 5 && (
+              {step === 6 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Lembretes</h3>
                   <div className="p-4 border rounded-lg bg-muted/30">
@@ -401,8 +436,8 @@ const AgendaTab = () => {
                 <div>{step > 1 && <Button variant="outline" onClick={() => setStep(s => s - 1)}>Voltar</Button>}</div>
                 <div className="flex gap-2">
                     <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                    {step < 5 && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
-                    {step === 5 && <Button onClick={handleSave}>Salvar</Button>}
+                    {step < totalSteps && <Button onClick={() => setStep(s => s + 1)} disabled={step === 1 && !currentAgenda.category}>Avançar</Button>}
+                    {step === totalSteps && <Button onClick={handleSave}>Salvar</Button>}
                 </div>
             </DialogFooter>
           </DialogContent>
