@@ -6,7 +6,7 @@ import { Info, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
-  title: string;
+  title: React.ReactNode;
   value: string | number;
   icon: React.ReactNode;
   description?: string;

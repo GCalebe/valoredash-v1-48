@@ -177,7 +177,7 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
           />
 
           <MetricCard
-            title="Conversas Não Respondidas"
+            title="Respostas¹"
             value={safeMetrics.conversasNaoRespondidas || 0}
             icon={<MessageCircle />}
             description="Leads que ainda não receberam resposta da equipe"
@@ -228,8 +228,8 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             isStale={safeMetrics.isStale}
           />
 
-          <MetricCard
-            title="Tempo Médio de Resposta"
+          <MetricCard           
+            title={<>Tempo de<br />Resposta</>}
             value={`${safeMetrics.avgResponseTime?.toFixed(1) || 0}h`}
             icon={<Clock />}
             description="Tempo médio para primeira resposta aos leads"
@@ -245,7 +245,7 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
           />
 
           <MetricCard
-            title="Taxa de Resposta"
+            title="Respostas²"
             value={`${safeMetrics.responseRate?.toFixed(1) || 0}%`}
             icon={<Star />}
             description="Percentual de conversas que receberam resposta"
