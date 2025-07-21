@@ -2,6 +2,7 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useHosts } from "@/hooks/useHosts";
 
 interface ServiceSelectionTabProps {
   state: any;
@@ -18,6 +19,8 @@ export function ServiceSelectionTab({
   onNext,
   onPrevious,
 }: ServiceSelectionTabProps) {
+  const { hosts, loading: hostsLoading } = useHosts();
+
   return (
     <>
       <div className="space-y-2">
@@ -43,20 +46,26 @@ export function ServiceSelectionTab({
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="collaborator">Responsável / Atendente *</Label>
+        <Label htmlFor="collaborator">Anfitrião *</Label>
         <Select 
           value={state.collaborator} 
           onValueChange={(value) => updateState({ collaborator: value })}
+          disabled={hostsLoading}
         >
           <SelectTrigger id="collaborator" className={state.errors.collaborator ? "border-destructive" : ""}>
-            <SelectValue placeholder="Selecione um responsável" />
+            <SelectValue placeholder={hostsLoading ? "Carregando anfitriões..." : "Selecione um anfitrião"} />
           </SelectTrigger>
           <SelectContent>
-            {constants.COLLABORATORS.map((collab: string) => (
-              <SelectItem key={collab} value={collab}>
-                {collab}
+            {hosts.map((host) => (
+              <SelectItem key={host.id} value={host.name}>
+                {host.name} - {host.role}
               </SelectItem>
             ))}
+            {hosts.length === 0 && !hostsLoading && (
+              <div className="p-2 text-sm text-gray-500 text-center">
+                Nenhum anfitrião encontrado
+              </div>
+            )}
           </SelectContent>
         </Select>
         {state.errors.collaborator && (

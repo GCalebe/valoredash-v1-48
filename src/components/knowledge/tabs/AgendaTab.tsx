@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useHosts } from '@/hooks/useHosts';
 import {
   Dialog,
   DialogContent,
@@ -196,6 +197,7 @@ const FormField = ({ label, tooltipText, children }: { label: string, tooltipTex
 );
 
 const AgendaTab = () => {
+  const { hosts, loading: hostsLoading } = useHosts();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [agendas, setAgendas] = useState<Agenda[]>(mockAgendas);
   const [currentAgenda, setCurrentAgenda] = useState<Omit<Agenda, 'id'>>(initialAgendaState);
@@ -298,7 +300,27 @@ const AgendaTab = () => {
                       <Textarea id="description" value={currentAgenda.description} onChange={handleInputChange} />
                   </FormField>
                   <FormField label="Anfitrião" tooltipText={tooltipTexts.host}>
-                      <Input id="host" value={currentAgenda.host} onChange={handleInputChange} />
+                      <Select 
+                        value={currentAgenda.host} 
+                        onValueChange={(value) => setCurrentAgenda(prev => ({ ...prev, host: value }))}
+                        disabled={hostsLoading}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={hostsLoading ? "Carregando anfitriões..." : "Selecione um anfitrião"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hosts.map((host) => (
+                            <SelectItem key={host.id} value={host.name}>
+                              {host.name} - {host.role}
+                            </SelectItem>
+                          ))}
+                          {hosts.length === 0 && !hostsLoading && (
+                            <div className="p-2 text-sm text-gray-500 text-center">
+                              Nenhum anfitrião encontrado
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
                   </FormField>
                 </>
               )}

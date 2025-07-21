@@ -41,7 +41,7 @@ export const validateServiceFields = (state: EventFormState): Record<string, str
   }
   
   if (!state.collaborator) {
-    newErrors.collaborator = "O responsável é obrigatório";
+    newErrors.collaborator = "O anfitrião é obrigatório";
   }
   
   return newErrors;
