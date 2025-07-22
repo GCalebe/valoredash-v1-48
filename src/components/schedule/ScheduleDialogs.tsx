@@ -18,6 +18,7 @@ interface ScheduleDialogsProps {
   onAddEvent: (formData: EventFormData) => void;
   onEditEvent: (formData: EventFormData) => void;
   onDeleteEvent: () => void;
+  error?: string | null;
 
   // Appointment dialog props
   appointments: Appointment[];
@@ -61,6 +62,7 @@ export function ScheduleDialogs({
   setFormData,
   handleSubmit,
   confirmDelete,
+  error,
 }: ScheduleDialogsProps) {
   return (
     <>
@@ -72,6 +74,7 @@ export function ScheduleDialogs({
         title="Novo Evento"
         description=""
         submitLabel="Criar"
+        error={error}
       />
 
       <EventFormDialog

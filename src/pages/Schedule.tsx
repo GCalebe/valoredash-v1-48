@@ -13,6 +13,9 @@ import {
 } from "@/hooks/useCalendarEvents";
 import { useScheduleData } from "@/hooks/useScheduleData";
 import { useScheduleState } from "@/hooks/useScheduleState";
+import { useAgendaSelection } from "@/hooks/useAgendaSelection";
+import { useAppointmentForm } from "@/hooks/useAppointmentForm";
+import { useScheduleDialogs } from "@/hooks/useScheduleDialogs";
 import { ScheduleContent } from "@/components/schedule/ScheduleContent";
 import { ScheduleDialogs } from "@/components/schedule/ScheduleDialogs";
 import { startOfMonth, endOfMonth } from "date-fns";
@@ -26,36 +29,24 @@ const Schedule = () => {
   // Estados para filtros
   const [statusFilter, setStatusFilter] = useState("all");
   const [hostFilter, setHostFilter] = useState("all");
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const {
     selectedDate,
     setSelectedDate,
     appointments,
+    setAppointments,
     searchTerm,
     setSearchTerm,
     selectedTab,
     setSelectedTab,
-    isAddDialogOpen,
-    setIsAddDialogOpen,
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    currentAppointment,
-    isAddEventDialogOpen,
-    setIsAddEventDialogOpen,
-    isEditEventDialogOpen,
-    setIsEditEventDialogOpen,
-    isDeleteEventDialogOpen,
-    setIsDeleteEventDialogOpen,
-    selectedEvent,
-    setSelectedEvent,
-    formData,
-    setFormData,
-    handleSubmit,
-    confirmDelete,
-    // Agenda selection states
+    showDateTimeSelection,
+    setShowDateTimeSelection,
+    handleTimeSelect,
+    handleBackToAgendaFromDateTime,
+  } = useScheduleState();
+
+  const {
     selectedAgendaId,
     selectedAgendaName,
     showAgendaSelection,
@@ -63,36 +54,28 @@ const Schedule = () => {
     handleAgendaSelect,
     handleProceedWithAgenda,
     handleBackToAgendaSelection,
-    // DateTime selection states
-    showDateTimeSelection,
-    selectedAppointmentDate,
-    selectedAppointmentTime,
-    handleBackToAgendaFromDateTime,
-    handleTimeSelect,
-  } = useScheduleState();
+  } = useAgendaSelection();
 
-  // Estado para controlar o período de busca de eventos
-  const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(
-    () => {
-      const currentMonth = selectedDate || new Date();
-      return {
-        start: startOfMonth(currentMonth),
-        end: endOfMonth(currentMonth),
-      };
-    },
-  );
+  const dialogs = useScheduleDialogs();
+
+  const {
+    formData,
+    setFormData,
+    handleSubmit,
+  } = useAppointmentForm(appointments, setAppointments);
+
+  
 
   const {
     events,
     isLoading: isEventsLoading,
     error: eventsError,
-    lastUpdated,
-    refreshEventsPost,
+    isSubmitting,
+    refreshEvents,
     addEvent,
     editEvent,
     deleteEvent,
-    isSubmitting,
-  } = useCalendarEvents(selectedDate, dateRange);
+  } = useCalendarEvents({ currentMonth });
 
   // Passar o hostFilter para o hook useScheduleData
   const {
@@ -109,82 +92,66 @@ const Schedule = () => {
     "mes" | "semana" | "dia" | "agenda"
   >("mes");
 
-  const handleRefreshAll = useCallback(async () => {
+  const handleRefreshAll = useCallback(() => {
     console.log("Atualizando todos os dados...");
-    setIsRefreshing(true);
+    refreshEvents();
+    refreshScheduleData();
+  }, [refreshEvents, refreshScheduleData]);
 
-    const refreshPromises = [refreshEventsPost(), refreshScheduleData()];
-
-    try {
-      await Promise.all(refreshPromises);
-      console.log("Todos os dados atualizados com sucesso");
-    } catch (error) {
-      console.error("Erro ao atualizar dados:", error);
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [refreshEventsPost, refreshScheduleData]);
-
-  const handlePeriodChange = useCallback((start: Date, end: Date) => {
-    console.log("Período alterado:", { start, end });
-    setDateRange({ start, end });
+  const handleMonthChange = useCallback((month: Date) => {
+    setCurrentMonth(month);
   }, []);
 
   const handleAddEvent = useCallback(
     (formData: EventFormData) => {
       addEvent(formData).then((success) => {
         if (success) {
-          setIsAddEventDialogOpen(false);
+          dialogs.setIsAddEventDialogOpen(false);
         }
       });
     },
-    [addEvent, setIsAddEventDialogOpen],
+    [addEvent, dialogs],
   );
 
   const handleEditEvent = useCallback(
     (formData: EventFormData) => {
-      if (selectedEvent) {
-        editEvent(selectedEvent.id, formData).then((success) => {
+      if (dialogs.selectedEvent) {
+        editEvent(dialogs.selectedEvent.id, formData).then((success) => {
           if (success) {
-            setIsEditEventDialogOpen(false);
-            setSelectedEvent(null);
+            dialogs.setIsEditEventDialogOpen(false);
+            dialogs.setSelectedEvent(null);
           }
         });
       }
     },
-    [selectedEvent, editEvent, setIsEditEventDialogOpen, setSelectedEvent],
+    [dialogs, editEvent],
   );
 
   const handleDeleteEvent = useCallback(() => {
-    if (selectedEvent) {
-      deleteEvent(selectedEvent.id).then((success) => {
+    if (dialogs.selectedEvent) {
+      deleteEvent(dialogs.selectedEvent.id).then((success) => {
         if (success) {
-          setIsDeleteEventDialogOpen(false);
-          setSelectedEvent(null);
+          dialogs.setIsDeleteEventDialogOpen(false);
+          dialogs.setSelectedEvent(null);
         }
       });
     }
-  }, [
-    selectedEvent,
-    deleteEvent,
-    setIsDeleteEventDialogOpen,
-    setSelectedEvent,
-  ]);
+  }, [dialogs, deleteEvent]);
 
   const openEditEventDialog = useCallback(
     (event: CalendarEvent) => {
-      setSelectedEvent(event);
-      setIsEditEventDialogOpen(true);
+      dialogs.setSelectedEvent(event);
+      dialogs.setIsEditEventDialogOpen(true);
     },
-    [setSelectedEvent, setIsEditEventDialogOpen],
+    [dialogs],
   );
 
   const openDeleteEventDialog = useCallback(
     (event: CalendarEvent) => {
-      setSelectedEvent(event);
-      setIsDeleteEventDialogOpen(true);
+      dialogs.setSelectedEvent(event);
+      dialogs.setIsDeleteEventDialogOpen(true);
     },
-    [setSelectedEvent, setIsDeleteEventDialogOpen],
+    [dialogs],
   );
 
   const openEventLink = useCallback((url: string) => {
@@ -271,20 +238,18 @@ const Schedule = () => {
             <Button
               variant="outline"
               onClick={handleRefreshAll}
-              disabled={isRefreshing}
+              disabled={isAnyRefreshing}
               className="border-white text-white bg-transparent hover:bg-white/20 h-8 px-2"
             >
               <span className="flex items-center gap-1">
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-                {isRefreshing ? "Atualizando..." : "Atualizar"}
+                <RefreshCw className={`h-4 w-4 ${isAnyRefreshing ? "animate-spin" : ""}`} />
+                {isAnyRefreshing ? "Atualizando..." : "Atualizar"}
               </span>
             </Button>
             
             <Button 
               onClick={() => {
                 setShowAgendaSelection(true);
-                setSelectedAgendaId(null);
-                setSelectedAgendaName(null);
               }}
               className="bg-white text-blue-600 hover:bg-blue-50 h-8 px-2"
             >
@@ -305,14 +270,14 @@ const Schedule = () => {
           searchTerm={searchTerm}
           isAnyLoading={isAnyLoading}
           eventsError={eventsError}
-          lastUpdated={lastUpdated}
+          lastUpdated={null}
           setSearchTerm={setSearchTerm}
           setSelectedTab={setSelectedTab}
-          setIsAddEventDialogOpen={setIsAddEventDialogOpen}
+          setIsAddEventDialogOpen={dialogs.setIsAddEventDialogOpen}
           openEditEventDialog={openEditEventDialog}
           openDeleteEventDialog={openDeleteEventDialog}
           openEventLink={openEventLink}
-          onPeriodChange={handlePeriodChange}
+          onMonthChange={handleMonthChange}
           calendarViewType={calendarViewTab === "agenda" ? "lista" : calendarViewTab}
           setCalendarViewType={(view) => setCalendarViewTab(view === "lista" ? "agenda" : view)}
           scheduleEvents={scheduleEvents}
@@ -326,34 +291,35 @@ const Schedule = () => {
           onBackToAgendaSelection={handleBackToAgendaSelection}
           showDateTimeSelection={showDateTimeSelection}
           onBackToAgendaFromDateTime={handleBackToAgendaFromDateTime}
-          onTimeSelect={handleTimeSelect}
+          onTimeSelect={(date, time) => handleTimeSelect(date, time, dialogs.setIsAddEventDialogOpen)}
         />
       </div>
 
       <ScheduleDialogs
-        isAddEventDialogOpen={isAddEventDialogOpen}
-        setIsAddEventDialogOpen={setIsAddEventDialogOpen}
-        isEditEventDialogOpen={isEditEventDialogOpen}
-        setIsEditEventDialogOpen={setIsEditEventDialogOpen}
-        isDeleteEventDialogOpen={isDeleteEventDialogOpen}
-        setIsDeleteEventDialogOpen={setIsDeleteEventDialogOpen}
-        selectedEvent={selectedEvent}
+        isAddEventDialogOpen={dialogs.isAddEventDialogOpen}
+        setIsAddEventDialogOpen={dialogs.setIsAddEventDialogOpen}
+        isEditEventDialogOpen={dialogs.isEditEventDialogOpen}
+        setIsEditEventDialogOpen={dialogs.setIsEditEventDialogOpen}
+        isDeleteEventDialogOpen={dialogs.isDeleteEventDialogOpen}
+        setIsDeleteEventDialogOpen={dialogs.setIsDeleteEventDialogOpen}
+        selectedEvent={dialogs.selectedEvent}
         isSubmitting={isSubmitting}
         onAddEvent={handleAddEvent}
         onEditEvent={handleEditEvent}
         onDeleteEvent={handleDeleteEvent}
         appointments={appointments}
-        isAddDialogOpen={isAddDialogOpen}
-        setIsAddDialogOpen={setIsAddDialogOpen}
-        isEditDialogOpen={isEditDialogOpen}
-        setIsEditDialogOpen={setIsEditDialogOpen}
-        isDeleteDialogOpen={isDeleteDialogOpen}
-        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-        currentAppointment={currentAppointment}
+        isAddDialogOpen={dialogs.isAddDialogOpen}
+        setIsAddDialogOpen={dialogs.setIsAddDialogOpen}
+        isEditDialogOpen={dialogs.isEditDialogOpen}
+        setIsEditDialogOpen={dialogs.setIsEditDialogOpen}
+        isDeleteDialogOpen={dialogs.isDeleteDialogOpen}
+        setIsDeleteDialogOpen={dialogs.setIsDeleteDialogOpen}
+        currentAppointment={dialogs.currentAppointment}
         formData={formData}
         setFormData={setFormData}
-        handleSubmit={handleSubmit}
-        confirmDelete={confirmDelete}
+        handleSubmit={(e) => handleSubmit(e, dialogs.isEditDialogOpen, dialogs.currentAppointment, dialogs.setIsEditDialogOpen, dialogs.setIsAddDialogOpen)}
+        confirmDelete={() => dialogs.confirmDelete(appointments, setAppointments)}
+        error={eventsError}
       />
     </div>
   );
