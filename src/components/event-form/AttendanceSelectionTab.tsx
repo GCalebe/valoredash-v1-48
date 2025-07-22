@@ -36,7 +36,7 @@ export function AttendanceSelectionTab({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {constants.ATTENDANCE_TYPES.map((type: any) => (
+            {(constants.ATTENDANCE_TYPES || []).map((type: any) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.label}
               </SelectItem>
@@ -78,7 +78,7 @@ export function AttendanceSelectionTab({
       <div className="space-y-2">
         <Label>Tags Personalizadas</Label>
         <div className="flex flex-wrap gap-2 mb-2">
-          {state.tags.map((tag: any) => (
+          {(state.tags || []).map((tag: any) => (
             <Badge 
               key={tag.id} 
               style={{backgroundColor: tag.color}}

@@ -41,9 +41,9 @@ export function ClientSelectionTab({
         </div>
         
         <div className="max-h-60 overflow-y-auto border rounded-md">
-          {filteredContacts.length > 0 ? (
+          {(filteredContacts || []).length > 0 ? (
             <div className="divide-y">
-              {filteredContacts.map((contact) => (
+              {(filteredContacts || []).map((contact) => (
                 <div 
                   key={contact.id}
                   className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"

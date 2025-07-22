@@ -33,7 +33,7 @@ export function ServiceSelectionTab({
             <SelectValue placeholder="Selecione um serviço" />
           </SelectTrigger>
           <SelectContent>
-            {constants.SERVICES.map((service: string) => (
+            {(constants.SERVICES || []).map((service: string) => (
               <SelectItem key={service} value={service}>
                 {service}
               </SelectItem>
@@ -56,7 +56,7 @@ export function ServiceSelectionTab({
             <SelectValue placeholder={hostsLoading ? "Carregando anfitriões..." : "Selecione um anfitrião"} />
           </SelectTrigger>
           <SelectContent>
-            {hosts.map((host) => (
+            {(hosts || []).map((host) => (
               <SelectItem key={host.id} value={host.name}>
                 {host.name} - {host.role}
               </SelectItem>
@@ -83,7 +83,7 @@ export function ServiceSelectionTab({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {constants.DURATIONS.map((duration: any) => (
+            {(constants.DURATIONS || []).map((duration: any) => (
               <SelectItem key={duration.value} value={duration.value.toString()}>
                 {duration.label}
               </SelectItem>
