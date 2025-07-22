@@ -13,6 +13,11 @@ export function useScheduleState() {
     useState<Appointment[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTab, setSelectedTab] = useState("day");
+  
+  // Agenda selection states
+  const [selectedAgendaId, setSelectedAgendaId] = useState<string | null>(null);
+  const [selectedAgendaName, setSelectedAgendaName] = useState<string | null>(null);
+  const [showAgendaSelection, setShowAgendaSelection] = useState(false);
 
   // Dialog states
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -105,6 +110,25 @@ export function useScheduleState() {
     }
   };
 
+  // Agenda selection handlers
+  const handleAgendaSelect = (agendaId: string, agendaName: string) => {
+    setSelectedAgendaId(agendaId);
+    setSelectedAgendaName(agendaName);
+  };
+
+  const handleProceedWithAgenda = () => {
+    if (selectedAgendaId) {
+      setShowAgendaSelection(false);
+      setIsAddEventDialogOpen(true);
+    }
+  };
+
+  const handleBackToAgendaSelection = () => {
+    setShowAgendaSelection(true);
+    setSelectedAgendaId(null);
+    setSelectedAgendaName(null);
+  };
+
   return {
     // State
     selectedDate,
@@ -143,5 +167,14 @@ export function useScheduleState() {
     handleEditClick,
     handleDeleteClick,
     confirmDelete,
+
+    // Agenda selection
+    selectedAgendaId,
+    selectedAgendaName,
+    showAgendaSelection,
+    setShowAgendaSelection,
+    handleAgendaSelect,
+    handleProceedWithAgenda,
+    handleBackToAgendaSelection,
   };
 }

@@ -55,6 +55,14 @@ const Schedule = () => {
     setFormData,
     handleSubmit,
     confirmDelete,
+    // Agenda selection states
+    selectedAgendaId,
+    selectedAgendaName,
+    showAgendaSelection,
+    setShowAgendaSelection,
+    handleAgendaSelect,
+    handleProceedWithAgenda,
+    handleBackToAgendaSelection,
   } = useScheduleState();
 
   // Estado para controlar o período de busca de eventos
@@ -267,7 +275,11 @@ const Schedule = () => {
             </Button>
             
             <Button 
-              onClick={() => setIsAddEventDialogOpen(true)}
+              onClick={() => {
+                setShowAgendaSelection(true);
+                setSelectedAgendaId(null);
+                setSelectedAgendaName(null);
+              }}
               className="bg-white text-blue-600 hover:bg-blue-50 h-8 px-2"
             >
               <Plus className="h-4 w-4 mr-1" />
@@ -300,6 +312,12 @@ const Schedule = () => {
           scheduleEvents={scheduleEvents}
           statusFilter={statusFilter}
           hostFilter={hostFilter}
+          showAgendaSelection={showAgendaSelection}
+          selectedAgendaId={selectedAgendaId}
+          selectedAgendaName={selectedAgendaName}
+          onAgendaSelect={handleAgendaSelect}
+          onProceedWithAgenda={handleProceedWithAgenda}
+          onBackToAgendaSelection={handleBackToAgendaSelection}
         />
       </div>
 

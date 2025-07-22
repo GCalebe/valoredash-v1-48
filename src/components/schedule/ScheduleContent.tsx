@@ -6,11 +6,14 @@ import { CalendarView } from "./CalendarView";
 import { EventsTable } from "./EventsTable";
 import { CalendarHeaderBar } from "./CalendarHeaderBar";
 import { ScheduleMetricsCards } from "./ScheduleMetricsCards";
+import { AgendaSelectionTab } from "./AgendaSelectionTab";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { useFilteredEvents } from "@/hooks/useFilteredEvents";
 import { isSameDay, parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 interface ScheduleContentProps {
   selectedDate: Date | undefined;
@@ -34,6 +37,13 @@ interface ScheduleContentProps {
   scheduleEvents?: ScheduleEvent[];
   statusFilter?: string;
   hostFilter?: string;
+  // Agenda selection props
+  showAgendaSelection?: boolean;
+  selectedAgendaId?: string | null;
+  selectedAgendaName?: string | null;
+  onAgendaSelect?: (agendaId: string, agendaName: string) => void;
+  onProceedWithAgenda?: () => void;
+  onBackToAgendaSelection?: () => void;
 }
 
 export function ScheduleContent({
@@ -58,6 +68,13 @@ export function ScheduleContent({
   scheduleEvents = [],
   statusFilter = "all",
   hostFilter = "all",
+  // Agenda selection props
+  showAgendaSelection = false,
+  selectedAgendaId = null,
+  selectedAgendaName = null,
+  onAgendaSelect,
+  onProceedWithAgenda,
+  onBackToAgendaSelection,
 }: ScheduleContentProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
 
@@ -169,6 +186,38 @@ export function ScheduleContent({
     
     return grouped;
   }, [eventsForSelectedDay, salespeople]);
+
+  // Show agenda selection if needed
+  if (showAgendaSelection) {
+    return (
+      <div className="w-full h-full flex flex-col gap-4 min-h-0">
+        <div className="flex items-center gap-4 mb-4">
+          {selectedAgendaId && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onBackToAgendaSelection}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar para seleção
+            </Button>
+          )}
+          {selectedAgendaName && (
+            <div className="text-lg font-semibold text-gray-900 dark:text-white">
+              Agenda selecionada: {selectedAgendaName}
+            </div>
+          )}
+        </div>
+        
+        <AgendaSelectionTab
+          selectedAgendaId={selectedAgendaId}
+          onAgendaSelect={onAgendaSelect}
+          onProceed={onProceedWithAgenda}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full flex flex-col gap-4 min-h-0">
