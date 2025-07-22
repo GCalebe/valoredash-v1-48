@@ -65,7 +65,7 @@ export function useSubscription() {
     } finally {
       setLoading(false);
     }
-  }, [user, loadSubscription, loadPaymentMethods, loadInvoices, toast]);
+  }, [user?.id]);
 
   const { processingPayment, subscribeToPlan, cancelSubscription, changePlan } =
     useSubscriptionActions({
@@ -88,13 +88,13 @@ export function useSubscription() {
     return foundPlan
       ? { ...foundPlan, description: foundPlan.description || "" }
       : null;
-  }, [subscription, availablePlans]);
+  }, [subscription?.planId, availablePlans]);
 
   useEffect(() => {
     if (user) {
       fetchSubscription();
     }
-  }, [user, fetchSubscription]);
+  }, [user]);
 
   return {
     subscription,
