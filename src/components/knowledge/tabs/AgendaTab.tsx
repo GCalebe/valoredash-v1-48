@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useHosts } from '@/hooks/useHosts';
+import { useAgendas } from '@/hooks/useAgendas';
 import {
   Dialog,
   DialogContent,
@@ -50,7 +51,9 @@ type Reminder = {
   channel: 'email' | 'sms';
 };
 
-type Agenda = {
+import { Agenda as SupabaseAgenda } from '@/hooks/useAgendas';
+
+type LocalAgenda = {
   id: number;
   title: string;
   description: string;
@@ -69,61 +72,11 @@ type Agenda = {
   reminders: Reminder[];
 };
 
-export const mockAgendas: Agenda[] = [
-  {
-    id: 1,
-    title: "Consulta de Terapia",
-    description: "Sessão individual de terapia para bem-estar mental.",
-    category: "consulta",
-    host: "Dr. Freud",
-    duration: 50,
-    breakTime: 10,
-    availabilityInterval: 15,
-    operatingHours: "09:00-18:00",
-    minNotice: 24,
-    actionAfterRegistration: 'success_message',
-    successMessage: 'Obrigado por agendar sua consulta!',
-    sendReminders: false,
-    reminders: []
-  },
-  {
-    id: 2,
-    title: "Webinar de Marketing",
-    description: "Aprenda as novas estratégias de marketing digital com especialistas.",
-    category: "evento",
-    host: "Neil Patel",
-    duration: 90,
-    breakTime: 0,
-    availabilityInterval: 30,
-    operatingHours: "19:00-21:00",
-    minNotice: 48,
-    maxParticipants: 100,
-    actionAfterRegistration: 'redirect_url',
-    redirectUrl: 'https://example.com/webinar',
-    sendReminders: true,
-    reminders: [
-      { id: 1, when: "0 Dia(s) 1 Hora(s) 0 Minuto(s) antes", subject: "1 hora para a reunião...", sendTo: "inscrito", channel: "email" }
-    ]
-  },
-  {
-    id: 3,
-    title: "Aula de Yoga",
-    description: "Yoga para iniciantes, focando em postura e respiração.",
-    category: "classes",
-    host: "Adriene Mishler",
-    duration: 60,
-    breakTime: 0,
-    availabilityInterval: 60,
-    operatingHours: "08:00-12:00",
-    minNotice: 12,
-    actionAfterRegistration: 'success_message',
-    successMessage: 'Obrigado por se inscrever na aula!',
-    sendReminders: false,
-    reminders: []
-  },
-];
+type Agenda = LocalAgenda;
 
-const initialAgendaState: Omit<Agenda, 'id'> = {
+// Mock data removed - now using Supabase data
+
+const initialAgendaState: Omit<LocalAgenda, 'id'> = {
   title: '',
   description: '',
   category: '',
@@ -198,11 +151,41 @@ const FormField = ({ label, tooltipText, children }: { label: string, tooltipTex
 
 const AgendaTab = () => {
   const { hosts, loading: hostsLoading } = useHosts();
+  const { agendas: supabaseAgendas, agendasLoading, refetchAgendas } = useAgendas();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [agendas, setAgendas] = useState<Agenda[]>(mockAgendas);
-  const [currentAgenda, setCurrentAgenda] = useState<Omit<Agenda, 'id'>>(initialAgendaState);
+  const [agendas, setAgendas] = useState<LocalAgenda[]>([]);
+  const [currentAgenda, setCurrentAgenda] = useState<Omit<LocalAgenda, 'id'>>(initialAgendaState);
   const [step, setStep] = useState(1);
   const totalSteps = 6;
+
+  // Função para converter agenda do Supabase para formato local
+  const convertSupabaseToLocal = (supabaseAgenda: SupabaseAgenda): LocalAgenda => {
+    return {
+      id: parseInt(supabaseAgenda.id),
+      title: supabaseAgenda.name,
+      description: supabaseAgenda.description || '',
+      category: (supabaseAgenda.category as AgendaCategory) || '',
+      host: '', // Será preenchido com dados dos hosts
+      duration: supabaseAgenda.duration_minutes,
+      breakTime: supabaseAgenda.buffer_time_minutes,
+      availabilityInterval: 30, // Valor padrão
+      operatingHours: '09:00-18:00', // Valor padrão
+      minNotice: 24, // Valor padrão
+      maxParticipants: supabaseAgenda.max_participants || undefined,
+      actionAfterRegistration: 'success_message',
+      successMessage: 'Obrigado por se inscrever!',
+      redirectUrl: '',
+      sendReminders: false,
+      reminders: []
+    };
+  };
+
+  // Usar dados do Supabase quando disponíveis, senão usar mockados
+  const displayAgendas = supabaseAgendas.length > 0 
+    ? supabaseAgendas.map(convertSupabaseToLocal)
+    : agendas;
+
+  const isLoading = agendasLoading || hostsLoading;
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -233,7 +216,36 @@ const AgendaTab = () => {
     setCurrentAgenda(initialAgendaState);
     setStep(1);
     setIsDialogOpen(true);
-  }
+  };
+
+  const handleEditAgenda = (agenda: LocalAgenda) => {
+    setCurrentAgenda({
+      title: agenda.title,
+      description: agenda.description,
+      category: agenda.category,
+      host: agenda.host,
+      duration: agenda.duration,
+      breakTime: agenda.breakTime,
+      availabilityInterval: agenda.availabilityInterval || 30,
+      operatingHours: agenda.operatingHours || '09:00-18:00',
+      minNotice: agenda.minNotice || 24,
+      actionAfterRegistration: agenda.actionAfterRegistration || 'success_message',
+      successMessage: agenda.successMessage || 'Obrigado por se inscrever!',
+      redirectUrl: agenda.redirectUrl || '',
+      sendReminders: agenda.sendReminders || false,
+      reminders: agenda.reminders || [],
+    });
+    setStep(1);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteAgenda = async (agendaId: string | number) => {
+     if (window.confirm('Tem certeza que deseja excluir esta agenda?')) {
+       // TODO: Implementar exclusão no Supabase
+       console.log('Deletar agenda:', agendaId);
+       // Após implementar a exclusão, chamar refetchAgendas() para atualizar a lista
+     }
+   };
 
   return (
     <div className="space-y-8">
@@ -466,14 +478,43 @@ const AgendaTab = () => {
         </Dialog>
       </div>
 
-      {agendas.length === 0 ? (
+      {isLoading ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="flex flex-col justify-between bg-background border">
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1">
+                    <div className="h-6 bg-muted rounded animate-pulse mb-2"></div>
+                    <div className="h-4 bg-muted rounded animate-pulse w-2/3"></div>
+                  </div>
+                  <div className="h-6 w-16 bg-muted rounded animate-pulse"></div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="h-4 bg-muted rounded animate-pulse mb-2"></div>
+                <div className="h-4 bg-muted rounded animate-pulse w-3/4 mb-6"></div>
+                <div className="flex items-center gap-6">
+                  <div className="h-4 bg-muted rounded animate-pulse w-20"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse w-20"></div>
+                </div>
+              </CardContent>
+              <CardFooter className="pt-4 flex justify-end gap-2 bg-muted/30 p-3 mt-4">
+                <div className="h-8 w-8 bg-muted rounded animate-pulse"></div>
+                <div className="h-8 flex-1 bg-muted rounded animate-pulse"></div>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : displayAgendas.length === 0 ? (
         <div className="border-2 border-dashed border-muted rounded-xl p-12 text-center bg-background">
           <p className="text-lg text-muted-foreground">Nenhuma agenda criada ainda.</p>
           <p className="text-base text-muted-foreground mt-2">Clique em "Criar Nova Agenda" para começar.</p>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {agendas.map((agenda) => (
+        <div className="max-h-[800px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {displayAgendas.map((agenda) => (
             <Card key={agenda.id} className="flex flex-col justify-between bg-background border hover:shadow-md transition-shadow duration-200">
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start gap-3">
@@ -489,11 +530,25 @@ const AgendaTab = () => {
                 </div>
               </CardContent>
               <CardFooter className="pt-4 flex justify-end gap-2 bg-muted/30 p-3 mt-4">
-                <Button variant="destructive" size="icon" className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-0"><Trash2 className="h-4 w-4" /></Button>
-                <Button variant="default" className="flex-1 font-semibold"><Edit className="h-4 w-4 mr-2" />Editar Agenda</Button>
+                <Button 
+                  variant="destructive" 
+                  size="icon" 
+                  className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-0"
+                  onClick={() => handleDeleteAgenda(agenda.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="default" 
+                  className="flex-1 font-semibold"
+                  onClick={() => handleEditAgenda(agenda)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />Editar Agenda
+                </Button>
               </CardFooter>
             </Card>
           ))}
+          </div>
         </div>
       )}
     </div>

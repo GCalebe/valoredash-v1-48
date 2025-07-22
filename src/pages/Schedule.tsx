@@ -63,6 +63,12 @@ const Schedule = () => {
     handleAgendaSelect,
     handleProceedWithAgenda,
     handleBackToAgendaSelection,
+    // DateTime selection states
+    showDateTimeSelection,
+    selectedAppointmentDate,
+    selectedAppointmentTime,
+    handleBackToAgendaFromDateTime,
+    handleTimeSelect,
   } = useScheduleState();
 
   // Estado para controlar o período de busca de eventos
@@ -318,6 +324,9 @@ const Schedule = () => {
           onAgendaSelect={handleAgendaSelect}
           onProceedWithAgenda={handleProceedWithAgenda}
           onBackToAgendaSelection={handleBackToAgendaSelection}
+          showDateTimeSelection={showDateTimeSelection}
+          onBackToAgendaFromDateTime={handleBackToAgendaFromDateTime}
+          onTimeSelect={handleTimeSelect}
         />
       </div>
 

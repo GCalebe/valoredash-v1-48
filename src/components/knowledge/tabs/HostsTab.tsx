@@ -20,13 +20,22 @@ import { toast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { mockAgendas as allAgendas } from "./AgendaTab"; // Assuming AgendaTab exports mockAgendas
+import { useAgendas } from '@/hooks/useAgendas';
 
 type Host = Database['public']['Tables']['employees']['Row'];
-type Agenda = typeof allAgendas[0];
+type Agenda = {
+  id: string | number;
+  title: string;
+  description: string;
+  category: string;
+  host: string;
+  duration: number;
+  breakTime: number;
+};
 
 const HostsTab = () => {
   const { user } = useAuth();
+  const { supabaseAgendas } = useAgendas();
   const [hosts, setHosts] = useState<Host[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingHost, setEditingHost] = useState<Host | null>(null);
@@ -174,23 +183,34 @@ const HostsTab = () => {
                       <CommandList>
                         <CommandEmpty>Nenhuma agenda encontrada.</CommandEmpty>
                         <CommandGroup>
-                          {allAgendas.map(agenda => (
-                            <CommandItem
-                              key={agenda.id}
-                              onSelect={() => {
-                                setSelectedAgendas(current => 
-                                  current.some(a => a.id === agenda.id)
-                                    ? current.filter(a => a.id !== agenda.id)
-                                    : [...current, agenda]
-                                )
-                              }}
-                            >
-                              <div className={`mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary ${selectedAgendas.some(a => a.id === agenda.id) ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible"}`}>
-                                <X className="h-4 w-4" />
-                              </div>
-                              {agenda.title}
-                            </CommandItem>
-                          ))}
+                          {(supabaseAgendas || []).map(agenda => {
+                            const mappedAgenda = {
+                              id: agenda.id,
+                              title: agenda.name,
+                              description: agenda.description || '',
+                              category: agenda.category || '',
+                              host: '',
+                              duration: agenda.duration_minutes || 60,
+                              breakTime: agenda.buffer_time_minutes || 0
+                            };
+                            return (
+                              <CommandItem
+                                key={agenda.id}
+                                onSelect={() => {
+                                  setSelectedAgendas(current => 
+                                    current.some(a => a.id === agenda.id)
+                                      ? current.filter(a => a.id !== agenda.id)
+                                      : [...current, mappedAgenda]
+                                  )
+                                }}
+                              >
+                                <div className={`mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary ${selectedAgendas.some(a => a.id === agenda.id) ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible"}`}>
+                                  <X className="h-4 w-4" />
+                                </div>
+                                {agenda.name}
+                              </CommandItem>
+                            );
+                           })}
                         </CommandGroup>
                       </CommandList>
                     </Command>

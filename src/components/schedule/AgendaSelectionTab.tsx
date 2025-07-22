@@ -86,8 +86,8 @@ export function AgendaSelectionTab({ onAgendaSelect, selectedAgendaId, onProceed
     return (
       <div className="space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-foreground">Selecione o Tipo de Agenda</h2>
-          <p className="text-muted-foreground">Escolha o tipo de agendamento que deseja criar</p>
+          <h2 className="text-2xl font-bold text-foreground">Selecione sua Agenda</h2>
+          <p className="text-muted-foreground">Escolha em qual agenda deseja continuar</p>
         </div>
         
         <div className="border-2 border-dashed border-muted rounded-xl p-12 text-center bg-background">
@@ -104,11 +104,12 @@ export function AgendaSelectionTab({ onAgendaSelect, selectedAgendaId, onProceed
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-foreground">Selecione o Tipo de Agenda</h2>
-        <p className="text-muted-foreground">Escolha o tipo de agendamento que deseja criar</p>
+        <h2 className="text-2xl font-bold text-foreground">Selecione sua Agenda</h2>
+        <p className="text-muted-foreground">Escolha em qual agenda deseja continuar</p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="max-h-[700px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {agendas.map((agenda) => (
           <Card 
             key={agenda.id} 
@@ -197,6 +198,7 @@ export function AgendaSelectionTab({ onAgendaSelect, selectedAgendaId, onProceed
             </CardFooter>
           </Card>
         ))}
+        </div>
       </div>
       
       {selectedAgendaId && onProceed && (
@@ -205,7 +207,7 @@ export function AgendaSelectionTab({ onAgendaSelect, selectedAgendaId, onProceed
             onClick={onProceed}
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 font-semibold"
           >
-            Prosseguir com Agenda Selecionada
+            Prosseguir com a Agenda Selecionada
           </Button>
         </div>
       )}

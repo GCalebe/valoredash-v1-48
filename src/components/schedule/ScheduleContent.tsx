@@ -7,6 +7,7 @@ import { EventsTable } from "./EventsTable";
 import { CalendarHeaderBar } from "./CalendarHeaderBar";
 import { ScheduleMetricsCards } from "./ScheduleMetricsCards";
 import { AgendaSelectionTab } from "./AgendaSelectionTab";
+import { AppointmentDateTimeSelection } from "./AppointmentDateTimeSelection";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { useFilteredEvents } from "@/hooks/useFilteredEvents";
 import { isSameDay, parseISO, format } from "date-fns";
@@ -44,6 +45,10 @@ interface ScheduleContentProps {
   onAgendaSelect?: (agendaId: string, agendaName: string) => void;
   onProceedWithAgenda?: () => void;
   onBackToAgendaSelection?: () => void;
+  // DateTime selection props
+  showDateTimeSelection?: boolean;
+  onBackToAgendaFromDateTime?: () => void;
+  onTimeSelect?: (date: Date, time: string) => void;
 }
 
 export function ScheduleContent({
@@ -75,6 +80,10 @@ export function ScheduleContent({
   onAgendaSelect,
   onProceedWithAgenda,
   onBackToAgendaSelection,
+  // DateTime selection props
+  showDateTimeSelection = false,
+  onBackToAgendaFromDateTime,
+  onTimeSelect,
 }: ScheduleContentProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
 
@@ -186,6 +195,17 @@ export function ScheduleContent({
     
     return grouped;
   }, [eventsForSelectedDay, salespeople]);
+
+  // Show date time selection if enabled
+  if (showDateTimeSelection) {
+    return (
+      <AppointmentDateTimeSelection
+        selectedAgendaName={selectedAgendaName || undefined}
+        onBack={onBackToAgendaFromDateTime}
+        onTimeSelect={onTimeSelect}
+      />
+    );
+  }
 
   // Show agenda selection if needed
   if (showAgendaSelection) {

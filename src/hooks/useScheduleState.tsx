@@ -18,6 +18,11 @@ export function useScheduleState() {
   const [selectedAgendaId, setSelectedAgendaId] = useState<string | null>(null);
   const [selectedAgendaName, setSelectedAgendaName] = useState<string | null>(null);
   const [showAgendaSelection, setShowAgendaSelection] = useState(false);
+  
+  // DateTime selection states
+  const [showDateTimeSelection, setShowDateTimeSelection] = useState(false);
+  const [selectedAppointmentDate, setSelectedAppointmentDate] = useState<Date | null>(null);
+  const [selectedAppointmentTime, setSelectedAppointmentTime] = useState<string | null>(null);
 
   // Dialog states
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -119,7 +124,7 @@ export function useScheduleState() {
   const handleProceedWithAgenda = () => {
     if (selectedAgendaId) {
       setShowAgendaSelection(false);
-      setIsAddEventDialogOpen(true);
+      setShowDateTimeSelection(true);
     }
   };
 
@@ -127,6 +132,23 @@ export function useScheduleState() {
     setShowAgendaSelection(true);
     setSelectedAgendaId(null);
     setSelectedAgendaName(null);
+  };
+
+  // DateTime selection handlers
+  const handleBackToAgendaFromDateTime = () => {
+    setShowDateTimeSelection(false);
+    setShowAgendaSelection(true);
+    setSelectedAppointmentDate(null);
+    setSelectedAppointmentTime(null);
+  };
+
+  const handleTimeSelect = (date: Date, time: string) => {
+    setSelectedAppointmentDate(date);
+    setSelectedAppointmentTime(time);
+    // Aqui você pode adicionar lógica para prosseguir para o próximo passo
+    // Por exemplo, abrir um formulário de dados do cliente
+    setShowDateTimeSelection(false);
+    setIsAddEventDialogOpen(true);
   };
 
   return {
@@ -176,5 +198,13 @@ export function useScheduleState() {
     handleAgendaSelect,
     handleProceedWithAgenda,
     handleBackToAgendaSelection,
+    
+    // DateTime selection
+    showDateTimeSelection,
+    setShowDateTimeSelection,
+    selectedAppointmentDate,
+    selectedAppointmentTime,
+    handleBackToAgendaFromDateTime,
+    handleTimeSelect,
   };
 }
