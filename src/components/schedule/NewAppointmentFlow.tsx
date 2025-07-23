@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Calendar, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, ArrowLeft, UserCheck, Clock } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,7 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
   // Agenda selection state
   const [internalSelectedAgendaId, setInternalSelectedAgendaId] = useState<string | null>(selectedAgendaId || null);
   const [selectedAgendaName, setSelectedAgendaName] = useState<string | null>(null);
+  const [selectedAgendaHost, setSelectedAgendaHost] = useState<string>('');
 
   // DateTime selection state
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -39,6 +41,46 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
     isDateAvailable,
     loading: agendaLoading
   } = useAgendaAvailability(selectedAgendaId || internalSelectedAgendaId || '');
+  
+  const { agendas } = useAgendas();
+  
+  // Get selected agenda details
+  const selectedAgenda = agendas.find(agenda => agenda.id === internalSelectedAgendaId);
+  
+  // Function to get host name for agenda
+  const getAgendaHost = async (agendaId: string) => {
+    try {
+      const { data: employeeAgendas, error } = await supabase
+        .from('employee_agendas')
+        .select(`
+          employees (
+            name,
+            role
+          )
+        `)
+        .eq('agenda_id', agendaId)
+        .eq('is_primary', true)
+        .single();
+      
+      if (error || !employeeAgendas) {
+        return 'Anfitrião não definido';
+      }
+      
+      return employeeAgendas.employees?.name || 'Anfitrião não definido';
+    } catch (error) {
+      console.error('Erro ao buscar anfitrião:', error);
+      return 'Anfitrião não definido';
+    }
+  };
+  
+  // Update host when agenda changes
+  useEffect(() => {
+    if (internalSelectedAgendaId) {
+      getAgendaHost(internalSelectedAgendaId).then(hostName => {
+        setSelectedAgendaHost(hostName);
+      });
+    }
+  }, [internalSelectedAgendaId]);
   
   // Form state
   const {
@@ -75,6 +117,73 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
   useEffect(() => {
     setSelectedTime('');
   }, [selectedDate]);
+  
+  // Render agenda details section
+  const renderAgendaDetails = () => {
+    if (!selectedAgenda) return null;
+    
+    return (
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+        <div className="flex items-center gap-6">
+          {/* Icon */}
+          <div className="flex-shrink-0">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+              <Calendar className="w-8 h-8 text-blue-600" />
+            </div>
+          </div>
+          
+          {/* Content */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Title */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                {selectedAgenda.name}
+              </h3>
+              <p className="text-sm text-gray-600">
+                Título do Agendamento
+              </p>
+            </div>
+            
+            {/* Description */}
+            <div>
+              <p className="text-sm text-gray-900 mb-1 line-clamp-2">
+                {selectedAgenda.description || 'Sem descrição disponível'}
+              </p>
+              <p className="text-xs text-gray-600">
+                Descrição
+              </p>
+            </div>
+            
+            {/* Host */}
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <UserCheck className="w-4 h-4 text-gray-600" />
+                <span className="text-sm text-gray-900">
+                  {selectedAgendaHost || 'Carregando...'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-600">
+                Anfitrião/Consultor
+              </p>
+            </div>
+            
+            {/* Duration */}
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Clock className="w-4 h-4 text-gray-600" />
+                <span className="text-sm text-gray-900">
+                  {selectedAgenda.duration_minutes} minutos
+                </span>
+              </div>
+              <p className="text-xs text-gray-600">
+                Duração
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
   
   // Function to check if a date is bookable
   const isDateBookable = (date: Date): boolean => {
@@ -131,6 +240,8 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
   const handleAgendaSelect = (agendaId: string, agendaName: string) => {
     setInternalSelectedAgendaId(agendaId);
     setSelectedAgendaName(agendaName);
+    // Reset host when changing agenda
+    setSelectedAgendaHost('');
   };
 
   const renderAgendaStep = () => (
@@ -161,6 +272,9 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
           Agenda: <span className="font-medium text-foreground">{selectedAgendaName}</span>
         </p>
       </div>
+      
+      {/* Agenda Details */}
+      {renderAgendaDetails()}
       
       <div className="grid lg:grid-cols-2 gap-8 items-start">
         {/* Calendar */}
