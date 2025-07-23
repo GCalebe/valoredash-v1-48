@@ -5,8 +5,6 @@ import { Appointment } from "@/types/calendar";
 import { CalendarView } from "./CalendarView";
 import { EventList } from "./EventList";
 import { EventSidebar } from "./EventSidebar";
-import { AgendaSelectionTab } from "./AgendaSelectionTab";
-import { AppointmentDateTimeSelection } from "./AppointmentDateTimeSelection";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { useFilteredEvents } from "@/hooks/useFilteredEvents";
 import { Button } from "@/components/ui/button";
@@ -21,6 +19,7 @@ interface ScheduleContentProps {
   searchTerm: string;
   isAnyLoading: boolean;
   eventsError: Error | null;
+  lastUpdated: Date | null;
   setSearchTerm: (term: string) => void;
   setSelectedTab: (tab: string) => void;
   setIsAddEventDialogOpen: (open: boolean) => void;
@@ -33,15 +32,6 @@ interface ScheduleContentProps {
   scheduleEvents?: ScheduleEvent[];
   statusFilter?: string;
   hostFilter?: string;
-  showAgendaSelection?: boolean;
-  selectedAgendaId?: string | null;
-  selectedAgendaName?: string | null;
-  onAgendaSelect?: (agendaId: string, agendaName: string) => void;
-  onProceedWithAgenda?: () => void;
-  onBackToAgendaSelection?: () => void;
-  showDateTimeSelection?: boolean;
-  onBackToAgendaFromDateTime?: () => void;
-  onTimeSelect?: (date: Date, time: string) => void;
 }
 
 export function ScheduleContent({
@@ -65,15 +55,6 @@ export function ScheduleContent({
   scheduleEvents = [],
   statusFilter = "all",
   hostFilter = "all",
-  showAgendaSelection = false,
-  selectedAgendaId = null,
-  selectedAgendaName = null,
-  onAgendaSelect,
-  onProceedWithAgenda,
-  onBackToAgendaSelection,
-  showDateTimeSelection = false,
-  onBackToAgendaFromDateTime,
-  onTimeSelect,
 }: ScheduleContentProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
 
@@ -101,47 +82,6 @@ export function ScheduleContent({
     },
     [openEditEventDialog],
   );
-
-  if (showDateTimeSelection) {
-    return (
-      <AppointmentDateTimeSelection
-        selectedAgendaName={selectedAgendaName || undefined}
-        onBack={onBackToAgendaFromDateTime}
-        onTimeSelect={onTimeSelect}
-      />
-    );
-  }
-
-  if (showAgendaSelection) {
-    return (
-      <div className="w-full h-full flex flex-col gap-4 min-h-0">
-        <div className="flex items-center gap-4 mb-4">
-          {selectedAgendaId && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onBackToAgendaSelection}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar para seleção
-            </Button>
-          )}
-          {selectedAgendaName && (
-            <div className="text-lg font-semibold text-gray-900 dark:text-white">
-              Agenda selecionada: {selectedAgendaName}
-            </div>
-          )}
-        </div>
-
-        <AgendaSelectionTab
-          selectedAgendaId={selectedAgendaId}
-          onAgendaSelect={onAgendaSelect}
-          onProceed={onProceedWithAgenda}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="w-full h-full flex flex-col gap-4 min-h-0">

@@ -13,13 +13,13 @@ import {
 } from "@/hooks/useCalendarEvents";
 import { useScheduleData } from "@/hooks/useScheduleData";
 import { useScheduleState } from "@/hooks/useScheduleState";
-import { useAgendaSelection } from "@/hooks/useAgendaSelection";
 import { useAppointmentForm } from "@/hooks/useAppointmentForm";
 import { useScheduleDialogs } from "@/hooks/useScheduleDialogs";
 import { ScheduleContent } from "@/components/schedule/ScheduleContent";
 import { ScheduleDialogs } from "@/components/schedule/ScheduleDialogs";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { CalendarViewSwitcher } from "@/components/schedule/CalendarViewSwitcher";
+import { NewAppointmentFlow } from "@/components/schedule/NewAppointmentFlow";
 
 const Schedule = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -30,6 +30,7 @@ const Schedule = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [hostFilter, setHostFilter] = useState("all");
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isNewAppointmentFlowOpen, setIsNewAppointmentFlowOpen] = useState(false);
 
   const {
     selectedDate,
@@ -40,21 +41,7 @@ const Schedule = () => {
     setSearchTerm,
     selectedTab,
     setSelectedTab,
-    showDateTimeSelection,
-    setShowDateTimeSelection,
-    handleTimeSelect,
-    handleBackToAgendaFromDateTime,
   } = useScheduleState();
-
-  const {
-    selectedAgendaId,
-    selectedAgendaName,
-    showAgendaSelection,
-    setShowAgendaSelection,
-    handleAgendaSelect,
-    handleProceedWithAgenda,
-    handleBackToAgendaSelection,
-  } = useAgendaSelection();
 
   const dialogs = useScheduleDialogs();
 
@@ -63,8 +50,6 @@ const Schedule = () => {
     setFormData,
     handleSubmit,
   } = useAppointmentForm(appointments, setAppointments);
-
-  
 
   const {
     events,
@@ -107,6 +92,7 @@ const Schedule = () => {
       addEvent(formData).then((success) => {
         if (success) {
           dialogs.setIsAddEventDialogOpen(false);
+          setIsNewAppointmentFlowOpen(false);
         }
       });
     },
@@ -180,6 +166,15 @@ const Schedule = () => {
     );
   }
 
+  if (isNewAppointmentFlowOpen) {
+    return (
+      <NewAppointmentFlow
+        onBack={() => setIsNewAppointmentFlowOpen(false)}
+        onFormSubmit={handleAddEvent}
+      />
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col bg-gray-900 overflow-hidden">
       <header
@@ -249,7 +244,7 @@ const Schedule = () => {
             
             <Button 
               onClick={() => {
-                setShowAgendaSelection(true);
+                setIsNewAppointmentFlowOpen(true);
               }}
               className="bg-white text-blue-600 hover:bg-blue-50 h-8 px-2"
             >
@@ -283,15 +278,6 @@ const Schedule = () => {
           scheduleEvents={scheduleEvents}
           statusFilter={statusFilter}
           hostFilter={hostFilter}
-          showAgendaSelection={showAgendaSelection}
-          selectedAgendaId={selectedAgendaId}
-          selectedAgendaName={selectedAgendaName}
-          onAgendaSelect={handleAgendaSelect}
-          onProceedWithAgenda={handleProceedWithAgenda}
-          onBackToAgendaSelection={handleBackToAgendaSelection}
-          showDateTimeSelection={showDateTimeSelection}
-          onBackToAgendaFromDateTime={handleBackToAgendaFromDateTime}
-          onTimeSelect={(date, time) => handleTimeSelect(date, time, dialogs.setIsAddEventDialogOpen)}
         />
       </div>
 
