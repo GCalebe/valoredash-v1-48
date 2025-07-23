@@ -2,7 +2,7 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useHosts } from "@/hooks/useHosts";
+import { useOptimizedHosts } from "@/hooks/useOptimizedHosts";
 
 interface ServiceSelectionTabProps {
   state: any;
@@ -19,7 +19,7 @@ export function ServiceSelectionTab({
   onNext,
   onPrevious,
 }: ServiceSelectionTabProps) {
-  const { hosts, loading: hostsLoading } = useHosts();
+  const { hosts, loading: hostsLoading } = useOptimizedHosts();
 
   return (
     <>

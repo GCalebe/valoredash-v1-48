@@ -40,14 +40,7 @@ export function AppointmentDateTimeSelection({ selectedAgendaName, onBack, onCon
     removeTag
   } = useEventFormDialog({ open: true });
   
-  // Additional hooks for form functionality
-  const { contacts: formContacts } = useContactsData();
-  
-  // Filter contacts for the form
-  const formFilteredContacts = (formContacts || []).filter(contact => 
-    contact.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-    contact.email.toLowerCase().includes(state.searchTerm.toLowerCase())
-  );
+  // Use the contacts from useEventFormDialog instead of duplicating the call
   
   // Mock constants and tag functions for now
   const formConstants = { services: [], attendanceTypes: [] };
@@ -346,7 +339,7 @@ export function AppointmentDateTimeSelection({ selectedAgendaName, onBack, onCon
                        <ClientSelectionTab
                          state={state}
                          updateState={updateState}
-                         filteredContacts={formFilteredContacts}
+                         filteredContacts={filteredContacts}
                          onSelectClient={handleSelectClient}
                          onNewClient={handleNewClient}
                          onSaveNewClient={handleSaveNewClient}

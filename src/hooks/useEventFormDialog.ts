@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { format, parse, parseISO } from 'date-fns';
 import { Contact } from '@/types/client';
 import { EventFormData, CalendarEvent } from '@/hooks/useCalendarEvents';
-import { useContactsData } from '@/hooks/useContactsData';
+import { useOptimizedContactsData } from '@/hooks/useOptimizedContactsData';
 import { useEventFormState } from '@/hooks/useEventFormState';
 import { EventFormState } from '@/types/eventForm';
 import { COLORS, SERVICES, COLLABORATORS, DURATIONS, ATTENDANCE_TYPES } from '@/constants/eventFormConstants';
@@ -27,7 +27,7 @@ interface UseEventFormDialogProps {
 }
 
 export const useEventFormDialog = ({ event, open }: UseEventFormDialogProps) => {
-  const { contacts } = useContactsData();
+  const { contacts } = useOptimizedContactsData();
   const { state, updateState, resetForm: resetFormState } = useEventFormState();
 
   // Filter contacts based on search term
