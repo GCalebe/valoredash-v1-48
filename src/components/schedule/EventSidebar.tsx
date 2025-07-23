@@ -42,7 +42,7 @@ export function EventSidebar({
       let color = "#6b7280";
 
       const matchingSalesperson = salespeople.find(
-        (sp) => sp.name.toLowerCase() === event.professional_id?.toLowerCase(),
+        (sp) => sp.name.toLowerCase() === event.hostName?.toLowerCase(),
       );
 
       if (matchingSalesperson) {

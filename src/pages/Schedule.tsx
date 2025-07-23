@@ -305,7 +305,7 @@ const Schedule = () => {
         setFormData={setFormData}
         handleSubmit={(e) => handleSubmit(e, dialogs.isEditDialogOpen, dialogs.currentAppointment, dialogs.setIsEditDialogOpen, dialogs.setIsAddDialogOpen)}
         confirmDelete={() => dialogs.confirmDelete(appointments, setAppointments)}
-        error={eventsError}
+        error={eventsError?.message || null}
       />
     </div>
   );

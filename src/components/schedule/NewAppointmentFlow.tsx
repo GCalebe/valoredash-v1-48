@@ -324,8 +324,8 @@ export function NewAppointmentFlow({ onBack, onFormSubmit }: NewAppointmentFlowP
                      state={state}
                      updateState={updateState}
                      constants={formConstants}
-                     addTag={formAddTag}
-                     removeTag={formRemoveTag}
+                       addTag={() => formAddTag}
+                       removeTag={() => formRemoveTag}
                      onPrevious={() => updateState({ activeTab: "service" })}
                    />
                  </TabsContent>

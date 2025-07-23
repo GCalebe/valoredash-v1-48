@@ -17,7 +17,7 @@ type UseCalendarEventsProps = {
 export function useCalendarEvents({ currentMonth }: UseCalendarEventsProps) {
   const [events, setEvents] = React.useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<Error | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const lastFetchedMonth = React.useRef<string | null>(null);
@@ -48,9 +48,9 @@ export function useCalendarEvents({ currentMonth }: UseCalendarEventsProps) {
         toast.success("Agenda atualizada com sucesso!");
       }
     } catch (err: any) {
-      const errorMessage = err instanceof Error ? err.message : "Erro desconhecido";
-      setError(errorMessage);
-      toast.error(`Erro ao buscar eventos: ${errorMessage}`);
+      const error = err instanceof Error ? err : new Error(err?.message || "Erro desconhecido");
+      setError(error);
+      toast.error(`Erro ao buscar eventos: ${error.message}`);
     } finally {
       setIsLoading(false);
       lastFetchedMonth.current = cacheKey;
@@ -116,62 +116,42 @@ export type { CalendarEvent, EventFormData } from "@/types/calendar";
 export const mockEvents: CalendarEvent[] = [
   {
     id: "1",
-    title: "Consulta com Dr. Smith",
-    start: new Date(2024, 6, 22, 10, 0),
-    end: new Date(2024, 6, 22, 11, 0),
+    summary: "Consulta com Dr. Smith",
+    start: new Date(2024, 6, 22, 10, 0).toISOString(),
+    end: new Date(2024, 6, 22, 11, 0).toISOString(),
     description: "Check-up anual",
     status: "confirmed",
-    client_id: "client-123",
-    professional_id: "prof-456",
-    service_id: "service-789",
-    location: "Consultório 1",
-    notes: "Trazer exames anteriores",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    htmlLink: "#1",
+    hostName: "Dr. Smith"
   },
   {
     id: "2",
-    title: "Reunião de Projeto",
-    start: new Date(2024, 6, 22, 14, 0),
-    end: new Date(2024, 6, 22, 15, 0),
+    summary: "Reunião de Projeto",
+    start: new Date(2024, 6, 22, 14, 0).toISOString(),
+    end: new Date(2024, 6, 22, 15, 0).toISOString(),
     description: "Discussão sobre o novo design",
     status: "confirmed",
-    client_id: "client-124",
-    professional_id: "prof-457",
-    service_id: "service-790",
-    location: "Sala de Reuniões 2",
-    notes: "Preparar apresentação",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    htmlLink: "#2",
+    hostName: "Maria Santos"
   },
   {
     id: "3",
-    title: "Almoço com a Equipe",
-    start: subDays(new Date(), 1),
-    end: subDays(new Date(), 1),
+    summary: "Almoço com a Equipe",
+    start: subDays(new Date(), 1).toISOString(),
+    end: subDays(new Date(), 1).toISOString(),
     description: "Confraternização",
     status: "confirmed",
-    client_id: "client-125",
-    professional_id: "prof-458",
-    service_id: "service-791",
-    location: "Restaurante Central",
-    notes: "",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    htmlLink: "#3",
+    hostName: "Pedro Costa"
   },
   {
     id: "4",
-    title: "Dentista",
-    start: addDays(new Date(), 2),
-    end: addDays(new Date(), 2),
+    summary: "Dentista",
+    start: addDays(new Date(), 2).toISOString(),
+    end: addDays(new Date(), 2).toISOString(),
     description: "Limpeza de rotina",
     status: "pending",
-    client_id: "client-126",
-    professional_id: "prof-459",
-    service_id: "service-792",
-    location: "Clínica Odontológica",
-    notes: "",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    htmlLink: "#4",
+    hostName: "Ana Silva"
   },
 ];

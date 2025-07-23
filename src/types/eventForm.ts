@@ -29,6 +29,8 @@ export interface EventFormState {
   meetingLink: string;
   searchTerm: string;
   selectedClient: Contact | null;
+  selectedDate?: Date;
+  selectedTime?: string;
   isNewClient: boolean;
   newClientData: NewClientData;
   isBlockingDate: boolean;

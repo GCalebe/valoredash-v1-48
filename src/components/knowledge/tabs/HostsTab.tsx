@@ -35,7 +35,7 @@ type Agenda = {
 
 const HostsTab = () => {
   const { user } = useAuth();
-  const { supabaseAgendas } = useAgendas();
+  const { agendas: supabaseAgendas } = useAgendas();
   const [hosts, setHosts] = useState<Host[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingHost, setEditingHost] = useState<Host | null>(null);
