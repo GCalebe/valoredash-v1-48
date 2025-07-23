@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bell, Calendar, MessageSquare, Users, AlertTriangle, Clock, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Bell, Calendar, MessageSquare, Users, AlertTriangle, Clock, CheckCircle, X } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,8 @@ interface NotificationItem {
 
 const NotificationsCard = React.memo(() => {
   const { notifications, loading, markAsRead, clearAll } = useNotifications();
+  const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const getIcon = (category: string) => {
     switch (category) {
@@ -76,13 +79,32 @@ const NotificationsCard = React.memo(() => {
     return 'Agora';
   };
 
+  const handleNotificationClick = (notification: NotificationItem) => {
+    setSelectedNotification(notification);
+    setIsDialogOpen(true);
+  };
+
+  const handleCompleteTask = () => {
+    if (selectedNotification) {
+      markAsRead(selectedNotification.id);
+      setIsDialogOpen(false);
+      setSelectedNotification(null);
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedNotification(null);
+  };
+
   const priorityOrder = { urgent: 0, warning: 1, info: 2, success: 3 };
   const sortedNotifications = notifications.sort((a, b) => 
     priorityOrder[a.type] - priorityOrder[b.type]
   );
 
   return (
-    <Card className="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-1">
+    <>
+    <Card className="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-1 h-[260px] flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <Bell className="h-4 w-4" />
@@ -105,7 +127,7 @@ const NotificationsCard = React.memo(() => {
         )}
       </CardHeader>
 
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-2 flex-1 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <div className="h-6 w-6 border-2 border-t-transparent border-primary rounded-full animate-spin"></div>
@@ -118,8 +140,8 @@ const NotificationsCard = React.memo(() => {
             </p>
           </div>
         ) : (
-          <div className="space-y-2 max-h-80 overflow-y-auto">
-            {sortedNotifications.slice(0, 5).map((notification) => {
+          <div className="space-y-2 max-h-80 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500 scrollbar-thumb-rounded-full transition-colors duration-200">
+            {sortedNotifications.map((notification) => {
               const Icon = getIcon(notification.category);
               const styles = getTypeStyles(notification.type);
               
@@ -132,13 +154,13 @@ const NotificationsCard = React.memo(() => {
                     styles.bg,
                     "hover:shadow-sm cursor-pointer"
                   )}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start gap-3">
                     <Icon className="h-4 w-4 mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
-                        <p className="text-sm font-medium truncate">
+                        <p className="text-sm font-medium">
                           {notification.title}
                         </p>
                         <Badge 
@@ -173,6 +195,50 @@ const NotificationsCard = React.memo(() => {
         )}
       </CardContent>
     </Card>
+
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {selectedNotification && (
+              <>
+                {React.createElement(getIcon(selectedNotification.category), { className: "h-5 w-5" })}
+                Detalhes da Notificação
+              </>
+            )}
+          </DialogTitle>
+        </DialogHeader>
+        
+        {selectedNotification && (
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium text-sm mb-2">Título:</h4>
+              <p className="text-sm">{selectedNotification.title}</p>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-sm mb-2">Descrição:</h4>
+              <p className="text-sm text-muted-foreground">{selectedNotification.subtitle}</p>
+            </div>
+            
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              <span>{formatTime(selectedNotification.timestamp)}</span>
+            </div>
+          </div>
+        )}
+        
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={handleCloseDialog}>
+            Fechar
+          </Button>
+          <Button onClick={handleCompleteTask} className="bg-green-600 hover:bg-green-700">
+            Já conclui
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 });
 
