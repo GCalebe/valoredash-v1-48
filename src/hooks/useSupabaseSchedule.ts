@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ScheduleEvent } from './useScheduleData';
+import { useAgendaAvailability } from './useAgendaAvailability';
 
-// Mock Supabase schedule hook since schedule_events table doesn't exist
-// This uses calendar_events for now or provides mock data
-export function useSupabaseSchedule() {
+// Enhanced Supabase schedule hook with availability automation
+export function useSupabaseSchedule(agendaId?: string) {
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Integrate with agenda availability system
+  const availability = useAgendaAvailability(agendaId);
 
   // Mock fetch all schedule events
   const fetchEvents = useCallback(async () => {
@@ -187,6 +190,13 @@ export function useSupabaseSchedule() {
     deleteEvent,
     getTodayEvents,
     getWeekEvents,
-    getMonthEvents
+    getMonthEvents,
+    // Availability automation features
+    availability: {
+      isDateAvailable: availability.isDateAvailable,
+      getAvailableDatesForMonth: availability.getAvailableDatesForMonth,
+      getAvailableTimeSlots: availability.getAvailableTimeSlots,
+      getOperatingHoursForDate: availability.getOperatingHoursForDate,
+    }
   };
 }
