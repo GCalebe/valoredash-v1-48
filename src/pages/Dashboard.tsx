@@ -11,6 +11,7 @@ import ClientsCard from "@/components/dashboard/ClientsCard";
 import EvolutionCard from "@/components/dashboard/EvolutionCard";
 import ScheduleCard from "@/components/dashboard/ScheduleCard";
 import AccountManagementCard from "@/components/dashboard/AccountManagementCard";
+import NotificationsCard from "@/components/dashboard/NotificationsCard";
 
 const Dashboard = React.memo(() => {
   const { user, isLoading } = useAuth();
@@ -28,6 +29,7 @@ const Dashboard = React.memo(() => {
 
   // Memoize cards to prevent unnecessary re-renders
   const dashboardCards = useMemo(() => [
+    <NotificationsCard key="notifications" />,
     <MetricsCard key="metrics" />,
     <ChatsCard key="chats" />,
     <KnowledgeCard key="knowledge" />,
@@ -54,7 +56,7 @@ const Dashboard = React.memo(() => {
           Painel Administrativo
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto w-full mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto w-full mb-8">
           {dashboardCards}
         </div>
         
