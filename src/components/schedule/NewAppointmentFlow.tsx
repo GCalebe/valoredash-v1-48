@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, Calendar, ArrowLeft } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, isToday } from 'date-fns';
@@ -13,23 +13,32 @@ import { EventFormData } from '@/types/event';
 import { useContactsData } from '@/hooks/useContactsData';
 import { AgendaSelectionTab } from './AgendaSelectionTab';
 import { useAgendas } from '@/hooks/useAgendas';
+import { useAgendaAvailability } from '@/hooks/useAgendaAvailability';
 
 interface NewAppointmentFlowProps {
+  selectedAgendaId?: string;
   onBack: () => void;
   onFormSubmit?: (formData: EventFormData) => void;
 }
 
-export function NewAppointmentFlow({ onBack, onFormSubmit }: NewAppointmentFlowProps) {
+export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: NewAppointmentFlowProps) {
   const [currentStep, setCurrentStep] = useState<'agenda' | 'datetime' | 'form'>('agenda');
   
   // Agenda selection state
-  const [selectedAgendaId, setSelectedAgendaId] = useState<string | null>(null);
+  const [internalSelectedAgendaId, setInternalSelectedAgendaId] = useState<string | null>(selectedAgendaId || null);
   const [selectedAgendaName, setSelectedAgendaName] = useState<string | null>(null);
 
   // DateTime selection state
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<Array<{time: string, available: boolean, reason?: string}>>([]);
+  
+  const {
+    getAvailableTimeSlots,
+    isDateAvailable,
+    loading: agendaLoading
+  } = useAgendaAvailability(selectedAgendaId || internalSelectedAgendaId || '');
   
   // Form state
   const {
@@ -51,25 +60,28 @@ export function NewAppointmentFlow({ onBack, onFormSubmit }: NewAppointmentFlowP
   const formAddTag = (tag: string) => console.log('Add tag:', tag);
   const formRemoveTag = (tag: string) => console.log('Remove tag:', tag);
 
-  // Horários disponíveis
-  const timeSlots = [
-    { time: '08:00', period: 'AM' },
-    { time: '08:30', period: 'AM' },
-    { time: '09:00', period: 'AM' },
-    { time: '09:30', period: 'AM' },
-    { time: '10:00', period: 'AM' },
-    { time: '10:30', period: 'AM' },
-    { time: '11:00', period: 'AM' },
-    { time: '11:30', period: 'AM' },
-    { time: '12:00', period: 'PM' },
-    { time: '12:30', period: 'PM' },
-    { time: '01:00', period: 'PM' },
-    { time: '01:30', period: 'PM' },
-    { time: '02:00', period: 'PM' },
-    { time: '02:30', period: 'PM' },
-    { time: '03:00', period: 'PM' },
-    { time: '03:30', period: 'PM' },
-  ];
+  // Load available time slots when date changes
+  useEffect(() => {
+    const agendaId = selectedAgendaId || internalSelectedAgendaId;
+    if (selectedDate && agendaId) {
+      const slots = getAvailableTimeSlots(selectedDate);
+      setAvailableTimeSlots(slots);
+    } else {
+      setAvailableTimeSlots([]);
+    }
+  }, [selectedDate, selectedAgendaId, internalSelectedAgendaId, getAvailableTimeSlots]);
+  
+  // Reset selected time when date changes
+  useEffect(() => {
+    setSelectedTime('');
+  }, [selectedDate]);
+  
+  // Function to check if a date is bookable
+  const isDateBookable = (date: Date): boolean => {
+    const agendaId = selectedAgendaId || internalSelectedAgendaId;
+    if (!agendaId) return false;
+    return isDateAvailable(date);
+  };
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -117,7 +129,7 @@ export function NewAppointmentFlow({ onBack, onFormSubmit }: NewAppointmentFlowP
   };
 
   const handleAgendaSelect = (agendaId: string, agendaName: string) => {
-    setSelectedAgendaId(agendaId);
+    setInternalSelectedAgendaId(agendaId);
     setSelectedAgendaName(agendaName);
   };
 
@@ -134,7 +146,7 @@ export function NewAppointmentFlow({ onBack, onFormSubmit }: NewAppointmentFlowP
       
       <AgendaSelectionTab
         onAgendaSelect={handleAgendaSelect}
-        selectedAgendaId={selectedAgendaId}
+        selectedAgendaId={selectedAgendaId || internalSelectedAgendaId}
       />
     </div>
   );
@@ -188,18 +200,20 @@ export function NewAppointmentFlow({ onBack, onFormSubmit }: NewAppointmentFlowP
               const isCurrentMonth = isSameMonth(day, currentDate);
               const isSelected = selectedDate && isSameDay(day, selectedDate);
               const isTodayDate = isToday(day);
+              const isBookable = isCurrentMonth && isDateBookable(day);
               
               return (
                 <button
                   key={index}
-                  onClick={() => isCurrentMonth && handleDateSelect(day)}
-                  disabled={!isCurrentMonth}
+                  onClick={() => isCurrentMonth && isBookable && handleDateSelect(day)}
+                  disabled={!isCurrentMonth || !isBookable}
                   className={cn(
                     "h-10 w-10 text-sm font-medium rounded-lg transition-colors",
                     !isCurrentMonth && "text-muted-foreground/50 cursor-not-allowed",
-                    isCurrentMonth && "hover:bg-muted text-foreground",
+                    isCurrentMonth && !isBookable && "text-muted-foreground/50 cursor-not-allowed",
+                    isCurrentMonth && isBookable && "hover:bg-muted text-foreground",
                     isSelected && "bg-primary text-primary-foreground hover:bg-primary/90",
-                    isTodayDate && !isSelected && "bg-muted text-foreground font-semibold"
+                    isTodayDate && !isSelected && isBookable && "bg-muted text-foreground font-semibold"
                   )}
                 >
                   {format(day, 'd')}
@@ -224,18 +238,32 @@ export function NewAppointmentFlow({ onBack, onFormSubmit }: NewAppointmentFlowP
           
           {selectedDate ? (
             <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
-              {timeSlots.map((slot) => (
-                <Button
-                  key={`${slot.time}-${slot.period}`}
-                  variant={selectedTime === `${slot.time} ${slot.period}` ? "default" : "outline"}
-                  size="sm"
-                  className="flex-col h-12"
-                  onClick={() => handleTimeSelect(`${slot.time} ${slot.period}`)}
-                >
-                  <span className="text-sm font-medium">{slot.time}</span>
-                  <span className="text-xs">{slot.period}</span>
-                </Button>
-              ))}
+              {agendaLoading ? (
+                <div className="col-span-2 text-center py-8">
+                  <p className="text-muted-foreground">Carregando horários...</p>
+                </div>
+              ) : availableTimeSlots.length > 0 ? (
+                availableTimeSlots.map((slot) => (
+                  <Button
+                    key={slot.time}
+                    variant={selectedTime === slot.time ? "default" : "outline"}
+                    size="sm"
+                    className="flex-col h-12"
+                    onClick={() => slot.available && handleTimeSelect(slot.time)}
+                    disabled={!slot.available}
+                    title={!slot.available ? slot.reason : undefined}
+                  >
+                    <span className="text-sm font-medium">{slot.time}</span>
+                    {!slot.available && (
+                      <span className="text-xs text-muted-foreground">Indisponível</span>
+                    )}
+                  </Button>
+                ))
+              ) : (
+                <div className="col-span-2 text-center py-8">
+                  <p className="text-muted-foreground">Nenhum horário disponível para esta data</p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-12">
@@ -395,7 +423,7 @@ export function NewAppointmentFlow({ onBack, onFormSubmit }: NewAppointmentFlowP
                 </Button>
               )}
               
-              {currentStep === 'agenda' && selectedAgendaId && (
+              {currentStep === 'agenda' && (selectedAgendaId || internalSelectedAgendaId) && (
                 <Button onClick={() => setCurrentStep('datetime')} size="sm">
                   Continuar
                 </Button>

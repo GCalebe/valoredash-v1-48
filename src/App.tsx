@@ -11,6 +11,7 @@ import ClientsDashboard from "./pages/ClientsDashboard";
 import Evolution from "./pages/Evolution";
 import Schedule from "./pages/Schedule";
 import ThemeSettings from "./pages/ThemeSettings";
+import { ScheduleTestComponent } from "./components/schedule/ScheduleTestComponent";
 import AdminDashboard from "./pages/AdminDashboard";
 import AIStore from "./pages/AIStore";
 import Pricing from "./pages/Pricing";
@@ -44,6 +45,7 @@ const App = () => (
                   <Route path="/clients" element={<ClientsDashboard />} />
                   <Route path="/evolution" element={<Evolution />} />
                   <Route path="/schedule" element={<Schedule />} />
+                  <Route path="/schedule-test" element={<ScheduleTestComponent />} />
                   <Route path="/theme-settings" element={<ThemeSettings />} />
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/user-management" element={<UserManagement />} />

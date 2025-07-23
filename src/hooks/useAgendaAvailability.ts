@@ -48,9 +48,9 @@ export function useAgendaAvailability(agendaId?: string) {
   const { toast } = useToast();
 
   // Get current agenda from the agendas list
-  const agenda = agendas.find(a => a.id === agendaId) || null;
+  const agenda = agendas.find(a => a.id === agendaId);
 
-  // Fetch operating hours from Supabase
+  // Fetch operating hours for the agenda
   const fetchOperatingHours = useCallback(async () => {
     if (!agendaId) return;
     
@@ -63,19 +63,18 @@ export function useAgendaAvailability(agendaId?: string) {
         .order('day_of_week');
 
       if (error) throw error;
-
       setOperatingHours(data || []);
     } catch (error) {
       console.error('Error fetching operating hours:', error);
       toast({
         variant: "destructive",
-        title: "Erro ao buscar horários",
+        title: "Erro ao buscar horários de funcionamento",
         description: "Não foi possível carregar os horários de funcionamento.",
       });
     }
   }, [agendaId, toast]);
 
-  // Fetch available dates with exceptions from Supabase
+  // Fetch available dates for the agenda
   const fetchAvailableDates = useCallback(async () => {
     if (!agendaId) return;
     
@@ -87,27 +86,26 @@ export function useAgendaAvailability(agendaId?: string) {
         .order('date');
 
       if (error) throw error;
-
       setAvailableDates(data || []);
     } catch (error) {
       console.error('Error fetching available dates:', error);
       toast({
         variant: "destructive",
         title: "Erro ao buscar datas disponíveis",
-        description: "Não foi possível carregar as exceções de data.",
+        description: "Não foi possível carregar as datas disponíveis.",
       });
     }
   }, [agendaId, toast]);
 
-  // Fetch existing bookings from Supabase
+  // Fetch bookings for a date range
   const fetchBookings = useCallback(async (startDate: Date, endDate: Date) => {
-    if (!agendaId) return;
+    if (!agendaId || !agenda?.name) return;
     
     try {
       const { data, error } = await supabase
         .from('agenda_bookings')
         .select('*')
-        .eq('agenda_name', agenda?.name || '')
+        .eq('agenda_name', agenda.name)
         .gte('booking_date', format(startDate, 'yyyy-MM-dd'))
         .lte('booking_date', format(endDate, 'yyyy-MM-dd'))
         .neq('status', 'cancelled')
@@ -143,21 +141,18 @@ export function useAgendaAvailability(agendaId?: string) {
   }, [operatingHours, availableDates]);
 
   // Get available dates for a month
-  const getAvailableDatesForMonth = useCallback((year: number, month: number): Date[] => {
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 0);
-    const availableDatesArray: Date[] = [];
+  const getAvailableDatesForMonth = useCallback((date: Date): Date[] => {
+    const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    const dates: Date[] = [];
     
-    for (let date = new Date(startDate); date <= endDate; date = addDays(date, 1)) {
-      // Don't include past dates
-      if (isBefore(date, startOfDay(new Date()))) continue;
-      
-      if (isDateAvailable(date)) {
-        availableDatesArray.push(new Date(date));
+    for (let d = new Date(startOfMonth); d <= endOfMonth; d = addDays(d, 1)) {
+      if (isDateAvailable(d)) {
+        dates.push(new Date(d));
       }
     }
     
-    return availableDatesArray;
+    return dates;
   }, [isDateAvailable]);
 
   // Get operating hours for a specific date
@@ -191,59 +186,53 @@ export function useAgendaAvailability(agendaId?: string) {
   const getAvailableTimeSlots = useCallback((date: Date): TimeSlot[] => {
     if (!agenda) return [];
     
-    const operatingHoursForDate = getOperatingHoursForDate(date);
-    if (!operatingHoursForDate) return [];
+    const operatingHours = getOperatingHoursForDate(date);
+    if (!operatingHours) return [];
     
     const dateStr = format(date, 'yyyy-MM-dd');
     const dayBookings = bookings.filter(booking => booking.booking_date === dateStr);
     
-    // Check for date-specific capacity limits
-    const dateException = availableDates.find(ad => ad.date === dateStr);
-    const maxBookingsForDate = dateException?.max_bookings;
-    
     const slots: TimeSlot[] = [];
-    const startTime = parseISO(`${dateStr}T${operatingHoursForDate.start}:00`);
-    const endTime = parseISO(`${dateStr}T${operatingHoursForDate.end}:00`);
-    
-    let currentTime = startTime;
     const duration = agenda.duration_minutes || 60;
     const bufferTime = agenda.buffer_time_minutes || 0;
     
-    // Generate slots with correct duration and buffer calculation
-    while (isBefore(addMinutes(currentTime, duration), endTime)) {
-      const slotTime = format(currentTime, 'HH:mm');
-      const slotEndTime = addMinutes(currentTime, duration);
-      const slotEndWithBuffer = addMinutes(currentTime, duration + bufferTime);
+    // Parse start and end times
+    const [startHour, startMinute] = operatingHours.start.split(':').map(Number);
+    const [endHour, endMinute] = operatingHours.end.split(':').map(Number);
+    
+    const startTime = new Date(date);
+    startTime.setHours(startHour, startMinute, 0, 0);
+    
+    const endTime = new Date(date);
+    endTime.setHours(endHour, endMinute, 0, 0);
+    
+    let currentTime = new Date(startTime);
+    
+    while (currentTime.getTime() + (duration * 60000) <= endTime.getTime()) {
+      const timeStr = format(currentTime, 'HH:mm');
       
-      // Improved conflict detection considering buffer time
+      // Check for conflicts with existing bookings
       const hasConflict = dayBookings.some(booking => {
-        const bookingStart = parseISO(`${dateStr}T${booking.start_time}:00`);
-        const bookingEnd = parseISO(`${dateStr}T${booking.end_time}:00`);
+        const [bookingStartHour, bookingStartMinute] = booking.start_time.split(':').map(Number);
+        const [bookingEndHour, bookingEndMinute] = booking.end_time.split(':').map(Number);
         
-        // Check for overlaps including buffer time
-        return !(
-          // Slot ends (with buffer) before booking starts OR slot starts after booking ends
-          isBefore(slotEndWithBuffer, bookingStart) || 
-          isAfter(currentTime, bookingEnd)
-        );
+        const bookingStart = new Date(date);
+        bookingStart.setHours(bookingStartHour, bookingStartMinute, 0, 0);
+        
+        const bookingEnd = new Date(date);
+        bookingEnd.setHours(bookingEndHour, bookingEndMinute, 0, 0);
+        
+        const slotEnd = new Date(currentTime.getTime() + (duration * 60000));
+        
+        // Check if slot overlaps with booking
+        return currentTime < bookingEnd && slotEnd > bookingStart;
       });
       
-      // Count participants for this exact time slot
-      const exactSlotBookings = dayBookings.filter(booking => {
-        return booking.start_time === slotTime;
-      });
-      
-      const currentParticipants = exactSlotBookings.length;
+      // Count existing bookings for this time slot
+      const slotBookings = dayBookings.filter(booking => booking.start_time === timeStr);
       const maxParticipants = agenda.max_participants || 1;
-      const isOverCapacity = currentParticipants >= maxParticipants;
+      const isOverCapacity = slotBookings.length >= maxParticipants;
       
-      // Check total bookings for the day if there's a daily limit
-      let isDayOverCapacity = false;
-      if (maxBookingsForDate && maxBookingsForDate > 0) {
-        isDayOverCapacity = dayBookings.length >= maxBookingsForDate;
-      }
-      
-      // Determine availability and reason
       let available = true;
       let reason: string | undefined;
       
@@ -252,20 +241,17 @@ export function useAgendaAvailability(agendaId?: string) {
         reason = 'Horário ocupado';
       } else if (isOverCapacity) {
         available = false;
-        reason = `Capacidade máxima atingida (${currentParticipants}/${maxParticipants})`;
-      } else if (isDayOverCapacity) {
-        available = false;
-        reason = 'Limite de agendamentos do dia atingido';
+        reason = `Capacidade máxima atingida (${slotBookings.length}/${maxParticipants})`;
       }
       
       slots.push({
-        time: slotTime,
+        time: timeStr,
         available,
         reason
       });
       
-      // Advance to next slot (duration + buffer)
-      currentTime = addMinutes(currentTime, duration + bufferTime);
+      // Move to next slot
+      currentTime = new Date(currentTime.getTime() + ((duration + bufferTime) * 60000));
     }
     
     return slots;
@@ -295,14 +281,10 @@ export function useAgendaAvailability(agendaId?: string) {
     availableDates,
     bookings,
     loading,
+    fetchBookings,
     isDateAvailable,
     getAvailableDatesForMonth,
     getOperatingHoursForDate,
     getAvailableTimeSlots,
-    fetchBookings,
-    refreshData: () => {
-      fetchOperatingHours();
-      fetchAvailableDates();
-    }
   };
 }

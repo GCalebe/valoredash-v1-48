@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, Calendar, ArrowLeft } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, isToday } from 'date-fns';
@@ -11,19 +11,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEventFormDialog } from '@/hooks/useEventFormDialog';
 import { EventFormData } from '@/types/event';
 import { useContactsData } from '@/hooks/useContactsData';
+import { useAgendaAvailability, type TimeSlot } from '@/hooks/useAgendaAvailability';
 
 interface AppointmentDateTimeSelectionProps {
-  selectedAgendaName: string;
+  selectedAgendaId: string;
   onBack: () => void;
   onContinue: (data: { date: Date; time: string }) => void;
   onFormSubmit?: (formData: EventFormData) => void;
 }
 
-export function AppointmentDateTimeSelection({ selectedAgendaName, onBack, onContinue, onFormSubmit }: AppointmentDateTimeSelectionProps) {
+export function AppointmentDateTimeSelection({ selectedAgendaId, onBack, onContinue, onFormSubmit }: AppointmentDateTimeSelectionProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [currentStep, setCurrentStep] = useState<'datetime' | 'form'>('datetime');
+  
+  // Use agenda availability hook instead of mock data
+  const {
+    agenda,
+    loading: agendaLoading,
+    getAvailableTimeSlots,
+    isDateAvailable,
+    fetchBookings
+  } = useAgendaAvailability(selectedAgendaId);
+  
+
   
   // Form state
   const {
@@ -47,25 +59,26 @@ export function AppointmentDateTimeSelection({ selectedAgendaName, onBack, onCon
   const formAddTag = (tag: string) => console.log('Add tag:', tag);
   const formRemoveTag = (tag: string) => console.log('Remove tag:', tag);
 
-  // Horários disponíveis
-  const timeSlots = [
-    { time: '08:00', period: 'AM' },
-    { time: '08:30', period: 'AM' },
-    { time: '09:00', period: 'AM' },
-    { time: '09:30', period: 'AM' },
-    { time: '10:00', period: 'AM' },
-    { time: '10:30', period: 'AM' },
-    { time: '11:00', period: 'AM' },
-    { time: '11:30', period: 'AM' },
-    { time: '12:00', period: 'PM' },
-    { time: '12:30', period: 'PM' },
-    { time: '01:00', period: 'PM' },
-    { time: '01:30', period: 'PM' },
-    { time: '02:00', period: 'PM' },
-    { time: '02:30', period: 'PM' },
-    { time: '03:00', period: 'PM' },
-    { time: '03:30', period: 'PM' },
-  ];
+  // Get available time slots from Supabase
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
+  
+  // Load time slots when date changes
+  useEffect(() => {
+    if (selectedDate && selectedAgendaId) {
+      // Fetch bookings for the selected date
+        const startDate = new Date(selectedDate);
+        const endDate = new Date(selectedDate);
+      
+      fetchBookings(startDate, endDate).then(() => {
+        const slots = getAvailableTimeSlots(selectedDate);
+        setAvailableTimeSlots(slots);
+      }).catch(error => {
+        console.error('Error in fetchBookings:', error);
+      });
+    } else {
+      setAvailableTimeSlots([]);
+    }
+  }, [selectedDate, selectedAgendaId, fetchBookings, getAvailableTimeSlots]);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -85,11 +98,17 @@ export function AppointmentDateTimeSelection({ selectedAgendaName, onBack, onCon
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    setSelectedTime(null); // Reset time selection when date changes
+    setSelectedTime(''); // Reset time selection when date changes
   };
 
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
+  };
+  
+  // Check if a date is available for booking
+  const isDateBookable = (date: Date): boolean => {
+    if (!selectedAgendaId) return false;
+    return isDateAvailable(date);
   };
   
   const handleContinueToForm = () => {
@@ -237,16 +256,18 @@ export function AppointmentDateTimeSelection({ selectedAgendaName, onBack, onCon
                         const isCurrentMonth = isSameMonth(day, currentDate);
                         const isSelected = selectedDate && isSameDay(day, selectedDate);
                         const isTodayDate = isToday(day);
+                        const isAvailable = isCurrentMonth && isDateBookable(day);
                         
                         return (
                           <button
                             key={index}
-                            onClick={() => isCurrentMonth && handleDateSelect(day)}
-                            disabled={!isCurrentMonth}
+                            onClick={() => isCurrentMonth && isAvailable && handleDateSelect(day)}
+                            disabled={!isCurrentMonth || !isAvailable}
                             className={cn(
                               "h-12 w-12 p-0 text-sm font-semibold rounded-xl transition-all duration-200 transform hover:scale-105",
                               !isCurrentMonth && "text-gray-300 dark:text-gray-600 cursor-not-allowed",
-                              isCurrentMonth && "hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:shadow-md text-gray-700 dark:text-gray-300",
+                              !isAvailable && isCurrentMonth && "text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50",
+                              isCurrentMonth && isAvailable && "hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:shadow-md text-gray-700 dark:text-gray-300",
                               isSelected && "bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg",
                               isTodayDate && !isSelected && "bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50 text-blue-700 dark:text-blue-300 border-2 border-blue-300 dark:border-blue-600"
                             )}
@@ -274,30 +295,50 @@ export function AppointmentDateTimeSelection({ selectedAgendaName, onBack, onCon
                     </div>
                     
                     {selectedDate ? (
-                       <div className="grid grid-cols-3 gap-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-                        {timeSlots.map((slot) => (
-                          <Button
-                            key={`${slot.time}-${slot.period}`}
-                            variant={selectedTime === `${slot.time} ${slot.period}` ? "default" : "outline"}
-                            size="sm"
-                            className={cn(
-                              "flex-col h-14 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105",
-                              selectedTime === `${slot.time} ${slot.period}` 
-                                ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg border-0" 
-                                : "hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500"
-                            )}
-                            onClick={() => handleTimeSelect(`${slot.time} ${slot.period}`)}
-                          >
-                            <span className="text-sm font-bold">{slot.time}</span>
-                            <span className={cn(
-                              "text-xs font-medium",
-                              selectedTime === `${slot.time} ${slot.period}` 
-                                ? "text-blue-100" 
-                                : "text-gray-500 dark:text-gray-400"
-                            )}>{slot.period}</span>
-                          </Button>
-                        ))}
-                      </div>
+                      agendaLoading ? (
+                        <div className="flex items-center justify-center py-16">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+                          {availableTimeSlots.length > 0 ? (
+                            availableTimeSlots.map((slot) => {
+                              const isSlotAvailable = slot.available;
+                              const isSlotSelected = selectedTime === slot.time;
+                              
+                              return (
+                                <Button
+                                  key={slot.time}
+                                  variant={isSlotSelected ? "default" : "outline"}
+                                  size="sm"
+                                  disabled={!isSlotAvailable}
+                                  className={cn(
+                                    "h-12 rounded-xl font-semibold transition-all duration-200",
+                                    isSlotSelected
+                                      ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg border-0"
+                                      : isSlotAvailable
+                                      ? "hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500"
+                                      : "opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500"
+                                  )}
+                                  onClick={() => isSlotAvailable && handleTimeSelect(slot.time)}
+                                  title={!isSlotAvailable ? slot.reason : undefined}
+                                >
+                                  <span className="text-sm font-bold">{slot.time}</span>
+                                  {!isSlotAvailable && slot.reason && (
+                                    <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">✕</span>
+                                  )}
+                                </Button>
+                              );
+                            })
+                          ) : (
+                            <div className="col-span-2 text-center py-8">
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Nenhum horário disponível para esta data
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )
                     ) : (
                       <div className="text-center py-16">
                         <div className="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6">
