@@ -132,7 +132,14 @@ const InfoTooltip = ({ text }: { text: string }) => (
       <TooltipTrigger asChild>
         <Info className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
       </TooltipTrigger>
-      <TooltipContent className="max-w-sm p-3 bg-background border">
+      <TooltipContent 
+        className="max-w-sm p-3 bg-background border z-[9999]" 
+        side="top" 
+        align="start"
+        sideOffset={8}
+        avoidCollisions={true}
+        collisionPadding={16}
+      >
         <p className="text-sm leading-relaxed text-foreground">{text}</p>
       </TooltipContent>
     </Tooltip>
