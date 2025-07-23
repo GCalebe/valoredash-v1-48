@@ -140,7 +140,7 @@ const NotificationsCard = React.memo(() => {
             </p>
           </div>
         ) : (
-          <div className="space-y-2 max-h-80 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500 scrollbar-thumb-rounded-full transition-colors duration-200">
+          <div className="space-y-2 h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500 scrollbar-thumb-rounded-full transition-colors duration-200">
             {sortedNotifications.map((notification) => {
               const Icon = getIcon(notification.category);
               const styles = getTypeStyles(notification.type);
