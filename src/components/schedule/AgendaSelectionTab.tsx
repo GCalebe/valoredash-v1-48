@@ -16,10 +16,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface AgendaSelectionTabProps {
   onAgendaSelect: (agendaId: string, agendaName: string) => void;
   selectedAgendaId?: string;
-  onProceed?: () => void;
 }
 
-export function AgendaSelectionTab({ onAgendaSelect, selectedAgendaId, onProceed }: AgendaSelectionTabProps) {
+export function AgendaSelectionTab({ onAgendaSelect, selectedAgendaId }: AgendaSelectionTabProps) {
   const { agendas, agendasLoading } = useAgendas();
 
   const getCategoryColor = (category: string | null) => {
@@ -201,16 +200,6 @@ export function AgendaSelectionTab({ onAgendaSelect, selectedAgendaId, onProceed
         </div>
       </div>
       
-      {selectedAgendaId && onProceed && (
-        <div className="mt-6 flex justify-center">
-          <Button 
-            onClick={onProceed}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 font-semibold"
-          >
-            Prosseguir com a Agenda Selecionada
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

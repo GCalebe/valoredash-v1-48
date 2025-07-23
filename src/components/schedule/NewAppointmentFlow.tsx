@@ -144,7 +144,6 @@ export function NewAppointmentFlow({ onBack, onFormSubmit }: NewAppointmentFlowP
           <AgendaSelectionTab
             onAgendaSelect={handleAgendaSelect}
             selectedAgendaId={selectedAgendaId}
-            onProceed={handleProceedFromAgenda}
           />
         );
       case 'datetime':
