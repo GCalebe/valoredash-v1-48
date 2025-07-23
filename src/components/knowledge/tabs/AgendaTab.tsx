@@ -158,10 +158,10 @@ const FormField = ({ label, tooltipText, children }: { label: string, tooltipTex
 
 const AgendaTab = () => {
   const { hosts, loading: hostsLoading } = useHosts();
-  const { agendas: supabaseAgendas, agendasLoading, refetchAgendas } = useAgendas();
+  const { agendas: supabaseAgendas, agendasLoading, refetchAgendas, createAgenda, updateAgenda, deleteAgenda } = useAgendas();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [agendas, setAgendas] = useState<LocalAgenda[]>([]);
   const [currentAgenda, setCurrentAgenda] = useState<Omit<LocalAgenda, 'id'>>(initialAgendaState);
+  const [editingAgendaId, setEditingAgendaId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const totalSteps = 6;
 
@@ -187,10 +187,8 @@ const AgendaTab = () => {
     };
   };
 
-  // Usar dados do Supabase quando disponíveis, senão usar mockados
-  const displayAgendas = supabaseAgendas.length > 0 
-    ? supabaseAgendas.map(convertSupabaseToLocal)
-    : agendas;
+  // Usar dados do Supabase convertidos para formato local
+  const displayAgendas = supabaseAgendas.map(convertSupabaseToLocal);
 
   const isLoading = agendasLoading || hostsLoading;
 
@@ -212,20 +210,54 @@ const AgendaTab = () => {
     setCurrentAgenda(prev => ({ ...prev, sendReminders: checked }));
   };
 
-  const handleSave = () => {
-    setAgendas(prev => [...prev, { ...currentAgenda, id: Math.random() }]);
-    setIsDialogOpen(false);
-    setCurrentAgenda(initialAgendaState);
-    setStep(1);
+  const handleSave = async () => {
+    try {
+      const agendaData = {
+        name: currentAgenda.title,
+        description: currentAgenda.description,
+        category: currentAgenda.category,
+        duration_minutes: currentAgenda.duration,
+        buffer_time_minutes: currentAgenda.breakTime,
+        max_participants: currentAgenda.maxParticipants || 1,
+        price: null, // Será implementado futuramente
+        requires_approval: false,
+        cancellation_policy: null,
+        preparation_notes: null,
+        follow_up_notes: null,
+        is_active: true
+      };
+
+      if (editingAgendaId) {
+        // Editando agenda existente
+        await updateAgenda(editingAgendaId, agendaData);
+      } else {
+        // Criando nova agenda
+        await createAgenda(agendaData);
+      }
+
+      setIsDialogOpen(false);
+      setCurrentAgenda(initialAgendaState);
+      setEditingAgendaId(null);
+      setStep(1);
+    } catch (error) {
+      console.error('Erro ao salvar agenda:', error);
+    }
   };
   
   const openDialog = () => {
     setCurrentAgenda(initialAgendaState);
+    setEditingAgendaId(null);
     setStep(1);
     setIsDialogOpen(true);
   };
 
   const handleEditAgenda = (agenda: LocalAgenda) => {
+    // Encontrar a agenda original do Supabase para pegar o ID correto
+    const supabaseAgenda = supabaseAgendas.find(sa => parseInt(sa.id) === agenda.id);
+    if (supabaseAgenda) {
+      setEditingAgendaId(supabaseAgenda.id);
+    }
+    
     setCurrentAgenda({
       title: agenda.title,
       description: agenda.description,
@@ -248,9 +280,15 @@ const AgendaTab = () => {
 
   const handleDeleteAgenda = async (agendaId: string | number) => {
      if (window.confirm('Tem certeza que deseja excluir esta agenda?')) {
-       // TODO: Implementar exclusão no Supabase
-       console.log('Deletar agenda:', agendaId);
-       // Após implementar a exclusão, chamar refetchAgendas() para atualizar a lista
+       try {
+         // Encontrar a agenda original do Supabase para pegar o ID correto
+         const supabaseAgenda = supabaseAgendas.find(sa => parseInt(sa.id) === agendaId);
+         if (supabaseAgenda) {
+           await deleteAgenda(supabaseAgenda.id);
+         }
+       } catch (error) {
+         console.error('Erro ao deletar agenda:', error);
+       }
      }
    };
 
@@ -270,7 +308,7 @@ const AgendaTab = () => {
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto bg-background border">
             <DialogHeader className="space-y-4 pb-6">
               <div>
-                <DialogTitle className="text-2xl font-bold">Nova Agenda - Etapa {step} de {totalSteps}</DialogTitle>
+                <DialogTitle className="text-2xl font-bold">{editingAgendaId ? 'Editar' : 'Nova'} Agenda - Etapa {step} de {totalSteps}</DialogTitle>
                 <div className="flex gap-2 mt-3">
                   {Array.from({ length: totalSteps }, (_, i) => i + 1).map((stepNumber) => (
                     <div
