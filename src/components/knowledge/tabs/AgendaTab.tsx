@@ -185,7 +185,8 @@ const AgendaTab = () => {
       successMessage: 'Obrigado por se inscrever!',
       redirectUrl: '',
       sendReminders: false,
-      reminders: []
+      reminders: [],
+      serviceTypes: ['Online', 'Presencial'] // Default service types since service_types column doesn't exist yet
     };
   };
 

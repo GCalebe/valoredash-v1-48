@@ -27,7 +27,7 @@ export function useAgendaServiceTypes(agendaId?: string) {
       try {
         const { data, error } = await supabase
           .from('agendas')
-          .select('service_types')
+          .select('*')
           .eq('id', agendaId)
           .single();
 
@@ -41,20 +41,11 @@ export function useAgendaServiceTypes(agendaId?: string) {
           return;
         }
 
-        if (data?.service_types && Array.isArray(data.service_types)) {
-          // Converter os tipos da agenda para o formato esperado
-          const types = data.service_types.map((type: string) => ({
-            label: type,
-            value: type.toLowerCase()
-          }));
-          setServiceTypes(types);
-        } else {
-          // Se não há tipos definidos, usar padrão
-          setServiceTypes([
-            { label: "Presencial", value: "presencial" },
-            { label: "Online", value: "online" },
-          ]);
-        }
+        // Since service_types column doesn't exist yet, use default types
+        setServiceTypes([
+          { label: "Presencial", value: "presencial" },
+          { label: "Online", value: "online" },
+        ]);
       } catch (error) {
         console.error('Erro ao buscar tipos de atendimento:', error);
         toast({

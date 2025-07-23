@@ -28,10 +28,7 @@ export function AvailabilityCalendar({
   } = useAgendaAvailability(agendaId);
 
   // Get available dates for current month view
-  const availableDates = getAvailableDatesForMonth(
-    currentMonth.getFullYear(),
-    currentMonth.getMonth()
-  );
+  const availableDates = getAvailableDatesForMonth(currentMonth);
 
   // Custom modifiers for the calendar
   const modifiers = {
