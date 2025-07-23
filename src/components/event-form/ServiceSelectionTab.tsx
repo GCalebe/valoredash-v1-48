@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOptimizedHosts } from "@/hooks/useOptimizedHosts";
+import { useProducts } from "@/hooks/useProducts";
 
 interface ServiceSelectionTabProps {
   state: any;
@@ -20,24 +21,31 @@ export function ServiceSelectionTab({
   onPrevious,
 }: ServiceSelectionTabProps) {
   const { hosts, loading: hostsLoading } = useOptimizedHosts();
+  const { products, loading: productsLoading } = useProducts();
 
   return (
     <>
       <div className="space-y-2">
-        <Label htmlFor="service">Serviço Náutico *</Label>
+        <Label htmlFor="service">Produto/Serviço *</Label>
         <Select 
           value={state.selectedService} 
           onValueChange={(value) => updateState({ selectedService: value })}
+          disabled={productsLoading}
         >
           <SelectTrigger id="service" className={state.errors.service ? "border-destructive" : ""}>
-            <SelectValue placeholder="Selecione um serviço" />
+            <SelectValue placeholder={productsLoading ? "Carregando produtos..." : "Selecione um produto/serviço"} />
           </SelectTrigger>
           <SelectContent>
-            {(constants.SERVICES || []).map((service: string) => (
-              <SelectItem key={service} value={service}>
-                {service}
+            {products.map((product) => (
+              <SelectItem key={product.id} value={product.name}>
+                {product.name} {product.price > 0 && `- R$ ${product.price.toFixed(2)}`}
               </SelectItem>
             ))}
+            {products.length === 0 && !productsLoading && (
+              <div className="p-2 text-sm text-gray-500 text-center">
+                Nenhum produto/serviço encontrado
+              </div>
+            )}
           </SelectContent>
         </Select>
         {state.errors.service && (

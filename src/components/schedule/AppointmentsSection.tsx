@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X, Trash2 } from "lucide-react";
+import { useProducts } from "@/hooks/useProducts";
 
 interface AppointmentsSectionProps {
   appointments: Appointment[];
@@ -44,6 +45,7 @@ export function AppointmentsSection({
   handleSubmit,
   confirmDelete,
 }: AppointmentsSectionProps) {
+  const { products, loading: productsLoading } = useProducts();
   return (
     <>
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -124,7 +126,7 @@ export function AppointmentsSection({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="service">Serviço Náutico</Label>
+                <Label htmlFor="service">Produto/Serviço</Label>
                 <select
                   id="service"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
@@ -136,24 +138,16 @@ export function AppointmentsSection({
                     })
                   }
                   required
+                  disabled={productsLoading}
                 >
-                  <option value="Manutenção de Casco">
-                    Manutenção de Casco
+                  <option value="">
+                    {productsLoading ? "Carregando produtos..." : "Selecione um produto/serviço"}
                   </option>
-                  <option value="Revisão de Motor">Revisão de Motor</option>
-                  <option value="Inspeção de Segurança">
-                    Inspeção de Segurança
-                  </option>
-                  <option value="Vistoria Completa">Vistoria Completa</option>
-                  <option value="Limpeza e Enceramento">
-                    Limpeza e Enceramento
-                  </option>
-                  <option value="Manutenção Preventiva">
-                    Manutenção Preventiva
-                  </option>
-                  <option value="Vistoria de Segurança">
-                    Vistoria de Segurança
-                  </option>
+                  {products.map((product) => (
+                    <option key={product.id} value={product.name}>
+                      {product.name} {product.price > 0 && `- R$ ${product.price.toFixed(2)}`}
+                    </option>
+                  ))}
                 </select>
               </div>
 

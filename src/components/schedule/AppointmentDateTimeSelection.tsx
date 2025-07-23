@@ -406,6 +406,7 @@ export function AppointmentDateTimeSelection({ selectedAgendaId, onBack, onConti
                        addTag={() => formAddTag}
                        removeTag={() => formRemoveTag}
                          onPrevious={() => updateState({ activeTab: "service" })}
+                         selectedAgendaId={selectedAgendaId}
                        />
                      </TabsContent>
                   </Tabs>

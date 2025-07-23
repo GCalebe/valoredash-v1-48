@@ -21,6 +21,7 @@ export const useEventFormState = () => {
     meetingLink: "",
     searchTerm: "",
     selectedClient: null,
+    selectedAgendaId: undefined,
     isNewClient: false,
     newClientData: {
       name: "",
@@ -61,6 +62,7 @@ export const useEventFormState = () => {
       meetingLink: "",
       searchTerm: "",
       selectedClient: null,
+      selectedAgendaId: undefined,
       isNewClient: false,
       newClientData: {
         name: "",

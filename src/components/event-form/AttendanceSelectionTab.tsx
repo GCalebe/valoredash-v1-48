@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Plus } from "lucide-react";
+import { useAgendaServiceTypes } from "@/hooks/useAgendaServiceTypes";
 
 interface AttendanceSelectionTabProps {
   state: any;
@@ -14,6 +15,7 @@ interface AttendanceSelectionTabProps {
   addTag: () => void;
   removeTag: (id: string) => void;
   onPrevious: () => void;
+  selectedAgendaId?: string;
 }
 
 export function AttendanceSelectionTab({
@@ -23,7 +25,9 @@ export function AttendanceSelectionTab({
   addTag,
   removeTag,
   onPrevious,
+  selectedAgendaId,
 }: AttendanceSelectionTabProps) {
+  const { serviceTypes, loading } = useAgendaServiceTypes(selectedAgendaId);
   return (
     <>
       <div className="space-y-2">
@@ -36,11 +40,21 @@ export function AttendanceSelectionTab({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {(constants.ATTENDANCE_TYPES || []).map((type: any) => (
-              <SelectItem key={type.value} value={type.value}>
-                {type.label}
+            {loading ? (
+              <SelectItem value="loading" disabled>
+                Carregando tipos de atendimento...
               </SelectItem>
-            ))}
+            ) : serviceTypes.length > 0 ? (
+              serviceTypes.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="no-types" disabled>
+                Nenhum tipo de atendimento disponível
+              </SelectItem>
+            )}
           </SelectContent>
         </Select>
       </div>

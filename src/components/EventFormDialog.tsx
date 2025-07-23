@@ -149,6 +149,7 @@ export function EventFormDialog({
                     addTag={addTag}
                     removeTag={removeTag}
                     onPrevious={() => updateState({ activeTab: "datetime" })}
+                    selectedAgendaId={state.selectedAgendaId}
                   />
                 </TabsContent>
               </Tabs>

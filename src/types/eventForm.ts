@@ -31,6 +31,7 @@ export interface EventFormState {
   selectedClient: Contact | null;
   selectedDate?: Date;
   selectedTime?: string;
+  selectedAgendaId?: string;
   isNewClient: boolean;
   newClientData: NewClientData;
   isBlockingDate: boolean;

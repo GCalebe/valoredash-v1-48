@@ -335,6 +335,7 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
                 addTag={() => formAddTag}
                 removeTag={() => formRemoveTag}
                 onPrevious={() => updateState({ activeTab: "service" })}
+                selectedAgendaId={selectedAgendaId}
               />
             </TabsContent>
           </Tabs>

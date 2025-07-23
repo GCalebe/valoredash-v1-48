@@ -70,6 +70,7 @@ type LocalAgenda = {
   redirectUrl?: string;
   sendReminders: boolean;
   reminders: Reminder[];
+  serviceTypes: string[];
 };
 
 type Agenda = LocalAgenda;
@@ -86,6 +87,7 @@ const initialAgendaState: Omit<LocalAgenda, 'id'> = {
   breakTime: 15,
   operatingHours: '09:00-18:00',
   minNotice: 24,
+  serviceTypes: ['Online', 'Presencial'],
   actionAfterRegistration: 'success_message',
   successMessage: 'Obrigado por se inscrever!',
   redirectUrl: '',
@@ -163,7 +165,7 @@ const AgendaTab = () => {
   const [currentAgenda, setCurrentAgenda] = useState<Omit<LocalAgenda, 'id'>>(initialAgendaState);
   const [editingAgendaId, setEditingAgendaId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
-  const totalSteps = 6;
+  const totalSteps = 7;
 
   // Função para converter agenda do Supabase para formato local
   const convertSupabaseToLocal = (supabaseAgenda: SupabaseAgenda): LocalAgenda => {
@@ -224,7 +226,8 @@ const AgendaTab = () => {
         cancellation_policy: null,
         preparation_notes: null,
         follow_up_notes: null,
-        is_active: true
+        is_active: true,
+        service_types: currentAgenda.serviceTypes
       };
 
       if (editingAgendaId) {
@@ -268,6 +271,7 @@ const AgendaTab = () => {
       availabilityInterval: agenda.availabilityInterval || 30,
       operatingHours: agenda.operatingHours || '09:00-18:00',
       minNotice: agenda.minNotice || 24,
+      serviceTypes: agenda.serviceTypes || ['Online', 'Presencial'],
       actionAfterRegistration: agenda.actionAfterRegistration || 'success_message',
       successMessage: agenda.successMessage || 'Obrigado por se inscrever!',
       redirectUrl: agenda.redirectUrl || '',
@@ -458,6 +462,67 @@ const AgendaTab = () => {
 
               {step === 5 && (
                 <div className="space-y-6">
+                  <h3 className="text-lg font-semibold">Tipos de Atendimento</h3>
+                  <p className="text-sm text-muted-foreground">Selecione os tipos de atendimento disponíveis para esta agenda. Você pode escolher múltiplas opções.</p>
+                  
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        currentAgenda.serviceTypes.includes('Online') 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/60'
+                      }`} onClick={() => {
+                        const newTypes = currentAgenda.serviceTypes.includes('Online')
+                          ? currentAgenda.serviceTypes.filter(type => type !== 'Online')
+                          : [...currentAgenda.serviceTypes, 'Online'];
+                        setCurrentAgenda(prev => ({ ...prev, serviceTypes: newTypes }));
+                      }}>
+                        <div className="text-center space-y-2">
+                          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
+                            currentAgenda.serviceTypes.includes('Online') 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-muted text-muted-foreground'
+                          }`}>
+                            <span className="text-2xl">💻</span>
+                          </div>
+                          <h4 className="font-semibold text-foreground">Online</h4>
+                          <p className="text-sm text-muted-foreground">Atendimento virtual via videochamada</p>
+                        </div>
+                      </div>
+                      
+                      <div className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        currentAgenda.serviceTypes.includes('Presencial') 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/60'
+                      }`} onClick={() => {
+                        const newTypes = currentAgenda.serviceTypes.includes('Presencial')
+                          ? currentAgenda.serviceTypes.filter(type => type !== 'Presencial')
+                          : [...currentAgenda.serviceTypes, 'Presencial'];
+                        setCurrentAgenda(prev => ({ ...prev, serviceTypes: newTypes }));
+                      }}>
+                        <div className="text-center space-y-2">
+                          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
+                            currentAgenda.serviceTypes.includes('Presencial') 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-muted text-muted-foreground'
+                          }`}>
+                            <span className="text-2xl">🏢</span>
+                          </div>
+                          <h4 className="font-semibold text-foreground">Presencial</h4>
+                          <p className="text-sm text-muted-foreground">Atendimento no local físico</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {currentAgenda.serviceTypes.length === 0 && (
+                      <p className="text-sm text-destructive text-center">Selecione pelo menos um tipo de atendimento</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {step === 6 && (
+                <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Ação após a inscrição</h3>
                   <div className="space-y-4">
                     <div className="flex gap-4">
@@ -482,7 +547,7 @@ const AgendaTab = () => {
                 </div>
               )}
 
-              {step === 6 && (
+              {step === 7 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Lembretes</h3>
                   <div className="p-4 border rounded-lg bg-muted/30">
@@ -515,7 +580,12 @@ const AgendaTab = () => {
                 <div>{step > 1 && <Button variant="outline" onClick={() => setStep(s => s - 1)}>Voltar</Button>}</div>
                 <div className="flex gap-2">
                     <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                    {step < totalSteps && <Button onClick={() => setStep(s => s + 1)} disabled={step === 1 && !currentAgenda.category}>Avançar</Button>}
+                    {step < totalSteps && <Button onClick={() => {
+                      if (step === 5 && currentAgenda.serviceTypes.length === 0) {
+                        return; // Não avança se não tiver tipos selecionados
+                      }
+                      setStep(s => s + 1);
+                    }} disabled={step === 1 && !currentAgenda.category || (step === 5 && currentAgenda.serviceTypes.length === 0)}>Avançar</Button>}
                     {step === totalSteps && <Button onClick={handleSave}>{editingAgendaId ? 'Atualizar' : 'Salvar'}</Button>}
                 </div>
             </DialogFooter>
