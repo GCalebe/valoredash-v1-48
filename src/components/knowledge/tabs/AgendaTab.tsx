@@ -516,7 +516,7 @@ const AgendaTab = () => {
                 <div className="flex gap-2">
                     <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
                     {step < totalSteps && <Button onClick={() => setStep(s => s + 1)} disabled={step === 1 && !currentAgenda.category}>Avançar</Button>}
-                    {step === totalSteps && <Button onClick={handleSave}>Salvar</Button>}
+                    {step === totalSteps && <Button onClick={handleSave}>{editingAgendaId ? 'Atualizar' : 'Salvar'}</Button>}
                 </div>
             </DialogFooter>
           </DialogContent>

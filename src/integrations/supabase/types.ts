@@ -14,6 +14,435 @@ export type Database = {
   }
   public: {
     Tables: {
+      agenda_available_dates: {
+        Row: {
+          agenda_id: string
+          created_at: string | null
+          created_by: string | null
+          date: string
+          end_time: string | null
+          id: string
+          is_available: boolean | null
+          max_bookings: number | null
+          reason: string | null
+          start_time: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          agenda_id: string
+          created_at?: string | null
+          created_by?: string | null
+          date: string
+          end_time?: string | null
+          id?: string
+          is_available?: boolean | null
+          max_bookings?: number | null
+          reason?: string | null
+          start_time?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          agenda_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          date?: string
+          end_time?: string | null
+          id?: string
+          is_available?: boolean | null
+          max_bookings?: number | null
+          reason?: string | null
+          start_time?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_available_dates_agenda_id_fkey"
+            columns: ["agenda_id"]
+            isOneToOne: false
+            referencedRelation: "agendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agenda_booking_history: {
+        Row: {
+          action_type: string
+          additional_metadata: Json | null
+          booking_id: string
+          changed_fields: string[] | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          performed_at: string | null
+          performed_by: string | null
+          reason: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action_type: string
+          additional_metadata?: Json | null
+          booking_id: string
+          changed_fields?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          reason?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action_type?: string
+          additional_metadata?: Json | null
+          booking_id?: string
+          changed_fields?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          reason?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      agenda_bookings: {
+        Row: {
+          agenda_name: string
+          booking_date: string
+          booking_type: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          client_email: string | null
+          client_name: string
+          client_phone: string | null
+          confirmation_code: string | null
+          created_at: string | null
+          created_by: string | null
+          duration_minutes: number
+          employee_name: string | null
+          end_time: string
+          id: string
+          internal_notes: string | null
+          notes: string | null
+          payment_method: string | null
+          payment_status: string | null
+          price: number | null
+          reminder_sent: boolean | null
+          start_time: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          agenda_name: string
+          booking_date: string
+          booking_type?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          client_email?: string | null
+          client_name: string
+          client_phone?: string | null
+          confirmation_code?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          duration_minutes?: number
+          employee_name?: string | null
+          end_time: string
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          price?: number | null
+          reminder_sent?: boolean | null
+          start_time: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          agenda_name?: string
+          booking_date?: string
+          booking_type?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          client_email?: string | null
+          client_name?: string
+          client_phone?: string | null
+          confirmation_code?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          duration_minutes?: number
+          employee_name?: string | null
+          end_time?: string
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          price?: number | null
+          reminder_sent?: boolean | null
+          start_time?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      agenda_operating_hours: {
+        Row: {
+          agenda_id: string
+          created_at: string | null
+          created_by: string | null
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean | null
+          start_time: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          agenda_id: string
+          created_at?: string | null
+          created_by?: string | null
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          start_time: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          agenda_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          start_time?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_operating_hours_agenda_id_fkey"
+            columns: ["agenda_id"]
+            isOneToOne: false
+            referencedRelation: "agendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agenda_recurring_bookings: {
+        Row: {
+          agenda_name: string
+          auto_confirm: boolean | null
+          client_email: string | null
+          client_name: string
+          client_phone: string | null
+          created_at: string | null
+          created_by: string | null
+          days_of_week: number[] | null
+          duration_minutes: number
+          employee_name: string | null
+          end_date: string | null
+          end_time: string
+          id: string
+          internal_notes: string | null
+          last_generated_date: string | null
+          max_occurrences: number | null
+          next_generation_date: string | null
+          notes: string | null
+          payment_method: string | null
+          price: number | null
+          recurrence_pattern: string
+          send_reminders: boolean | null
+          start_date: string
+          start_time: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          agenda_name: string
+          auto_confirm?: boolean | null
+          client_email?: string | null
+          client_name: string
+          client_phone?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          days_of_week?: number[] | null
+          duration_minutes?: number
+          employee_name?: string | null
+          end_date?: string | null
+          end_time: string
+          id?: string
+          internal_notes?: string | null
+          last_generated_date?: string | null
+          max_occurrences?: number | null
+          next_generation_date?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          price?: number | null
+          recurrence_pattern: string
+          send_reminders?: boolean | null
+          start_date: string
+          start_time: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          agenda_name?: string
+          auto_confirm?: boolean | null
+          client_email?: string | null
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          days_of_week?: number[] | null
+          duration_minutes?: number
+          employee_name?: string | null
+          end_date?: string | null
+          end_time?: string
+          id?: string
+          internal_notes?: string | null
+          last_generated_date?: string | null
+          max_occurrences?: number | null
+          next_generation_date?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          price?: number | null
+          recurrence_pattern?: string
+          send_reminders?: boolean | null
+          start_date?: string
+          start_time?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      agenda_reminders: {
+        Row: {
+          agenda_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          message_template: string | null
+          reminder_type: string
+          send_to_client: boolean | null
+          send_to_employee: boolean | null
+          trigger_time_minutes: number
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          agenda_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          message_template?: string | null
+          reminder_type: string
+          send_to_client?: boolean | null
+          send_to_employee?: boolean | null
+          trigger_time_minutes: number
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          agenda_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          message_template?: string | null
+          reminder_type?: string
+          send_to_client?: boolean | null
+          send_to_employee?: boolean | null
+          trigger_time_minutes?: number
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_reminders_agenda_id_fkey"
+            columns: ["agenda_id"]
+            isOneToOne: false
+            referencedRelation: "agendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agendas: {
+        Row: {
+          buffer_time_minutes: number | null
+          cancellation_policy: string | null
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          duration_minutes: number
+          follow_up_notes: string | null
+          id: string
+          is_active: boolean | null
+          max_participants: number | null
+          name: string
+          preparation_notes: string | null
+          price: number | null
+          requires_approval: boolean | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          buffer_time_minutes?: number | null
+          cancellation_policy?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number
+          follow_up_notes?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_participants?: number | null
+          name: string
+          preparation_notes?: string | null
+          price?: number | null
+          requires_approval?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          buffer_time_minutes?: number | null
+          cancellation_policy?: string | null
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number
+          follow_up_notes?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_participants?: number | null
+          name?: string
+          preparation_notes?: string | null
+          price?: number | null
+          requires_approval?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       ai_personality_settings: {
         Row: {
           created_at: string | null
@@ -1463,6 +1892,66 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_agendas: {
+        Row: {
+          agenda_id: string
+          commission_percentage: number | null
+          created_at: string | null
+          created_by: string | null
+          employee_id: string
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          notes: string | null
+          priority: number | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          agenda_id: string
+          commission_percentage?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          employee_id: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          notes?: string | null
+          priority?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          agenda_id?: string
+          commission_percentage?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          employee_id?: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          notes?: string | null
+          priority?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_agendas_agenda_id_fkey"
+            columns: ["agenda_id"]
+            isOneToOne: false
+            referencedRelation: "agendas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_agendas_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_services: {
         Row: {
           available_days: string[] | null
@@ -1774,6 +2263,518 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      knowledge_analytics: {
+        Row: {
+          article_id: string
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          device_type: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          operating_system: string | null
+          referrer: string | null
+          region: string | null
+          scroll_percentage: number | null
+          search_query: string | null
+          session_id: string | null
+          time_spent_seconds: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          article_id: string
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          operating_system?: string | null
+          referrer?: string | null
+          region?: string | null
+          scroll_percentage?: number | null
+          search_query?: string | null
+          session_id?: string | null
+          time_spent_seconds?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          article_id?: string
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          operating_system?: string | null
+          referrer?: string | null
+          region?: string | null
+          scroll_percentage?: number | null
+          search_query?: string | null
+          session_id?: string | null
+          time_spent_seconds?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_analytics_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_article_tags: {
+        Row: {
+          article_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_article_tags_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_base"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_article_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_base: {
+        Row: {
+          allowed_roles: string[] | null
+          archived_at: string | null
+          average_rating: number | null
+          category: string
+          content: string
+          content_type: string
+          created_at: string | null
+          created_by: string | null
+          difficulty_level: string | null
+          dislike_count: number | null
+          estimated_read_time: number | null
+          expires_at: string | null
+          external_id: string | null
+          format: string | null
+          id: string
+          is_featured: boolean | null
+          is_public: boolean | null
+          is_searchable: boolean | null
+          keywords: string[] | null
+          language: string | null
+          like_count: number | null
+          metadata: Json | null
+          parent_id: string | null
+          priority: number | null
+          published_at: string | null
+          published_by: string | null
+          requires_authentication: boolean | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          search_vector: unknown | null
+          source_url: string | null
+          status: string
+          subcategory: string | null
+          summary: string | null
+          tags: string[] | null
+          title: string
+          total_ratings: number | null
+          updated_at: string | null
+          updated_by: string | null
+          version: number | null
+          view_count: number | null
+        }
+        Insert: {
+          allowed_roles?: string[] | null
+          archived_at?: string | null
+          average_rating?: number | null
+          category: string
+          content: string
+          content_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          difficulty_level?: string | null
+          dislike_count?: number | null
+          estimated_read_time?: number | null
+          expires_at?: string | null
+          external_id?: string | null
+          format?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          is_searchable?: boolean | null
+          keywords?: string[] | null
+          language?: string | null
+          like_count?: number | null
+          metadata?: Json | null
+          parent_id?: string | null
+          priority?: number | null
+          published_at?: string | null
+          published_by?: string | null
+          requires_authentication?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          search_vector?: unknown | null
+          source_url?: string | null
+          status?: string
+          subcategory?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          title: string
+          total_ratings?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+          version?: number | null
+          view_count?: number | null
+        }
+        Update: {
+          allowed_roles?: string[] | null
+          archived_at?: string | null
+          average_rating?: number | null
+          category?: string
+          content?: string
+          content_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          difficulty_level?: string | null
+          dislike_count?: number | null
+          estimated_read_time?: number | null
+          expires_at?: string | null
+          external_id?: string | null
+          format?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          is_searchable?: boolean | null
+          keywords?: string[] | null
+          language?: string | null
+          like_count?: number | null
+          metadata?: Json | null
+          parent_id?: string | null
+          priority?: number | null
+          published_at?: string | null
+          published_by?: string | null
+          requires_authentication?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          search_vector?: unknown | null
+          source_url?: string | null
+          status?: string
+          subcategory?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          title?: string
+          total_ratings?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+          version?: number | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_base_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_categories: {
+        Row: {
+          allowed_roles: string[] | null
+          article_count: number | null
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_visible: boolean | null
+          metadata: Json | null
+          name: string
+          parent_id: string | null
+          requires_permission: boolean | null
+          slug: string
+          sort_order: number | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          allowed_roles?: string[] | null
+          article_count?: number | null
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_visible?: boolean | null
+          metadata?: Json | null
+          name: string
+          parent_id?: string | null
+          requires_permission?: boolean | null
+          slug: string
+          sort_order?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          allowed_roles?: string[] | null
+          article_count?: number | null
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_visible?: boolean | null
+          metadata?: Json | null
+          name?: string
+          parent_id?: string | null
+          requires_permission?: boolean | null
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_comments: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          article_id: string
+          author_email: string | null
+          author_name: string | null
+          content: string
+          created_at: string | null
+          helpful_count: number | null
+          id: string
+          ip_address: unknown | null
+          is_anonymous: boolean | null
+          is_staff_reply: boolean | null
+          metadata: Json | null
+          not_helpful_count: number | null
+          parent_comment_id: string | null
+          reply_count: number | null
+          status: string | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          article_id: string
+          author_email?: string | null
+          author_name?: string | null
+          content: string
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          ip_address?: unknown | null
+          is_anonymous?: boolean | null
+          is_staff_reply?: boolean | null
+          metadata?: Json | null
+          not_helpful_count?: number | null
+          parent_comment_id?: string | null
+          reply_count?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          article_id?: string
+          author_email?: string | null
+          author_name?: string | null
+          content?: string
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          ip_address?: unknown | null
+          is_anonymous?: boolean | null
+          is_staff_reply?: boolean | null
+          metadata?: Json | null
+          not_helpful_count?: number | null
+          parent_comment_id?: string | null
+          reply_count?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_comments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_base"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_ratings: {
+        Row: {
+          article_id: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          is_helpful: boolean | null
+          metadata: Json | null
+          rating: number
+          review: string | null
+          session_id: string | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          article_id: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_helpful?: boolean | null
+          metadata?: Json | null
+          rating: number
+          review?: string | null
+          session_id?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          article_id?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_helpful?: boolean | null
+          metadata?: Json | null
+          rating?: number
+          review?: string | null
+          session_id?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_ratings_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_tags: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_system_tag: boolean | null
+          metadata: Json | null
+          name: string
+          slug: string
+          updated_at: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system_tag?: boolean | null
+          metadata?: Json | null
+          name: string
+          slug: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system_tag?: boolean | null
+          metadata?: Json | null
+          name?: string
+          slug?: string
+          updated_at?: string | null
+          usage_count?: number | null
         }
         Relationships: []
       }
@@ -2262,6 +3263,27 @@ export type Database = {
           id?: string
           new_name?: string
           old_name?: string
+        }
+        Relationships: []
+      }
+      test_connection: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string
+          test_data: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          name: string
+          test_data?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          name?: string
+          test_data?: Json | null
         }
         Relationships: []
       }
