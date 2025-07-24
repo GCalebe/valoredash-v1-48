@@ -1,3 +1,10 @@
+// Interface for objection with question and answer
+export interface ProductObjection {
+  id?: string;
+  question: string;
+  answer: string;
+}
+
 // Product interface matching the unified products table
 export interface Product {
   id: string;

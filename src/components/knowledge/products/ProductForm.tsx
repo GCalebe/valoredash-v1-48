@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ObjectionsManager from "./ObjectionsManager";
+import { ProductObjection } from "@/types/product";
 import { 
   Plus, 
   Minus, 
@@ -57,6 +59,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   mode
 }) => {
   const [activeTab, setActiveTab] = useState("basic");
+  const [objections, setObjections] = useState<ProductObjection[]>([]);
   
   const {
     register,
@@ -288,11 +291,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <ArrayInputField
-                field="objections"
-                label="Objeções Comuns"
-                placeholder="Adicione uma objeção..."
-                icon={Target}
+              <ObjectionsManager
+                productId={initialData?.id}
+                onObjectionsChange={setObjections}
               />
               
               <ArrayInputField
