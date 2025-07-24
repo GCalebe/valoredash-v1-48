@@ -27,8 +27,6 @@ import {
 interface MessageConditions {
   userType: string;
   stage: string;
-  priority: 'high' | 'medium' | 'low';
-  timing: string;
 }
 
 interface AIMessage {
@@ -104,9 +102,7 @@ const mockMessagesByStage: Record<string, AIMessage[]> = {
       category: 'Primeiro Contato',
       conditions: {
         userType: 'Novo usuário',
-        stage: 'Primeiro contato',
-        priority: 'high',
-        timing: 'Imediato'
+        stage: 'Primeiro contato'
       },
       isActive: true,
       usage: 245,
@@ -121,9 +117,7 @@ const mockMessagesByStage: Record<string, AIMessage[]> = {
       category: 'Qualificação',
       conditions: {
         userType: 'Lead qualificado',
-        stage: 'Demonstração de interesse',
-        priority: 'high',
-        timing: '2 horas após interesse'
+        stage: 'Demonstração de interesse'
       },
       isActive: true,
       usage: 189,
@@ -138,9 +132,7 @@ const mockMessagesByStage: Record<string, AIMessage[]> = {
       category: 'Agendamento',
       conditions: {
         userType: 'Prospect qualificado',
-        stage: 'Proposta de reunião',
-        priority: 'high',
-        timing: 'Após qualificação'
+        stage: 'Proposta de reunião'
       },
       isActive: true,
       usage: 156,
@@ -155,9 +147,7 @@ const mockMessagesByStage: Record<string, AIMessage[]> = {
       category: 'Confirmação',
       conditions: {
         userType: 'Cliente agendado',
-        stage: 'Pós-agendamento',
-        priority: 'high',
-        timing: 'Imediato após agendamento'
+        stage: 'Pós-agendamento'
       },
       isActive: true,
       usage: 98,
@@ -172,9 +162,7 @@ const mockMessagesByStage: Record<string, AIMessage[]> = {
       category: 'Follow-up',
       conditions: {
         userType: 'Cliente pós-reunião',
-        stage: 'Pós-reunião',
-        priority: 'medium',
-        timing: '2 horas após reunião'
+        stage: 'Pós-reunião'
       },
       isActive: true,
       usage: 234,
@@ -189,9 +177,7 @@ const mockMessagesByStage: Record<string, AIMessage[]> = {
       category: 'Reativação',
       conditions: {
         userType: 'Cliente inativo',
-        stage: 'Reativação',
-        priority: 'medium',
-        timing: '30 dias após inatividade'
+        stage: 'Reativação'
       },
       isActive: false,
       usage: 67,
@@ -237,14 +223,7 @@ const MessagesHybridDesign = () => {
     return colors[category as keyof typeof colors] || colors['Lead'];
   };
 
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      'high': 'destructive',
-      'medium': 'default',
-      'low': 'secondary'
-    };
-    return colors[priority as keyof typeof colors] || 'default';
-  };
+
 
   return (
     <div className="space-y-6">
@@ -307,11 +286,6 @@ const MessagesHybridDesign = () => {
                         onClick={() => handleCardClick(message)}
                       >
                         <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <Badge variant={getPriorityColor(message.conditions.priority) as any}>
-                              {message.conditions.priority}
-                            </Badge>
-                          </div>
                           <div className="flex items-center gap-1">
                             {message.isActive ? (
                               <CheckCircle className="h-4 w-4 text-green-600" />
@@ -347,10 +321,7 @@ const MessagesHybridDesign = () => {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Clock className="h-3 w-3" />
-                            <span>{message.conditions.timing}</span>
-                          </div>
+
                         </div>
                       </Card>
                     ))}
@@ -510,42 +481,7 @@ const MessagesHybridDesign = () => {
                       placeholder="Ex: Primeiro contato, Negociação"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Prioridade</label>
-                    <Select
-                      value={editingMessage.conditions.priority}
-                      onValueChange={(value: 'high' | 'medium' | 'low') => setEditingMessage({
-                        ...editingMessage,
-                        conditions: {
-                          ...editingMessage.conditions,
-                          priority: value
-                        }
-                      })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="high">Alta</SelectItem>
-                        <SelectItem value="medium">Média</SelectItem>
-                        <SelectItem value="low">Baixa</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Timing</label>
-                    <Input
-                      value={editingMessage.conditions.timing}
-                      onChange={(e) => setEditingMessage({
-                        ...editingMessage,
-                        conditions: {
-                          ...editingMessage.conditions,
-                          timing: e.target.value
-                        }
-                      })}
-                      placeholder="Ex: Imediato, 24 horas após"
-                    />
-                  </div>
+
                 </div>
               </div>
 
