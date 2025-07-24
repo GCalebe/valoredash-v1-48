@@ -170,7 +170,7 @@ const Index = () => {
                 <Input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  placeholder="Senha (opcional)"
+                  placeholder="Senha"
                   value={formData.password}
                   onChange={handleChange}
                   className={`pl-10 h-12 bg-white/10 dark:bg-gray-700/50 border-white/20 text-white rounded-md transition-all duration-300 hover:border-valore-gold/50 ${
