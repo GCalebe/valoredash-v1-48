@@ -3,6 +3,7 @@ import { Save, RotateCcw, ArrowLeft, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAIPersonalityForm } from "@/hooks/useAIPersonalityForm";
+import { useAIPersonalityQuery } from "@/hooks/useAIPersonalityQuery";
 import BasicInfoSection from "@/components/knowledge/personality/BasicInfoSection";
 import TraitsSection from "@/components/knowledge/personality/TraitsSection";
 import MessagesSection from "@/components/knowledge/personality/MessagesSection";
@@ -37,6 +38,8 @@ const AIPersonalityTab = () => {
     refetch: refetchTemplates
   } = usePersonalityTemplates();
 
+  const { data: activePersonality } = useAIPersonalityQuery();
+
   const [currentView, setCurrentView] = useState<'templates' | 'configuration'>('templates');
   const [selectedTemplate, setSelectedTemplate] = useState<AIPersonalityTemplate | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<AIPersonalityTemplate | null>(null);
@@ -45,6 +48,16 @@ const AIPersonalityTab = () => {
 
   // Usar templates do banco se disponíveis, senão usar os estáticos
   const templates = dbTemplates && dbTemplates.length > 0 ? dbTemplates : aiPersonalityTemplates;
+
+  // Função para verificar se um template é o ativo
+  const isTemplateActive = (template: AIPersonalityTemplate): boolean => {
+    if (!activePersonality || activePersonality.length === 0) return false;
+    const active = activePersonality[0];
+    return (
+      active.name === template.name ||
+      active.personality_type === template.settings.personality_type
+    );
+  };
 
    const handleTemplateSelect = (template: AIPersonalityTemplate) => {
      setSelectedTemplate(template);
@@ -187,6 +200,7 @@ const AIPersonalityTab = () => {
                    template={template}
                    onSelect={() => handleTemplateSelect(template)}
                    onPreview={() => handleTemplatePreview(template)}
+                   isActive={isTemplateActive(template)}
                  />
                ))}
              </div>

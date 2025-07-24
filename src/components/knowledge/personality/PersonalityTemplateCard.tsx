@@ -10,6 +10,7 @@ interface PersonalityTemplateCardProps {
   onSelect: (template: AIPersonalityTemplate) => void;
   onPreview: (template: AIPersonalityTemplate) => void;
   isSelected?: boolean;
+  isActive?: boolean;
 }
 
 const PersonalityTemplateCard = ({
@@ -17,11 +18,14 @@ const PersonalityTemplateCard = ({
   onSelect,
   onPreview,
   isSelected = false,
+  isActive = false,
 }: PersonalityTemplateCardProps) => {
   return (
     <Card 
       className={`hover:shadow-md transition-all cursor-pointer ${
         isSelected ? 'ring-2 ring-primary border-primary' : ''
+      } ${
+        isActive ? 'border-2 border-green-500 shadow-green-100' : ''
       }`}
       onClick={() => onSelect(template)}
     >
