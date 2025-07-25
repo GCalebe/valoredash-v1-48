@@ -165,7 +165,7 @@ const DiagnosticPanel: React.FC = () => {
 
   useEffect(() => {
     runDiagnostics();
-  }, [, runDiagnostics]);
+  }, [runDiagnostics]);
 
   const groupedDiagnostics = diagnostics.reduce((acc, diagnostic) => {
     if (!acc[diagnostic.category]) {

@@ -33,7 +33,7 @@ export function useWebsitesData() {
     return { id: 'mock', ...websiteData };
   }, []);
 
-  const updateWebsite = useCallback(async (id: string, updates: any) => {
+  const updateWebsite = useCallback(async (id: string, updates: unknown) => {
     console.log('Mock updateWebsite called');
     return true;
   }, []);

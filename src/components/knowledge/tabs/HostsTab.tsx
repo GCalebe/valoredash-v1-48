@@ -50,7 +50,7 @@ const HostsTab = () => {
     if (user) {
       fetchHosts();
     }
-  }, [, fetchHosts]);
+  }, [, fetchHosts]);
 
   const fetchHosts = async () => {
     try {

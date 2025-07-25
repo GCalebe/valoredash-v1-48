@@ -13,7 +13,7 @@ export interface ContactFilters {
 }
 
 export const contactsService = {
-  async fetchContacts(filters: ContactFilters = {}): Promise<any[]> {
+  async fetchContacts(filters: ContactFilters = {}): Promise<unknown[]> {
     // Verify user authentication
     const user = await getCurrentAuthUser();
     
@@ -48,7 +48,7 @@ export const contactsService = {
     return data || [];
   },
 
-  async fetchContactsByKanbanStage(stage: string): Promise<any[]> {
+  async fetchContactsByKanbanStage(stage: string): Promise<unknown[]> {
     // Verify user authentication
     const user = await getCurrentAuthUser();
     

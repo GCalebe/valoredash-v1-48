@@ -9,12 +9,12 @@ export const semanticMemoryService = {
     return null;
   },
 
-  getSemanticMemories: async (sessionId: string, useCache = true): Promise<any[]> => {
+  getSemanticMemories: async (sessionId: string, useCache = true): Promise<unknown[]> => {
     logger.info('semanticMemoryService: Funcionalidade desabilitada durante unificação');
     return [];
   },
 
-  searchBySimilarity: async (query: string, limit = 10): Promise<any[]> => {
+  searchBySimilarity: async (query: string, limit = 10): Promise<unknown[]> => {
     logger.info('semanticMemoryService: Busca por similaridade desabilitada durante unificação');
     return [];
   },

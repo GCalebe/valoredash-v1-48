@@ -25,7 +25,7 @@ export function useUserProfile() {
     if (user) {
       fetchProfile();
     }
-  }, [, fetchProfile]);
+  }, [fetchProfile]);
 
   const fetchProfile = async () => {
     if (!user) return;

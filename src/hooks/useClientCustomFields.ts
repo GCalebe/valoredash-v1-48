@@ -40,7 +40,7 @@ export const useClientCustomFields = (contactId?: string) => {
     if (contactId) {
       loadCustomFieldsForContact(contactId);
     }
-  }, [, loadCustomFieldsForContact]);
+  }, [loadCustomFieldsForContact]);
 
   return {
     customFieldsWithValues,

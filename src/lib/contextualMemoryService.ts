@@ -15,7 +15,7 @@ export const contextualMemoryService = {
   /**
    * Obtém todas as memórias contextuais - Desabilitado temporariamente
    */
-  getContextualMemories: async (sessionId: string, useCache = true): Promise<any[]> => {
+  getContextualMemories: async (sessionId: string, useCache = true): Promise<unknown[]> => {
     logger.info('contextualMemoryService: Funcionalidade desabilitada durante unificação');
     return [];
   },

@@ -80,7 +80,7 @@ const validateMetrics = (metrics: unknown): DataValidationResult<unknown> => {
 };
 
 // Função para validar dados de série temporal
-const validateTimeSeriesData = (data: unknown[]): DataValidationResult<any[]> => {
+const validateTimeSeriesData = (data: unknown[]): DataValidationResult<unknown[]> => {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -134,7 +134,7 @@ const validateTimeSeriesData = (data: unknown[]): DataValidationResult<any[]> =>
 // Função para calcular qualidade dos dados
 const calculateDataQuality = (
   metricsValidation: DataValidationResult<unknown>,
-  timeSeriesValidation: DataValidationResult<any[]>,
+  timeSeriesValidation: DataValidationResult<unknown[]>,
   lastUpdate?: string
 ): DataQualityScore => {
   // Completeness: baseado na presença de campos obrigatórios

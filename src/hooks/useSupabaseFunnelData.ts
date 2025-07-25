@@ -39,7 +39,7 @@ export const useSupabaseFunnelData = () => {
   const getFunnelByDateRange = async (startDate: string, endDate: string) => {
     try {
       // Try conversion_funnel_view first, fallback to funnel_data
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from('conversion_funnel_view')
         .select('*')
         .gte('created_at', startDate)
@@ -69,7 +69,7 @@ export const useSupabaseFunnelData = () => {
   const getFunnelSummary = async () => {
     try {
       // Try conversion_funnel_view first, fallback to funnel_data
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from('conversion_funnel_view')
         .select('*');
 
@@ -129,7 +129,7 @@ const getFunnelDataCompat = async (start?: string, end?: string) => {
 
 const getFunnelByDateRangeCompat = async (startDate: string, endDate: string) => {
   try {
-    let { data, error } = await supabase
+    const { data, error } = await supabase
       .from('conversion_funnel_view')
       .select('*')
       .gte('created_at', startDate)

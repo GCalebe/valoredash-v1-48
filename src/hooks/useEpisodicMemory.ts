@@ -102,7 +102,7 @@ export function useEpisodicMemory({
         return [];
       }
     },
-    [, fetchMemoriesByPeriod]
+    [, fetchMemoriesByPeriod]
   );
 
   // Função para armazenar nova memória

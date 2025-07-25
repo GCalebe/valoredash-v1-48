@@ -60,7 +60,7 @@ const ConversionFunnelChart: React.FC<ConversionFunnelChartProps> = ({
     if (stages.length > 0 && selectedStages.length === 0) {
       setSelectedStages(stages.map((stage) => stage.title));
     }
-  }, [, selectedStages.length]);
+  }, [, selectedStages.length]);
 
   // Filtra os dados com base nos estágios selecionados e aplica cores
   useEffect(() => {
@@ -87,7 +87,7 @@ const ConversionFunnelChart: React.FC<ConversionFunnelChartProps> = ({
     } else {
       setFilteredData([]);
     }
-  }, [, stageColors]);
+  }, [, stageColors]);
 
   return (
     <Card className="dark:bg-gray-800 transition-all duration-300 hover:shadow-lg">

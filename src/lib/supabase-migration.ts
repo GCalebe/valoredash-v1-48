@@ -161,7 +161,7 @@ export async function getFunnelDataFromSupabase(
   endDate?: string,
 ): Promise<SupabaseFunnelData[]> {
   try {
-    let query = supabase.from("funnel_data").select("*");
+    const query = supabase.from("funnel_data").select("*");
 
     if (startDate && endDate) {
       // Usar função SQL para filtro por data
@@ -467,7 +467,7 @@ export async function checkTablesExist() {
         }
 
         const { data, error } = await supabase
-          .from(table as any)
+          .from(table as never)
           .select("id")
           .limit(1);
 

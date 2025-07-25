@@ -88,13 +88,13 @@ export function useSubscription() {
     return foundPlan
       ? { ...foundPlan, description: foundPlan.description || "" }
       : null;
-  }, [, subscription]);
+  }, [subscription]);
 
   useEffect(() => {
     if (user) {
       fetchSubscription();
     }
-  }, [, fetchSubscription]);
+  }, [fetchSubscription]);
 
   return {
     subscription,

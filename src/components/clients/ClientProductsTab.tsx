@@ -27,7 +27,7 @@ const ClientProductsTab: React.FC<ClientProductsTabProps> = ({ client, onUpdate 
     if (client?.id) {
       loadClientProducts();
     }
-  }, [, loadClientProducts]);
+  }, [loadClientProducts]);
 
   // Load client products - this function now returns different values based on the client
   const loadClientProducts = async () => {

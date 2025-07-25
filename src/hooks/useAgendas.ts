@@ -29,7 +29,7 @@ export function useAgendas() {
 
   useEffect(() => {
     fetchAgendas();
-  }, [, fetchAgendas]);
+  }, [fetchAgendas]);
 
   const fetchAgendas = async () => {
     try {

@@ -43,7 +43,7 @@ const ChatHeader = ({
   // Sincronizar com o search term do header
   useEffect(() => {
     advancedSearch.setSearchTerm(searchTerm);
-  }, [, advancedSearch]);
+  }, [advancedSearch]);
 
   // Realizar busca com debounce
   const debouncedSearch = useDebouncedCallback(() => {

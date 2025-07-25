@@ -91,7 +91,7 @@ export function useKanbanStagesSupabase() {
     } finally {
       setLoading(false);
     }
-  }, [, createDefaultStages]);
+  }, [createDefaultStages]);
 
   const createDefaultStages = async () => {
     if (!user?.id) return;

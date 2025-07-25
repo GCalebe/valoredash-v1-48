@@ -55,7 +55,7 @@ export default function ContextualMemoryViewerPage() {
   // Carregar sessões ao montar o componente
   useEffect(() => {
     loadSessions();
-  }, [, loadSessions]);
+  }, [loadSessions]);
 
   return (
     <div className="container py-8">

@@ -49,7 +49,7 @@ export function SemanticMemoryViewer({ sessionId }: SemanticMemoryViewerProps) {
 
   useEffect(() => {
     loadEntities();
-  }, [, loadEntities]);
+  }, [loadEntities]);
 
   const loadEntities = async () => {
     setLoading(true);

@@ -7,7 +7,7 @@ export const memoryService = {
   /**
    * Obtém todas as memórias - Desabilitado temporariamente
    */
-  getAllMemories: async (sessionId: string, useCache = true): Promise<any[]> => {
+  getAllMemories: async (sessionId: string, useCache = true): Promise<unknown[]> => {
     logger.info('memoryService: Funcionalidade desabilitada durante unificação');
     return [];
   },
@@ -20,7 +20,7 @@ export const memoryService = {
     memoryType?: unknown,
     limit = 50,
     useCache = true
-  ): Promise<any[]> => {
+  ): Promise<unknown[]> => {
     logger.info('memoryService: Funcionalidade desabilitada durante unificação');
     return [];
   },
@@ -40,7 +40,7 @@ export const memoryService = {
     sessionId: string,
     minImportance = 3,
     useCache = true
-  ): Promise<any[]> => {
+  ): Promise<unknown[]> => {
     logger.info('memoryService: Busca por importância desabilitada durante unificação');
     return [];
   },

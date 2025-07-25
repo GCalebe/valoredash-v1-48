@@ -101,7 +101,7 @@ export const episodicMemoryService = {
   /**
    * Gera linha do tempo episódica
    */
-  generateTimeline: async (sessionId: string, useCache = true): Promise<any[]> => {
+  generateTimeline: async (sessionId: string, useCache = true): Promise<unknown[]> => {
     try {
       // Mock implementation
       console.log('Mock generateTimeline called', { sessionId, useCache });
