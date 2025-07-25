@@ -143,7 +143,7 @@ const DynamicCategoryManager = ({
           </Select>
         );
 
-      case "multi_select":
+      case "multi_select": {
         const selectedValues = Array.isArray(category.value)
           ? category.value
           : [];
@@ -178,6 +178,7 @@ const DynamicCategoryManager = ({
             ))}
           </div>
         );
+      }
 
       default:
         return null;

@@ -22,7 +22,7 @@ export const useClientDataFetch = (
 
         // Encontrar o cliente correspondente à sessão selecionada
         const client = availableContacts.find(
-          (client) => (client as any).sessionId === selectedConversation.sessionId || (client as any).session_id === selectedConversation.sessionId,
+          (client) => (client as Contact & {sessionId?: string; session_id?: string}).sessionId === selectedConversation.sessionId || (client as Contact & {sessionId?: string; session_id?: string}).session_id === selectedConversation.sessionId,
         );
 
         if (client) {

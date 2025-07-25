@@ -44,7 +44,7 @@ const ProductsTab = () => {
 
   // Filtered and sorted products
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products.filter(product =>
+    const filtered = products.filter(product =>
       product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );

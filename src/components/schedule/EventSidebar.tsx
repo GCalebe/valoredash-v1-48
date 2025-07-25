@@ -36,7 +36,7 @@ export function EventSidebar({
   }, [events, selectedDate]);
 
   const eventsBySalesperson = useMemo(() => {
-    const grouped: Record<string, any[]> = {};
+    const grouped: Record<string, Array<CalendarEvent & { time: string; color: string }>> = {};
     eventsForSelectedDay.forEach((event) => {
       let salesperson = "Não atribuído";
       let color = "#6b7280";

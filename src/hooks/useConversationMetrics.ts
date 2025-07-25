@@ -94,7 +94,7 @@ export function useConversationMetrics(
   
   // Calculate date range based on filter
   const endDate = new Date().toISOString().split('T')[0];
-  let startDate = new Date();
+  const startDate = new Date();
   
   if (dateFilter === "week") {
     startDate.setDate(startDate.getDate() - 7);

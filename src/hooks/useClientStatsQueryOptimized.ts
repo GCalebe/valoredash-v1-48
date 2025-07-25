@@ -80,8 +80,8 @@ export const useClientStatsQueryOptimized = (filters?: ClientStatsFilters) => {
       thisMonth.setHours(0, 0, 0, 0);
 
       let totalValue = 0;
-      let totalWithProbability = 0;
-      let sumProbability = 0;
+      const totalWithProbability = 0;
+      const sumProbability = 0;
 
       // Processar contatos em uma única passagem
       contactList.forEach(contact => {

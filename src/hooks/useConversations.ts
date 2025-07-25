@@ -120,10 +120,10 @@ export function useConversations() {
         avatar: conv.avatar || "👤",
         phone: conv.phone || "",
         email: conv.email || "",
-        address: (conv.client_data as any)?.address || "",
-        clientName: (conv.client_data as any)?.client_name || "",
-        clientSize: (conv.client_data as any)?.client_size || "",
-        clientType: (conv.client_data as any)?.client_type || "",
+        address: (conv.client_data as { address?: string })?.address || "",
+        clientName: (conv.client_data as { client_name?: string })?.client_name || "",
+        clientSize: (conv.client_data as { client_size?: string })?.client_size || "",
+        clientType: (conv.client_data as { client_type?: string })?.client_type || "",
         sessionId: conv.session_id || "",
       }));
 

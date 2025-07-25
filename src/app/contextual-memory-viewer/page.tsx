@@ -11,7 +11,7 @@ import { RefreshCw } from 'lucide-react';
 import { MemoryNavigation } from '@/components/MemoryNavigation';
 
 export default function ContextualMemoryViewerPage() {
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<Array<{id: string; name: string; created_at: string}>>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export default function ContextualMemoryViewerPage() {
       }
     } catch (err: unknown) {
       console.error('Erro ao carregar sessões:', err);
-      setError(err.message || 'Erro ao carregar sessões');
+      setError((err as Error).message || 'Erro ao carregar sessões');
     } finally {
       setLoading(false);
     }
@@ -55,7 +55,7 @@ export default function ContextualMemoryViewerPage() {
   // Carregar sessões ao montar o componente
   useEffect(() => {
     loadSessions();
-  }, [loadSessions]);
+  }, []);
 
   return (
     <div className="container py-8">

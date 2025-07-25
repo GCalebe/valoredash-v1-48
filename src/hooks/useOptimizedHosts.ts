@@ -7,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 type Host = Database['public']['Tables']['employees']['Row'];
 
 // Global cache to avoid multiple API calls
-let globalHostsCache: {
+const globalHostsCache: {
   data: Host[];
   loading: boolean;
   lastFetch: number;

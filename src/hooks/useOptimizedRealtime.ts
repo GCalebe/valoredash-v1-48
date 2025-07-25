@@ -32,7 +32,7 @@ export const useOptimizedRealtime = (config: RealtimeConfig = {}) => {
   } = config;
 
   const queryClient = useQueryClient();
-  const subscriptionsRef = useRef<any[]>([]);
+  const subscriptionsRef = useRef<Array<{unsubscribe: () => void}>>([]);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debounced invalidation functions

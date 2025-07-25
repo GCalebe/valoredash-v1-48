@@ -13,7 +13,7 @@ export interface Memory {
   created_at: string;
   importance?: number;
   entities?: Array<{ name: string }>;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 interface Props {

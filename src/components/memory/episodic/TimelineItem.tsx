@@ -6,7 +6,7 @@ export interface TimelineEvent {
   id: number;
   date: string;
   description: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface GroupedTimelineDay {

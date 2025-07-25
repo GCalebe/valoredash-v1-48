@@ -8,7 +8,7 @@ interface ContextSummary {
   total_memories: number;
   entities: unknown[];
   relationships: unknown[];
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   most_important: unknown | null;
 }
 
@@ -30,10 +30,10 @@ interface UseContextualMemoryResult {
  * Hook para gerenciar memória contextual - Simplificado durante unificação
  */
 export function useContextualMemory(options: unknown): UseContextualMemoryResult {
-  const [memories, setMemories] = useState<any[]>([]);
-  const [shortTermMemories, setShortTermMemories] = useState<any[]>([]);
-  const [mediumTermMemories, setMediumTermMemories] = useState<any[]>([]);
-  const [longTermMemories, setLongTermMemories] = useState<any[]>([]);
+  const [memories, setMemories] = useState<unknown[]>([]);
+  const [shortTermMemories, setShortTermMemories] = useState<unknown[]>([]);
+  const [mediumTermMemories, setMediumTermMemories] = useState<unknown[]>([]);
+  const [longTermMemories, setLongTermMemories] = useState<unknown[]>([]);
   const [contextSummary, setContextSummary] = useState<ContextSummary>({
     short_term_count: 0,
     medium_term_count: 0,

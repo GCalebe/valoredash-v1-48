@@ -155,7 +155,7 @@ export const useClientFiles = ({ clientId, onFileUpdate }: UseClientFilesProps) 
 
       const { error: updateError } = await supabase
         .from('contacts')
-        .update({ files_metadata: updatedFiles as any })
+        .update({ files_metadata: updatedFiles as FileMetadata[] })
         .eq('id', clientId);
 
       if (updateError) {
@@ -198,7 +198,7 @@ export const useClientFiles = ({ clientId, onFileUpdate }: UseClientFilesProps) 
 
       const { error: updateError } = await supabase
         .from('contacts')
-        .update({ files_metadata: updatedFiles as any })
+        .update({ files_metadata: updatedFiles as FileMetadata[] })
         .eq('id', clientId);
 
       if (updateError) {

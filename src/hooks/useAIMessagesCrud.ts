@@ -29,7 +29,7 @@ export function useAIMessagesCrud() {
       is_active: true,
     };
     try {
-      await createMutation.mutateAsync(payload as any);
+      await createMutation.mutateAsync(payload);
       toast({
         title: 'Mensagem adicionada',
         description: 'Nova mensagem criada com sucesso!',

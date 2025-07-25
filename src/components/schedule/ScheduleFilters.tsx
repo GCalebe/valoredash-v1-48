@@ -12,8 +12,7 @@ interface ScheduleFiltersProps {
   onAddEvent: () => void;
 }
 
-export function ScheduleFilters({} // mantendo props para compatibilidade, mas não usados mais
-: ScheduleFiltersProps) {
+export function ScheduleFilters(props: ScheduleFiltersProps) {
   // Layout vazio (sem filtros/seletores)
   return null;
 }

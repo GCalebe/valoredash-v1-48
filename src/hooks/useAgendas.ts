@@ -36,10 +36,10 @@ export function useAgendas() {
       setAgendasLoading(true);
       
       const { data, error } = await supabase
-        .from('agendas' as any)
+        .from('agendas')
         .select('*')
         .eq('is_active', true)
-        .order('created_at', { ascending: false }) as any;
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Erro ao buscar agendas:', error);
@@ -62,9 +62,9 @@ export function useAgendas() {
   const createAgenda = async (agendaData: Omit<Agenda, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by'>) => {
     try {
       const { data, error } = await supabase
-        .from('agendas' as any)
+        .from('agendas')
         .insert([agendaData])
-        .select() as any;
+        .select();
 
       if (error) {
         console.error('Erro ao criar agenda:', error);
@@ -92,10 +92,10 @@ export function useAgendas() {
   const updateAgenda = async (id: string, agendaData: Partial<Omit<Agenda, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by'>>) => {
     try {
       const { data, error } = await supabase
-        .from('agendas' as any)
+        .from('agendas')
         .update({ ...agendaData, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .select() as any;
+        .select();
 
       if (error) {
         console.error('Erro ao atualizar agenda:', error);
@@ -123,9 +123,9 @@ export function useAgendas() {
   const deleteAgenda = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('agendas' as any)
+        .from('agendas')
         .update({ is_active: false, updated_at: new Date().toISOString() })
-        .eq('id', id) as any;
+        .eq('id', id);
 
       if (error) {
         console.error('Erro ao deletar agenda:', error);

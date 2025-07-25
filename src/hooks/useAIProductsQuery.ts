@@ -13,7 +13,7 @@ export const aiProductsKeys = {
 };
 
 // Fetch AI products
-const fetchAIProducts = async (): Promise<any[]> => {
+const fetchAIProducts = async (): Promise<unknown[]> => {
   const { data, error } = await supabase
     .from('ai_products')
     .select('*')

@@ -4,7 +4,7 @@ import { Contact } from "@/types/client";
 import { toast } from "@/hooks/use-toast";
 
 // Global cache to avoid multiple API calls
-let globalContactsCache: {
+const globalContactsCache: {
   data: Contact[];
   loading: boolean;
   lastFetch: number;

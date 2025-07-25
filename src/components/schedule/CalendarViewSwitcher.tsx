@@ -27,7 +27,7 @@ export const CalendarViewSwitcher: React.FC<CalendarViewSwitcherProps> = ({
               ? "bg-white text-blue-700 shadow-md h-7 px-2 text-xs"
               : "text-white hover:bg-white/20 h-7 px-2 text-xs"
           }
-          onClick={() => onChange(item.key as any)}
+          onClick={() => onChange(item.key as "mes" | "semana" | "dia" | "agenda")}
         >
           {item.label}
         </Button>

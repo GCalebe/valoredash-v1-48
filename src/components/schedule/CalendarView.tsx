@@ -96,7 +96,7 @@ export function CalendarView({
 
   const buildWeeks = () => {
     const daysArr = [...days];
-    let weeks: Date[][] = [];
+    const weeks: Date[][] = [];
     
     // For month view, we need to include days from previous/next months to fill the grid
     if (view === "mes") {

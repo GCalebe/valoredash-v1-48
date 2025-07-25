@@ -75,7 +75,7 @@ const CustomFieldRenderer = ({
           </Select>
         );
 
-      case "multi_select":
+      case "multi_select": {
         const selectedValues = Array.isArray(value) ? value : [];
         
         // Função extraída para reduzir o aninhamento
@@ -110,6 +110,7 @@ const CustomFieldRenderer = ({
               ))}
           </div>
         );
+      }
 
       default:
         return null;

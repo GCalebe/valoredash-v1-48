@@ -4,7 +4,7 @@ import { Contact } from "@/types/client";
 export interface ColumnConfig {
   id: string;
   label: string;
-  accessor: keyof Contact | ((contact: Contact) => any);
+  accessor: keyof Contact | ((contact: Contact) => unknown);
   isVisible: boolean;
   priority: number; // Quanto menor, mais importante (usado para responsividade)
   minWidth?: number;

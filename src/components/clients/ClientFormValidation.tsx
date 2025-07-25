@@ -37,7 +37,7 @@ const validatePhone = (
   errors: { [key: string]: string }
 ): void => {
   if (phone && phone.trim()) {
-    const phoneRegex = /^[\d\s\(\)\-\+]+$/;
+    const phoneRegex = /^[\d\s()\-+]+$/;
     if (!phoneRegex.test(phone)) {
       errors.phone = "Telefone deve conter apenas números e caracteres válidos";
     }
