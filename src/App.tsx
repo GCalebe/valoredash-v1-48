@@ -18,6 +18,10 @@ import Pricing from "./pages/Pricing";
 import Subscription from "./pages/Subscription";
 import UserManagement from "./pages/UserManagement";
 import Profile from "./pages/Profile";
+import Conversations from "./pages/Conversations";
+import Reports from "./pages/Reports";
+import Connections from "./pages/Connections";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -56,6 +60,10 @@ const App = () => (
                   <Route path="/contracts" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/subscription" element={<Subscription />} />
+                  <Route path="/conversations" element={<Conversations />} />
+                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/connections" element={<Connections />} />
+                  <Route path="/settings" element={<Settings />} />
                 </Route>
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
