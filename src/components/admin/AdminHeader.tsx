@@ -6,8 +6,8 @@ import { ArrowLeft, ShipWheel, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface AdminHeaderProps {
-  user: any;
-  settings: any;
+  user: unknown;
+  settings: unknown;
   onSignOut: () => void;
 }
 

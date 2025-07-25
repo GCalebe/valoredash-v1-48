@@ -410,7 +410,7 @@ export interface Database {
         }[];
       };
     };
-    Enums: {};
-    CompositeTypes: {};
+    Enums: object;
+    CompositeTypes: object;
   };
 }

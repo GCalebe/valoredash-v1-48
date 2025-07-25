@@ -7,8 +7,8 @@ export interface AIStage {
   name: string;
   description: string | null;
   stage_order: number;
-  actions: any | null;
-  trigger_conditions: any | null;
+  actions: unknown | null;
+  trigger_conditions: unknown | null;
   next_stage_id: string | null;
   personality_id: string | null;
   timeout_minutes: number | null;
@@ -24,8 +24,8 @@ interface AIStageInsert {
   name: string;
   description?: string;
   stage_order: number;
-  actions?: any;
-  trigger_conditions?: any;
+  actions?: unknown;
+  trigger_conditions?: unknown;
   next_stage_id?: string;
   personality_id?: string;
   timeout_minutes?: number;
@@ -37,8 +37,8 @@ interface AIStageUpdate {
   name?: string;
   description?: string;
   stage_order?: number;
-  actions?: any;
-  trigger_conditions?: any;
+  actions?: unknown;
+  trigger_conditions?: unknown;
   next_stage_id?: string;
   personality_id?: string;
   timeout_minutes?: number;

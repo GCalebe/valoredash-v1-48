@@ -19,7 +19,7 @@ export interface DynamicCategory {
   name: string;
   type: "text" | "single_select" | "multi_select";
   options?: string[];
-  value?: any;
+  value?: unknown;
 }
 
 interface DynamicCategoryManagerProps {

@@ -48,7 +48,7 @@ export interface Client {
 export interface N8nChatHistory {
   id: number;
   session_id: string;
-  message: any;
+  message: unknown;
   data?: string;
   hora?: string;
 }

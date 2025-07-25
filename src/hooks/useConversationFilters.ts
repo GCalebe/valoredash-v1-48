@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 export interface ConversationCustomFieldFilter {
   fieldId: string;
   fieldName: string;
-  value: any;
+  value: unknown;
 }
 
 export interface ConversationFilters {

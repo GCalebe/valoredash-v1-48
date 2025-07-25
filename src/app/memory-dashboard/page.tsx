@@ -47,7 +47,7 @@ export default function MemoryDashboardPage() {
       if (sessionData.length > 0 && !selectedSessionId) {
         setSelectedSessionId(sessionData[0].id);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao carregar sessões:', err);
       setError(err.message || 'Erro ao carregar sessões');
     } finally {
@@ -58,7 +58,7 @@ export default function MemoryDashboardPage() {
   // Carregar sessões ao montar o componente
   useEffect(() => {
     loadSessions();
-  }, []);
+  }, [, loadSessions]);
 
   return (
     <div className="container py-8">

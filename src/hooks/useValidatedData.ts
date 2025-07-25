@@ -16,7 +16,7 @@ export interface DataQualityScore {
 }
 
 // Função para validar métricas
-const validateMetrics = (metrics: any): DataValidationResult<any> => {
+const validateMetrics = (metrics: unknown): DataValidationResult<unknown> => {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -80,7 +80,7 @@ const validateMetrics = (metrics: any): DataValidationResult<any> => {
 };
 
 // Função para validar dados de série temporal
-const validateTimeSeriesData = (data: any[]): DataValidationResult<any[]> => {
+const validateTimeSeriesData = (data: unknown[]): DataValidationResult<any[]> => {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -133,7 +133,7 @@ const validateTimeSeriesData = (data: any[]): DataValidationResult<any[]> => {
 
 // Função para calcular qualidade dos dados
 const calculateDataQuality = (
-  metricsValidation: DataValidationResult<any>,
+  metricsValidation: DataValidationResult<unknown>,
   timeSeriesValidation: DataValidationResult<any[]>,
   lastUpdate?: string
 ): DataQualityScore => {
@@ -179,7 +179,7 @@ const calculateDataQuality = (
 };
 
 // Hook principal
-export const useValidatedData = (metrics: any, timeSeriesData: any[], lastUpdate?: string) => {
+export const useValidatedData = (metrics: unknown, timeSeriesData: unknown[], lastUpdate?: string) => {
   return useMemo(() => {
     // Validar métricas
     const metricsValidation = validateMetrics(metrics || {});

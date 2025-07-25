@@ -19,18 +19,18 @@ interface UTMMetricsTabProps {
     totalCampaigns: number;
     totalLeads: number;
     conversionRate: number;
-    campaignData: any[];
-    sourceData: any[];
-    deviceData: any[];
-    geoData: any[];
+    campaignData: unknown[];
+    sourceData: unknown[];
+    deviceData: unknown[];
+    geoData: unknown[];
     timeToConversion: {
       average: number;
       median: number;
       min: number;
       max: number;
     };
-    topCampaigns: any[];
-    recentTracking: any[];
+    topCampaigns: unknown[];
+    recentTracking: unknown[];
     isStale?: boolean;
   };
   utmLoading: boolean;

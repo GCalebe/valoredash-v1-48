@@ -6,7 +6,7 @@ import { Contact } from "@/types/client";
 
 interface ClientStatsProps {
   clientData: Contact | null;
-  customFields: any[];
+  customFields: unknown[];
   consultationStageOptions: string[];
   fieldVisibility: Record<string, boolean>;
   onFieldUpdate?: (fieldId: string, newValue: any) => void;

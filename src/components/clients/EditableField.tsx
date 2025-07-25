@@ -40,7 +40,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
 }) => {
   const [localValue, setLocalValue] = useState(value || "");
 
-  const handleChange = (newValue: any) => {
+  const handleChange = (newValue: unknown) => {
     setLocalValue(newValue);
     if (onChange) {
       onChange(fieldId, newValue);

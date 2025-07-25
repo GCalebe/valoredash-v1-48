@@ -258,7 +258,7 @@ export const useEventFormDialog = ({ event, open }: UseEventFormDialogProps) => 
   // Update end time when start time or duration changes
   useEffect(() => {
     updateEndTime();
-  }, [state.startDateTime, state.selectedDuration]);
+  }, [, updateEndTime]);
 
   return {
     // State

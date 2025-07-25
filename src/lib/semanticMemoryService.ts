@@ -4,7 +4,7 @@ import { logger } from '@/utils/logger';
  * Serviço para gerenciar memória semântica - Simplificado durante unificação
  */
 export const semanticMemoryService = {
-  storeSemanticMemory: async (memory: any): Promise<any> => {
+  storeSemanticMemory: async (memory: unknown): Promise<unknown> => {
     logger.info('semanticMemoryService: Funcionalidade desabilitada durante unificação');
     return null;
   },

@@ -88,7 +88,7 @@ const useFAQManagement = () => {
     }
   };
 
-  const editFAQ = (item: any) => {
+  const editFAQ = (item: unknown) => {
     setEditingFAQ({
       ...item,
       tags: Array.isArray(item.tags) ? item.tags.join(", ") : "",

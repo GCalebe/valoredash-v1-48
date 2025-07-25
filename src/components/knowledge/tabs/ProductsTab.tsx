@@ -51,7 +51,7 @@ const ProductsTab = () => {
 
     // Sort products
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: unknown, bValue: unknown;
       
       switch (sortBy) {
         case "name":
@@ -80,7 +80,7 @@ const ProductsTab = () => {
     return filtered;
   }, [products, searchTerm, sortBy, sortOrder]);
 
-  const handleCreateProduct = async (data: any) => {
+  const handleCreateProduct = async (data: unknown) => {
     try {
       await createProductMutation.mutateAsync(data);
       setIsAddDialogOpen(false);
@@ -102,7 +102,7 @@ const ProductsTab = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateProduct = async (data: any) => {
+  const handleUpdateProduct = async (data: unknown) => {
     try {
       await updateProductMutation.mutateAsync({
         id: editingProduct!.id,

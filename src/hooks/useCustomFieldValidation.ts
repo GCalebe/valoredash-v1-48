@@ -55,8 +55,8 @@ export function useCustomFieldValidation() {
   const logCustomFieldChange = async (
     clientId: string,
     fieldId: string,
-    oldValue: any,
-    newValue: any,
+    oldValue: unknown,
+    newValue: unknown,
     changeType: "create" | "update" | "delete",
     changedBy?: string,
   ) => {

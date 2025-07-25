@@ -25,7 +25,7 @@ interface DiagnosticResult {
   test: string;
   status: 'success' | 'error' | 'warning' | 'info';
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 const DiagnosticPanel: React.FC = () => {
@@ -35,7 +35,7 @@ const DiagnosticPanel: React.FC = () => {
   const { settings } = useThemeSettings();
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
+  const [supabaseStatus, setSupabaseStatus] = useState<unknown>(null);
 
   const runDiagnostics = async () => {
     setIsRunning(true);
@@ -165,7 +165,7 @@ const DiagnosticPanel: React.FC = () => {
 
   useEffect(() => {
     runDiagnostics();
-  }, [location.pathname]);
+  }, [, runDiagnostics]);
 
   const groupedDiagnostics = diagnostics.reduce((acc, diagnostic) => {
     if (!acc[diagnostic.category]) {

@@ -35,7 +35,7 @@ export class QueryErrorBoundary extends React.Component<
   { children: React.ReactNode; fallback?: React.ComponentType<{ error: Error; resetError: () => void }> },
   { hasError: boolean; error: Error | null }
 > {
-  constructor(props: any) {
+  constructor(props: unknown) {
     super(props);
     this.state = { hasError: false, error: null };
   }

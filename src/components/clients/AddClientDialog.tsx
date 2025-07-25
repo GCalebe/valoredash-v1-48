@@ -69,7 +69,7 @@ const AddClientDialog = ({
       loadCustomFields();
       console.log("AddClientDialog opened, loading custom fields");
     }
-  }, [isOpen]);
+  }, [, loadCustomFields]);
 
   const loadCustomFields = async () => {
     try {

@@ -71,7 +71,7 @@ export interface ClientRecord {
   kanban_stage?: string | null;
   nome?: string | null;
   nome_pet?: string | null;
-  payments?: any;
+  payments?: unknown;
   porte_pet?: string | null;
   raca_pet?: string | null;
   session_id?: string | null;

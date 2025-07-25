@@ -32,7 +32,7 @@ export async function fetchCalendarEvents(
     }
 
     // Mapear dados do Supabase para CalendarEvent
-    return (data || []).map((event: any) => ({
+    return (data || []).map((event: unknown) => ({
       id: event.id,
       summary: event.summary || event.title || "Evento sem título",
       description: event.description || "",
@@ -92,7 +92,7 @@ export async function fetchCalendarEventsFromExternalAPI(
       const eventsArray = Array.isArray(data) ? data : data.events || [];
       
       return eventsArray
-        .map((event: any) => ({
+        .map((event: unknown) => ({
           id: event.id || `event-${Date.now()}-${Math.random()}`,
           summary: event.summary || "Evento sem título",
           description: event.description || "",

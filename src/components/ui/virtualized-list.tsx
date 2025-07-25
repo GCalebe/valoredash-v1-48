@@ -8,7 +8,7 @@ interface VirtualizedListProps<T> {
   itemHeight: number | ((index: number) => number);
   renderItem: (item: T, index: number, style: React.CSSProperties) => React.ReactNode;
   className?: string;
-  onScroll?: (props: any) => void;
+  onScroll?: (props: unknown) => void;
   overscanCount?: number;
   variableSize?: boolean;
 }

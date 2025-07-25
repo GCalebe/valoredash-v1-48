@@ -5,7 +5,7 @@ import { Contact } from "@/types/client";
 
 interface ClientDetailsProps {
   clientData: Contact | null;
-  customFields: any[];
+  customFields: unknown[];
   clientTypeOptions: string[];
   clientSizeOptions: string[];
   fieldVisibility: Record<string, boolean>;

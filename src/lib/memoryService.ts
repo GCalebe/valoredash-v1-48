@@ -17,7 +17,7 @@ export const memoryService = {
    */
   getMemoriesBySession: async (
     sessionId: string,
-    memoryType?: any,
+    memoryType?: unknown,
     limit = 50,
     useCache = true
   ): Promise<any[]> => {
@@ -28,7 +28,7 @@ export const memoryService = {
   /**
    * Armazena uma nova memória - Desabilitado temporariamente
    */
-  storeMemory: async (memory: any): Promise<any> => {
+  storeMemory: async (memory: unknown): Promise<unknown> => {
     logger.info('memoryService: Armazenamento de memória desabilitado durante unificação');
     return null;
   },

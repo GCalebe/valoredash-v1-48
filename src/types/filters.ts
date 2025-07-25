@@ -25,7 +25,7 @@ export interface CalendarProps {
   mode?: "single" | "range";
   numberOfMonths?: number;
   initialFocus?: boolean;
-  locale?: any;
+  locale?: unknown;
   disabled?: (date: Date) => boolean;
   className?: string;
 }

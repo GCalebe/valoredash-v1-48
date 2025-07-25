@@ -68,6 +68,6 @@ export const seedPersonalityTemplates = async () => {
 // Função para executar o seeding
 if (typeof window !== 'undefined') {
   // Executar apenas no browser para debug
-  (window as any).seedPersonalityTemplates = seedPersonalityTemplates;
+  (window as unknown as { seedPersonalityTemplates: typeof seedPersonalityTemplates }).seedPersonalityTemplates = seedPersonalityTemplates;
   console.log('Função seedPersonalityTemplates disponível no console do browser');
 }

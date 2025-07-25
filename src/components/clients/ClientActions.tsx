@@ -6,7 +6,7 @@ import { Contact } from "@/types/client";
 
 interface ClientActionsProps {
   clientData: Contact | null;
-  customFields: any[];
+  customFields: unknown[];
   onFieldUpdate?: (fieldId: string, newValue: any) => void;
   readOnly: boolean;
   section: "custom" | "docs";

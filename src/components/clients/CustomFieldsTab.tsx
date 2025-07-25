@@ -95,7 +95,7 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
   };
 
   // Helper function to get the currently selected tab for a field
-  const getSelectedTab = (field: any) => {
+  const getSelectedTab = (field: unknown) => {
     const tabSettings = field.visibility_settings?.visible_in_tabs || {};
     if (tabSettings.basic) return 'basic';
     if (tabSettings.commercial) return 'commercial';

@@ -17,28 +17,32 @@ export const isDateInPeriod = (dateStr: string, period: string): boolean => {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   switch (period) {
-    case "today":
+    case "today": {
       const contactDay = new Date(
         contactDate.getFullYear(),
         contactDate.getMonth(),
         contactDate.getDate(),
       );
       return contactDay.getTime() === today.getTime();
+    }
 
-    case "week":
+    case "week": {
       const weekAgo = new Date(today);
       weekAgo.setDate(today.getDate() - 7);
       return contactDate >= weekAgo && contactDate <= now;
+    }
 
-    case "month":
+    case "month": {
       const monthAgo = new Date(today);
       monthAgo.setMonth(today.getMonth() - 1);
       return contactDate >= monthAgo && contactDate <= now;
+    }
 
-    case "older":
+    case "older": {
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(today.getDate() - 30);
       return contactDate < thirtyDaysAgo;
+    }
 
     default:
       return true;

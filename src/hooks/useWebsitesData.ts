@@ -9,7 +9,7 @@ export interface Website {
   description: string;
   status: 'active' | 'inactive' | 'pending' | 'indexed' | 'indexing' | 'error';
   last_crawled: string;
-  metadata: any;
+  metadata: unknown;
   created_at: string;
   updated_at: string;
   tags: string[];
@@ -28,7 +28,7 @@ export function useWebsitesData() {
     return [];
   }, []);
 
-  const addWebsite = useCallback(async (websiteData: any) => {
+  const addWebsite = useCallback(async (websiteData: unknown) => {
     console.log('Mock addWebsite called with:', websiteData);
     return { id: 'mock', ...websiteData };
   }, []);
@@ -65,8 +65,8 @@ export const useWebsitesQuery = () => {
 
 // Mock mutation hooks with full React Query mutation interface
 export const useCreateWebsiteMutation = () => ({
-  mutateAsync: async (websiteData: any) => ({ id: 'mock', ...websiteData }),
-  mutate: (websiteData: any) => console.log('Creating website:', websiteData),
+  mutateAsync: async (websiteData: unknown) => ({ id: 'mock', ...websiteData }),
+  mutate: (websiteData: unknown) => console.log('Creating website:', websiteData),
   isPending: false,
   isLoading: false,
   error: null,
@@ -77,8 +77,8 @@ export const useCreateWebsiteMutation = () => ({
 });
 
 export const useUpdateWebsiteMutation = () => ({
-  mutateAsync: async (updates: any) => ({ success: true }),
-  mutate: (updates: any) => console.log('Updating website:', updates),
+  mutateAsync: async (updates: unknown) => ({ success: true }),
+  mutate: (updates: unknown) => console.log('Updating website:', updates),
   isPending: false,
   isLoading: false,
   error: null,

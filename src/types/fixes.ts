@@ -33,12 +33,12 @@ export interface UTMMetricsComplete {
   new_clients_this_month: number;
   response_rate: number;
   total_campaigns: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // API Response with error
 export interface ApiResponseWithError {
-  data?: any;
+  data?: unknown;
   success: boolean;
   message: string;
   error?: string;
@@ -79,13 +79,13 @@ export interface QueryHookReturnComplete<T> {
 }
 
 export interface ProductHookReturn {
-  products: any[];
-  combos?: any[];
+  products: unknown[];
+  combos?: unknown[];
   loading: boolean;
   refreshing?: boolean;
   error?: string | null;
   isLoading: boolean;
-  data: any[];
+  data: unknown[];
   fetchProducts?: () => Promise<void>;
   refreshProducts?: () => Promise<void>;
 }

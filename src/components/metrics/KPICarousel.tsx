@@ -51,7 +51,7 @@ const KPICarousel: React.FC<KPICarouselProps> = ({ cards, loading }) => {
     }
   }, [emblaApi]);
 
-  const onSelect = useCallback((emblaApi: any) => {
+  const onSelect = useCallback((emblaApi: unknown) => {
     const index = emblaApi.selectedScrollSnap();
     console.log('Embla onSelect:', { index, canScrollPrev: emblaApi.canScrollPrev(), canScrollNext: emblaApi.canScrollNext() });
     setSelectedIndex(index);

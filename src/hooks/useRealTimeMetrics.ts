@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 interface RealtimeMetricsUpdate {
   type: 'contact_added' | 'conversation_updated' | 'metrics_updated';
-  data: any;
+  data: unknown;
   timestamp: string;
 }
 

@@ -21,7 +21,8 @@ import {
   Tag,
   Award,
   Target,
-  TrendingUp
+  TrendingUp,
+  type LucideIcon
 } from "lucide-react";
 
 const productSchema = z.object({
@@ -113,7 +114,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases' | 'features'>;
     label: string;
     placeholder: string;
-    icon: any;
+    icon: LucideIcon;
   }) => {
     const [inputValue, setInputValue] = useState("");
     const items = watchedValues[field] || [];

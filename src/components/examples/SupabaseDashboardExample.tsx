@@ -12,7 +12,7 @@ import { useAIProductsQuery } from '../../hooks/useAIProductsQuery';
 export const SupabaseDashboardExample: React.FC = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [filteredData, setFilteredData] = useState<any>(null);
+  const [filteredData, setFilteredData] = useState<unknown>(null);
 
   const { metrics = [] } = useConversationMetricsQuery();
   const { data: funnelData = [] } = useFunnelDataQuery();

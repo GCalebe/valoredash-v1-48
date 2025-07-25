@@ -8,6 +8,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { logger } from '@/utils/logger';
 
+// Interface para dados brutos do Supabase
+interface SupabaseConversationData {
+  id: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  session_id?: string;
+  created_at: string;
+}
+
 /**
  * Página otimizada de chat que demonstra as melhorias de performance
  */
@@ -19,7 +29,7 @@ export default function ChatOptimizedPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Função para formatar os dados de conversa recebidos do Supabase
-  const formatChatData = (data: any[]): Chat[] => {
+  const formatChatData = (data: SupabaseConversationData[]): Chat[] => {
     // Agrupar conversas por cliente/contato
     const groupedConversations = data.reduce((acc, conv) => {
       const clientId = conv.session_id || conv.id;
@@ -116,7 +126,7 @@ export default function ChatOptimizedPage() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [loadChats]);
 
   // Manipular seleção de chat
   const handleSelectChat = (chat: Chat) => {

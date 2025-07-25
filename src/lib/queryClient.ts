@@ -95,8 +95,8 @@ export const queryKeys = {
   // Outros dados
   aiProducts: ['ai-products'] as const,
   kanbanStages: ['kanban-stages'] as const,
-  contacts: (filters?: any) => ['contacts', filters] as const,
-  funnelData: (dateRange?: any) => ['funnel-data', dateRange] as const,
+  contacts: (filters?: unknown) => ['contacts', filters] as const,
+  funnelData: (dateRange?: unknown) => ['funnel-data', dateRange] as const,
   realtimeMetrics: ['realtime-metrics'] as const,
   notifications: ['notifications'] as const,
 } as const;

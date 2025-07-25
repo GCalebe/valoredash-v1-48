@@ -34,7 +34,7 @@ interface CacheStats {
 /**
  * Classe que implementa um cache em memória com TTL e limite de tamanho
  */
-export class MemoryCache<T = any> {
+export class MemoryCache<T = unknown> {
   private data: Map<string, T>;
   private ttls: Map<string, number>;
   private lastAccess: Map<string, number>;
@@ -265,7 +265,7 @@ export class MemoryCache<T = any> {
  * Cache global para memórias
  * Uso: import { memoryCache } from './memoryCache';
  */
-export const memoryCache = new MemoryCache<any>({
+export const memoryCache = new MemoryCache<unknown>({
   name: 'memory-service-cache',
   ttl: 10 * 60 * 1000, // 10 minutos
   maxSize: 2000,

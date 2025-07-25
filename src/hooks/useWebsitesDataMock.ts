@@ -8,7 +8,7 @@ export interface Website {
   description: string;
   status: 'active' | 'inactive' | 'pending';
   last_crawled: string;
-  metadata: any;
+  metadata: unknown;
   created_at: string;
   updated_at: string;
   tags: string[];

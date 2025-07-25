@@ -8,10 +8,10 @@ import KanbanStagesFunnelChart from '../KanbanStagesFunnelChart';
 import SectionHeader from './SectionHeader';
 
 interface PerformanceChartsSectionProps {
-  conversationData: any[];
-  conversionFunnelData: any[];
-  conversionByTimeData: any[];
-  leadsAverageByTimeData: any[];
+  conversationData: unknown[];
+  conversionFunnelData: unknown[];
+  conversionByTimeData: unknown[];
+  leadsAverageByTimeData: unknown[];
   noShowRate: number;
   loading: boolean;
   transformedDataLoading: boolean;
@@ -26,7 +26,7 @@ const PerformanceChartsSection: React.FC<PerformanceChartsSectionProps> = ({
   loading,
   transformedDataLoading,
 }) => {
-  const handleFilterChange = (date: any, stages: any, showNoShow: any) => {
+  const handleFilterChange = (date: unknown, stages: unknown, showNoShow: any) => {
     console.log("Filtro aplicado no Funil de Conversão:", {
       date,
       stages,

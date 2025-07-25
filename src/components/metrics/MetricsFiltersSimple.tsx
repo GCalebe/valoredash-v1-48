@@ -111,7 +111,7 @@ const MetricsFiltersSimple = React.memo<MetricsFiltersSimpleProps>(({
     }
   }, [onPeriodChange, onDateRangeChange, periodOptions]);
 
-  const handleDateRangeSelect = useCallback((selectedRange: any) => {
+  const handleDateRangeSelect = useCallback((selectedRange: unknown) => {
     let newRange: DateRange | null = null;
     
     if (selectedRange?.from && selectedRange?.to) {

@@ -10,7 +10,7 @@ export interface AIMessage {
   variables?: string[];
   context?: string;
   is_active?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AIStage {
@@ -22,11 +22,11 @@ export interface AIStage {
   order_position?: number; // Backward compatibility
   is_active?: boolean;
   personality_id?: string;
-  actions?: any[];
+  actions?: unknown[];
   trigger?: string;
   next_stage?: string;
   next_stage_id?: string;
-  trigger_conditions?: Record<string, any>;
+  trigger_conditions?: Record<string, unknown>;
   timeout_minutes?: number;
   is_final_stage?: boolean;
   created_at?: string;
@@ -53,5 +53,5 @@ export interface AIPersonality {
   created_by?: string;
   updated_by?: string;
   custom_instructions?: string;
-  fallback_responses?: any;
+  fallback_responses?: unknown;
 }

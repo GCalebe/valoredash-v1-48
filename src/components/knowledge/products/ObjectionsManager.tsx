@@ -35,7 +35,7 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
     if (productId) {
       loadObjections();
     }
-  }, [productId]);
+  }, [, loadObjections]);
 
   const loadObjections = async () => {
     if (!productId) return;

@@ -47,7 +47,7 @@ export function useCalendarEvents({ currentMonth }: UseCalendarEventsProps) {
       if (forceRefresh) {
         toast.success("Agenda atualizada com sucesso!");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(err?.message || "Erro desconhecido");
       setError(error);
       toast.error(`Erro ao buscar eventos: ${error.message}`);

@@ -67,7 +67,7 @@ export const contactsService = {
     return data || [];
   },
 
-  async createContact(contact: any): Promise<any> {
+  async createContact(contact: unknown): Promise<unknown> {
     const { data, error } = await supabase
       .from('contacts')
       .insert([contact])
@@ -82,7 +82,7 @@ export const contactsService = {
     return data;
   },
 
-  async updateContact({ id, ...updates }: any): Promise<any> {
+  async updateContact({ id, ...updates }: unknown): Promise<unknown> {
     // Verify user authentication and ownership
     const user = await getCurrentAuthUser();
     

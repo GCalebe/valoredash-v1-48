@@ -148,7 +148,7 @@ export const episodicMemoryService = {
   /**
    * Gera estatísticas da memória episódica
    */
-  getMemoryStats: async (sessionId: string): Promise<any> => {
+  getMemoryStats: async (sessionId: string): Promise<unknown> => {
     try {
       // Mock implementation
       console.log('Mock getMemoryStats called', { sessionId });

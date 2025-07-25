@@ -5,7 +5,7 @@ import * as React from "react";
  * @param callback Função original a ser debounced
  * @param delay Delay em ms (default 400)
  */
-export function useDebouncedCallback<T extends (...args: any[]) => void>(
+export function useDebouncedCallback<T extends (...args: unknown[]) => void>(
   callback: T,
   delay: number = 400,
 ) {

@@ -46,7 +46,7 @@ interface ConversationMetrics {
   conversionRate: number;
   avgClosingTime: number;
   avgResponseStartTime: number; // Nova métrica em minutos
-  conversationData: any[];
+  conversationData: unknown[];
   funnelData: FunnelStage[];
   conversionByTimeData: ConversionByTime[];
   leadsAverageByTimeData: ConversionByTime[]; // Nova métrica
@@ -162,7 +162,7 @@ export function useConversationMetrics(
 
       // Transform funnel data if available
       if (funnelData && funnelData.length > 0) {
-        transformedMetrics.funnelData = funnelData.map((item: any) => ({
+        transformedMetrics.funnelData = funnelData.map((item: unknown) => ({
           name: item.stage_name || item.name,
           value: item.count || item.value || 0,
           percentage: item.percentage || 0,

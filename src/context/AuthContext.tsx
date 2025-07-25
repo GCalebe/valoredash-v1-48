@@ -6,9 +6,9 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
-  userProfile?: any; // Add userProfile for compatibility
+  userProfile?: unknown; // Add userProfile for compatibility
   isAdmin?: boolean; // Add isAdmin for compatibility
-  signIn: (email: string, password: string) => Promise<{ error?: any }>;
+  signIn: (email: string, password: string) => Promise<{ error?: unknown }>;
   signOut: () => Promise<void>;
 }
 

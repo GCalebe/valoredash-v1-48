@@ -66,7 +66,7 @@ const KanbanView = ({
     console.log("[KanbanView] Drag started");
   }, []);
 
-  const handleDragEnd = useCallback((result: any) => {
+  const handleDragEnd = useCallback((result: unknown) => {
     const dragEndTime = Date.now();
     const dragDuration = dragStartTime ? dragEndTime - dragStartTime : 0;
     

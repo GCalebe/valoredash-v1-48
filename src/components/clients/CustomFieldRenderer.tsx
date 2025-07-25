@@ -13,8 +13,8 @@ import { AlertCircle } from "lucide-react";
 
 interface CustomFieldRendererProps {
   field: CustomFieldWithValue;
-  value: any;
-  onChange: (value: any) => void;
+  value: unknown;
+  onChange: (value: unknown) => void;
   validationError?: string;
 }
 

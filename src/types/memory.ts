@@ -16,7 +16,7 @@ export type MemoryLevel = "short_term" | "medium_term" | "long_term";
 export interface SemanticEntity {
   name: string;
   type: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
   confidence?: number;
 }
 
@@ -28,7 +28,7 @@ export interface EntityRelationship {
   target: string;
   type: string;
   relation?: string; // Backward compatibility
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
   confidence?: number;
 }
 
@@ -43,10 +43,10 @@ export interface EpisodicMemory {
     action: string;
     timestamp: string;
     actors: string[];
-    context?: Record<string, any>;
+    context?: Record<string, unknown>;
   }>;
   summary?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -55,7 +55,7 @@ export interface EpisodicMemory {
 export interface N8nChatMemory {
   id: number;
   session_id: string;
-  message: any;
+  message: unknown;
   data?: string;
   hora?: string;
   created_at?: string;
@@ -67,11 +67,11 @@ export interface N8nChatMemory {
   importance?: number; // 1-10
   entities?: SemanticEntity[];
   relationships?: EntityRelationship[];
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   metadata?: {
     tags?: string[];
     categories?: string[];
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -85,5 +85,5 @@ export interface Memory {
   created_at: string;
   importance?: number;
   entities?: Array<{ name: string }>;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }

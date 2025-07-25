@@ -7,7 +7,7 @@ export interface ValidationError {
 
 export function validateCustomField(
   fieldId: string,
-  value: any,
+  value: unknown,
   validationRules: ValidationRule[],
 ): ValidationError | null {
   const fieldRules = validationRules.filter(
@@ -25,19 +25,19 @@ export function validateCustomField(
 }
 
 // Funções auxiliares para validação de regras específicas
-function validateRequiredRule(value: any, ruleValue: string): boolean {
+function validateRequiredRule(value: unknown, ruleValue: string): boolean {
   return ruleValue === "true" && (value === null || value === undefined || value === "");
 }
 
-function validateMinLengthRule(value: any, ruleValue: string): boolean {
+function validateMinLengthRule(value: unknown, ruleValue: string): boolean {
   return typeof value === "string" && value.length < parseInt(ruleValue || "0");
 }
 
-function validateMaxLengthRule(value: any, ruleValue: string): boolean {
+function validateMaxLengthRule(value: unknown, ruleValue: string): boolean {
   return typeof value === "string" && value.length > parseInt(ruleValue || "0");
 }
 
-function validatePatternRule(value: any, ruleValue: string): boolean {
+function validatePatternRule(value: unknown, ruleValue: string): boolean {
   if (typeof value === "string" && ruleValue) {
     const regex = new RegExp(ruleValue);
     return !regex.test(value);
@@ -45,18 +45,18 @@ function validatePatternRule(value: any, ruleValue: string): boolean {
   return false;
 }
 
-function validateMinValueRule(value: any, ruleValue: string): boolean {
+function validateMinValueRule(value: unknown, ruleValue: string): boolean {
   return typeof value === "number" && value < parseFloat(ruleValue || "0");
 }
 
-function validateMaxValueRule(value: any, ruleValue: string): boolean {
+function validateMaxValueRule(value: unknown, ruleValue: string): boolean {
   return typeof value === "number" && value > parseFloat(ruleValue || "0");
 }
 
 // Função principal de validação com complexidade reduzida
 function validateRule(
   fieldId: string,
-  value: any,
+  value: unknown,
   rule: ValidationRule,
 ): ValidationError | null {
   const validators = {
@@ -78,7 +78,7 @@ function validateRule(
 }
 
 export function validateAllCustomFields(
-  fieldValues: { [fieldId: string]: any },
+  fieldValues: { [fieldId: string]: unknown },
   validationRules: ValidationRule[],
 ): ValidationError[] {
   const errors: ValidationError[] = [];

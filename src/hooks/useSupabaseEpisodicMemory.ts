@@ -24,7 +24,7 @@ export const useSupabaseEpisodicMemory = () => {
         importance: 1, // Default importance
         created_at: msg.created_at,
         metadata: typeof msg.message_data === 'object' && msg.message_data !== null 
-          ? msg.message_data as { [key: string]: any } 
+          ? msg.message_data as { [key: string]: unknown } 
           : {}
       }));
       
@@ -96,7 +96,7 @@ export const useSupabaseEpisodicMemory = () => {
         importance: 1, // Default importance
         created_at: msg.created_at,
         metadata: typeof msg.message_data === 'object' && msg.message_data !== null 
-          ? msg.message_data as { [key: string]: any } 
+          ? msg.message_data as { [key: string]: unknown } 
           : {}
       }));
       
@@ -149,7 +149,7 @@ export const useSupabaseEpisodicMemory = () => {
         importance: 1,
         created_at: data.created_at,
         metadata: typeof data.message_data === 'object' && data.message_data !== null 
-          ? data.message_data as { [key: string]: any } 
+          ? data.message_data as { [key: string]: unknown } 
           : {}
       };
 

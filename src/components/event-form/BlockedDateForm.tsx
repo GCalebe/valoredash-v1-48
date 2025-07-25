@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 import { X, Plus } from "lucide-react";
 
 interface BlockedDateFormProps {
-  state: any;
-  updateState: (updates: any) => void;
-  constants: any;
+  state: unknown;
+  updateState: (updates: unknown) => void;
+  constants: unknown;
   addTag: () => void;
   removeTag: (id: string) => void;
 }
@@ -84,7 +84,7 @@ export function BlockedDateForm({
       <div className="space-y-2">
         <Label>Tags Personalizadas</Label>
         <div className="flex flex-wrap gap-2 mb-2">
-          {state.tags.map((tag: any) => (
+          {state.tags.map((tag: unknown) => (
             <Badge 
               key={tag.id} 
               style={{backgroundColor: tag.color}}

@@ -37,7 +37,7 @@ export interface UTMDataComplete {
   first_utm_content?: string;
   first_utm_created_at?: string;
   first_utm_medium?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Product types with category
@@ -79,7 +79,7 @@ export interface MetricsComplete {
   new_clients_this_month?: number;
   response_rate?: number;
   total_campaigns?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // API Response types

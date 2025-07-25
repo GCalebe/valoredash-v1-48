@@ -42,7 +42,7 @@ export interface SupabaseContact {
   payment: string | null;
   uploaded_files: string[] | null;
   consultation_stage: string | null;
-  files_metadata: any;
+  files_metadata: unknown;
   deleted_at: string | null;
   user_id: string;
   created_at: string | null;

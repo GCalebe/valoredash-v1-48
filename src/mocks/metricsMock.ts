@@ -92,7 +92,7 @@ export interface UTMMetrics {
     ctr: number;
     roas: number;
   }>;
-  recentTracking: Array<any>; // simplified
+  recentTracking: Array<unknown>; // simplified
   isStale: boolean;
 }
 

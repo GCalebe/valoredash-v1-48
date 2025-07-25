@@ -40,7 +40,7 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
   };
 
   // Renderizar um item de memória
-  const renderMemoryItem = (memory: any) => (
+  const renderMemoryItem = (memory: unknown) => (
     <Card key={memory.id} className={cn(
       'mb-4 transition-all duration-200',
       memory.importance >= 3 ? 'border-amber-400 dark:border-amber-500' : ''
@@ -79,7 +79,7 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
           <div className="mt-2">
             <p className="text-xs text-muted-foreground mb-1">Entidades:</p>
             <div className="flex flex-wrap gap-1">
-              {memory.entities.map((entity: any, idx: number) => (
+              {memory.entities.map((entity: unknown, idx: number) => (
                 <Badge key={idx} variant="outline" className="text-xs">
                   {entity.name}
                 </Badge>
@@ -143,7 +143,7 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
             <h4 className="text-sm font-medium mb-2">Entidades Principais</h4>
             {contextSummary.entities.length > 0 ? (
               <div className="flex flex-wrap gap-1">
-                {contextSummary.entities.slice(0, 10).map((entity: any, idx: number) => (
+                {contextSummary.entities.slice(0, 10).map((entity: unknown, idx: number) => (
                   <Badge key={idx} variant="outline" className="text-xs">
                     {entity.name}
                   </Badge>

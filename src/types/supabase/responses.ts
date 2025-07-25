@@ -1,7 +1,7 @@
 // Generic API response helpers
 export interface SupabaseResponse<T> {
   data: T | null;
-  error: any;
+  error: unknown;
   success: boolean;
 }
 

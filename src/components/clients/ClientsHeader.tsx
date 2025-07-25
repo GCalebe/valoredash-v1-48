@@ -34,8 +34,8 @@ interface ClientsHeaderProps {
   hasActiveFilters: boolean;
   isAddContactOpen: boolean;
   onAddContactOpenChange: (open: boolean) => void;
-  newContact: Partial<any>;
-  setNewContact: (contact: Partial<any>) => void;
+  newContact: Partial<unknown>;
+  setNewContact: (contact: Partial<unknown>) => void;
   handleAddContact: () => Promise<string>;
   viewMode: "table" | "kanban";
   setViewMode: (v: "table" | "kanban") => void;

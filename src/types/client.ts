@@ -79,7 +79,7 @@ export interface Contact {
   customValues?: CustomFieldValue[];
   
   // Outros campos dinâmicos
-  payments?: any;
+  payments?: unknown;
 }
 
 export interface CustomFieldValue {

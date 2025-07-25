@@ -7,7 +7,7 @@ export const contextualMemoryService = {
   /**
    * Armazena uma memória contextual - Desabilitado temporariamente
    */
-  storeContextualMemory: async (memory: any): Promise<any> => {
+  storeContextualMemory: async (memory: unknown): Promise<unknown> => {
     logger.info('contextualMemoryService: Funcionalidade desabilitada durante unificação');
     return null;
   },

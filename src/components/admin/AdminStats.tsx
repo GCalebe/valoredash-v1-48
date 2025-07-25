@@ -13,7 +13,7 @@ import { User } from "@/types/user";
 
 interface AdminStatsProps {
   users: User[];
-  aiProducts: any[];
+  aiProducts: unknown[];
 }
 
 export const AdminStats: React.FC<AdminStatsProps> = ({

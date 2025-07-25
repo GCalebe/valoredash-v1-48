@@ -70,16 +70,16 @@ const parseStringMessage = (message: string, timestamp: string): ChatMessage[] =
 };
 
 // Função para processar mensagem com tipo e conteúdo
-const processTypeAndContent = (messageObj: any, timestamp: string): ChatMessage[] => {
+const processTypeAndContent = (messageObj: unknown, timestamp: string): ChatMessage[] => {
   const role = messageObj.type === "human" ? "user" : "assistant";
   return [createChatMessage(role, messageObj.content, timestamp, messageObj.type)];
 };
 
 // Função para processar array de mensagens
-const processMessageArray = (messages: any[], timestamp: string): ChatMessage[] => {
+const processMessageArray = (messages: unknown[], timestamp: string): ChatMessage[] => {
   const parsedMessages: ChatMessage[] = [];
   
-  messages.forEach((msg: any) => {
+  messages.forEach((msg: unknown) => {
     if (msg.role && msg.content) {
       parsedMessages.push(createChatMessage(msg.role, msg.content, timestamp));
     }
@@ -89,12 +89,12 @@ const processMessageArray = (messages: any[], timestamp: string): ChatMessage[] 
 };
 
 // Função para processar mensagem com role e conteúdo
-const processRoleAndContent = (messageObj: any, timestamp: string): ChatMessage[] => {
+const processRoleAndContent = (messageObj: unknown, timestamp: string): ChatMessage[] => {
   return [createChatMessage(messageObj.role, messageObj.content, timestamp)];
 };
 
 // Função auxiliar para processar mensagem em formato objeto
-const parseObjectMessage = (messageObj: any, timestamp: string): ChatMessage[] => {
+const parseObjectMessage = (messageObj: unknown, timestamp: string): ChatMessage[] => {
   if (messageObj.type && messageObj.content) {
     return processTypeAndContent(messageObj, timestamp);
   } 
@@ -116,7 +116,7 @@ const extractTimestampFromHistory = (chatHistory: N8nChatHistory): string => {
 };
 
 // Função para processar mensagem com base em seu tipo
-const processMessageByType = (message: any, timestamp: string): ChatMessage[] => {
+const processMessageByType = (message: unknown, timestamp: string): ChatMessage[] => {
   if (typeof message === "string") {
     return parseStringMessage(message, timestamp);
   }

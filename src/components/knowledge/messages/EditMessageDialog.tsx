@@ -15,7 +15,7 @@ interface EditMessageDialogProps {
     content: string;
     context: string;
   };
-  setNewMessage: React.Dispatch<React.SetStateAction<any>>;
+  setNewMessage: React.Dispatch<React.SetStateAction<unknown>>;
   onUpdate: () => void;
   isUpdating: boolean;
   stages: KanbanStage[];

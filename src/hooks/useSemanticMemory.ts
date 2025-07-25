@@ -9,15 +9,15 @@ interface UseSemanticMemoryOptions {
 }
 
 interface UseSemanticMemoryResult {
-  memories: any[];
-  entities: any[];
-  relationships: any[];
+  memories: unknown[];
+  entities: unknown[];
+  relationships: unknown[];
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
   searchBySimilarity: (query: string, limit?: number) => Promise<any[]>;
   searchByEntity: (entityName: string) => Promise<any[]>;
-  storeMemory: (memory: any) => Promise<any>;
+  storeMemory: (memory: unknown) => Promise<unknown>;
   updateImportance: (memoryId: number, importance: number) => Promise<boolean>;
   clearCache: (pattern?: string) => void;
 }
@@ -52,7 +52,7 @@ export function useSemanticMemory({
     return [];
   }, []);
 
-  const storeMemory = useCallback(async (memory: any): Promise<any> => {
+  const storeMemory = useCallback(async (memory: unknown): Promise<unknown> => {
     logger.info('useSemanticMemory: Armazenamento de memória desabilitado durante unificação');
     return null;
   }, []);

@@ -6,9 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 
 interface DateTimeSelectionTabProps {
-  state: any;
-  updateState: (updates: any) => void;
-  constants: any;
+  state: unknown;
+  updateState: (updates: unknown) => void;
+  constants: unknown;
   onNext: () => void;
   onPrevious: () => void;
 }
@@ -57,7 +57,7 @@ export function DateTimeSelectionTab({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {constants.DURATIONS.map((duration: any) => (
+            {constants.DURATIONS.map((duration: unknown) => (
               <SelectItem key={duration.value} value={duration.value.toString()}>
                 {duration.label}
               </SelectItem>

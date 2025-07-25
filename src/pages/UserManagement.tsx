@@ -18,7 +18,7 @@ const UserManagement = () => {
   const { toast } = useToast();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<unknown>(null);
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
     password: '',
@@ -69,7 +69,7 @@ const UserManagement = () => {
     }
   };
 
-  const openEditDialog = (user: any) => {
+  const openEditDialog = (user: unknown) => {
     setSelectedUser(user);
     setFormData({
       email: user.email,
