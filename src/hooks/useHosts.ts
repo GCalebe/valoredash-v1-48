@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
@@ -11,13 +11,7 @@ export const useHosts = () => {
   const [hosts, setHosts] = useState<Host[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchHosts();
-    }
-  }, [fetchHosts]);
-
-  const fetchHosts = async () => {
+  const fetchHosts = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -38,7 +32,13 @@ export const useHosts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      fetchHosts();
+    }
+  }, [user, fetchHosts]);
 
   return {
     hosts,

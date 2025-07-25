@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -27,11 +27,7 @@ export function useAgendas() {
   const [agendasLoading, setAgendasLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchAgendas();
-  }, [fetchAgendas]);
-
-  const fetchAgendas = async () => {
+  const fetchAgendas = useCallback(async () => {
     try {
       setAgendasLoading(true);
       
@@ -57,7 +53,11 @@ export function useAgendas() {
     } finally {
       setAgendasLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchAgendas();
+  }, [fetchAgendas]);
 
   const createAgenda = async (agendaData: Omit<Agenda, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by'>) => {
     try {

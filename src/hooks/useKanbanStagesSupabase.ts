@@ -43,6 +43,54 @@ export function useKanbanStagesSupabase() {
   const [stages, setStages] = useState<KanbanStage[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const createDefaultStages = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      console.log("Creating default stages for user:", user.id);
+      
+      const defaultStagesData = DEFAULT_STAGES.map((title, index) => ({
+        title,
+        ordering: index,
+        user_id: user.id,
+        settings: { color: '#6b7280' }
+      }));
+
+      const { data, error } = await supabase
+        .from('kanban_stages')
+        .insert(defaultStagesData)
+        .select();
+
+      if (error) {
+        console.error("Error creating default stages:", error);
+        throw error;
+      }
+
+      console.log("Created default stages:", data);
+
+      const transformedStages: KanbanStage[] = data.map(stage => ({
+        id: stage.id,
+        title: stage.title,
+        ordering: stage.ordering,
+        settings: parseStageSettings(stage.settings)
+      }));
+
+      setStages(transformedStages);
+
+      toast({
+        title: "Estágios criados",
+        description: "Estágios padrão do kanban foram criados com sucesso.",
+      });
+    } catch (error) {
+      console.error("Failed to create default stages:", error);
+      toast({
+        title: "Erro ao criar estágios",
+        description: "Não foi possível criar os estágios padrão.",
+        variant: "destructive",
+      });
+    }
+  }, [user?.id]);
+
   const fetchStages = useCallback(async () => {
     if (!user?.id) {
       console.log("No user ID available for fetching stages");
@@ -91,55 +139,9 @@ export function useKanbanStagesSupabase() {
     } finally {
       setLoading(false);
     }
-  }, [createDefaultStages]);
+  }, [user?.id, createDefaultStages]);
 
-  const createDefaultStages = async () => {
-    if (!user?.id) return;
 
-    try {
-      console.log("Creating default stages for user:", user.id);
-      
-      const defaultStagesData = DEFAULT_STAGES.map((title, index) => ({
-        title,
-        ordering: index,
-        user_id: user.id,
-        settings: { color: '#6b7280' }
-      }));
-
-      const { data, error } = await supabase
-        .from('kanban_stages')
-        .insert(defaultStagesData)
-        .select();
-
-      if (error) {
-        console.error("Error creating default stages:", error);
-        throw error;
-      }
-
-      console.log("Created default stages:", data);
-
-      const transformedStages: KanbanStage[] = data.map(stage => ({
-        id: stage.id,
-        title: stage.title,
-        ordering: stage.ordering,
-        settings: parseStageSettings(stage.settings)
-      }));
-
-      setStages(transformedStages);
-
-      toast({
-        title: "Estágios criados",
-        description: "Estágios padrão do kanban foram criados com sucesso.",
-      });
-    } catch (error) {
-      console.error("Failed to create default stages:", error);
-      toast({
-        title: "Erro ao criar estágios",
-        description: "Não foi possível criar os estágios padrão.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const addStage = async (title: string) => {
     if (!user?.id) return;

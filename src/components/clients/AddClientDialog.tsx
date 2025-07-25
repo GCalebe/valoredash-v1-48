@@ -64,13 +64,6 @@ const AddClientDialog = ({
     baseHandleInputChange(field, value, newContact, setNewContact);
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      loadCustomFields();
-      console.log("AddClientDialog opened, loading custom fields");
-    }
-  }, [loadCustomFields]);
-
   const loadCustomFields = async () => {
     try {
       setLoading(true);
@@ -82,6 +75,13 @@ const AddClientDialog = ({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      loadCustomFields();
+      console.log("AddClientDialog opened, loading custom fields");
+    }
+  }, [isOpen, fetchCustomFields]);
 
   const handleSave = async () => {
     if (!validateForm(newContact)) {
