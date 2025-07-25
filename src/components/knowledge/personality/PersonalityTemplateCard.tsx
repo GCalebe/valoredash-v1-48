@@ -72,15 +72,15 @@ const PersonalityTemplateCard = ({
         </p>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground">Tom:</span>
+            <span className="text-xs font-medium text-muted-foreground">Indústria:</span>
             <Badge variant="outline" className="text-xs">
-              {template.settings.tone}
+              {template.industry}
             </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground">Estilo:</span>
+            <span className="text-xs font-medium text-muted-foreground">Métricas:</span>
             <Badge variant="outline" className="text-xs">
-              {template.settings.response_style}
+              {template.metrics}
             </Badge>
           </div>
         </div>

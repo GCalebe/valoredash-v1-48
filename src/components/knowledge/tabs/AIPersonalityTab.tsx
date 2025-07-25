@@ -46,8 +46,8 @@ const AIPersonalityTab = () => {
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
 
-  // Usar templates do banco se disponíveis, senão usar os estáticos
-  const templates = dbTemplates && dbTemplates.length > 0 ? dbTemplates : aiPersonalityTemplates;
+  // Usar sempre os templates estáticos para garantir que todos os novos modelos sejam exibidos
+  const templates = aiPersonalityTemplates;
 
   // Função para verificar se um template é o ativo
   const isTemplateActive = (template: AIPersonalityTemplate): boolean => {
