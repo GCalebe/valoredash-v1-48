@@ -13,7 +13,7 @@ export function useScheduleDialogs() {
   const [isDeleteEventDialogOpen, setIsDeleteEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
-  const handleEditClick = (appointment: Appointment, setFormData: any) => {
+  const handleEditClick = (appointment: Appointment, setFormData: (data: Partial<Appointment>) => void) => {
     setCurrentAppointment(appointment);
     setFormData({
       petName: appointment.petName,
@@ -32,7 +32,7 @@ export function useScheduleDialogs() {
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDelete = (appointments: Appointment[], setAppointments: any) => {
+  const confirmDelete = (appointments: Appointment[], setAppointments: (appointments: Appointment[]) => void) => {
     if (currentAppointment) {
       setAppointments(
         appointments.filter((app) => app.id !== currentAppointment.id),

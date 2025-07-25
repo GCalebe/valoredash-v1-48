@@ -26,7 +26,7 @@ const PerformanceChartsSection: React.FC<PerformanceChartsSectionProps> = ({
   loading,
   transformedDataLoading,
 }) => {
-  const handleFilterChange = (date: unknown, stages: unknown, showNoShow: any) => {
+  const handleFilterChange = (date: unknown, stages: unknown, showNoShow: unknown) => {
     console.log("Filtro aplicado no Funil de Conversão:", {
       date,
       stages,

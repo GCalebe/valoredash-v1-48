@@ -100,7 +100,7 @@ const DynamicCategoryManager = ({
     });
   };
 
-  const updateCategoryValue = (categoryId: string, value: any) => {
+  const updateCategoryValue = (categoryId: string, value: unknown) => {
     onCategoriesChange(
       categories.map((cat) =>
         cat.id === categoryId ? { ...cat, value } : cat,

@@ -57,7 +57,7 @@ export const useAddClientFormLogic = () => {
     setActiveTab("basico");
   }, []);
 
-  const handleCustomFieldChange = useCallback((fieldId: string, value: any) => {
+  const handleCustomFieldChange = useCallback((fieldId: string, value: unknown) => {
     setCustomValues((prev) => ({
       ...prev,
       [fieldId]: value,

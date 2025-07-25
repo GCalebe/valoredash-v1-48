@@ -13,7 +13,7 @@ interface ClientInfoProps {
     personalized: DynamicCategory[];
     documents: DynamicCategory[];
   };
-  onFieldUpdate?: (fieldId: string, newValue: any) => void;
+  onFieldUpdate?: (fieldId: string, newValue: unknown) => void;
   context: "chat" | "table" | "details" | "edit";
   compact?: boolean;
 }

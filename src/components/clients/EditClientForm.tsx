@@ -40,7 +40,7 @@ const EditClientForm: React.FC<EditClientFormProps> = ({
     }
   }, [isOpen, selectedContact, refetch]);
 
-  const handleFieldUpdate = (fieldId: string, newValue: any) => {
+  const handleFieldUpdate = (fieldId: string, newValue: unknown) => {
     if (!contact) return;
 
     console.log("Field updated:", fieldId, newValue);

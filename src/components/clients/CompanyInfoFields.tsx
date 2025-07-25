@@ -7,7 +7,7 @@ import { Contact } from "@/types/client";
 interface CompanyInfoFieldsProps {
   newContact: Partial<Contact>;
   validationErrors: { [key: string]: string };
-  onInputChange: (field: keyof Contact, value: any) => void;
+  onInputChange: (field: keyof Contact, value: unknown) => void;
 }
 
 const CompanyInfoFields = React.memo(({ newContact, validationErrors, onInputChange }: CompanyInfoFieldsProps) => {

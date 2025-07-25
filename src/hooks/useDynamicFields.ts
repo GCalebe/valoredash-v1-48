@@ -122,7 +122,7 @@ export function useDynamicFields(clientId: string | null) {
   }, [clientId, fetchDynamicFields]);
 
   const updateField = useCallback(
-    async (fieldId: string, newValue: any) => {
+    async (fieldId: string, newValue: unknown) => {
       if (!clientId) return;
 
       // Get current value for audit logging
@@ -159,7 +159,7 @@ export function useDynamicFields(clientId: string | null) {
       }
 
       // Helper function to update a field in the dynamic fields state
-      const updateDynamicFieldValue = (prevFields: typeof dynamicFields, fieldId: string, newValue: any) => {
+      const updateDynamicFieldValue = (prevFields: typeof dynamicFields, fieldId: string, newValue: unknown) => {
         const updated = { ...prevFields };
 
         // Find and update the field in the appropriate category

@@ -20,7 +20,7 @@ interface EditableFieldProps {
   type?: "text" | "email" | "tel" | "textarea" | "select" | "badge" | "money";
   options?: string[];
   readOnly?: boolean;
-  onChange?: (fieldId: string, newValue: any) => void;
+  onChange?: (fieldId: string, newValue: unknown) => void;
   onVisibilityChange?: (fieldId: string, visible: boolean) => void;
   isVisible?: boolean;
   showVisibilityControl?: boolean;

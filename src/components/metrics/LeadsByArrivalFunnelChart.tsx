@@ -38,7 +38,7 @@ const LeadsByArrivalFunnelChart: React.FC<LeadsByArrivalFunnelChartProps> = ({
     if (stages.length > 0 && selectedStages.length === 0) {
       setSelectedStages(stages.map((stage) => stage.title));
     }
-  }, [, selectedStages.length]);
+  }, [stages, selectedStages.length]);
 
   useEffect(() => {
     if (selectedStages.length > 0) {

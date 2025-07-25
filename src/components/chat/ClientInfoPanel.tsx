@@ -36,7 +36,7 @@ const ClientInfoPanel = ({
 
 
 
-  const handleFieldUpdate = (fieldId: string, newValue: any) => {
+  const handleFieldUpdate = (fieldId: string, newValue: unknown) => {
     updateField(fieldId, newValue);
     console.log(`Field ${fieldId} updated with value:`, newValue);
 

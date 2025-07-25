@@ -7,7 +7,7 @@ import { Contact } from "@/types/client";
 interface ClientActionsProps {
   clientData: Contact | null;
   customFields: unknown[];
-  onFieldUpdate?: (fieldId: string, newValue: any) => void;
+  onFieldUpdate?: (fieldId: string, newValue: unknown) => void;
   readOnly: boolean;
   section: "custom" | "docs";
 }

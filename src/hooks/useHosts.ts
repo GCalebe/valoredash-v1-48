@@ -15,7 +15,7 @@ export const useHosts = () => {
     if (user) {
       fetchHosts();
     }
-  }, [, fetchHosts]);
+  }, [fetchHosts]);
 
   const fetchHosts = async () => {
     try {

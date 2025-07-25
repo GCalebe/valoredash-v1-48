@@ -60,7 +60,7 @@ const AddClientDialog = ({
   const [documentsCategories, setDocumentsCategories] = useState<DynamicCategory[]>([]);
 
   // Wrapper for input change to pass required parameters
-  const handleInputChange = (field: keyof Contact, value: any) => {
+  const handleInputChange = (field: keyof Contact, value: unknown) => {
     baseHandleInputChange(field, value, newContact, setNewContact);
   };
 

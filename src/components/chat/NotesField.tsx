@@ -29,7 +29,7 @@ const NotesField = ({ selectedChat }: NotesFieldProps) => {
     if (selectedChat) {
       loadNotes();
     }
-  }, [, loadNotes]);
+  }, [loadNotes]);
 
   const loadNotes = async () => {
     if (!selectedChat) return;

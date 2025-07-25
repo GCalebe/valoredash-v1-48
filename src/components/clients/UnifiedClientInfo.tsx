@@ -16,7 +16,7 @@ interface UnifiedClientInfoProps {
     personalized: DynamicCategory[];
     documents: DynamicCategory[];
   };
-  onFieldUpdate?: (fieldId: string, newValue: any) => void;
+  onFieldUpdate?: (fieldId: string, newValue: unknown) => void;
   readOnly?: boolean;
   compact?: boolean;
   showTabs?: string[];

@@ -9,7 +9,7 @@ interface ClientStatsProps {
   customFields: unknown[];
   consultationStageOptions: string[];
   fieldVisibility: Record<string, boolean>;
-  onFieldUpdate?: (fieldId: string, newValue: any) => void;
+  onFieldUpdate?: (fieldId: string, newValue: unknown) => void;
   onVisibilityChange: (fieldId: string, visible: boolean) => void;
   readOnly: boolean;
   section: "commercial" | "utm";
