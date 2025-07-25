@@ -35,12 +35,13 @@ export function useFilteredEvents(
           };
         }
         return null;
-      case "semana":
+      case "semana": {
         const weekStart = startOfWeek(selectedDate || today, {
           weekStartsOn: 0,
         });
         const weekEnd = endOfWeek(selectedDate || today, { weekStartsOn: 0 });
         return { start: weekStart, end: weekEnd };
+      }
       case "mes":
         return {
           start: startOfMonth(currentMonth),
