@@ -23,7 +23,7 @@ export const useClientFiles = ({ clientId, onFileUpdate }: UseClientFilesProps) 
       loadClientFiles();
     }
     loadStorageUsage();
-  }, [clientId]);
+  }, [clientId]); // Remove function dependencies to prevent unnecessary re-renders
 
   const loadClientFiles = async () => {
     if (!clientId) return;

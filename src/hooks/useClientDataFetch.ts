@@ -92,7 +92,7 @@ export const useClientDataFetch = (
     };
 
     fetchClientData();
-  }, [selectedConversation?.sessionId, availableContacts]);
+  }, [selectedConversation?.sessionId, availableContacts]); // Only depend on sessionId and availableContacts to prevent unnecessary re-renders
 
   return { clientData, loading };
 };

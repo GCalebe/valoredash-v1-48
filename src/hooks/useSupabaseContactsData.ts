@@ -158,7 +158,7 @@ export const useContacts = (filters?: ContactFilters, pageSize = 20): PaginatedR
     }
   }, [filters, pageSize])
 
-  useEffect(() => { load(1) }, [load])
+  useEffect(() => { load(1) }, []) // load removida das dependências para evitar re-execuções desnecessárias
 
   const nextPage = () => { if (page < Math.ceil(totalCount / pageSize)) load(page + 1) }
   const prevPage = () => { if (page > 1) load(page - 1) }

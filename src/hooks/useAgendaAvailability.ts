@@ -273,7 +273,7 @@ export function useAgendaAvailability(agendaId?: string) {
       setAvailableDates([]);
       setBookings([]);
     }
-  }, [agendaId, fetchOperatingHours, fetchAvailableDates]);
+  }, [agendaId]); // fetchOperatingHours e fetchAvailableDates removidas das dependências para evitar re-execuções desnecessárias
 
   return {
     agenda,

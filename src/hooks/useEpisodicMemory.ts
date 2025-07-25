@@ -177,7 +177,7 @@ export function useEpisodicMemory({
   // Carregar dados iniciais
   useEffect(() => {
     loadEpisodicData();
-  }, [loadEpisodicData]);
+  }, [sessionId]); // loadEpisodicData removida das dependências para evitar re-execuções desnecessárias
 
   // Configurar atualização automática se habilitada
   useEffect(() => {
@@ -188,7 +188,7 @@ export function useEpisodicMemory({
     }, refreshInterval);
 
     return () => clearInterval(intervalId);
-  }, [autoRefresh, refreshInterval, loadEpisodicData]);
+  }, [autoRefresh, refreshInterval]); // loadEpisodicData removida das dependências para evitar re-execuções desnecessárias
 
   return {
     memories,

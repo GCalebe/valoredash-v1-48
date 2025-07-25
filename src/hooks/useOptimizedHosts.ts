@@ -99,7 +99,7 @@ export const useOptimizedHosts = () => {
     return () => {
       globalHostsCache.listeners.delete(updateFromCache);
     };
-  }, [user, fetchHosts]);
+  }, [user]); // fetchHosts removida das dependências para evitar re-execuções desnecessárias
 
   return {
     hosts,

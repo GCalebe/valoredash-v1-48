@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 
 interface RealtimeMetricsUpdate {
   type: 'contact_added' | 'conversation_updated' | 'metrics_updated';
@@ -12,6 +13,25 @@ export const useRealTimeMetrics = () => {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [updateCount, setUpdateCount] = useState(0);
   const queryClient = useQueryClient();
+
+  // Debounced invalidation functions to prevent excessive cache invalidations
+  const { debouncedCallback: debouncedInvalidateMetrics } = useDebouncedCallback(() => {
+    queryClient.invalidateQueries({ 
+      queryKey: ['consolidated-metrics'],
+      exact: false 
+    });
+    queryClient.invalidateQueries({ 
+      queryKey: ['time-series-data'],
+      exact: false 
+    });
+  }, 1000);
+
+  const { debouncedCallback: debouncedInvalidateLeads } = useDebouncedCallback(() => {
+    queryClient.invalidateQueries({ 
+      queryKey: ['leads-by-source'],
+      exact: false 
+    });
+  }, 1000);
 
   useEffect(() => {
     // Canal para atualizações de contatos
@@ -27,19 +47,9 @@ export const useRealTimeMetrics = () => {
         (payload) => {
           console.log('🔄 Atualização de contato:', payload);
           
-          // Invalidar queries relacionadas a contatos
-          queryClient.invalidateQueries({ 
-            queryKey: ['consolidated-metrics'],
-            exact: false 
-          });
-          queryClient.invalidateQueries({ 
-            queryKey: ['time-series-data'],
-            exact: false 
-          });
-          queryClient.invalidateQueries({ 
-            queryKey: ['leads-by-source'],
-            exact: false 
-          });
+          // Use debounced invalidation to prevent excessive cache invalidations
+          debouncedInvalidateMetrics();
+          debouncedInvalidateLeads();
           
           setLastUpdate(new Date());
           setUpdateCount(prev => prev + 1);
@@ -60,15 +70,8 @@ export const useRealTimeMetrics = () => {
         (payload) => {
           console.log('💬 Atualização de conversa:', payload);
           
-          // Invalidar queries relacionadas a conversas
-          queryClient.invalidateQueries({ 
-            queryKey: ['consolidated-metrics'],
-            exact: false 
-          });
-          queryClient.invalidateQueries({ 
-            queryKey: ['time-series-data'],
-            exact: false 
-          });
+          // Use debounced invalidation to prevent excessive cache invalidations
+          debouncedInvalidateMetrics();
           
           setLastUpdate(new Date());
           setUpdateCount(prev => prev + 1);
@@ -89,11 +92,8 @@ export const useRealTimeMetrics = () => {
         (payload) => {
           console.log('📊 Atualização de métrica:', payload);
           
-          // Invalidar todas as queries de métricas
-          queryClient.invalidateQueries({ 
-            queryKey: ['consolidated-metrics'],
-            exact: false 
-          });
+          // Use debounced invalidation to prevent excessive cache invalidations
+          debouncedInvalidateMetrics();
           
           setLastUpdate(new Date());
           setUpdateCount(prev => prev + 1);
@@ -114,10 +114,8 @@ export const useRealTimeMetrics = () => {
         (payload) => {
           console.log('🎯 Atualização UTM:', payload);
           
-          queryClient.invalidateQueries({ 
-            queryKey: ['leads-by-source'],
-            exact: false 
-          });
+          // Use debounced invalidation to prevent excessive cache invalidations
+          debouncedInvalidateLeads();
           
           setLastUpdate(new Date());
           setUpdateCount(prev => prev + 1);

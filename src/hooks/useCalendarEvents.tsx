@@ -62,7 +62,7 @@ export function useCalendarEvents({ currentMonth }: UseCalendarEventsProps) {
     if (monthCacheKey !== lastFetchedMonth.current) {
       fetchEventsForMonth(currentMonth);
     }
-  }, [currentMonth, fetchEventsForMonth]);
+  }, [currentMonth]); // Remove fetchEventsForMonth dependency to prevent unnecessary re-renders
 
   const refreshEvents = React.useCallback(() => {
     clearCache();

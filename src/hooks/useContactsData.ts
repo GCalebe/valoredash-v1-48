@@ -73,7 +73,7 @@ export const useContactsData = () => {
 
   useEffect(() => {
     fetchClients();
-  }, [fetchClients]);
+  }, []); // Remove fetchClients dependency to prevent unnecessary re-renders
 
   return {
     contacts,

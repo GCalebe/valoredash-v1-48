@@ -1,6 +1,7 @@
 
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 
 interface UseRealtimeUpdatesProps {
   updateConversationLastMessage: (sessionId: string) => Promise<void>;
@@ -11,6 +12,11 @@ export function useRealtimeUpdates({
   updateConversationLastMessage,
   fetchConversations,
 }: UseRealtimeUpdatesProps) {
+  // Debounced functions to prevent excessive updates
+  const { debouncedCallback: debouncedFetchConversations } = useDebouncedCallback(
+    fetchConversations,
+    1000
+  );
   useEffect(() => {
     console.log("🔄 Configurando atualizações em tempo real para chat");
 
@@ -30,11 +36,13 @@ export function useRealtimeUpdates({
           const sessionId = payload.new.session_id;
           console.log(`🔄 Processando mensagem para sessão: ${sessionId}`);
 
-          // Update the conversation last message
+          // Update the conversation last message immediately for real-time feel
           updateConversationLastMessage(sessionId)
-            .then(() =>
-              console.log(`✅ Última mensagem atualizada para conversa: ${sessionId}`)
-            )
+            .then(() => {
+              console.log(`✅ Última mensagem atualizada para conversa: ${sessionId}`);
+              // Also refresh conversations list with debounce
+              debouncedFetchConversations();
+            })
             .catch((error) =>
               console.error(`❌ Erro ao atualizar conversa: ${error}`)
             );
@@ -55,10 +63,8 @@ export function useRealtimeUpdates({
         (payload) => {
           console.log("🔄 Mudança na tabela de conversas:", payload.eventType);
           
-          // Refresh conversations list when there are changes
-          fetchConversations()
-            .then(() => console.log("✅ Lista de conversas atualizada"))
-            .catch((error) => console.error("❌ Erro ao atualizar lista:", error));
+          // Refresh conversations list with debounce to prevent excessive updates
+          debouncedFetchConversations();
         },
       )
       .subscribe();
@@ -77,9 +83,7 @@ export function useRealtimeUpdates({
           console.log("👤 Mudança na tabela de contatos:", payload.eventType);
           
           // If conversations table is empty, this might help populate it
-          fetchConversations()
-            .then(() => console.log("✅ Lista de conversas atualizada via contatos"))
-            .catch((error) => console.error("❌ Erro ao atualizar via contatos:", error));
+          debouncedFetchConversations();
         },
       )
       .subscribe();
@@ -92,5 +96,5 @@ export function useRealtimeUpdates({
       conversationsSubscription.unsubscribe();
       contactsSubscription.unsubscribe();
     };
-  }, [updateConversationLastMessage, fetchConversations]);
+  }, [updateConversationLastMessage, debouncedFetchConversations]);
 }

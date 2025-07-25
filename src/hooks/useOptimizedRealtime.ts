@@ -184,13 +184,7 @@ export const useOptimizedRealtime = (config: RealtimeConfig = {}) => {
 
     // Cleanup on unmount
     return cleanup;
-  }, [
-    setupClientUpdates,
-    setupMetricsUpdates,
-    setupConversationUpdates,
-    setupPolling,
-    cleanup
-  ]);
+  }, []); // Funções removidas das dependências para evitar re-execuções desnecessárias
 
   // Manual refresh functions
   const manualRefresh = useCallback(() => {

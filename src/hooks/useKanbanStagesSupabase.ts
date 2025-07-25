@@ -250,7 +250,7 @@ export function useKanbanStagesSupabase() {
 
   useEffect(() => {
     fetchStages();
-  }, [fetchStages]);
+  }, [user?.id]); // fetchStages removida das dependências para evitar re-execuções desnecessárias
 
   return {
     stages,

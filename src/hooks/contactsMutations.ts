@@ -9,7 +9,8 @@ export const useCreateContactMutation = () => {
   return useMutation({
     mutationFn: contactsService.createContact,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: contactsKeys.all });
+      // Invalidate only specific queries instead of all contacts queries
+      queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
       toast({
         title: "Success",
         description: "Contact created successfully",
@@ -31,7 +32,8 @@ export const useUpdateContactMutation = () => {
   return useMutation({
     mutationFn: contactsService.updateContact,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: contactsKeys.all });
+      // Invalidate only specific queries instead of all contacts queries
+      queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
       toast({
         title: "Success",
         description: "Contact updated successfully",
@@ -53,7 +55,8 @@ export const useDeleteContactMutation = () => {
   return useMutation({
     mutationFn: contactsService.deleteContact,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: contactsKeys.all });
+      // Invalidate only specific queries instead of all contacts queries
+      queryClient.invalidateQueries({ queryKey: contactsKeys.lists() });
       toast({
         title: "Success",
         description: "Contact deleted successfully",

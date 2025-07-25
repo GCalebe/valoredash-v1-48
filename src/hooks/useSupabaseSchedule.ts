@@ -176,7 +176,7 @@ export function useSupabaseSchedule(agendaId?: string) {
   // Load events on mount
   useEffect(() => {
     fetchEvents();
-  }, [fetchEvents]);
+  }, []); // fetchEvents removida das dependências para evitar re-execuções desnecessárias
 
   return {
     events,

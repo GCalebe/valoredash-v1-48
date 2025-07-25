@@ -1,9 +1,34 @@
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 
 export function useDashboardRealtime() {
   const queryClient = useQueryClient();
+
+  // Debounced invalidation functions to prevent excessive cache invalidations
+  const { debouncedCallback: debouncedInvalidateClientStats } = useDebouncedCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+  }, 1000);
+
+  const { debouncedCallback: debouncedInvalidateConversations } = useDebouncedCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['conversation-metrics'] });
+  }, 1000);
+
+  const { debouncedCallback: debouncedInvalidateSchedule } = useDebouncedCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['schedule'] });
+    queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+  }, 1000);
+
+  const { debouncedCallback: debouncedInvalidateServices } = useDebouncedCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['services'] });
+    queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+  }, 1000);
+
+  const { debouncedCallback: debouncedInvalidateUTM } = useDebouncedCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['utm-metrics'] });
+  }, 1000);
 
   useEffect(() => {
     console.log("Setting up dashboard-wide realtime updates");
@@ -21,9 +46,8 @@ export function useDashboardRealtime() {
         async (payload) => {
           console.log("Client data changed:", payload);
           try {
-            // Invalidate client stats queries
-            queryClient.invalidateQueries({ queryKey: ['client-stats'] });
-            queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+            // Use debounced invalidation to prevent excessive cache invalidations
+            debouncedInvalidateClientStats();
           } catch (error) {
             console.error("Error refreshing data after client change:", error);
           }
@@ -44,9 +68,8 @@ export function useDashboardRealtime() {
         async (payload) => {
           console.log("Chat history changed:", payload);
           try {
-            // Invalidate conversation metrics queries
-            queryClient.invalidateQueries({ queryKey: ['conversation-metrics'] });
-            queryClient.invalidateQueries({ queryKey: ['conversation-metrics'] });
+            // Use debounced invalidation to prevent excessive cache invalidations
+            debouncedInvalidateConversations();
           } catch (error) {
             console.error(
               "Error refreshing conversations after chat change:",
@@ -70,9 +93,8 @@ export function useDashboardRealtime() {
         async (payload) => {
           console.log("Schedule data changed:", payload);
           try {
-            // Invalidate schedule and stats queries
-            queryClient.invalidateQueries({ queryKey: ['schedule'] });
-            queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+            // Use debounced invalidation to prevent excessive cache invalidations
+            debouncedInvalidateSchedule();
           } catch (error) {
             console.error(
               "Error refreshing stats after schedule change:",
@@ -96,9 +118,8 @@ export function useDashboardRealtime() {
         async (payload) => {
           console.log("Services data changed:", payload);
           try {
-            // Invalidate services and stats queries
-            queryClient.invalidateQueries({ queryKey: ['services'] });
-            queryClient.invalidateQueries({ queryKey: ['client-stats'] });
+            // Use debounced invalidation to prevent excessive cache invalidations
+            debouncedInvalidateServices();
           } catch (error) {
             console.error(
               "Error refreshing stats after services change:",
@@ -122,8 +143,8 @@ export function useDashboardRealtime() {
         async (payload) => {
           console.log("UTM data changed:", payload);
           try {
-            // Invalidate UTM metrics queries
-            queryClient.invalidateQueries({ queryKey: ['utm-metrics'] });
+            // Use debounced invalidation to prevent excessive cache invalidations
+            debouncedInvalidateUTM();
           } catch (error) {
             console.error(
               "Error refreshing UTM data after change:",

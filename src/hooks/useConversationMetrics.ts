@@ -213,7 +213,7 @@ export function useConversationMetrics(
       };
       setMetrics(safeMetrics);
     }
-  }, [toast, dateFilter, conversationMetrics, latestStats, funnelData, startDateStr, endDate]);
+  }, [dateFilter, conversationMetrics, funnelData]); // Removed unnecessary dependencies
 
   return { metrics, loading, refetchMetrics };
 }

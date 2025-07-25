@@ -127,15 +127,17 @@ export const useOptimizedContactsData = () => {
     globalContactsCache.listeners.add(updateFromCache);
     
     // Initial fetch if cache is empty or expired
-    if (globalContactsCache.data.length === 0 || 
-        (Date.now() - globalContactsCache.lastFetch) > CACHE_DURATION) {
+    const shouldFetch = globalContactsCache.data.length === 0 || 
+        (Date.now() - globalContactsCache.lastFetch) > CACHE_DURATION;
+    
+    if (shouldFetch) {
       fetchClients();
     }
 
     return () => {
       globalContactsCache.listeners.delete(updateFromCache);
     };
-  }, [fetchClients]);
+  }, []); // Remove fetchClients from dependencies to prevent infinite loop
 
   return {
     contacts,

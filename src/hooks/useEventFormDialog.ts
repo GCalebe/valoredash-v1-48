@@ -253,12 +253,16 @@ export const useEventFormDialog = ({ event, open }: UseEventFormDialogProps) => 
     } else if (!open) {
       resetFormState();
     }
-  }, [event, open, contacts]);
+  }, [event, open]); // Remove function dependencies to prevent unnecessary re-runs
 
   // Update end time when start time or duration changes
   useEffect(() => {
-    updateEndTime();
-  }, [updateEndTime]);
+    if (state.startDateTime) {
+      const startDate = parse(state.startDateTime, "yyyy-MM-dd'T'HH:mm", new Date());
+      const endDate = new Date(startDate.getTime() + state.selectedDuration * 60 * 1000);
+      updateState({ endDateTime: format(endDate, "yyyy-MM-dd'T'HH:mm") });
+    }
+  }, [state.startDateTime, state.selectedDuration]); // Inline logic to avoid function dependency
 
   return {
     // State

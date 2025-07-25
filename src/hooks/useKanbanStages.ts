@@ -109,7 +109,7 @@ export function useKanbanStages() {
   useEffect(() => {
     console.log("useKanbanStages: Initial fetch");
     fetchStages();
-  }, [fetchStages]);
+  }, [user?.id]); // Remove fetchStages dependency to prevent unnecessary re-renders
 
   return {
     stages,

@@ -54,7 +54,7 @@ type Reminder = {
 import { Agenda as SupabaseAgenda } from '@/hooks/useAgendas';
 
 type LocalAgenda = {
-  id: number;
+  id: string; // Alterado de number para string para manter consistência com Supabase
   title: string;
   description: string;
   category: AgendaCategory;
@@ -170,7 +170,7 @@ const AgendaTab = () => {
   // Função para converter agenda do Supabase para formato local
   const convertSupabaseToLocal = (supabaseAgenda: SupabaseAgenda): LocalAgenda => {
     return {
-      id: parseInt(supabaseAgenda.id),
+      id: supabaseAgenda.id, // Mantém como string para evitar problemas de conversão
       title: supabaseAgenda.name,
       description: supabaseAgenda.description || '',
       category: (supabaseAgenda.category as AgendaCategory) || '',

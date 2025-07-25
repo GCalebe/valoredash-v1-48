@@ -160,7 +160,7 @@ export function useChatMessages(selectedChat: string | null) {
       setMessages([]);
       setLoading(false);
     }
-  }, [selectedChat, fetchMessages]);
+  }, [selectedChat]); // fetchMessages removida das dependências para evitar re-execuções desnecessárias
 
   const handleNewMessage = (message: ChatMessage) => {
     logger.debug("📨 Adicionando nova mensagem ao estado local:", message);

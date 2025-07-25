@@ -110,7 +110,7 @@ export const useNotifications = () => {
     const interval = setInterval(loadNotifications, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
-  }, [loadNotifications]);
+  }, [user?.id]); // loadNotifications removida das dependências para evitar re-execuções desnecessárias
 
   return {
     notifications,

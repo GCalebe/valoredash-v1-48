@@ -223,7 +223,7 @@ export function useConversations() {
 
   useEffect(() => {
     fetchConversations();
-  }, [fetchConversations]);
+  }, []); // fetchConversations removida das dependências para evitar re-execuções desnecessárias
 
   return {
     conversations,
