@@ -42,7 +42,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 
 
-type AgendaCategory = 'consulta' | 'evento' | 'classes' | 'recorrente' | '';
+export type AgendaCategory = 'consulta' | 'evento' | 'classes' | 'recorrente' | '';
 
 type Reminder = {
   id: number;
@@ -54,7 +54,7 @@ type Reminder = {
 
 import { Agenda as SupabaseAgenda } from '@/hooks/useAgendas';
 
-type LocalAgenda = {
+export type LocalAgenda = {
   id: string; // Alterado de number para string para manter consistência com Supabase
   title: string;
   description: string;
@@ -96,7 +96,7 @@ const initialAgendaState: Omit<LocalAgenda, 'id'> = {
   reminders: [],
 };
 
-const categoryDetails = {
+export const categoryDetails = {
     consulta: {
         icon: Calendar,
         title: "Consulta",
@@ -119,7 +119,7 @@ const categoryDetails = {
     }
 }
 
-const tooltipTexts = {
+export const tooltipTexts = {
   title: "O titulo da agenda que será visivel para seus cliente",
   host: "Anfitriões são as pessoas responsáveis pela organização, execução e atendimento do agendamento. Por exemplo, se você estiver criando um calendário para uma clínica odontológica, o anfitrião será o dentista.",
   availabilityInterval: "Com esse recurso, você pode definir os intervalos de tempo que podem ser agendados, quanto menor o tempo, maior a quantidade de horários disponíveis. ex: o cliente pode marcar a cada 30 minutos.",
@@ -129,7 +129,7 @@ const tooltipTexts = {
   availableDates: "Especifique quais meses e o intervalo de datas que estar�� com essa agenda disponível.",
 };
 
-const InfoTooltip = ({ text }: { text: string }) => (
+export const InfoTooltip = ({ text }: { text: string }) => (
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger asChild>
@@ -149,7 +149,7 @@ const InfoTooltip = ({ text }: { text: string }) => (
   </TooltipProvider>
 );
 
-const FormField = ({ label, tooltipText, children }: { label: string, tooltipText?: string, children: React.ReactNode }) => (
+export const FormField = ({ label, tooltipText, children }: { label: string, tooltipText?: string, children: React.ReactNode }) => (
     <div className="space-y-3">
         <div className="flex items-center gap-2">
             <Label className="text-base font-semibold text-foreground">{label}</Label>

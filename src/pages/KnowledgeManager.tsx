@@ -147,10 +147,10 @@ const KnowledgeManager = () => {
               <TabsTrigger value="agenda" className="text-sm">
                 Agenda
               </TabsTrigger>
-              <TabsTrigger value="documents" className="text-sm">
+              <TabsTrigger value="products" className="text-sm">
                 Produtos
               </TabsTrigger>
-              <TabsTrigger value="employees" className="text-sm">
+              <TabsTrigger value="hosts" className="text-sm">
                 Anfitriões
               </TabsTrigger>
               <TabsTrigger value="faq" className="text-sm">
@@ -175,11 +175,11 @@ const KnowledgeManager = () => {
                 <AgendaTab />
               </TabsContent>
 
-              <TabsContent value="documents" className="mt-0">
+              <TabsContent value="products" className="mt-0">
                 <ProductsTab />
               </TabsContent>
 
-              <TabsContent value="employees" className="mt-0">
+              <TabsContent value="hosts" className="mt-0">
                 <HostsTab />
               </TabsContent>
 

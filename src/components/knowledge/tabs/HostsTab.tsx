@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -46,18 +46,14 @@ const HostsTab = () => {
     description: "",
   });
 
-  useEffect(() => {
-    if (user) {
-      fetchHosts();
-    }
-  }, [fetchHosts]);
-
-  const fetchHosts = async () => {
+  const fetchHosts = useCallback(async () => {
+    if (!user?.id) return;
+    
     try {
       const { data, error } = await supabase
         .from("employees")
         .select("*")
-        .eq("user_id", user?.id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -70,7 +66,13 @@ const HostsTab = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchHosts();
+  }, [fetchHosts]);
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
