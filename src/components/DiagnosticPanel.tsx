@@ -28,6 +28,75 @@ interface DiagnosticResult {
   details?: unknown;
 }
 
+const DiagnosticResultItem: React.FC<{ result: DiagnosticResult; getStatusIcon: (status: string) => JSX.Element; getStatusColor: (status: string) => string; }> = ({ result, getStatusIcon, getStatusColor }) => (
+  <div className={`p-3 rounded-md border ${getStatusColor(result.status)}`}>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        {getStatusIcon(result.status)}
+        <span className="font-semibold">{result.test}</span>
+      </div>
+      <Badge variant={result.status === 'success' ? 'default' : 'destructive'}>{result.status}</Badge>
+    </div>
+    <p className="text-sm text-muted-foreground ml-6">{result.message}</p>
+    {result.details && (
+      <pre className="mt-2 ml-6 p-2 bg-gray-100 dark:bg-gray-800 rounded-md text-xs overflow-x-auto">
+        {JSON.stringify(result.details, null, 2)}
+      </pre>
+    )}
+  </div>
+);
+
+const runAuthDiagnostics = (user, session, userProfile, isAdmin, authLoading): DiagnosticResult[] => [
+  {
+    category: 'Auth',
+    test: 'User Authentication',
+    status: user ? 'success' : 'error',
+    message: user ? 'Usuário autenticado' : 'Usuário não autenticado',
+    details: { user: user?.email, isAdmin, authLoading }
+  },
+  {
+    category: 'Auth',
+    test: 'Session Status',
+    status: session ? 'success' : 'warning',
+    message: session ? 'Sessão ativa' : 'Sem sessão ativa',
+    details: { sessionExists: !!session }
+  },
+  {
+    category: 'Auth',
+    test: 'User Profile',
+    status: userProfile ? 'success' : 'warning',
+    message: userProfile ? 'Perfil carregado' : 'Perfil não carregado',
+    details: userProfile
+  },
+];
+
+const runNavDiagnostics = (location): DiagnosticResult[] => [
+  {
+    category: 'Navigation',
+    test: 'Current Route',
+    status: 'info',
+    message: `Rota atual: ${location.pathname}`,
+    details: { pathname: location.pathname, search: location.search, hash: location.hash }
+  }
+];
+
+const runEnvDiagnostics = (): DiagnosticResult[] => {
+  const envVars = {
+    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+    VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY ? '***HIDDEN***' : undefined,
+    VITE_ENV: import.meta.env.VITE_ENV
+  };
+  return [
+    {
+      category: 'Environment',
+      test: 'Environment Variables',
+      status: envVars.VITE_SUPABASE_URL && envVars.VITE_SUPABASE_ANON_KEY ? 'success' : 'error',
+      message: envVars.VITE_SUPABASE_URL && envVars.VITE_SUPABASE_ANON_KEY ? 'Variáveis de ambiente OK' : 'Variáveis de ambiente faltando',
+      details: envVars
+    }
+  ];
+};
+
 const DiagnosticPanel: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,32 +110,9 @@ const DiagnosticPanel: React.FC = () => {
     setIsRunning(true);
     const results: DiagnosticResult[] = [];
 
-    // Test 1: Authentication Status
-    results.push({
-      category: 'Auth',
-      test: 'User Authentication',
-      status: user ? 'success' : 'error',
-      message: user ? 'Usuário autenticado' : 'Usuário não autenticado',
-      details: { user: user?.email, isAdmin, authLoading }
-    });
-
-    // Test 2: Session Status
-    results.push({
-      category: 'Auth',
-      test: 'Session Status',
-      status: session ? 'success' : 'warning',
-      message: session ? 'Sessão ativa' : 'Sem sessão ativa',
-      details: { sessionExists: !!session }
-    });
-
-    // Test 3: User Profile
-    results.push({
-      category: 'Auth',
-      test: 'User Profile',
-      status: userProfile ? 'success' : 'warning',
-      message: userProfile ? 'Perfil carregado' : 'Perfil não carregado',
-      details: userProfile
-    });
+    results.push(...runAuthDiagnostics(user, session, userProfile, isAdmin, authLoading));
+    results.push(...runNavDiagnostics(location));
+    results.push(...runEnvDiagnostics());
 
     // Test 4: Theme Settings
     results.push({
@@ -77,16 +123,7 @@ const DiagnosticPanel: React.FC = () => {
       details: settings
     });
 
-    // Test 5: Current Route
-    results.push({
-      category: 'Navigation',
-      test: 'Current Route',
-      status: 'info',
-      message: `Rota atual: ${location.pathname}`,
-      details: { pathname: location.pathname, search: location.search, hash: location.hash }
-    });
-
-    // Test 6: Supabase Connection - Fixed to use correct table name
+    // Test 6: Supabase Connection
     try {
       const { data, error } = await supabase.from('contacts').select('count', { count: 'exact', head: true });
       results.push({
@@ -107,21 +144,6 @@ const DiagnosticPanel: React.FC = () => {
       });
       setSupabaseStatus({ connected: false, error: err });
     }
-
-    // Test 7: Environment Variables
-    const envVars = {
-      VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-      VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY ? '***HIDDEN***' : undefined,
-      VITE_ENV: import.meta.env.VITE_ENV
-    };
-    
-    results.push({
-      category: 'Environment',
-      test: 'Environment Variables',
-      status: envVars.VITE_SUPABASE_URL && envVars.VITE_SUPABASE_ANON_KEY ? 'success' : 'error',
-      message: envVars.VITE_SUPABASE_URL && envVars.VITE_SUPABASE_ANON_KEY ? 'Variáveis de ambiente OK' : 'Variáveis de ambiente faltando',
-      details: envVars
-    });
 
     // Test 8: Local Storage
     const mockAuthData = localStorage.getItem('mockAuthData');
@@ -223,45 +245,19 @@ const DiagnosticPanel: React.FC = () => {
                   {category}
                 </h3>
                 {tests.map((test, index) => (
-                  <div 
-                    key={index}
-                    className={`p-3 rounded border ${getStatusColor(test.status)}`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      {getStatusIcon(test.status)}
-                      <span className="font-medium">{test.test}</span>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{test.message}</p>
-                  </div>
+                  <DiagnosticResultItem 
+                    key={index} 
+                    result={test} 
+                    getStatusIcon={getStatusIcon} 
+                    getStatusColor={getStatusColor} 
+                  />
                 ))}
               </div>
             ))}
           </TabsContent>
           
           <TabsContent value="navigation" className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {[
-                { path: '/dashboard', name: 'Dashboard' },
-                { path: '/metrics', name: 'Métricas' },
-                { path: '/chats', name: 'Chats' },
-                { path: '/knowledge', name: 'Conhecimento' },
-                { path: '/clients', name: 'Clientes' },
-                { path: '/evolution', name: 'Evolução' },
-                { path: '/schedule', name: 'Agenda' },
-                { path: '/admin', name: 'Admin' },
-                { path: '/subscription', name: 'Assinatura' },
-              ].map((route) => (
-                <Button
-                  key={route.path}
-                  variant={location.pathname === route.path ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => testNavigation(route.path)}
-                  className="text-xs"
-                >
-                  {route.name}
-                </Button>
-              ))}
-            </div>
+            <NavigationTestTab testNavigation={testNavigation} location={location} />
           </TabsContent>
           
           <TabsContent value="details" className="space-y-4">
