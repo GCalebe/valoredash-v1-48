@@ -62,6 +62,33 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
   const [step, setStep] = useState(1);
   const totalSteps = 6;
 
+  // Estado para gerenciar múltiplos horários de funcionamento
+  const [operatingHours, setOperatingHours] = useState<Record<string, Array<{start: string, end: string}>>>({
+    'Domingo': [{start: '08:00', end: '17:00'}],
+    'Segunda-Feira': [{start: '08:00', end: '17:00'}],
+    'Terça-Feira': [{start: '08:00', end: '17:00'}],
+    'Quarta-Feira': [{start: '08:00', end: '17:00'}],
+    'Quinta-Feira': [{start: '08:00', end: '17:00'}],
+    'Sexta-Feira': [{start: '08:00', end: '17:00'}],
+    'Sábado': [{start: '08:00', end: '17:00'}]
+  });
+
+  // Estado para gerenciar múltiplas datas disponíveis
+  const [availableDates, setAvailableDates] = useState<Record<string, Array<{start: number, end: number}>>>({
+    'Janeiro': [{start: 1, end: 31}],
+    'Fevereiro': [{start: 1, end: 29}],
+    'Março': [{start: 1, end: 31}],
+    'Abril': [{start: 1, end: 30}],
+    'Maio': [{start: 1, end: 31}],
+    'Junho': [{start: 1, end: 30}],
+    'Julho': [{start: 1, end: 31}],
+    'Agosto': [{start: 1, end: 31}],
+    'Setembro': [{start: 1, end: 30}],
+    'Outubro': [{start: 1, end: 31}],
+    'Novembro': [{start: 1, end: 30}],
+    'Dezembro': [{start: 1, end: 31}]
+  });
+
   useEffect(() => {
     if (editingAgenda) {
       setCurrentAgenda(editingAgenda);
@@ -87,6 +114,63 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
 
   const handleSwitchChange = (checked: boolean) => {
     setCurrentAgenda(prev => ({ ...prev, sendReminders: checked }));
+  };
+
+  // Funções para gerenciar horários de funcionamento
+  const addOperatingHour = (day: string) => {
+    setOperatingHours(prev => ({
+      ...prev,
+      [day]: [...prev[day], { start: '08:00', end: '17:00' }]
+    }));
+  };
+
+  const removeOperatingHour = (day: string, index: number) => {
+    setOperatingHours(prev => ({
+      ...prev,
+      [day]: prev[day].filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateOperatingHour = (day: string, index: number, field: 'start' | 'end', value: string) => {
+    setOperatingHours(prev => ({
+      ...prev,
+      [day]: prev[day].map((hour, i) => 
+        i === index ? { ...hour, [field]: value } : hour
+      )
+    }));
+  };
+
+  // Funções para gerenciar datas disponíveis
+  const addAvailableDate = (month: string) => {
+    const monthData = [
+      { name: 'Janeiro', days: 31 }, { name: 'Fevereiro', days: 29 }, { name: 'Março', days: 31 },
+      { name: 'Abril', days: 30 }, { name: 'Maio', days: 31 }, { name: 'Junho', days: 30 },
+      { name: 'Julho', days: 31 }, { name: 'Agosto', days: 31 }, { name: 'Setembro', days: 30 },
+      { name: 'Outubro', days: 31 }, { name: 'Novembro', days: 30 }, { name: 'Dezembro', days: 31 }
+    ];
+    const monthInfo = monthData.find(m => m.name === month);
+    const maxDays = monthInfo ? monthInfo.days : 31;
+    
+    setAvailableDates(prev => ({
+      ...prev,
+      [month]: [...prev[month], { start: 1, end: maxDays }]
+    }));
+  };
+
+  const removeAvailableDate = (month: string, index: number) => {
+    setAvailableDates(prev => ({
+      ...prev,
+      [month]: prev[month].filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateAvailableDate = (month: string, index: number, field: 'start' | 'end', value: number) => {
+    setAvailableDates(prev => ({
+      ...prev,
+      [month]: prev[month].map((date, i) => 
+        i === index ? { ...date, [field]: value } : date
+      )
+    }));
   };
 
   const handleSaveClick = () => {
@@ -181,15 +265,65 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
                         { name: 'Julho', days: 31 }, { name: 'Agosto', days: 31 }, { name: 'Setembro', days: 30 },
                         { name: 'Outubro', days: 31 }, { name: 'Novembro', days: 30 }, { name: 'Dezembro', days: 31 }
                       ].map((month) => (
-                        <div key={month.name} className="flex items-center gap-4">
-                          <div className="flex items-center space-x-3 w-28">
-                            <Checkbox defaultChecked id={`month-${month.name}`} />
-                            <Label htmlFor={`month-${month.name}`} className="text-sm font-medium text-foreground cursor-pointer">{month.name}</Label>
+                        <div key={month.name} className="space-y-2">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center space-x-3 w-28">
+                              <Checkbox defaultChecked id={`month-${month.name}`} />
+                              <Label htmlFor={`month-${month.name}`} className="text-sm font-medium text-foreground cursor-pointer">{month.name}</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="w-8 h-8 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold"
+                                onClick={() => addAvailableDate(month.name)}
+                              >
+                                +
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Select defaultValue="1"><SelectTrigger className="w-16"><SelectValue /></SelectTrigger><SelectContent>{Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (<SelectItem key={day} value={day.toString()}>{day}</SelectItem>))}</SelectContent></Select>
-                            <span className="text-sm text-muted-foreground">até</span>
-                            <Select defaultValue={month.days.toString()}><SelectTrigger className="w-16"><SelectValue /></SelectTrigger><SelectContent>{Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (<SelectItem key={day} value={day.toString()}>{day}</SelectItem>))}</SelectContent></Select>
+                          <div className="ml-32 space-y-2">
+                            {availableDates[month.name]?.map((dateRange, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <Select 
+                                  value={dateRange.start.toString()} 
+                                  onValueChange={(value) => updateAvailableDate(month.name, index, 'start', parseInt(value))}
+                                >
+                                  <SelectTrigger className="w-16">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (
+                                      <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <span className="text-sm text-muted-foreground">até</span>
+                                <Select 
+                                  value={dateRange.end.toString()} 
+                                  onValueChange={(value) => updateAvailableDate(month.name, index, 'end', parseInt(value))}
+                                >
+                                  <SelectTrigger className="w-16">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (
+                                      <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                {availableDates[month.name].length > 1 && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="w-8 h-8 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
+                                    onClick={() => removeAvailableDate(month.name, index)}
+                                  >
+                                    ×
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
                           </div>
                         </div>
                       ))}
@@ -205,16 +339,51 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
                       <p className="text-sm text-muted-foreground mb-4">Defina o horário de abertura e fechamento. Para intervalos (como almoço), clique no '+' para adicionar mais faixas de horário.</p>
                       <div className="space-y-3">
                         {['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'].map((day) => (
-                          <div key={day} className="flex items-center gap-4">
-                            <div className="flex items-center space-x-3 w-36">
-                              <Checkbox defaultChecked id={`day-${day}`} />
-                              <Label htmlFor={`day-${day}`} className="text-sm font-medium text-foreground cursor-pointer">{day}</Label>
+                          <div key={day} className="space-y-2">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center space-x-3 w-36">
+                                <Checkbox defaultChecked id={`day-${day}`} />
+                                <Label htmlFor={`day-${day}`} className="text-sm font-medium text-foreground cursor-pointer">{day}</Label>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="w-8 h-8 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold"
+                                  onClick={() => addOperatingHour(day)}
+                                >
+                                  +
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Input type="time" defaultValue="08:00" className="w-24" />
-                              <span className="text-sm text-muted-foreground">até</span>
-                              <Input type="time" defaultValue="17:00" className="w-24" />
-                              <Button variant="ghost" size="icon" className="w-8 h-8 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold">+</Button>
+                            <div className="ml-40 space-y-2">
+                              {operatingHours[day]?.map((timeRange, index) => (
+                                <div key={index} className="flex items-center gap-2">
+                                  <Input 
+                                    type="time" 
+                                    value={timeRange.start} 
+                                    onChange={(e) => updateOperatingHour(day, index, 'start', e.target.value)}
+                                    className="w-24" 
+                                  />
+                                  <span className="text-sm text-muted-foreground">até</span>
+                                  <Input 
+                                    type="time" 
+                                    value={timeRange.end} 
+                                    onChange={(e) => updateOperatingHour(day, index, 'end', e.target.value)}
+                                    className="w-24" 
+                                  />
+                                  {operatingHours[day].length > 1 && (
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="w-8 h-8 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
+                                      onClick={() => removeOperatingHour(day, index)}
+                                    >
+                                      ×
+                                    </Button>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           </div>
                         ))}
