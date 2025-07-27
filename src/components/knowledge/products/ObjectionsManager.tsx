@@ -30,13 +30,6 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
-  // Load objections from database when productId is provided
-  useEffect(() => {
-    if (productId) {
-      loadObjections();
-    }
-  }, [loadObjections]);
-
   const loadObjections = async () => {
     if (!productId) return;
     
@@ -91,6 +84,13 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
       setIsLoading(false);
     }
   };
+
+  // Load objections from database when productId is provided
+  useEffect(() => {
+    if (productId) {
+      loadObjections();
+    }
+  }, [productId]);
 
   const saveObjection = async (objection: ProductObjection) => {
     if (!productId || !user) {
@@ -309,34 +309,27 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleEditObjection(objection.id!)}
-                    >
+                    <Button size="sm" onClick={() => handleEditObjection(objection.id!)}>
                       <Save className="h-3 w-3 mr-1" />
                       Salvar
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={cancelEdit}
-                    >
+                    <Button size="sm" variant="outline" onClick={cancelEdit}>
                       <X className="h-3 w-3 mr-1" />
                       Cancelar
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div>
-                    <Badge variant="outline" className="text-xs mb-1">Objeção</Badge>
+                    <Label className="text-xs text-muted-foreground">Objeção</Label>
                     <p className="text-sm font-medium">{objection.question}</p>
                   </div>
                   <div>
-                    <Badge variant="outline" className="text-xs mb-1">Resposta</Badge>
+                    <Label className="text-xs text-muted-foreground">Resposta</Label>
                     <p className="text-sm text-muted-foreground">{objection.answer}</p>
                   </div>
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="outline"

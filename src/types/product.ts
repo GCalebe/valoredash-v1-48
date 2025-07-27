@@ -16,7 +16,6 @@ export interface Product {
   objections?: string[];
   differentials?: string[];
   success_cases?: string[];
-  features?: string[];
   icon?: string;
   image?: string;
   has_combo: boolean;
@@ -48,7 +47,6 @@ export interface ProductFormData {
   objections?: string[];
   differentials?: string[];
   success_cases?: string[];
-  features?: string[];
   icon?: string;
   image?: string;
   has_combo?: boolean;

@@ -126,12 +126,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </div>
           )}
           
-          {getBadgeCount(product.features) > 0 && (
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Package className="h-3 w-3" />
-              <span>{getBadgeCount(product.features)} funcionalidades</span>
-            </div>
-          )}
+
         </div>
 
         {/* Category */}

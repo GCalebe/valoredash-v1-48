@@ -34,7 +34,6 @@ const productSchema = z.object({
   objections: z.array(z.string()).default([]),
   differentials: z.array(z.string()).default([]),
   success_cases: z.array(z.string()).default([]),
-  features: z.array(z.string()).default([]),
   icon: z.string().optional(),
   image: z.string().optional(),
   has_combo: z.boolean().default(false),
@@ -79,7 +78,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
       objections: [],
       differentials: [],
       success_cases: [],
-      features: [],
       icon: "",
       image: "",
       has_combo: false,
@@ -93,14 +91,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const watchedValues = watch();
 
-  const handleArrayAdd = (field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases' | 'features'>, value: string) => {
+  const handleArrayAdd = (field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases'>, value: string) => {
     if (value.trim()) {
       const currentArray = watchedValues[field] || [];
       setValue(field, [...currentArray, value.trim()]);
     }
   };
 
-  const handleArrayRemove = (field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases' | 'features'>, index: number) => {
+  const handleArrayRemove = (field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases'>, index: number) => {
     const currentArray = watchedValues[field] || [];
     setValue(field, currentArray.filter((_, i) => i !== index));
   };
@@ -111,7 +109,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     placeholder, 
     icon: Icon 
   }: { 
-    field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases' | 'features'>;
+    field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases'>;
     label: string;
     placeholder: string;
     icon: LucideIcon;
@@ -271,13 +269,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 label="Diferenciais"
                 placeholder="Adicione um diferencial..."
                 icon={Award}
-              />
-
-              <ArrayInputField
-                field="features"
-                label="Funcionalidades"
-                placeholder="Adicione uma funcionalidade..."
-                icon={Package}
               />
             </CardContent>
           </Card>
