@@ -26,21 +26,21 @@ import {
 } from "lucide-react";
 
 const productSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  price: z.number().min(0, "Preço deve ser positivo").optional(),
-  description: z.string().optional(),
-  category: z.string().optional(),
-  benefits: z.array(z.string()).default([]),
-  objections: z.array(z.string()).default([]),
-  differentials: z.array(z.string()).default([]),
-  success_cases: z.array(z.string()).default([]),
-  icon: z.string().optional(),
-  image: z.string().optional(),
-  has_combo: z.boolean().default(false),
-  has_upgrade: z.boolean().default(false),
-  has_promotion: z.boolean().default(false),
-  new: z.boolean().default(false),
-  popular: z.boolean().default(false),
+  name: z.string().nullable().optional(),
+  price: z.number().min(0, "Preço deve ser positivo").nullable().optional(),
+  description: z.string().nullable().optional(),
+  category: z.string().nullable().optional(),
+  benefits: z.array(z.string()).nullable().optional(),
+  objections: z.array(z.string()).nullable().optional(),
+  differentials: z.array(z.string()).nullable().optional(),
+  success_cases: z.array(z.string()).nullable().optional(),
+  icon: z.string().nullable().optional(),
+  image: z.string().nullable().optional(),
+  has_combo: z.boolean().nullable().optional(),
+  has_upgrade: z.boolean().nullable().optional(),
+  has_promotion: z.boolean().nullable().optional(),
+  new: z.boolean().nullable().optional(),
+  popular: z.boolean().nullable().optional(),
 });
 
 interface ProductFormProps {
@@ -69,7 +69,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
-      price: 0,
+      price: undefined,
       description: "",
       category: "",
       benefits: [],
@@ -179,9 +179,24 @@ const ProductForm: React.FC<ProductFormProps> = ({
     
     try {
       // Include objections from ObjectionsManager in the form data
+      // Ensure all fields have appropriate default values, handling null values
       const formDataWithObjections = {
         ...data,
-        objections: objections.map(obj => obj.question) // Convert ProductObjection[] to string[]
+        name: data.name || undefined,
+        price: data.price || undefined,
+        description: data.description || undefined,
+        category: data.category || undefined,
+        benefits: data.benefits || [],
+        objections: objections.length > 0 ? objections.map(obj => obj.question) : (data.objections || []),
+        differentials: data.differentials || [],
+        success_cases: data.success_cases || [],
+        icon: data.icon || undefined,
+        image: data.image || undefined,
+        has_combo: data.has_combo ?? false,
+        has_upgrade: data.has_upgrade ?? false,
+        has_promotion: data.has_promotion ?? false,
+        new: data.new ?? false,
+        popular: data.popular ?? false
       };
       
       console.log('📦 Final form data with objections:', formDataWithObjections);
@@ -227,7 +242,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="name">Nome do Produto/Serviço *</Label>
+                <Label htmlFor="name">Nome do Produto/Serviço</Label>
                 <Input
                   id="name"
                   {...register("name")}
@@ -241,7 +256,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <div>
                 <Label htmlFor="price" className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
-                  Preço (R$) *
+                  Preço (R$)
                 </Label>
                 <Input
                   id="price"

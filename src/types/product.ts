@@ -39,7 +39,7 @@ export interface ProductCombo {
 
 // Form data interface for creating/updating products
 export interface ProductFormData {
-  name: string;
+  name?: string;
   price?: number;
   description?: string;
   category?: string;
