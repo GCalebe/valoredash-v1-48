@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, User, Edit, Trash2, Calendar, X } from "lucide-react";
+import { Plus, User, Edit, Trash2, Calendar, X, Clock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import { Database } from "@/integrations/supabase/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useAgendas } from '@/hooks/useAgendas';
+import { Checkbox } from "@/components/ui/checkbox";
 
 type Host = Database['public']['Tables']['employees']['Row'];
 type Agenda = {
@@ -45,6 +46,20 @@ const HostsTab = () => {
     role: "",
     description: "",
   });
+
+  // Estado para gerenciar múltiplos horários de funcionamento
+  const [operatingHours, setOperatingHours] = useState<Record<string, Array<{start: string, end: string}>>>({
+    'Domingo': [{start: '08:00', end: '17:00'}],
+    'Segunda-Feira': [{start: '08:00', end: '17:00'}],
+    'Terça-Feira': [{start: '08:00', end: '17:00'}],
+    'Quarta-Feira': [{start: '08:00', end: '17:00'}],
+    'Quinta-Feira': [{start: '08:00', end: '17:00'}],
+    'Sexta-Feira': [{start: '08:00', end: '17:00'}],
+    'Sábado': [{start: '08:00', end: '17:00'}]
+  });
+
+  // Estado para dias disponíveis
+  const [availableDays, setAvailableDays] = useState<string[]>(['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
 
   const fetchHosts = useCallback(async () => {
     if (!user?.id) return;
@@ -72,6 +87,38 @@ const HostsTab = () => {
     fetchHosts();
   }, [fetchHosts]);
 
+  // Funções para gerenciar horários de funcionamento
+  const addOperatingHour = (day: string) => {
+    setOperatingHours(prev => ({
+      ...prev,
+      [day]: [...prev[day], { start: '08:00', end: '17:00' }]
+    }));
+  };
+
+  const removeOperatingHour = (day: string, index: number) => {
+    setOperatingHours(prev => ({
+      ...prev,
+      [day]: prev[day].filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateOperatingHour = (day: string, index: number, field: 'start' | 'end', value: string) => {
+    setOperatingHours(prev => ({
+      ...prev,
+      [day]: prev[day].map((hour, i) => 
+        i === index ? { ...hour, [field]: value } : hour
+      )
+    }));
+  };
+
+  const toggleAvailableDay = (day: string) => {
+    setAvailableDays(prev => 
+      prev.includes(day) 
+        ? prev.filter(d => d !== day)
+        : [...prev, day]
+    );
+  };
+
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,20 +134,33 @@ const HostsTab = () => {
     }
 
     try {
-      // Here you would also handle saving the `selectedAgendas` association
-      console.log("Salvando anfitrião com as agendas:", selectedAgendas.map(a => a.id));
+      // Preparar dados dos horários de funcionamento
+      const availableHoursData = Object.entries(operatingHours)
+        .filter(([day]) => availableDays.includes(day))
+        .map(([day, hours]) => ({
+          day,
+          hours: hours.map(h => `${h.start}-${h.end}`)
+        }));
+
+      const employeeData = {
+        name: formData.name,
+        role: formData.role,
+        description: formData.description,
+        available_days: availableDays,
+        available_hours: availableHoursData
+      };
 
       if (editingHost) {
         const { error } = await supabase
           .from("employees")
-          .update({ name: formData.name, role: formData.role, description: formData.description })
+          .update(employeeData)
           .eq("id", editingHost.id);
         if (error) throw error;
         toast({ title: "Sucesso", description: "Anfitrião atualizado com sucesso!" });
       } else {
         const { error } = await supabase
           .from("employees")
-          .insert({ name: formData.name, role: formData.role, description: formData.description, user_id: user?.id })
+          .insert({ ...employeeData, user_id: user?.id })
           .select()
           .single();
         if (error) throw error;
@@ -119,7 +179,49 @@ const HostsTab = () => {
   const handleEdit = (host: Host) => {
     setEditingHost(host);
     setFormData({ name: host.name, role: host.role, description: host.description || "" });
-    // In a real scenario, you would fetch and set the agendas associated with this host
+    
+    // Carregar dias disponíveis
+    if (host.available_days) {
+      setAvailableDays(host.available_days);
+    } else {
+      setAvailableDays(['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
+    }
+    
+    // Carregar horários de funcionamento
+    if (host.available_hours && Array.isArray(host.available_hours)) {
+      const hoursData: Record<string, Array<{start: string, end: string}>> = {
+        'Domingo': [{start: '08:00', end: '17:00'}],
+        'Segunda-Feira': [{start: '08:00', end: '17:00'}],
+        'Terça-Feira': [{start: '08:00', end: '17:00'}],
+        'Quarta-Feira': [{start: '08:00', end: '17:00'}],
+        'Quinta-Feira': [{start: '08:00', end: '17:00'}],
+        'Sexta-Feira': [{start: '08:00', end: '17:00'}],
+        'Sábado': [{start: '08:00', end: '17:00'}]
+      };
+      
+      host.available_hours.forEach((dayData: any) => {
+        if (dayData.day && dayData.hours) {
+          hoursData[dayData.day] = dayData.hours.map((timeRange: string) => {
+            const [start, end] = timeRange.split('-');
+            return { start, end };
+          });
+        }
+      });
+      
+      setOperatingHours(hoursData);
+    } else {
+      // Reset para horários padrão
+      setOperatingHours({
+        'Domingo': [{start: '08:00', end: '17:00'}],
+        'Segunda-Feira': [{start: '08:00', end: '17:00'}],
+        'Terça-Feira': [{start: '08:00', end: '17:00'}],
+        'Quarta-Feira': [{start: '08:00', end: '17:00'}],
+        'Quinta-Feira': [{start: '08:00', end: '17:00'}],
+        'Sexta-Feira': [{start: '08:00', end: '17:00'}],
+        'Sábado': [{start: '08:00', end: '17:00'}]
+      });
+    }
+    
     setSelectedAgendas([]); 
     setIsDialogOpen(true);
   };
@@ -141,6 +243,20 @@ const HostsTab = () => {
     setFormData({ name: "", role: "", description: "" });
     setSelectedAgendas([]);
     setEditingHost(null);
+    
+    // Reset horários de funcionamento para padrão
+    setOperatingHours({
+      'Domingo': [{start: '08:00', end: '17:00'}],
+      'Segunda-Feira': [{start: '08:00', end: '17:00'}],
+      'Terça-Feira': [{start: '08:00', end: '17:00'}],
+      'Quarta-Feira': [{start: '08:00', end: '17:00'}],
+      'Quinta-Feira': [{start: '08:00', end: '17:00'}],
+      'Sexta-Feira': [{start: '08:00', end: '17:00'}],
+      'Sábado': [{start: '08:00', end: '17:00'}]
+    });
+    
+    // Reset dias disponíveis para padrão
+    setAvailableDays(['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
   };
 
   return (
@@ -165,6 +281,83 @@ const HostsTab = () => {
               </div>
               <div className="space-y-2"><Label htmlFor="description">Descrição</Label><Textarea id="description" value={formData.description} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} /></div>
               
+              {/* Seção de Horário de Funcionamento */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <Label className="text-sm font-medium">Horário de Funcionamento</Label>
+                </div>
+                
+                {/* Dias Disponíveis */}
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Dias Disponíveis</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'].map((day) => (
+                      <div key={day} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`day-${day}`}
+                          checked={availableDays.includes(day)}
+                          onCheckedChange={() => toggleAvailableDay(day)}
+                        />
+                        <Label htmlFor={`day-${day}`} className="text-sm">
+                          {day}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Horários por Dia */}
+                <div className="space-y-3">
+                  {availableDays.map((day) => (
+                    <div key={day} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium">{day}</Label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addOperatingHour(day)}
+                          className="h-6 w-6 p-0"
+                        >
+                          +
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        {operatingHours[day]?.map((hour, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Input
+                              type="time"
+                              value={hour.start}
+                              onChange={(e) => updateOperatingHour(day, index, 'start', e.target.value)}
+                              className="flex-1"
+                            />
+                            <span className="text-sm text-muted-foreground">até</span>
+                            <Input
+                              type="time"
+                              value={hour.end}
+                              onChange={(e) => updateOperatingHour(day, index, 'end', e.target.value)}
+                              className="flex-1"
+                            />
+                            {operatingHours[day]?.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeOperatingHour(day, index)}
+                                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                              >
+                                ×
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label>Agendas Associadas</Label>
                 <Popover>
