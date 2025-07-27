@@ -400,6 +400,7 @@ export type Database = {
           preparation_notes: string | null
           price: number | null
           requires_approval: boolean | null
+          service_types: string[] | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -419,6 +420,7 @@ export type Database = {
           preparation_notes?: string | null
           price?: number | null
           requires_approval?: boolean | null
+          service_types?: string[] | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -438,8 +440,66 @@ export type Database = {
           preparation_notes?: string | null
           price?: number | null
           requires_approval?: boolean | null
+          service_types?: string[] | null
           updated_at?: string | null
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      ai_personalities: {
+        Row: {
+          created_at: string | null
+          custom_instructions: string | null
+          description: string | null
+          greeting_message: string | null
+          id: string
+          is_active: boolean | null
+          language: string | null
+          max_tokens: number | null
+          name: string
+          personality_type: string
+          response_style: string | null
+          temperature: number | null
+          tone: string | null
+          updated_at: string | null
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_instructions?: string | null
+          description?: string | null
+          greeting_message?: string | null
+          id?: string
+          is_active?: boolean | null
+          language?: string | null
+          max_tokens?: number | null
+          name: string
+          personality_type: string
+          response_style?: string | null
+          temperature?: number | null
+          tone?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_instructions?: string | null
+          description?: string | null
+          greeting_message?: string | null
+          id?: string
+          is_active?: boolean | null
+          language?: string | null
+          max_tokens?: number | null
+          name?: string
+          personality_type?: string
+          response_style?: string | null
+          temperature?: number | null
+          tone?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
