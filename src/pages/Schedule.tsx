@@ -160,8 +160,8 @@ const Schedule = () => {
 
   if (isAuthLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-900">
-        <div className="h-16 w-16 border-4 border-t-transparent border-blue-600 rounded-full animate-spin"></div>
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="h-16 w-16 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -176,10 +176,9 @@ const Schedule = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900 overflow-hidden">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       <header
-        className="text-white shadow-md transition-colors duration-300 rounded-b-xl flex-shrink-0"
-        style={{ backgroundColor: settings.primaryColor }}
+        className="text-primary-foreground shadow-md transition-colors duration-300 rounded-b-xl flex-shrink-0 bg-primary"
       >
         <div className="flex flex-row items-center justify-between h-16 w-full px-6">
           <div className="flex items-center gap-4">
@@ -187,7 +186,7 @@ const Schedule = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate("/dashboard")}
-              className="text-white hover:bg-white/20 focus-visible:ring-white"
+              className="text-primary-foreground hover:bg-primary-foreground/20 focus-visible:ring-primary-foreground"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -196,11 +195,11 @@ const Schedule = () => {
           
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-white text-sm font-medium">Vendedor:</span>
+              <span className="text-primary-foreground text-sm font-medium">Vendedor:</span>
               <select 
                 value={hostFilter} 
                 onChange={(e) => setHostFilter(e.target.value)}
-                className="h-8 border-slate-600 text-white bg-slate-700/50 hover:bg-slate-600 text-xs rounded-md w-[120px] px-2"
+                className="h-8 border-border text-primary-foreground bg-primary/50 hover:bg-primary/70 text-xs rounded-md w-[120px] px-2"
               >
                 <option value="all">Todos</option>
                 <option value="corretor1">João Silva</option>
@@ -210,11 +209,11 @@ const Schedule = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <span className="text-white text-sm font-medium">Status:</span>
+              <span className="text-primary-foreground text-sm font-medium">Status:</span>
               <select 
                 value={statusFilter} 
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-8 border-slate-600 text-white bg-slate-700/50 hover:bg-slate-600 text-xs rounded-md w-[140px] px-2"
+                className="h-8 border-border text-primary-foreground bg-primary/50 hover:bg-primary/70 text-xs rounded-md w-[140px] px-2"
               >
                 <option value="all">Todos</option>
                 <option value="confirmado">Confirmados</option>
@@ -234,7 +233,7 @@ const Schedule = () => {
               variant="outline"
               onClick={handleRefreshAll}
               disabled={isAnyRefreshing}
-              className="border-white text-white bg-transparent hover:bg-white/20 h-8 px-2"
+              className="border-primary-foreground text-primary-foreground bg-transparent hover:bg-primary-foreground/20 h-8 px-2"
             >
               <span className="flex items-center gap-1">
                 <RefreshCw className={`h-4 w-4 ${isAnyRefreshing ? "animate-spin" : ""}`} />
@@ -246,7 +245,7 @@ const Schedule = () => {
               onClick={() => {
                 setIsNewAppointmentFlowOpen(true);
               }}
-              className="bg-white text-blue-600 hover:bg-blue-50 h-8 px-2"
+              className="bg-primary-foreground text-primary hover:bg-primary-foreground/80 h-8 px-2"
             >
               <Plus className="h-4 w-4 mr-1" />
               Novo
