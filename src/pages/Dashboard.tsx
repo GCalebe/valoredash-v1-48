@@ -10,8 +10,6 @@ import KnowledgeCard from "@/components/dashboard/KnowledgeCard";
 import ClientsCard from "@/components/dashboard/ClientsCard";
 import EvolutionCard from "@/components/dashboard/EvolutionCard";
 import ScheduleCard from "@/components/dashboard/ScheduleCard";
-import AccountManagementCard from "@/components/dashboard/AccountManagementCard";
-import NotificationsCard from "@/components/dashboard/NotificationsCard";
 
 const Dashboard = React.memo(() => {
   const { user, isLoading } = useAuth();
@@ -29,14 +27,12 @@ const Dashboard = React.memo(() => {
 
   // Memoize cards to prevent unnecessary re-renders
   const dashboardCards = useMemo(() => [
-    <NotificationsCard key="notifications" />,
     <MetricsCard key="metrics" />,
     <ChatsCard key="chats" />,
     <KnowledgeCard key="knowledge" />,
     <ClientsCard key="clients" />,
     <EvolutionCard key="evolution" />,
-    <ScheduleCard key="schedule" />,
-    <AccountManagementCard key="account" />
+    <ScheduleCard key="schedule" />
   ], []);
 
   if (isLoading) {

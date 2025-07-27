@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, ShipWheel, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import NotificationIcon from "@/components/dashboard/NotificationIcon";
 
 const DashboardHeader = () => {
   const { user, signOut, isAdmin } = useAuth();
@@ -45,6 +46,7 @@ const DashboardHeader = () => {
               Admin
             </Button>
           )}
+          <NotificationIcon />
           <Badge
             variant="outline"
             className="bg-white/10 text-white border-0 px-3 py-1"
