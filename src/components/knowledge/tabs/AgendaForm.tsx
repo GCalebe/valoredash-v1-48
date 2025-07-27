@@ -33,7 +33,7 @@ import { LocalAgenda, AgendaCategory, categoryDetails, tooltipTexts, InfoTooltip
 const initialAgendaState: Omit<LocalAgenda, 'id'> = {
   title: '',
   description: '',
-  category: '',
+  category: 'consulta', // Categoria padrão definida
   host: '',
   availabilityInterval: 30,
   duration: 60,
@@ -60,13 +60,13 @@ interface AgendaFormProps {
 export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, onSave, editingAgenda, hosts, hostsLoading }) => {
   const [currentAgenda, setCurrentAgenda] = useState<Omit<LocalAgenda, 'id'>>(initialAgendaState);
   const [step, setStep] = useState(1);
-  const totalSteps = 7;
+  const totalSteps = 6;
 
   useEffect(() => {
     if (editingAgenda) {
       setCurrentAgenda(editingAgenda);
     } else {
-      setCurrentAgenda(initialAgendaState);
+      setCurrentAgenda({ ...initialAgendaState, category: 'consulta' }); // Define categoria padrão
     }
     setStep(1); // Reset step when dialog opens or editingAgenda changes
   }, [editingAgenda, isOpen]);
@@ -111,34 +111,12 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
             </div>
           </div>
           <DialogDescription className="text-base text-muted-foreground">
-            {step === 1 ? "Selecione o tipo de agenda que você deseja criar." : "Preencha os detalhes para criar uma nova agenda de atendimento."}
+            Preencha os detalhes para criar uma nova agenda de atendimento.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
               {step === 1 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(categoryDetails).map(([key, { icon: Icon, title, description }]) => (
-                        <div 
-                            key={key}
-                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${currentAgenda.category === key ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/60'}`}
-                            onClick={() => handleCategoryChange(key as AgendaCategory)}
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className={`mt-1 p-2 rounded-full ${currentAgenda.category === key ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                                    <Icon className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-foreground">{title}</h4>
-                                    <p className="text-sm text-muted-foreground">{description}</p>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-              )}
-              
-              {step === 2 && (
                 <>
                   <FormField label="Título" tooltipText={tooltipTexts.title}>
                       <Input id="title" value={currentAgenda.title} onChange={handleInputChange} />
@@ -169,10 +147,13 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
                         </SelectContent>
                       </Select>
                   </FormField>
+                  <FormField label="Limite de Inscrições">
+                      <Input id="maxParticipants" type="number" value={currentAgenda.maxParticipants || ''} onChange={handleInputChange} />
+                  </FormField>
                 </>
               )}
-
-              {step === 3 && (
+              
+              {step === 2 && (
                 <>
                   <FormField label="Duração (min)" tooltipText={tooltipTexts.duration}>
                       <Input id="duration" type="number" value={currentAgenda.duration} onChange={handleInputChange} />
@@ -186,7 +167,7 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
                 </>
               )}
 
-              {step === 4 && (
+              {step === 3 && (
                 <>
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -242,11 +223,10 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
                   </div>
 
                   <FormField label="Antecedência (horas)"><Input id="minNotice" type="number" value={currentAgenda.minNotice} onChange={handleInputChange} /></FormField>
-                  {currentAgenda.category === 'evento' && (<FormField label="Limite de Inscrições"><Input id="maxParticipants" type="number" value={currentAgenda.maxParticipants || ''} onChange={handleInputChange} /></FormField>)}
                 </>
               )}
 
-              {step === 5 && (
+              {step === 4 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Tipos de Atendimento</h3>
                   <p className="text-sm text-muted-foreground">Selecione os tipos de atendimento disponíveis para esta agenda. Você pode escolher múltiplas opções.</p>
@@ -307,7 +287,7 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
                 </div>
               )}
 
-              {step === 6 && (
+              {step === 5 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Ação após a inscrição</h3>
                   <div className="space-y-4">
@@ -333,7 +313,7 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
                 </div>
               )}
 
-              {step === 7 && (
+              {step === 6 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Lembretes</h3>
                   <div className="p-4 border rounded-lg bg-muted/30">
@@ -360,13 +340,15 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
                   )}
                 </div>
               )}
+
+
             </div>
 
         <DialogFooter className="flex justify-between w-full pt-6">
           <div>{step > 1 && <Button variant="outline" onClick={() => setStep(s => s - 1)}>Voltar</Button>}</div>
           <div className="flex gap-2">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            {step < totalSteps && <Button onClick={() => setStep(s => s + 1)} disabled={step === 1 && !currentAgenda.category}>Avançar</Button>}
+            {step < totalSteps && <Button onClick={() => setStep(s => s + 1)}>Avançar</Button>}
             {step === totalSteps && <Button onClick={handleSaveClick}>{editingAgenda ? 'Atualizar' : 'Salvar'}</Button>}
           </div>
         </DialogFooter>
