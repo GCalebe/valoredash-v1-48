@@ -80,10 +80,17 @@ const createProduct = async (productData: ProductFormData): Promise<Product> => 
 
 // Update product
 const updateProduct = async ({ id, ...updates }: ProductFormData & { id: string }): Promise<Product> => {
+  console.log('🔍 useProducts updateProduct called');
+  console.log('📝 Product ID:', id);
+  console.log('📦 Raw updates:', updates);
+  
   // Remove undefined values
   const cleanUpdates = Object.fromEntries(
     Object.entries(updates).filter(([_, value]) => value !== undefined)
   );
+  
+  console.log('🧹 Clean updates:', cleanUpdates);
+  console.log('🚀 Calling Supabase update...');
 
   const { data, error } = await supabase
     .from('products')
@@ -93,10 +100,17 @@ const updateProduct = async ({ id, ...updates }: ProductFormData & { id: string 
     .single();
 
   if (error) {
-    console.error('Error updating product:', error);
+    console.error('❌ Supabase error:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code
+    });
     throw new Error(`Failed to update product: ${error.message}`);
   }
 
+  console.log('✅ Supabase update successful:', data);
   return data;
 };
 

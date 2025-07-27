@@ -17,7 +17,7 @@ import {
   SortAsc, 
   SortDesc,
   Grid3X3,
-  List,
+  TreePine,
   Download,
   Upload
 } from "lucide-react";
@@ -28,8 +28,8 @@ interface ProductsHeaderProps {
   onAddProduct: () => void;
   onImport?: () => void;
   onExport?: () => void;
-  viewMode: "grid" | "list";
-  onViewModeChange: (mode: "grid" | "list") => void;
+  viewMode: "grid" | "hierarchy";
+  onViewModeChange: (mode: "grid" | "hierarchy") => void;
   sortBy: "name" | "price" | "created_at";
   sortOrder: "asc" | "desc";
   onSortChange: (sortBy: "name" | "price" | "created_at", order: "asc" | "desc") => void;
@@ -146,13 +146,14 @@ const ProductsHeader: React.FC<ProductsHeaderProps> = ({
             >
               <Grid3X3 className="h-4 w-4" />
             </Button>
+
             <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
+              variant={viewMode === "hierarchy" ? "default" : "ghost"}
               size="sm"
-              onClick={() => onViewModeChange("list")}
+              onClick={() => onViewModeChange("hierarchy")}
               className="px-2"
             >
-              <List className="h-4 w-4" />
+              <TreePine className="h-4 w-4" />
             </Button>
           </div>
 

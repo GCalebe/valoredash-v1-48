@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ObjectionsManager from "./ObjectionsManager";
-import { ProductObjection } from "@/types/product";
+import { ProductObjection, ProductFormData } from "@/types/product";
 import { 
   Plus, 
   Minus, 
@@ -42,8 +42,6 @@ const productSchema = z.object({
   new: z.boolean().default(false),
   popular: z.boolean().default(false),
 });
-
-type ProductFormData = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
   initialData?: Partial<ProductFormData>;
@@ -172,8 +170,45 @@ const ProductForm: React.FC<ProductFormProps> = ({
     );
   };
 
+  const handleFormSubmit = async (data: ProductFormData) => {
+    console.log('🔍 ProductForm handleFormSubmit called');
+    console.log('📝 Form data received:', data);
+    console.log('🎯 Current objections state:', objections);
+    console.log('🔧 Mode:', mode);
+    console.log('📋 Initial data:', initialData);
+    
+    try {
+      // Include objections from ObjectionsManager in the form data
+      const formDataWithObjections = {
+        ...data,
+        objections: objections.map(obj => obj.question) // Convert ProductObjection[] to string[]
+      };
+      
+      console.log('📦 Final form data with objections:', formDataWithObjections);
+      console.log('🚀 Calling onSubmit...');
+      
+      await onSubmit(formDataWithObjections);
+      
+      console.log('✅ onSubmit completed successfully');
+    } catch (error) {
+      console.error('❌ Error in handleFormSubmit:', error);
+      throw error;
+    }
+  };
+
+  const onFormSubmit = (data: ProductFormData) => {
+    console.log('🎯 react-hook-form handleSubmit called');
+    console.log('📋 Form validation passed, calling handleFormSubmit...');
+    return handleFormSubmit(data);
+  };
+
+  const onFormError = (errors: any) => {
+    console.log('❌ react-hook-form validation failed');
+    console.log('🚨 Form errors:', errors);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onFormSubmit, onFormError)} className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="basic">Básico</TabsTrigger>
@@ -286,6 +321,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <ObjectionsManager
                 productId={initialData?.id}
                 onObjectionsChange={setObjections}
+                initialObjections={initialData?.objections?.map((question, index) => ({
+                  id: `initial-${index}`,
+                  question,
+                  answer: 'Resposta não definida'
+                })) || []}
               />
               
               <ArrayInputField
@@ -375,7 +415,16 @@ const ProductForm: React.FC<ProductFormProps> = ({
       </Tabs>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          disabled={isLoading}
+          onClick={() => {
+            console.log('🖱️ Submit button clicked');
+            console.log('🔧 Button mode:', mode);
+            console.log('⏳ Is loading:', isLoading);
+            console.log('📝 Current form values:', watchedValues);
+          }}
+        >
           {isLoading ? "Salvando..." : mode === "create" ? "Criar Produto" : "Atualizar Produto"}
         </Button>
       </div>

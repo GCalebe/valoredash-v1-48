@@ -10,15 +10,15 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useProducts, useCreateProductMutation, useUpdateProductMutation, useDeleteProductMutation } from "@/hooks/useProducts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Product } from "@/types/product";
+import { Product, ProductFormData } from "@/types/product";
 
 // Import new components
 import ProductForm from "@/components/knowledge/products/ProductForm";
 import ProductCard from "@/components/knowledge/products/ProductCard";
-import ProductListView from "@/components/knowledge/products/ProductListView";
+import ProductHierarchicalView from "@/components/knowledge/products/ProductHierarchicalView";
 import ProductsHeader from "@/components/knowledge/products/ProductsHeader";
 
-type ViewMode = "grid" | "list";
+type ViewMode = "grid" | "hierarchy";
 type SortBy = "name" | "price" | "created_at";
 type SortOrder = "asc" | "desc";
 
@@ -32,7 +32,7 @@ const ProductsTab = () => {
   
   // View and filtering states
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = useState<ViewMode>("hierarchy");
   const [sortBy, setSortBy] = useState<SortBy>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
@@ -80,7 +80,7 @@ const ProductsTab = () => {
     return filtered;
   }, [products, searchTerm, sortBy, sortOrder]);
 
-  const handleCreateProduct = async (data: unknown) => {
+  const handleCreateProduct = async (data: ProductFormData) => {
     try {
       await createProductMutation.mutateAsync(data);
       setIsAddDialogOpen(false);
@@ -89,6 +89,7 @@ const ProductsTab = () => {
         description: "O produto foi criado com sucesso.",
       });
     } catch (error) {
+      console.error('Error creating product:', error);
       toast({
         title: "Erro",
         description: "Erro ao criar produto.",
@@ -102,12 +103,33 @@ const ProductsTab = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateProduct = async (data: unknown) => {
+  const handleUpdateProduct = async (data: ProductFormData) => {
+    console.log('🔍 ProductsTab handleUpdateProduct called');
+    console.log('📝 Data received:', data);
+    console.log('🎯 Editing product:', editingProduct);
+    console.log('🔧 Update mutation state:', {
+      isPending: updateProductMutation.isPending,
+      isError: updateProductMutation.isError,
+      error: updateProductMutation.error
+    });
+    
     try {
-      await updateProductMutation.mutateAsync({
-        id: editingProduct!.id,
+      if (!editingProduct?.id) {
+        console.error('❌ No editing product ID found');
+        throw new Error('ID do produto não encontrado');
+      }
+      
+      const updateData = {
+        id: editingProduct.id,
         ...data
-      });
+      };
+      
+      console.log('📦 Final update data:', updateData);
+      console.log('🚀 Calling updateProductMutation.mutateAsync...');
+      
+      await updateProductMutation.mutateAsync(updateData);
+      
+      console.log('✅ Product updated successfully');
       setEditingProduct(null);
       setIsEditDialogOpen(false);
       toast({
@@ -115,9 +137,10 @@ const ProductsTab = () => {
         description: "O produto foi atualizado com sucesso.",
       });
     } catch (error) {
+      console.error('❌ Error updating product:', error);
       toast({
         title: "Erro",
-        description: "Erro ao atualizar produto.",
+        description: error instanceof Error ? error.message : "Erro ao atualizar produto.",
         variant: "destructive",
       });
     }
@@ -200,11 +223,12 @@ const ProductsTab = () => {
             ))}
           </div>
         ) : (
-          <ProductListView
+          <ProductHierarchicalView
             products={filteredAndSortedProducts}
             onEdit={handleEditProduct}
             onDelete={handleDeleteProduct}
             isDeleting={deleteProductMutation.isPending}
+            searchTerm={searchTerm}
           />
         )
       ) : (
