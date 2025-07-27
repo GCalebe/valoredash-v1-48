@@ -4,7 +4,6 @@ import { useAIPersonalityForm } from "@/hooks/useAIPersonalityForm";
 import { useAIPersonalityQuery } from "@/hooks/useAIPersonalityQuery";
 import { aiPersonalityTemplates, type AIPersonalityTemplate } from "@/data/aiPersonalityTemplates";
 import { usePersonalityTemplates } from "@/hooks/usePersonalityTemplates";
-import { seedPersonalityTemplates } from "@/scripts/seedPersonalityTemplates";
 import { useToast } from "@/hooks/use-toast";
 import TemplateView from "@/components/knowledge/personality/TemplateView";
 import ConfigurationView from "@/components/knowledge/personality/ConfigurationView";
@@ -24,20 +23,22 @@ const AIPersonalityTab = () => {
   } = useAIPersonalityForm();
 
   const {
-    templates: dbTemplates,
+    data: templates,
     isLoading: templatesLoading,
     isError: templatesError,
     refetch: refetchTemplates,
-    activeTemplateId,
   } = usePersonalityTemplates();
+
+  // Para dados mockados, não há template ativo específico
+  const activeTemplateId = null;
 
   const [currentView, setCurrentView] = useState<'templates' | 'configuration'>('templates');
   const [selectedTemplate, setSelectedTemplate] = useState<AIPersonalityTemplate | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<AIPersonalityTemplate | null>(null);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
 
-  const templates = dbTemplates || [];
+
+  const templatesData = templates || [];
 
   const isTemplateActive = (template: AIPersonalityTemplate) => {
     return activeTemplateId === template.id;
@@ -71,26 +72,7 @@ const AIPersonalityTab = () => {
     handleSave(selectedTemplate?.id || null);
   };
 
-  const handleSeedTemplates = async () => {
-    setIsSeeding(true);
-    try {
-      await seedPersonalityTemplates();
-      await refetchTemplates();
-      toast({
-        title: "Sucesso",
-        description: "Templates de personalidade criados com sucesso.",
-      });
-    } catch (error) {
-      console.error("Erro ao criar templates:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar os templates.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSeeding(false);
-    }
-  };
+
 
   if (templatesLoading) {
     return (
@@ -108,15 +90,13 @@ const AIPersonalityTab = () => {
     <div className="space-y-6">
       {currentView === 'templates' ? (
         <TemplateView
-          templates={templates}
-          dbTemplates={dbTemplates || []}
+          templates={templatesData}
+          dbTemplates={templatesData}
           templatesLoading={templatesLoading}
-          isSeeding={isSeeding}
           templatesError={templatesError}
           isTemplateActive={isTemplateActive}
           handleTemplateSelect={handleTemplateSelect}
           handleTemplatePreview={handleTemplatePreview}
-          handleSeedTemplates={handleSeedTemplates}
           showPreviewDialog={showPreviewDialog}
           setShowPreviewDialog={setShowPreviewDialog}
           previewTemplate={previewTemplate}
