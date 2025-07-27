@@ -1,9 +1,11 @@
 import React from 'react';
 import { Palette, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import PersonalityTemplateCard from './PersonalityTemplateCard';
+import PersonalityCards from './PersonalityCards';
 import PersonalityPreviewDialog from './PersonalityPreviewDialog';
 import { type AIPersonalityTemplate } from '@/data/aiPersonalityTemplates';
+import { predefinedPersonalities } from './ideas/PersonalityConfigDemo';
+import { PersonalityConfig } from './ideas';
 
 interface TemplateViewProps {
   dbTemplates: any[];
@@ -18,9 +20,10 @@ interface TemplateViewProps {
   setShowPreviewDialog: (show: boolean) => void;
   previewTemplate: AIPersonalityTemplate | null;
   handleApplyTemplate: (template: AIPersonalityTemplate) => void;
+  handleCreateNew: () => void;
 }
 
-const TemplateView: React.FC<TemplateViewProps> = ({ dbTemplates, templatesLoading, refetchTemplates, templatesError, templates, isTemplateActive, handleTemplateSelect, handleTemplatePreview, showPreviewDialog, setShowPreviewDialog, previewTemplate, handleApplyTemplate }) => {
+const TemplateView: React.FC<TemplateViewProps> = ({ dbTemplates, templatesLoading, refetchTemplates, templatesError, templates, isTemplateActive, handleTemplateSelect, handleTemplatePreview, showPreviewDialog, setShowPreviewDialog, previewTemplate, handleApplyTemplate, handleCreateNew }) => {
   return (
     <>
       <div className="flex justify-between items-center">
@@ -43,6 +46,14 @@ const TemplateView: React.FC<TemplateViewProps> = ({ dbTemplates, templatesLoadi
             <RefreshCw className={`h-4 w-4 mr-2 ${templatesLoading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
+          <Button
+            onClick={handleCreateNew}
+            variant="default"
+            size="sm"
+          >
+            <Palette className="h-4 w-4 mr-2" />
+            Criar Nova Personalidade
+          </Button>
         </div>
       </div>
 
@@ -63,17 +74,34 @@ const TemplateView: React.FC<TemplateViewProps> = ({ dbTemplates, templatesLoadi
           <p className="text-muted-foreground">Nenhum template encontrado</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-           {templates.map((template) => (
-             <PersonalityTemplateCard
-               key={template.id}
-               template={template}
-               onSelect={() => handleTemplateSelect(template)}
-               onPreview={() => handleTemplatePreview(template)}
-               isActive={isTemplateActive(template)}
-             />
-           ))}
-         </div>
+        <PersonalityCards
+          personalities={predefinedPersonalities}
+          onSelect={(personality) => {
+            // Converter PersonalityConfig para AIPersonalityTemplate
+            const template: AIPersonalityTemplate = {
+              id: personality.name.toLowerCase().replace(/\s+/g, '-'),
+              name: personality.name,
+              description: personality.description,
+              category: personality.category,
+              settings: personality
+            };
+            handleTemplateSelect(template);
+          }}
+          onPreview={(personality) => {
+            const template: AIPersonalityTemplate = {
+              id: personality.name.toLowerCase().replace(/\s+/g, '-'),
+              name: personality.name,
+              description: personality.description,
+              category: personality.category,
+              settings: personality
+            };
+            handleTemplatePreview(template);
+          }}
+          onActivate={(personality) => {
+            // Implementar lógica de ativação da personalidade
+            console.log('Ativando personalidade:', personality.name);
+          }}
+        />
       )}
 
       <PersonalityPreviewDialog

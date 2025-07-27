@@ -23,6 +23,11 @@ export interface PersonalitySettings {
   responseTime: number;
   audioResponse: boolean;
   responseCreativity: number;
+  useEmojis: boolean;
+  responseSpeed: 'immediate' | 'thoughtful' | 'detailed';
+  contextAware: boolean;
+  continuousLearning: boolean;
+  responseLength: 'concise' | 'moderate' | 'detailed';
 }
 
 const defaultSettings: PersonalitySettings = {
@@ -44,6 +49,11 @@ const defaultSettings: PersonalitySettings = {
   responseTime: 3,
   audioResponse: false,
   responseCreativity: 3,
+  useEmojis: false,
+  responseSpeed: 'thoughtful',
+  contextAware: true,
+  continuousLearning: true,
+  responseLength: 'moderate',
 };
 
 export const useAIPersonalityForm = () => {
@@ -148,6 +158,7 @@ export const useAIPersonalityForm = () => {
 
   return {
     settings,
+    setSettings,
     isLoading,
     error,
     hasChanges,
@@ -155,6 +166,7 @@ export const useAIPersonalityForm = () => {
     handleSliderChange,
     handleSave,
     handleReset,
+    reset: handleReset,
     getSliderLabel,
     createMutation,
     updateMutation,

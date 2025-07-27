@@ -68,6 +68,12 @@ const AIPersonalityTab = () => {
     reset(); // Resetar as alterações ao voltar
   };
 
+  const handleCreateNew = () => {
+    setSelectedTemplate(null); // Não há template selecionado para nova personalidade
+    reset(); // Resetar para configurações padrão
+    setCurrentView('configuration');
+  };
+
   const onSave = () => {
     handleSave(selectedTemplate?.id || null);
   };
@@ -102,6 +108,7 @@ const AIPersonalityTab = () => {
           previewTemplate={previewTemplate}
           handleApplyTemplate={handleApplyTemplate}
           refetchTemplates={refetchTemplates}
+          handleCreateNew={handleCreateNew}
         />
       ) : (
         <ConfigurationView

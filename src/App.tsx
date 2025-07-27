@@ -22,6 +22,7 @@ import Conversations from "./pages/Conversations";
 import Reports from "./pages/Reports";
 import Connections from "./pages/Connections";
 import Settings from "./pages/Settings";
+import PersonalityConfigDemo from "./pages/PersonalityConfigDemo";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -64,6 +65,7 @@ const App = () => (
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/connections" element={<Connections />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/personality-demo" element={<PersonalityConfigDemo />} />
                 </Route>
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

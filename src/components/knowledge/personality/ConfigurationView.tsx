@@ -2,12 +2,10 @@ import React from 'react';
 import { Save, RotateCcw, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BasicInfoSection from './BasicInfoSection';
-import TraitsSection from './TraitsSection';
-import MessagesSection from './MessagesSection';
-import InstructionsSection from './InstructionsSection';
+import AdvancedSettingsSection from './AdvancedSettingsSection';
 import PreviewSection from './PreviewSection';
 import { type AIPersonalityTemplate } from '@/data/aiPersonalityTemplates';
-import { type AIPersonalitySettings } from '@/hooks/useAIPersonalityForm';
+import { type PersonalitySettings } from '@/hooks/useAIPersonalityForm';
 
 interface ConfigurationViewProps {
   handleBackToTemplates: () => void;
@@ -16,9 +14,9 @@ interface ConfigurationViewProps {
   handleReset: () => void;
   handleSave: () => void;
   isLoading: boolean;
-  settings: AIPersonalitySettings;
-  handleInputChange: (field: keyof AIPersonalitySettings, value: any) => void;
-  handleSliderChange: (field: keyof AIPersonalitySettings, value: number[]) => void;
+  settings: PersonalitySettings;
+  handleInputChange: (field: keyof PersonalitySettings, value: any) => void;
+  handleSliderChange: (field: keyof PersonalitySettings, value: number[]) => void;
   getSliderLabel: (value: number) => string;
 }
 
@@ -70,23 +68,13 @@ const ConfigurationView: React.FC<ConfigurationViewProps> = ({ handleBackToTempl
             settings={settings}
             onInputChange={handleInputChange}
           />
-          <TraitsSection
-            settings={settings}
-            onSliderChange={handleSliderChange}
-            onInputChange={handleInputChange}
-            getSliderLabel={getSliderLabel}
-          />
         </div>
         <div className="space-y-6">
-          <MessagesSection
-            settings={settings}
-            onInputChange={handleInputChange}
-          />
-          <InstructionsSection
-            settings={settings}
-            onInputChange={handleInputChange}
-          />
           <PreviewSection settings={settings} />
+          <AdvancedSettingsSection
+            settings={settings}
+            onInputChange={handleInputChange}
+          />
         </div>
       </div>
     </>
