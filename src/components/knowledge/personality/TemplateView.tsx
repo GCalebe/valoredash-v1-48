@@ -6,8 +6,6 @@ import PersonalityPreviewDialog from './PersonalityPreviewDialog';
 import { type AIPersonalityTemplate } from '@/data/aiPersonalityTemplates';
 
 interface TemplateViewProps {
-  handleSeedTemplates: () => void;
-  isSeeding: boolean;
   dbTemplates: any[];
   templatesLoading: boolean;
   refetchTemplates: () => void;
@@ -22,7 +20,7 @@ interface TemplateViewProps {
   handleApplyTemplate: (template: AIPersonalityTemplate) => void;
 }
 
-const TemplateView: React.FC<TemplateViewProps> = ({ handleSeedTemplates, isSeeding, dbTemplates, templatesLoading, refetchTemplates, templatesError, templates, isTemplateActive, handleTemplateSelect, handleTemplatePreview, showPreviewDialog, setShowPreviewDialog, previewTemplate, handleApplyTemplate }) => {
+const TemplateView: React.FC<TemplateViewProps> = ({ dbTemplates, templatesLoading, refetchTemplates, templatesError, templates, isTemplateActive, handleTemplateSelect, handleTemplatePreview, showPreviewDialog, setShowPreviewDialog, previewTemplate, handleApplyTemplate }) => {
   return (
     <>
       <div className="flex justify-between items-center">
@@ -36,21 +34,6 @@ const TemplateView: React.FC<TemplateViewProps> = ({ handleSeedTemplates, isSeed
           </p>
         </div>
         <div className="flex gap-2">
-          {(!dbTemplates || dbTemplates.length === 0) && (
-            <Button
-              onClick={handleSeedTemplates}
-              disabled={isSeeding}
-              variant="outline"
-              size="sm"
-            >
-              {isSeeding ? (
-                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
-              {isSeeding ? 'Criando...' : 'Criar Templates'}
-            </Button>
-          )}
           <Button
             onClick={() => refetchTemplates()}
             disabled={templatesLoading}
@@ -77,10 +60,7 @@ const TemplateView: React.FC<TemplateViewProps> = ({ handleSeedTemplates, isSeed
         </div>
       ) : templates.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">Nenhum template encontrado</p>
-          <Button onClick={handleSeedTemplates} disabled={isSeeding}>
-            {isSeeding ? 'Criando...' : 'Criar Templates Padrão'}
-          </Button>
+          <p className="text-muted-foreground">Nenhum template encontrado</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
