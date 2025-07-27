@@ -15,6 +15,7 @@ import { useScheduleData } from "@/hooks/useScheduleData";
 import { useScheduleState } from "@/hooks/useScheduleState";
 import { useAppointmentForm } from "@/hooks/useAppointmentForm";
 import { useScheduleDialogs } from "@/hooks/useScheduleDialogs";
+import { useHosts } from "@/hooks/useHosts";
 import { ScheduleContent } from "@/components/schedule/ScheduleContent";
 import { ScheduleDialogs } from "@/components/schedule/ScheduleDialogs";
 import { startOfMonth, endOfMonth } from "date-fns";
@@ -24,6 +25,7 @@ import { NewAppointmentFlow } from "@/components/schedule/NewAppointmentFlow";
 const Schedule = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
   const { settings } = useThemeSettings();
+  const { hosts, loading: isHostsLoading } = useHosts();
   const navigate = useNavigate();
   
   // Estados para filtros
@@ -201,11 +203,14 @@ const Schedule = () => {
                 value={hostFilter} 
                 onChange={(e) => setHostFilter(e.target.value)}
                 className="h-8 border-slate-600 text-white bg-slate-700/50 hover:bg-slate-600 text-xs rounded-md w-[120px] px-2"
+                disabled={isHostsLoading}
               >
-                <option value="all">Todos</option>
-                <option value="corretor1">João Silva</option>
-                <option value="corretor2">Maria Santos</option>
-                <option value="corretor3">Pedro Costa</option>
+                <option value="all">{isHostsLoading ? "Carregando..." : "Todos"}</option>
+                {hosts.map((host) => (
+                  <option key={host.id} value={host.id}>
+                    {host.name}
+                  </option>
+                ))}
               </select>
             </div>
             

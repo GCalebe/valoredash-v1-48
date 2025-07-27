@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useScheduleData } from "@/hooks/useScheduleData";
+import { useHosts } from "@/hooks/useHosts";
 
 interface ScheduleHeaderProps {
   onAddEvent: () => void;
@@ -45,6 +46,9 @@ const ScheduleHeader = ({
   
   // Buscar dados para exibir contagem correta
   const { events } = useScheduleData();
+  
+  // Buscar anfitriões do banco de dados
+  const { hosts, loading: hostsLoading } = useHosts();
 
   return (
     <header
@@ -101,24 +105,21 @@ const ScheduleHeader = ({
                   <SelectItem value="all" className="text-white hover:bg-slate-700">
                     Todos os anfitriões
                   </SelectItem>
-                  <SelectItem
-                    value="corretor1"
-                    className="text-white hover:bg-slate-700"
-                  >
-                    João Silva
-                  </SelectItem>
-                  <SelectItem
-                    value="corretor2"
-                    className="text-white hover:bg-slate-700"
-                  >
-                    Maria Santos
-                  </SelectItem>
-                  <SelectItem
-                    value="corretor3"
-                    className="text-white hover:bg-slate-700"
-                  >
-                    Pedro Costa
-                  </SelectItem>
+                  {hostsLoading ? (
+                    <SelectItem value="loading" disabled className="text-gray-400">
+                      Carregando anfitriões...
+                    </SelectItem>
+                  ) : (
+                    hosts.map((host) => (
+                      <SelectItem
+                        key={host.id}
+                        value={host.id}
+                        className="text-white hover:bg-slate-700"
+                      >
+                        {host.name} - {host.role}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
