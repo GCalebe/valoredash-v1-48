@@ -143,16 +143,16 @@ export function CalendarView({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#1e2330] dark:bg-[#1e2330] border rounded-xl shadow-sm overflow-hidden animate-fade-in text-white">
-      <div className="flex items-center justify-between p-4 border-b border-gray-700">
-        <h2 className="text-lg font-semibold text-white">
+    <div className="flex flex-col h-full bg-white dark:bg-[#1e2330] border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden animate-fade-in text-gray-900 dark:text-white">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
           {getCalendarTitle()}
         </h2>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={goToPrevious} className="text-white border-gray-600 hover:bg-gray-700">
+          <Button variant="outline" size="sm" onClick={goToPrevious} className="text-gray-700 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={goToNext} className="text-white border-gray-600 hover:bg-gray-700">
+          <Button variant="outline" size="sm" onClick={goToNext} className="text-gray-700 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -193,19 +193,19 @@ export function CalendarView({
                   <div
                     key={event.id}
                     onClick={(e) => handleEventClick(event, e)}
-                    className="flex items-center p-3 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 cursor-pointer"
+                    className="flex items-center p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                   >
                     <div className="w-16 text-center">
                       <div className="text-sm font-medium">
                         {format(new Date(event.start), "dd/MM", { locale: ptBR })}
                       </div>
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
                         {format(new Date(event.start), "HH:mm")}
                       </div>
                     </div>
                     <div className="ml-4 flex-1">
-                      <div className="font-medium">{event.summary}</div>
-                      <div className="text-sm text-gray-400">
+                      <div className="font-medium text-gray-900 dark:text-white">{event.summary}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         {event.attendees?.[0]?.email || "Sem participante"}
                       </div>
                     </div>
@@ -229,7 +229,7 @@ export function CalendarView({
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-gray-400">
+                <div className="text-center py-8 text-gray-600 dark:text-gray-400">
                   Nenhum evento encontrado
                 </div>
               )}

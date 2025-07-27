@@ -47,14 +47,14 @@ export const ScheduleFiltersSection = ({
         </div>
         
         <div className="flex items-center gap-2">
-          <span className="text-white text-sm font-medium">Vendedor:</span>
+          <span className="text-white text-sm font-medium">Anfitrião:</span>
           <Select value={hostFilter} onValueChange={onHostFilterChange}>
             <SelectTrigger className="h-9 border-slate-600 text-white bg-slate-700 hover:bg-slate-600 text-sm rounded-md w-[180px]">
-              <SelectValue placeholder="Todos os vendedores" />
+              <SelectValue placeholder="Todos os anfitriões" />
             </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-600">
               <SelectItem value="all" className="text-white hover:bg-slate-700">
-                Todos os vendedores
+                Todos os anfitriões
               </SelectItem>
               <SelectItem
                 value="corretor1"

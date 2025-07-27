@@ -36,7 +36,7 @@ export function EventList({
   );
 
   return (
-    <div className="bg-[#1e2330] dark:bg-[#1e2330] border-0 rounded-xl shadow-sm flex-1 overflow-auto flex flex-col">
+    <div className="bg-white dark:bg-[#1e2330] border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm flex-1 overflow-auto flex flex-col">
       <CalendarHeaderBar
         view="lista"
         currentMonth={currentMonth}

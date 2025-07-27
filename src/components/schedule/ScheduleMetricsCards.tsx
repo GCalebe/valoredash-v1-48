@@ -18,36 +18,36 @@ export function ScheduleMetricsCards({ scheduleEvents }: ScheduleMetricsCardsPro
       label: "Hoje", 
       value: metrics.today, 
       icon: Calendar,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50"
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20"
     },
     { 
       label: "Esta Semana", 
       value: metrics.thisWeek, 
       icon: Clock,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50"
+      color: "text-purple-600 dark:text-purple-400",
+      bgColor: "bg-purple-50 dark:bg-purple-900/20"
     },
     { 
       label: "Este Mês", 
       value: metrics.thisMonth, 
       icon: Users,
-      color: "text-green-600",
-      bgColor: "bg-green-50"
+      color: "text-green-600 dark:text-green-400",
+      bgColor: "bg-green-50 dark:bg-green-900/20"
     },
     { 
       label: "Confirmados", 
       value: metrics.confirmed, 
       icon: CheckCircle,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50"
+      color: "text-emerald-600 dark:text-emerald-400",
+      bgColor: "bg-emerald-50 dark:bg-emerald-900/20"
     },
     { 
       label: "Total", 
       value: metrics.total, 
       icon: Target,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50"
+      color: "text-orange-600 dark:text-orange-400",
+      bgColor: "bg-orange-50 dark:bg-orange-900/20"
     },
   ];
 

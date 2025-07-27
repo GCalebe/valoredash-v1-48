@@ -19,16 +19,16 @@ const CalendarLegend: React.FC<CalendarLegendProps> = ({ salespeople }) => {
             className="w-3 h-3 rounded-full mr-1"
             style={{ backgroundColor: person.color }}
           />
-          <span className="text-gray-400">{person.name}</span>
+          <span className="text-gray-600 dark:text-gray-400">{person.name}</span>
         </div>
       ))}
       <div className="flex items-center">
         <div className="w-3 h-3 rounded-full mr-1 bg-blue-500" />
-        <span className="text-gray-400">Selecionado</span>
+        <span className="text-gray-600 dark:text-gray-400">Selecionado</span>
       </div>
       <div className="flex items-center">
         <div className="w-3 h-3 rounded-full mr-1 bg-gray-500" />
-        <span className="text-gray-400">Com eventos</span>
+        <span className="text-gray-600 dark:text-gray-400">Com eventos</span>
       </div>
     </div>
   );

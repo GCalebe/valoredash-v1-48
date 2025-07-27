@@ -160,7 +160,7 @@ const Schedule = () => {
 
   if (isAuthLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-900">
+      <div className="h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="h-16 w-16 border-4 border-t-transparent border-blue-600 rounded-full animate-spin"></div>
       </div>
     );
@@ -176,7 +176,7 @@ const Schedule = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900 overflow-hidden">
+    <div className="h-screen flex flex-col bg-white dark:bg-gray-900 overflow-hidden">
       <header
         className="text-white shadow-md transition-colors duration-300 rounded-b-xl flex-shrink-0"
         style={{ backgroundColor: settings.primaryColor }}
@@ -196,7 +196,7 @@ const Schedule = () => {
           
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-white text-sm font-medium">Vendedor:</span>
+              <span className="text-white text-sm font-medium">Anfitrião:</span>
               <select 
                 value={hostFilter} 
                 onChange={(e) => setHostFilter(e.target.value)}

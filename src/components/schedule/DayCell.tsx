@@ -54,25 +54,25 @@ export const DayCell = React.memo(function DayCell({
     <div
       onClick={() => onDateChange(day)}
       className={`
-        relative px-1 pt-1 pb-4 h-full min-h-[90px] cursor-pointer border-l first:border-l-0 border-gray-700
-        group transition-colors
-        ${isToday ? "bg-blue-900/20" : ""}
+        relative px-1 pt-1 pb-4 h-full min-h-[90px] cursor-pointer border-l first:border-l-0 border-gray-200 dark:border-gray-700
+        group transition-colors overflow-hidden
+        ${isToday ? "bg-blue-50 dark:bg-blue-900/20" : ""}
         ${isSelected ? "bg-blue-500" : ""}
-        ${!isCurrentMonth ? "bg-gray-900/20 text-gray-500" : ""}
-        hover:bg-gray-800
+        ${!isCurrentMonth ? "bg-gray-50 dark:bg-gray-900/20 text-gray-400 dark:text-gray-500" : ""}
+        hover:bg-gray-50 dark:hover:bg-gray-800
       `}
       style={{ minWidth: 0 }}
     >
       <div
         className={`
           flex items-center justify-between z-10 relative
-          ${isToday ? "text-blue-400 font-bold" : isSelected ? "text-white font-bold" : ""}
+          ${isToday ? "text-blue-600 dark:text-blue-400 font-bold" : isSelected ? "text-white font-bold" : ""}
           pl-2 pr-1
         `}
       >
         <span
           className={`
-            text-xs select-none
+            text-xs select-none text-gray-900 dark:text-white
             ${isCurrentMonth ? "" : "opacity-50"}
           `}
         >

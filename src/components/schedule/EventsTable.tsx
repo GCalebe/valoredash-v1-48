@@ -39,27 +39,27 @@ export const EventsTable = React.memo(function EventsTable({
     if (responseStatus) {
       switch (responseStatus) {
         case "accepted":
-          return "bg-green-900/30 text-green-400";
+          return "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400";
         case "tentative":
-          return "bg-yellow-900/30 text-yellow-400";
+          return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400";
         case "declined":
-          return "bg-red-900/30 text-red-400";
+          return "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400";
         case "needsAction":
-          return "bg-blue-900/30 text-blue-400";
+          return "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400";
         default:
-          return "bg-gray-900/30 text-gray-400";
+          return "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400";
       }
     }
 
     switch (status) {
       case "confirmed":
-        return "bg-green-900/30 text-green-400";
+        return "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400";
       case "tentative":
-        return "bg-yellow-900/30 text-yellow-400";
+        return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400";
       case "cancelled":
-        return "bg-red-900/30 text-red-400";
+        return "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400";
       default:
-        return "bg-gray-900/30 text-gray-400";
+        return "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400";
     }
   };
 
@@ -80,14 +80,14 @@ export const EventsTable = React.memo(function EventsTable({
 
   return (
     <div className="overflow-x-auto">
-      <Table className="text-white">
+      <Table className="text-gray-900 dark:text-white">
         <TableHeader>
-          <TableRow className="border-gray-700">
-            <TableHead className="text-gray-400">Horário</TableHead>
-            <TableHead className="text-gray-400">Serviço</TableHead>
-            <TableHead className="text-gray-400">Participante</TableHead>
-            <TableHead className="text-gray-400">Status</TableHead>
-            <TableHead className="text-gray-400">Ações</TableHead>
+          <TableRow className="border-gray-200 dark:border-gray-700">
+            <TableHead className="text-gray-600 dark:text-gray-400">Horário</TableHead>
+            <TableHead className="text-gray-600 dark:text-gray-400">Serviço</TableHead>
+            <TableHead className="text-gray-600 dark:text-gray-400">Participante</TableHead>
+            <TableHead className="text-gray-600 dark:text-gray-400">Status</TableHead>
+            <TableHead className="text-gray-600 dark:text-gray-400">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -98,14 +98,14 @@ export const EventsTable = React.memo(function EventsTable({
               const attendee = event.attendees?.find((a) => a !== null);
 
               return (
-                <TableRow key={event.id} className="border-gray-700">
+                <TableRow key={event.id} className="border-gray-200 dark:border-gray-700">
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4 text-gray-500" />
+                      <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                       {format(start, "HH:mm")}
                       {!isSameDay(start, end) && " - evento de múltiplos dias"}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
                       {format(start, "dd/MM/yyyy")}
                     </div>
                   </TableCell>
@@ -113,11 +113,11 @@ export const EventsTable = React.memo(function EventsTable({
                   <TableCell>
                     {attendee?.email ? (
                       <div className="flex items-center gap-1">
-                        <Mail className="h-4 w-4 text-gray-500" />
+                        <Mail className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                         {attendee.email}
                       </div>
                     ) : (
-                      <span className="text-gray-500">Sem participante</span>
+                      <span className="text-gray-600 dark:text-gray-400">Sem participante</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -137,7 +137,7 @@ export const EventsTable = React.memo(function EventsTable({
                         size="icon"
                         onClick={() => onEditEvent(event)}
                         title="Editar evento"
-                        className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/30"
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -146,7 +146,7 @@ export const EventsTable = React.memo(function EventsTable({
                         size="icon"
                         onClick={() => onDeleteEvent(event)}
                         title="Excluir evento"
-                        className="text-red-400 hover:text-red-300 hover:bg-red-900/30"
+                        className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -155,7 +155,7 @@ export const EventsTable = React.memo(function EventsTable({
                         size="icon"
                         onClick={() => onOpenEventLink(event.htmlLink)}
                         title="Abrir no Google Calendar"
-                        className="text-gray-400 hover:text-gray-300 hover:bg-gray-700"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
                         <LinkIcon className="h-4 w-4" />
                       </Button>
@@ -165,10 +165,10 @@ export const EventsTable = React.memo(function EventsTable({
               );
             })
           ) : (
-            <TableRow className="border-gray-700">
+            <TableRow className="border-gray-200 dark:border-gray-700">
               <TableCell
                 colSpan={5}
-                className="text-center py-4 text-gray-400"
+                className="text-center py-4 text-gray-600 dark:text-gray-400"
               >
                 {isLoading ? (
                   <div className="flex justify-center items-center gap-2">

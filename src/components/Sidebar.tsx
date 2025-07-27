@@ -137,11 +137,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   return (
     <div
       className={cn(
-        "flex flex-col h-screen w-[220px] bg-[#0f172a] dark:bg-gray-900 text-white overflow-y-auto",
+        "flex flex-col h-screen w-[220px] bg-white dark:bg-gray-900 text-gray-900 dark:text-white overflow-y-auto border-r border-gray-200 dark:border-gray-800",
         className
       )}
     >
-      <div className="p-4 flex items-center gap-2 border-b border-gray-800">
+      <div className="p-4 flex items-center gap-2 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-center w-8 h-8 rounded-md bg-blue-600">
           {settings.logo ? (
             <img
@@ -154,8 +154,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           )}
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-sm">{settings.brandName}</span>
-          <span className="text-xs text-gray-400">Comercial 247</span>
+          <span className="font-bold text-sm text-gray-900 dark:text-white">{settings.brandName}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">Comercial 247</span>
         </div>
       </div>
 
@@ -163,7 +163,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {menuItems.map((section, idx) => (
           <div key={idx} className="mb-6">
             <div className="px-4 mb-2">
-              <span className="text-xs font-medium text-gray-400">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                 {section.title}
               </span>
             </div>
@@ -176,7 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                       "flex items-center w-full px-4 py-2 text-sm transition-colors",
                       isActive(item.path)
                         ? "bg-blue-600 text-white"
-                        : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                     )}
                   >
                     <item.icon className="h-5 w-5 mr-3" />
@@ -189,21 +189,21 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         ))}
       </div>
 
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-800">
         <button
           onClick={() => navigate("/profile")}
-          className="flex items-center w-full rounded-md bg-gray-800 p-2 text-sm hover:bg-gray-700 transition-colors"
+          className="flex items-center w-full rounded-md bg-gray-100 dark:bg-gray-800 p-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
         >
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 mr-2">
             <span className="font-bold text-white">A</span>
           </div>
           <div className="flex flex-col items-start overflow-hidden">
-            <span className="font-medium truncate w-full">Admin</span>
-            <span className="text-xs text-gray-400 truncate w-full">
+            <span className="font-medium truncate w-full text-gray-900 dark:text-white">Admin</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 truncate w-full">
               admin@comercial247.com
             </span>
           </div>
-          <ChevronDown className="h-4 w-4 ml-auto text-gray-400" />
+          <ChevronDown className="h-4 w-4 ml-auto text-gray-500 dark:text-gray-400" />
         </button>
       </div>
     </div>

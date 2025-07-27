@@ -40,9 +40,9 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     <div
       className={`
         min-h-[60px] p-1 rounded-md cursor-pointer
-        ${isCurrentMonth ? 'text-white' : 'text-gray-600'}
-        ${isSelected ? 'bg-blue-500' : 'bg-gray-800 hover:bg-gray-700'}
-        ${events.length > 0 && !isSelected ? 'border border-gray-700' : ''}
+        ${isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}
+        ${isSelected ? 'bg-blue-500' : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'}
+        ${events.length > 0 && !isSelected ? 'border border-gray-200 dark:border-gray-700' : ''}
         transition-colors
       `}
       onClick={() => onDateClick(day)}
