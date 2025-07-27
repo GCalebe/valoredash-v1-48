@@ -154,30 +154,26 @@ export function AgendaSelectionTab({ onAgendaSelect, selectedAgendaId }: AgendaS
                   <span className="flex items-center gap-1.5">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Duração:</span>
-                    {agenda.duration_minutes} min
+                    {agenda.duration_minutes || 0} min
                   </span>
                   
-                  {agenda.buffer_time_minutes > 0 && (
-                    <span className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground">Intervalo:</span>
-                      {agenda.buffer_time_minutes} min
-                    </span>
-                  )}
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-muted-foreground">Intervalo:</span>
+                    {agenda.buffer_time_minutes ? `${agenda.buffer_time_minutes} min` : '—'}
+                  </span>
                 </div>
                 
                 <div className="flex items-center gap-6 text-sm font-medium text-foreground">
-                  {agenda.max_participants && agenda.max_participants > 1 && (
-                    <span className="flex items-center gap-1.5">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Máx:</span>
-                      {agenda.max_participants} pessoas
-                    </span>
-                  )}
-                  
                   <span className="flex items-center gap-1.5">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Preço:</span>
                     {formatPrice(agenda.price)}
+                  </span>
+                  
+                  <span className="flex items-center gap-1.5">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Máx:</span>
+                    {agenda.max_participants && agenda.max_participants > 1 ? `${agenda.max_participants} pessoas` : '—'}
                   </span>
                 </div>
               </div>

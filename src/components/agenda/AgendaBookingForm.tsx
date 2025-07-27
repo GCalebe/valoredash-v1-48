@@ -163,14 +163,24 @@ export function AgendaBookingForm() {
                         <p className="text-sm text-muted-foreground mt-1">
                           {agenda.description}
                         </p>
-                        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {agenda.duration_minutes}min
-                          </span>
-                          {agenda.price && (
-                            <span>R$ {agenda.price.toFixed(2)}</span>
-                          )}
+                        <div className="space-y-2 mt-3">
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              Duração: {agenda.duration_minutes || 0}min
+                            </span>
+                            <span>
+                              Intervalo: {agenda.buffer_time_minutes ? `${agenda.buffer_time_minutes}min` : '—'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>
+                              Preço: {agenda.price ? `R$ ${agenda.price.toFixed(2)}` : 'Gratuito'}
+                            </span>
+                            <span>
+                              Máx: {agenda.max_participants && agenda.max_participants > 1 ? `${agenda.max_participants} pessoas` : '—'}
+                            </span>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
