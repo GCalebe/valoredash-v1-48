@@ -15,7 +15,7 @@ export const aiProductsKeys = {
 // Fetch AI products
 const fetchAIProducts = async (): Promise<unknown[]> => {
   const { data, error } = await supabase
-    .from('ai_products')
+    .from('products')
     .select('*')
     .order('created_at', { ascending: false });
 
@@ -30,7 +30,7 @@ const fetchAIProducts = async (): Promise<unknown[]> => {
 // Create AI product
 const createAIProduct = async (product: { name: string; description?: string; category?: string; features?: string[]; icon?: string; image?: string; popular?: boolean; new?: boolean }): Promise<unknown> => {
   const { data, error } = await supabase
-    .from('ai_products')
+    .from('products')
     .insert([{ id: crypto.randomUUID(), ...product }])
     .select()
     .single();
@@ -46,7 +46,7 @@ const createAIProduct = async (product: { name: string; description?: string; ca
 // Update AI product
 const updateAIProduct = async ({ id, ...updates }: { id: string } & Partial<{ name: string; description: string; category: string; features: string[]; icon: string; image: string; popular: boolean; new: boolean }>): Promise<unknown> => {
   const { data, error } = await supabase
-    .from('ai_products')
+    .from('products')
     .update(updates)
     .eq('id', id)
     .select()
@@ -63,7 +63,7 @@ const updateAIProduct = async ({ id, ...updates }: { id: string } & Partial<{ na
 // Delete AI product
 const deleteAIProduct = async (id: string): Promise<void> => {
   const { error } = await supabase
-    .from('ai_products')
+    .from('products')
     .delete()
     .eq('id', id);
 

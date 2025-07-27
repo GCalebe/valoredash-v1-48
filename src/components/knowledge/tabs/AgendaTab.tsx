@@ -320,9 +320,29 @@ const AgendaTab = () => {
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-base text-muted-foreground leading-relaxed line-clamp-2 h-12">{agenda.description}</p>
-                <div className="flex items-center gap-6 mt-6 text-sm font-medium text-foreground">
-                  <span className="flex items-center gap-1.5"><span className="text-muted-foreground">Duração:</span>{agenda.duration} min</span>
-                  <span className="flex items-center gap-1.5"><span className="text-muted-foreground">Intervalo:</span>{agenda.breakTime} min</span>
+                <div className="space-y-2 mt-6">
+                  <div className="flex items-center gap-6 text-sm font-medium text-foreground">
+                    <span className="flex items-center gap-1.5"><span className="text-muted-foreground">Duração:</span>{agenda.duration} min</span>
+                    <span className="flex items-center gap-1.5"><span className="text-muted-foreground">Intervalo:</span>{agenda.breakTime} min</span>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm font-medium text-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-muted-foreground">Preço:</span>
+                      {(() => {
+                        const supabaseAgenda = supabaseAgendas.find(sa => sa.id === agenda.id);
+                        return supabaseAgenda?.price ? `R$ ${supabaseAgenda.price.toFixed(2)}` : '—';
+                      })()}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-muted-foreground">Máx:</span>
+                      {(() => {
+                        const supabaseAgenda = supabaseAgendas.find(sa => sa.id === agenda.id);
+                        return supabaseAgenda?.max_participants && supabaseAgenda.max_participants > 1 
+                          ? `${supabaseAgenda.max_participants} pessoas` 
+                          : '—';
+                      })()}
+                    </span>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="pt-4 flex justify-end gap-2 bg-muted/30 p-3 mt-4">

@@ -9,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import DaySelector from "./DaySelector";
 import { Database } from "@/integrations/supabase/types";
 
-type Product = Database['public']['Tables']['ai_products']['Row'];
+type Product = Database['public']['Tables']['products']['Row'];
 
 interface ProductSelectorProps {
   selectedProducts: Array<{
@@ -33,7 +33,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ selectedProducts, onS
   const fetchProducts = async () => {
     try {
       const { data, error } = await supabase
-        .from("ai_products")
+        .from("products")
         .select("*")
         .order("name");
 

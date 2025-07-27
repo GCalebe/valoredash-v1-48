@@ -46,7 +46,7 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
         // Se a tabela não existir, usar dados do campo objections do produto
         console.log('Tabela product_objections não encontrada, usando campo objections do produto');
         const { data: productData, error: productError } = await supabase
-          .from('ai_products')
+          .from('products')
           .select('objections')
           .eq('id', productId)
           .single();

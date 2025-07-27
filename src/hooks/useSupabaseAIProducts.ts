@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 
-type AIProduct = Database['public']['Tables']['ai_products']['Row'];
-type AIProductInsert = Database['public']['Tables']['ai_products']['Insert'];
-type AIProductUpdate = Database['public']['Tables']['ai_products']['Update'];
+type AIProduct = Database['public']['Tables']['products']['Row'];
+type AIProductInsert = Database['public']['Tables']['products']['Insert'];
+type AIProductUpdate = Database['public']['Tables']['products']['Update'];
 
 export const useSupabaseAIProducts = () => {
   const [products, setProducts] = useState<AIProduct[]>([]);
@@ -15,7 +15,7 @@ export const useSupabaseAIProducts = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('ai_products')
+        .from('products')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -31,7 +31,7 @@ export const useSupabaseAIProducts = () => {
   const getProductsByCategory = async (category?: string) => {
     try {
       let query = supabase
-        .from('ai_products')
+        .from('products')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -51,7 +51,7 @@ export const useSupabaseAIProducts = () => {
   const createProduct = async (productData: AIProductInsert) => {
     try {
       const { data, error } = await supabase
-        .from('ai_products')
+        .from('products')
         .insert(productData)
         .select()
         .single();
@@ -68,7 +68,7 @@ export const useSupabaseAIProducts = () => {
   const updateProduct = async (id: string, updates: AIProductUpdate) => {
     try {
       const { data, error } = await supabase
-        .from('ai_products')
+        .from('products')
         .update(updates)
         .eq('id', id)
         .select()
@@ -86,7 +86,7 @@ export const useSupabaseAIProducts = () => {
   const deleteProduct = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('ai_products')
+        .from('products')
         .delete()
         .eq('id', id);
 
@@ -101,7 +101,7 @@ export const useSupabaseAIProducts = () => {
   const getProductById = async (id: string) => {
     try {
       const { data, error } = await supabase
-        .from('ai_products')
+        .from('products')
         .select('*')
         .eq('id', id)
         .single();

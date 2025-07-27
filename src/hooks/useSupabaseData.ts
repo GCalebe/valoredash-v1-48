@@ -103,7 +103,7 @@ export const useSupabaseData = (initialFilters?: MetricsFilters): UseSupabaseDat
 export const getAIProducts = async (): Promise<SupabaseResponse<AIProduct[]>> => {
   try {
     const { data, error } = await supabase
-      .from('ai_products')
+      .from('products')
       .select('*')
       .order('name');
 

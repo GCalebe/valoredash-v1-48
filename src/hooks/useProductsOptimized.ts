@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-// Simplified product interface using ai_products table
+// Simplified product interface using products table
 interface SimpleProduct {
   id: string;
   name: string;
@@ -27,7 +27,7 @@ export const productsKeysOptimized = {
 // Fetch AI products
 const fetchAIProducts = async (): Promise<SimpleProduct[]> => {
   const { data, error } = await supabase
-    .from('ai_products')
+    .from('products')
     .select('*')
     .order('created_at', { ascending: false });
 
@@ -42,7 +42,7 @@ const fetchAIProducts = async (): Promise<SimpleProduct[]> => {
 // Fetch products by category
 const fetchProductsByCategory = async (category: string): Promise<SimpleProduct[]> => {
   const { data, error } = await supabase
-    .from('ai_products')
+    .from('products')
     .select('*')
     .eq('category', category)
     .order('created_at', { ascending: false });
@@ -58,7 +58,7 @@ const fetchProductsByCategory = async (category: string): Promise<SimpleProduct[
 // Create product
 const createProduct = async (product: Omit<SimpleProduct, 'id' | 'created_at'>): Promise<SimpleProduct> => {
   const { data, error } = await supabase
-    .from('ai_products')
+    .from('products')
     .insert([{
       id: crypto.randomUUID(),
       name: product.name,
@@ -84,7 +84,7 @@ const createProduct = async (product: Omit<SimpleProduct, 'id' | 'created_at'>):
 // Update product
 const updateProduct = async ({ id, ...updates }: Partial<SimpleProduct> & { id: string }): Promise<SimpleProduct> => {
   const { data, error } = await supabase
-    .from('ai_products')
+    .from('products')
     .update(updates)
     .eq('id', id)
     .select()
@@ -101,7 +101,7 @@ const updateProduct = async ({ id, ...updates }: Partial<SimpleProduct> & { id: 
 // Delete product
 const deleteProduct = async (id: string): Promise<void> => {
   const { error } = await supabase
-    .from('ai_products')
+    .from('products')
     .delete()
     .eq('id', id);
 
