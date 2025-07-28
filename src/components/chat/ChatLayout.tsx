@@ -45,12 +45,12 @@ const ChatLayout = ({
   };
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-full">
+    <ResizablePanelGroup direction="horizontal" className="h-full max-w-full overflow-hidden">
       <ResizablePanel
         defaultSize={25}
         minSize={20}
         maxSize={30}
-        className="bg-white dark:bg-gray-800"
+        className="bg-white dark:bg-gray-800 max-w-full overflow-hidden"
       >
         <ConversationList
           conversations={conversations}
@@ -69,7 +69,7 @@ const ChatLayout = ({
       <ResizablePanel
         defaultSize={50}
         minSize={40}
-        className="bg-gray-50 dark:bg-gray-900 flex flex-col"
+        className="bg-gray-50 dark:bg-gray-900 flex flex-col max-w-full overflow-hidden"
       >
         <ChatArea
           selectedChat={selectedChat}
@@ -85,7 +85,7 @@ const ChatLayout = ({
         defaultSize={25}
         minSize={20}
         maxSize={30}
-        className="bg-white dark:bg-gray-800"
+        className="bg-white dark:bg-gray-800 max-w-full overflow-hidden"
       >
         <ClientInfoPanel
           selectedChat={selectedChat}

@@ -142,9 +142,9 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background max-w-full overflow-hidden">
       {/* Carousel Tab Navigation */}
-      <div className="relative border-b border-border bg-background flex-shrink-0">
+      <div className="relative border-b border-border bg-background flex-shrink-0 max-w-full">
         {/* Left scroll button */}
         <Button
           variant="ghost"
@@ -196,10 +196,12 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
       </div>
 
       {/* Tab Content with fixed height and scroll */}
-      <div className="flex-1 overflow-hidden min-h-0 bg-background">
-        <div className="h-full overflow-y-auto bg-background">
-          <div className="p-4 bg-background">
-            {renderTabContent()}
+      <div className="flex-1 overflow-hidden min-h-0 bg-background max-w-full">
+        <div className="h-full overflow-y-auto bg-background max-w-full">
+          <div className="p-4 bg-background max-w-full overflow-x-auto">
+            <div className="max-w-full">
+              {renderTabContent()}
+            </div>
           </div>
         </div>
       </div>

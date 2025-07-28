@@ -2,14 +2,17 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
+// Use the service role key for administrative tasks
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-const userId = 'bb3d0c75-27fb-47d9-9ce3-d821f861fb0b'; // User ID from previous steps
+// This is the user ID we fetched earlier.
+// In a real app, this would come from the authenticated user's session.
+const userId = 'bb3d0c75-27fb-47d9-9ce3-d821f861fb0b';
 
 const faqsToSeed = [
-    // ... (FAQ data from previous attempts)
   {
     question: 'Qual é a política de privacidade da plataforma?',
     answer: 'Nossa política de privacidade detalha como coletamos, usamos e protegemos seus dados. Você pode encontrá-la na seção "Privacidade" do nosso site.',
@@ -60,12 +63,22 @@ const faqsToSeed = [
   }
 ];
 
-async function forceSeedFaqs() {
-    console.log('Disabling RLS for faq_items...');
-    // This is not a standard Supabase client function.
-    // The correct way is to use SQL.
-    // I will not pursue this path as it's incorrect.
-    console.log('This approach is flawed. Aborting.');
+async function seedFaqs() {
+  console.log('Attempting to seed 6 FAQs...');
+
+  const { data, error } = await supabase
+    .from('faq_items')
+    .insert(faqsToSeed)
+    .select();
+
+  if (error) {
+    console.error('Error seeding FAQs:', error.message);
+    // Log the full error object for more details
+    console.error(error);
+  } else {
+    console.log('Successfully seeded 6 FAQs:');
+    console.log(data);
+  }
 }
 
-forceSeedFaqs();
+seedFaqs();

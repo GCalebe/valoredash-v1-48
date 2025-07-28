@@ -1,15 +1,24 @@
-
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-const userId = 'bb3d0c75-27fb-47d9-9ce3-d821f861fb0b'; // User ID from previous steps
+const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  },
+  global: {
+    headers: {
+      Authorization: `Bearer ${supabaseServiceRoleKey}`
+    }
+  }
+});
 
-const faqsToSeed = [
-    // ... (FAQ data from previous attempts)
+const userId = 'bb3d0c75-27fb-47d9-9ce3-d821f861fb0b';
+
+const faqs = [
   {
     question: 'Qual é a política de privacidade da plataforma?',
     answer: 'Nossa política de privacidade detalha como coletamos, usamos e protegemos seus dados. Você pode encontrá-la na seção "Privacidade" do nosso site.',
@@ -60,12 +69,20 @@ const faqsToSeed = [
   }
 ];
 
-async function forceSeedFaqs() {
-    console.log('Disabling RLS for faq_items...');
-    // This is not a standard Supabase client function.
-    // The correct way is to use SQL.
-    // I will not pursue this path as it's incorrect.
-    console.log('This approach is flawed. Aborting.');
+async function seedFaqs() {
+  console.log('Starting to seed FAQs...');
+
+  const { data, error } = await supabase
+    .from('faq_items')
+    .insert(faqs)
+    .select();
+
+  if (error) {
+    console.error('Error seeding FAQs:', error.message);
+  } else {
+    console.log('Successfully seeded FAQs:');
+    console.log(data);
+  }
 }
 
-forceSeedFaqs();
+seedFaqs();

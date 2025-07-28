@@ -13,6 +13,7 @@ export interface FAQFormData {
   answer: string;
   category: string;
   tags: string;
+  associated_agendas?: string[];
 }
 
 const useFAQManagement = () => {
@@ -25,6 +26,7 @@ const useFAQManagement = () => {
     answer: "",
     category: "Geral",
     tags: "",
+    associated_agendas: [],
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -53,11 +55,19 @@ const useFAQManagement = () => {
     });
   }, [faqs, searchTerm, selectedCategory]);
 
-  const addFAQ = async () => {
+  const addFAQ = async (userId: string | undefined) => {
     if (!newFAQ.question || !newFAQ.answer) {
       toast({
         title: "Campos obrigatórios",
         description: "Pergunta e resposta são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!userId) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Usuário não autenticado. Faça login novamente.",
         variant: "destructive",
       });
       return;
@@ -72,8 +82,10 @@ const useFAQManagement = () => {
           .split(",")
           .map((tag) => tag.trim())
           .filter(Boolean),
+        associated_agendas: newFAQ.associated_agendas,
+        created_by: userId,
       });
-      setNewFAQ({ question: "", answer: "", category: "Geral", tags: "" });
+      setNewFAQ({ question: "", answer: "", category: "Geral", tags: "", associated_agendas: [] });
       setIsAddDialogOpen(false);
       toast({
         title: "FAQ adicionado",
@@ -88,10 +100,11 @@ const useFAQManagement = () => {
     }
   };
 
-  const editFAQ = (item: unknown) => {
+  const editFAQ = (item: any) => { // Usando 'any' para compatibilidade com o que vem do banco
     setEditingFAQ({
       ...item,
       tags: Array.isArray(item.tags) ? item.tags.join(", ") : "",
+      associated_agendas: item.associated_agendas || [],
     });
     setIsEditDialogOpen(true);
   };
@@ -109,6 +122,7 @@ const useFAQManagement = () => {
           .split(",")
           .map((tag: string) => tag.trim())
           .filter(Boolean),
+        associated_agendas: editingFAQ.associated_agendas,
       });
       setEditingFAQ(null);
       setIsEditDialogOpen(false);

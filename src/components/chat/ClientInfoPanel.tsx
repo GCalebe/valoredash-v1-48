@@ -7,7 +7,7 @@ import { useClientDataFetch } from "@/hooks/useClientDataFetch";
 import TagsField from "./TagsField";
 import NotesField from "./NotesField";
 import ClientInfo from "@/components/clients/ClientInfo";
-import ClientHeader from "./ClientHeader";
+
 import EmptyClientState from "./EmptyClientState";
 import LoadingClientState from "./LoadingClientState";
 import ValidationErrors from "./ValidationErrors";
@@ -63,11 +63,16 @@ const ClientInfoPanel = ({
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <ClientHeader clientData={clientData} selectedConversation={selectedConversation} />
-
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-6">
+    <div className="h-full flex flex-col max-w-full overflow-hidden">
+      {/* Header com título */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Informações do Cliente
+        </h2>
+      </div>
+      
+      <ScrollArea className="flex-1 max-w-full">
+        <div className="p-4 pr-6 space-y-6 max-w-full overflow-x-auto">
           {/* Tags Field */}
           <TagsField selectedChat={selectedChat} />
 

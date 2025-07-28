@@ -26,7 +26,7 @@ interface ClientUTMDataProps {
 
 const ClientUTMData: React.FC<ClientUTMDataProps> = ({
   contactId,
-  readOnly = true,
+  readOnly = false,
   onFieldUpdate,
   onVisibilityChange,
   showVisibilityControl = false,
@@ -109,6 +109,38 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
     }
   };
 
+  const handleFieldChange = async (fieldId: string, newValue: string | number) => {
+    // Atualizar o estado local imediatamente
+    setUtmData(prev => ({
+      ...prev,
+      [fieldId]: newValue
+    }));
+
+    // Chamar a função de callback se fornecida
+    if (onFieldUpdate) {
+      onFieldUpdate(fieldId, newValue);
+    }
+
+    // Salvar no banco de dados
+    try {
+      const { error } = await supabase
+        .from("utm_tracking")
+        .upsert({
+          lead_id: contactId,
+          [fieldId]: newValue,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'lead_id'
+        });
+
+      if (error) {
+        console.error(`Erro ao salvar ${fieldId}:`, error);
+      }
+    } catch (error) {
+      console.error(`Erro ao salvar ${fieldId}:`, error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-4">
@@ -118,103 +150,103 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 max-w-full overflow-x-auto">
       <EditableField
-        label="Fonte UTM"
+        label="utm_source"
         value={utmData?.utm_source || ""}
         fieldId="utm_source"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.utm_source !== false}
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="Meio UTM"
+        label="utm_medium"
         value={utmData?.utm_medium || ""}
         fieldId="utm_medium"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.utm_medium !== false}
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="Campanha UTM"
+        label="utm_campaign"
         value={utmData?.utm_campaign || ""}
         fieldId="utm_campaign"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.utm_campaign !== false}
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="Termo UTM"
+        label="utm_term"
         value={utmData?.utm_term || ""}
         fieldId="utm_term"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.utm_term !== false}
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="Conteúdo UTM"
+        label="utm_content"
         value={utmData?.utm_content || ""}
         fieldId="utm_content"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.utm_content !== false}
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="Tipo de Dispositivo"
+        label="device_type"
         value={utmData?.device_type || ""}
         fieldId="device_type"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.device_type !== false}
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="Referenciador"
+        label="referrer"
         value={utmData?.referrer || ""}
         fieldId="referrer"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.referrer !== false}
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="User Agent"
+        label="user_agent"
         value={utmData?.user_agent || ""}
         fieldId="user_agent"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.user_agent !== false}
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="Landing Page"
+        label="landing_page"
         value={utmData?.landing_page || ""}
         fieldId="landing_page"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.landing_page !== false}
         showVisibilityControl={showVisibilityControl}
       />
       <EditableField
-        label="IP Address"
+        label="ip_address"
         value={utmData?.ip_address || ""}
         fieldId="ip_address"
         readOnly={readOnly}
-        onChange={onFieldUpdate}
+        onChange={handleFieldChange}
         onVisibilityChange={handleVisibilityChange}
         isVisible={fieldVisibility.ip_address !== false}
         showVisibilityControl={showVisibilityControl}

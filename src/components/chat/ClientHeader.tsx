@@ -13,9 +13,9 @@ const ClientHeader = React.memo(({ clientData, selectedConversation }: ClientHea
   const { settings } = useThemeSettings();
 
   return (
-    <div className="text-center p-6 border-b border-gray-200 dark:border-gray-700">
+    <div className="text-center p-3 border-b border-gray-200 dark:border-gray-700">
       <div
-        className="w-24 h-24 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"
+        className="w-12 h-12 rounded-full flex items-center justify-center text-xl mx-auto mb-2"
         style={{
           backgroundColor: `${settings.secondaryColor}20`,
           color: settings.primaryColor,
@@ -23,19 +23,14 @@ const ClientHeader = React.memo(({ clientData, selectedConversation }: ClientHea
       >
         ⚓
       </div>
-      <h2 className="text-xl font-semibold">
+      <h2 className="text-lg font-semibold">
         {clientData?.name || selectedConversation?.name}
       </h2>
-      <p className="text-gray-500 dark:text-gray-400">
+      <p className="text-gray-500 dark:text-gray-400 text-sm">
         {clientData?.phone || selectedConversation?.phone}
       </p>
-      {clientData?.address && (
-        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-          {clientData.address}
-        </p>
-      )}
       {clientData?.kanbanStage && (
-        <Badge variant="outline" className="mt-2">
+        <Badge variant="outline" className="mt-1 text-xs">
           {clientData.kanbanStage}
         </Badge>
       )}

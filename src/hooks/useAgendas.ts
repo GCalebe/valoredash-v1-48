@@ -61,9 +61,12 @@ export function useAgendas() {
 
   const createAgenda = async (agendaData: Omit<Agenda, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by'>) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from('agendas')
-        .insert([agendaData])
+        .insert([{ ...agendaData, created_by: user.id, user_id: user.id }]) // Adicionando ambos por segurança
         .select();
 
       if (error) {

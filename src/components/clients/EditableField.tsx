@@ -101,7 +101,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
           <Textarea
             value={localValue}
             onChange={(e) => handleChange(e.target.value)}
-            className="min-h-[60px] resize-none"
+            className="min-h-[60px] resize-none max-w-full"
             placeholder={`Digite ${label.toLowerCase()}`}
           />
         );
@@ -128,6 +128,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
             value={localValue}
             onChange={(e) => handleChange(parseFloat(e.target.value) || 0)}
             placeholder="0,00"
+            className="max-w-full"
           />
         );
       default:
@@ -137,13 +138,14 @@ const EditableField: React.FC<EditableFieldProps> = ({
             value={localValue}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={`Digite ${label.toLowerCase()}`}
+            className="max-w-full"
           />
         );
     }
   };
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 max-w-full">
       <div className="flex items-center justify-between">
         <Label htmlFor={fieldId} className="text-sm font-medium">
           {label}
