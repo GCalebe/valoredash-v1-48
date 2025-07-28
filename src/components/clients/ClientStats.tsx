@@ -3,10 +3,11 @@ import ClientUTMData from "./ClientUTMData";
 import EditableField from "./EditableField";
 import CustomFieldRenderer from "./CustomFieldRenderer";
 import { Contact } from "@/types/client";
+import { CustomField } from "@/types/customFields";
 
 interface ClientStatsProps {
   clientData: Contact | null;
-  customFields: unknown[];
+  customFields: CustomField[];
   consultationStageOptions: string[];
   fieldVisibility: Record<string, boolean>;
   onFieldUpdate?: (fieldId: string, newValue: unknown) => void;

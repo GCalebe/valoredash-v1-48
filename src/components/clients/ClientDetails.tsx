@@ -2,10 +2,11 @@ import React from "react";
 import EditableField from "./EditableField";
 import CustomFieldRenderer from "./CustomFieldRenderer";
 import { Contact } from "@/types/client";
+import { CustomField } from "@/types/customFields";
 
 interface ClientDetailsProps {
   clientData: Contact | null;
-  customFields: unknown[];
+  customFields: CustomField[];
   clientTypeOptions: string[];
   clientSizeOptions: string[];
   fieldVisibility: Record<string, boolean>;

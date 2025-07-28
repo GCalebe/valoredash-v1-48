@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCustomFieldValidation } from "./useCustomFieldValidation";
 import { validateCustomField } from "@/utils/customFieldValidation";
 import { toast } from "@/hooks/use-toast";
+import { CustomField, ClientCustomValue } from "@/types/customFields";
 
 export function useDynamicFields(clientId: string | null) {
   const [dynamicFields, setDynamicFields] = useState<{
@@ -48,7 +49,7 @@ export function useDynamicFields(clientId: string | null) {
     return data || [];
   };
 
-  const mapValuesToFields = (customFields: any[], clientValues: any[]) => {
+  const mapValuesToFields = (customFields: CustomField[], clientValues: ClientCustomValue[]) => {
     const valuesMap = new Map(clientValues.map(v => [v.field_id, v.field_value]));
     const categorizedFields = { basic: [], commercial: [], personalized: [], documents: [] };
 

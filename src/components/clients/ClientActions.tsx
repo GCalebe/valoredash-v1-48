@@ -3,10 +3,11 @@ import CustomFieldsTab from "./CustomFieldsTab";
 import ClientFilesTab from "./ClientFilesTab";
 import CustomFieldRenderer from "./CustomFieldRenderer";
 import { Contact } from "@/types/client";
+import { CustomField } from "@/types/customFields";
 
 interface ClientActionsProps {
   clientData: Contact | null;
-  customFields: unknown[];
+  customFields: CustomField[];
   onFieldUpdate?: (fieldId: string, newValue: unknown) => void;
   readOnly: boolean;
   section: "custom" | "docs";
