@@ -16,7 +16,7 @@ import { User } from "@/types/user";
 
 interface UserManagementTabProps {
   users: User[];
-  aiProducts: unknown[];
+  aiProducts: any[];
   loading: boolean;
   onAddUser: () => void;
   onEditUser: (user: User) => void;

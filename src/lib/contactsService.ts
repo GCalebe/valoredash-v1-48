@@ -13,7 +13,7 @@ export interface ContactFilters {
 }
 
 export const contactsService = {
-  async fetchContacts(filters: ContactFilters = {}): Promise<unknown[]> {
+  async fetchContacts(filters: ContactFilters = {}): Promise<any[]> {
     // Verify user authentication
     const user = await getCurrentAuthUser();
     
@@ -48,7 +48,7 @@ export const contactsService = {
     return data || [];
   },
 
-  async fetchContactsByKanbanStage(stage: string): Promise<unknown[]> {
+  async fetchContactsByKanbanStage(stage: string): Promise<any[]> {
     // Verify user authentication
     const user = await getCurrentAuthUser();
     
@@ -67,7 +67,7 @@ export const contactsService = {
     return data || [];
   },
 
-  async createContact(contact: unknown): Promise<unknown> {
+  async createContact(contact: any): Promise<any> {
     const { data, error } = await supabase
       .from('contacts')
       .insert([contact])
@@ -82,7 +82,7 @@ export const contactsService = {
     return data;
   },
 
-  async updateContact({ id, ...updates }: unknown): Promise<unknown> {
+  async updateContact({ id, ...updates }: any): Promise<any> {
     // Verify user authentication and ownership
     const user = await getCurrentAuthUser();
     

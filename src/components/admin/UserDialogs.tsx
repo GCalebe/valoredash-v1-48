@@ -40,7 +40,7 @@ interface UserDialogsProps {
   handleDeleteUser: () => void;
 
   // AI Products
-  aiProducts: unknown[];
+  aiProducts: any[];
 }
 
 export const UserDialogs: React.FC<UserDialogsProps> = ({
