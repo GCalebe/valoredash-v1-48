@@ -2,11 +2,11 @@
 // These should be replaced with proper interfaces once the unification process is complete
 
 export interface AnyObject {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SafeUnknown {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Temporary user type override
@@ -15,9 +15,9 @@ export interface TempUser {
   email?: string;
   user_metadata?: {
     email?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Temporary settings type override  
@@ -26,7 +26,7 @@ export interface TempSettings {
   secondaryColor?: string;
   brandName?: string;
   logo?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Temporary product type override
@@ -35,5 +35,5 @@ export interface TempProduct {
   name?: string;
   description?: string;
   category?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }

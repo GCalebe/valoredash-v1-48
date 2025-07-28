@@ -5,9 +5,26 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ArrowLeft, ShipWheel, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+interface User {
+  email?: string;
+  user_metadata?: {
+    name?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+interface Settings {
+  primaryColor: string;
+  secondaryColor: string;
+  brandName: string;
+  logo?: string;
+  [key: string]: unknown;
+}
+
 interface AdminHeaderProps {
-  user: any;
-  settings: any;
+  user: User;
+  settings: Settings;
   onSignOut: () => void;
 }
 

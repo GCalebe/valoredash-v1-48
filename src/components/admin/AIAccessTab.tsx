@@ -11,9 +11,17 @@ import { Progress } from "@/components/ui/progress";
 import { Bot, Users, TrendingUp } from "lucide-react";
 import { User } from "@/types/user";
 
+interface AIProduct {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  [key: string]: unknown;
+}
+
 interface AIAccessTabProps {
   users: User[];
-  aiProducts: any[];
+  aiProducts: AIProduct[];
 }
 
 export const AIAccessTab: React.FC<AIAccessTabProps> = ({

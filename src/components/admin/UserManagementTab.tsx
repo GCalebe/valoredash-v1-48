@@ -14,9 +14,17 @@ import {
 import { Users, UserPlus, Search, RefreshCw, Edit, Trash2 } from "lucide-react";
 import { User } from "@/types/user";
 
+interface AIProduct {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  [key: string]: unknown;
+}
+
 interface UserManagementTabProps {
   users: User[];
-  aiProducts: any[];
+  aiProducts: AIProduct[];
   loading: boolean;
   onAddUser: () => void;
   onEditUser: (user: User) => void;

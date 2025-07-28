@@ -12,6 +12,28 @@ import { ptBR } from 'date-fns/locale';
 import { Star, StarOff, Clock, AlertCircle, Brain, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+interface MemoryEntity {
+  name: string;
+  type?: string;
+  confidence?: number;
+}
+
+interface ContextualMemory {
+  id: number;
+  message: string;
+  importance: number;
+  memory_level: 'short_term' | 'medium_term' | 'long_term';
+  created_at: string;
+  entities?: MemoryEntity[];
+  context?: Record<string, unknown>;
+}
+
+interface MostImportantMemory {
+  message?: string;
+  created_at?: string;
+  [key: string]: unknown;
+}
+
 interface ContextualMemoryViewerProps {
   sessionId: string;
   autoRefresh?: boolean;
@@ -40,7 +62,7 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
   };
 
   // Renderizar um item de memória
-  const renderMemoryItem = (memory: any) => (
+  const renderMemoryItem = (memory: ContextualMemory) => (
     <Card key={memory.id} className={cn(
       'mb-4 transition-all duration-200',
       (memory.importance || 0) >= 3 ? 'border-amber-400 dark:border-amber-500' : ''
@@ -79,7 +101,7 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
           <div className="mt-2">
             <p className="text-xs text-muted-foreground mb-1">Entidades:</p>
             <div className="flex flex-wrap gap-1">
-              {memory.entities.map((entity: any, idx: number) => (
+              {memory.entities.map((entity: MemoryEntity, idx: number) => (
                 <Badge key={idx} variant="outline" className="text-xs">
                   {entity.name || 'Entidade'}
                 </Badge>
@@ -143,7 +165,7 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
             <h4 className="text-sm font-medium mb-2">Entidades Principais</h4>
             {contextSummary.entities.length > 0 ? (
             <div className="flex flex-wrap gap-1">
-              {contextSummary.entities.slice(0, 10).map((entity: any, idx: number) => (
+              {contextSummary.entities.slice(0, 10).map((entity: MemoryEntity, idx: number) => (
                 <Badge key={idx} variant="outline" className="text-xs">
                   {entity.name || 'Entidade'}
                 </Badge>
@@ -176,10 +198,10 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
               Memória Mais Importante
             </h4>
             <div className="text-xs p-2 border rounded-md">
-              <p className="font-medium">{(contextSummary.most_important as any)?.message || 'Memória não disponível'}</p>
+              <p className="font-medium">{(contextSummary.most_important as MostImportantMemory)?.message || 'Memória não disponível'}</p>
               <p className="text-muted-foreground mt-1">
-                {(contextSummary.most_important as any)?.created_at 
-                  ? format(new Date((contextSummary.most_important as any).created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR })
+                {(contextSummary.most_important as MostImportantMemory)?.created_at 
+                  ? format(new Date((contextSummary.most_important as MostImportantMemory).created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR })
                   : 'Data não disponível'}
               </p>
             </div>

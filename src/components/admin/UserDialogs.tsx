@@ -20,6 +20,14 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { User, UserFormData } from "@/types/user";
 
+interface AIProduct {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  [key: string]: unknown;
+}
+
 interface UserDialogsProps {
   // Add User Dialog
   isAddUserDialogOpen: boolean;
@@ -40,7 +48,7 @@ interface UserDialogsProps {
   handleDeleteUser: () => void;
 
   // AI Products
-  aiProducts: any[];
+  aiProducts: AIProduct[];
 }
 
 export const UserDialogs: React.FC<UserDialogsProps> = ({

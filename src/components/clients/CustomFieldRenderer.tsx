@@ -29,7 +29,7 @@ const CustomFieldRenderer = ({
       case "text":
         return (
           <Input
-            value={(value as any) || ""}
+            value={(value as string) || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder={`Digite ${field.field_name.toLowerCase()}`}
             className={`bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 ${
@@ -41,7 +41,7 @@ const CustomFieldRenderer = ({
       case "single_select":
         return (
           <Select
-            value={(value as any) || "none"}
+            value={(value as string) || "none"}
             onValueChange={(val) => onChange(val === "none" ? null : val)}
           >
             <SelectTrigger

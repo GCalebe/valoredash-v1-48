@@ -40,25 +40,25 @@ export const logAdminOperation = (operation: string, table: string) => {
 // Wrapper para operações CRUD que sempre usam service role
 export const adminOperations = {
   // SELECT com service role
-  select: <T = any>(table: string) => {
+  select: <T = Record<string, unknown>>(table: string) => {
     logAdminOperation('SELECT', table);
     return supabaseAdmin.from(table).select();
   },
 
   // INSERT com service role
-  insert: <T = any>(table: string, data: T | T[]) => {
+  insert: <T = Record<string, unknown>>(table: string, data: T | T[]) => {
     logAdminOperation('INSERT', table);
     return supabaseAdmin.from(table).insert(data);
   },
 
   // UPDATE com service role
-  update: <T = any>(table: string, data: Partial<T>) => {
+  update: <T = Record<string, unknown>>(table: string, data: Partial<T>) => {
     logAdminOperation('UPDATE', table);
     return supabaseAdmin.from(table).update(data);
   },
 
   // UPSERT com service role
-  upsert: <T = any>(table: string, data: T | T[]) => {
+  upsert: <T = Record<string, unknown>>(table: string, data: T | T[]) => {
     logAdminOperation('UPSERT', table);
     return supabaseAdmin.from(table).upsert(data);
   },
@@ -70,7 +70,7 @@ export const adminOperations = {
   },
 
   // RPC com service role
-  rpc: (functionName: string, params?: any) => {
+  rpc: (functionName: string, params?: Record<string, unknown>) => {
     logAdminOperation('RPC', functionName);
     return supabaseAdmin.rpc(functionName, params);
   }

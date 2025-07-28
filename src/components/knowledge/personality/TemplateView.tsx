@@ -7,11 +7,25 @@ import { type AIPersonalityTemplate } from '@/data/aiPersonalityTemplates';
 import { predefinedPersonalities } from './ideas/PersonalityConfigDemo';
 import { PersonalityConfig } from './ideas';
 
+interface DatabaseTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  personality_type: string;
+  [key: string]: unknown;
+}
+
+interface TemplateError {
+  message: string;
+  code?: string;
+  [key: string]: unknown;
+}
+
 interface TemplateViewProps {
-  dbTemplates: any[];
+  dbTemplates: DatabaseTemplate[];
   templatesLoading: boolean;
   refetchTemplates: () => void;
-  templatesError: any;
+  templatesError: TemplateError | null;
   templates: AIPersonalityTemplate[];
   isTemplateActive: (template: AIPersonalityTemplate) => boolean;
   handleTemplateSelect: (template: AIPersonalityTemplate) => void;

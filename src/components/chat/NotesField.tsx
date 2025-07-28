@@ -59,7 +59,7 @@ const NotesField = ({ selectedChat }: NotesFieldProps) => {
     if (error) throw error;
   };
 
-  const parseNotes = (notesData: any) => {
+  const parseNotes = (notesData: unknown) => {
     if (!notesData) return [];
     try {
       const parsed = typeof notesData === "string" ? JSON.parse(notesData) : notesData;

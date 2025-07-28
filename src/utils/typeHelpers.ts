@@ -4,13 +4,13 @@
  */
 
 // Safe property access for unknown objects
-export function safeGet<T = any>(obj: unknown, path: string, defaultValue?: T): T {
+export function safeGet<T = unknown>(obj: unknown, path: string, defaultValue?: T): T {
   if (!obj || typeof obj !== 'object') {
     return defaultValue as T;
   }
   
   const keys = path.split('.');
-  let current: any = obj;
+  let current: unknown = obj;
   
   for (const key of keys) {
     if (current == null || typeof current !== 'object' || !(key in current)) {
@@ -36,7 +36,7 @@ export function asArray<T>(value: unknown): T[] {
 }
 
 // Safe object conversion
-export function asObject<T extends Record<string, any>>(value: unknown, fallback: Partial<T> = {}): T {
+export function asObject<T extends Record<string, unknown>>(value: unknown, fallback: Partial<T> = {}): T {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     return { ...fallback, ...value } as T;
   }

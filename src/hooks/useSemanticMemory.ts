@@ -1,6 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import { logger } from '@/utils/logger';
 
+interface SemanticMemory {
+  id: number;
+  content: string;
+  importance: number;
+  timestamp: string;
+  sessionId: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface SemanticEntity {
+  id: number;
+  name: string;
+  type: string;
+  confidence: number;
+  mentions: number;
+}
+
+interface SemanticRelationship {
+  id: number;
+  sourceEntity: string;
+  targetEntity: string;
+  relationshipType: string;
+  strength: number;
+}
+
 interface UseSemanticMemoryOptions {
   sessionId: string;
   useCache?: boolean;
@@ -9,15 +34,15 @@ interface UseSemanticMemoryOptions {
 }
 
 interface UseSemanticMemoryResult {
-  memories: any[];
-  entities: any[];
-  relationships: any[];
+  memories: SemanticMemory[];
+  entities: SemanticEntity[];
+  relationships: SemanticRelationship[];
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
-  searchBySimilarity: (query: string, limit?: number) => Promise<any[]>;
-  searchByEntity: (entityName: string) => Promise<any[]>;
-  storeMemory: (memory: any) => Promise<any>;
+  searchBySimilarity: (query: string, limit?: number) => Promise<SemanticMemory[]>;
+  searchByEntity: (entityName: string) => Promise<SemanticMemory[]>;
+  storeMemory: (memory: Omit<SemanticMemory, 'id'>) => Promise<SemanticMemory | null>;
   updateImportance: (memoryId: number, importance: number) => Promise<boolean>;
   clearCache: (pattern?: string) => void;
 }
@@ -31,9 +56,9 @@ export function useSemanticMemory({
   autoRefresh = false,
   refreshInterval = 30000,
 }: UseSemanticMemoryOptions): UseSemanticMemoryResult {
-  const [memories, setMemories] = useState<any[]>([]);
-  const [entities, setEntities] = useState<any[]>([]);
-  const [relationships, setRelationships] = useState<any[]>([]);
+  const [memories, setMemories] = useState<SemanticMemory[]>([]);
+  const [entities, setEntities] = useState<SemanticEntity[]>([]);
+  const [relationships, setRelationships] = useState<SemanticRelationship[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -42,17 +67,17 @@ export function useSemanticMemory({
     setLoading(false);
   }, []);
 
-  const searchBySimilarity = useCallback(async (query: string, limit = 10): Promise<any[]> => {
+  const searchBySimilarity = useCallback(async (query: string, limit = 10): Promise<SemanticMemory[]> => {
     logger.info('useSemanticMemory: Busca por similaridade desabilitada durante unificação');
     return [];
   }, []);
 
-  const searchByEntity = useCallback(async (entityName: string): Promise<any[]> => {
+  const searchByEntity = useCallback(async (entityName: string): Promise<SemanticMemory[]> => {
     logger.info('useSemanticMemory: Busca por entidade desabilitada durante unificação');
     return [];
   }, []);
 
-  const storeMemory = useCallback(async (memory: any): Promise<any> => {
+  const storeMemory = useCallback(async (memory: Omit<SemanticMemory, 'id'>): Promise<SemanticMemory | null> => {
     logger.info('useSemanticMemory: Armazenamento de memória desabilitado durante unificação');
     return null;
   }, []);

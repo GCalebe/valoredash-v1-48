@@ -2,6 +2,42 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentAuthUser } from '@/hooks/useAuthUser';
 
+export interface ContactData {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  kanban_stage_id?: string;
+  created_at: string;
+  updated_at: string;
+  sales?: number;
+  budget?: number;
+  company?: string;
+  user_id: string;
+}
+
+export interface ContactInput {
+  name: string;
+  email?: string;
+  phone?: string;
+  kanban_stage_id?: string;
+  sales?: number;
+  budget?: number;
+  company?: string;
+  user_id: string;
+}
+
+export interface ContactUpdate {
+  id: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  kanban_stage_id?: string;
+  sales?: number;
+  budget?: number;
+  company?: string;
+}
+
 export interface ContactFilters {
   kanban_stage?: string;
   lead_source?: string;
@@ -13,7 +49,7 @@ export interface ContactFilters {
 }
 
 export const contactsService = {
-  async fetchContacts(filters: ContactFilters = {}): Promise<any[]> {
+  async fetchContacts(filters: ContactFilters = {}): Promise<ContactData[]> {
     // Verify user authentication
     const user = await getCurrentAuthUser();
     
@@ -48,7 +84,7 @@ export const contactsService = {
     return data || [];
   },
 
-  async fetchContactsByKanbanStage(stage: string): Promise<any[]> {
+  async fetchContactsByKanbanStage(stage: string): Promise<ContactData[]> {
     // Verify user authentication
     const user = await getCurrentAuthUser();
     
@@ -67,7 +103,7 @@ export const contactsService = {
     return data || [];
   },
 
-  async createContact(contact: any): Promise<any> {
+  async createContact(contact: ContactInput): Promise<ContactData> {
     const { data, error } = await supabase
       .from('contacts')
       .insert([contact])
@@ -82,7 +118,7 @@ export const contactsService = {
     return data;
   },
 
-  async updateContact({ id, ...updates }: any): Promise<any> {
+  async updateContact({ id, ...updates }: ContactUpdate): Promise<ContactData> {
     // Verify user authentication and ownership
     const user = await getCurrentAuthUser();
     
