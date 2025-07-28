@@ -40,10 +40,10 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
   };
 
   // Renderizar um item de memória
-  const renderMemoryItem = (memory: unknown) => (
+  const renderMemoryItem = (memory: any) => (
     <Card key={memory.id} className={cn(
       'mb-4 transition-all duration-200',
-      memory.importance >= 3 ? 'border-amber-400 dark:border-amber-500' : ''
+      (memory.importance || 0) >= 3 ? 'border-amber-400 dark:border-amber-500' : ''
     )}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
@@ -57,31 +57,31 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
               </Badge>
             </CardTitle>
             <CardDescription className="text-xs">
-              {format(new Date(memory.created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR })}
+              {memory.created_at ? format(new Date(memory.created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR }) : 'Data não disponível'}
             </CardDescription>
           </div>
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => handleToggleImportance(memory.id, memory.importance)}
-            title={memory.importance >= 3 ? "Remover importância" : "Marcar como importante"}
+            onClick={() => handleToggleImportance(memory.id, memory.importance || 0)}
+            title={(memory.importance || 0) >= 3 ? "Remover importância" : "Marcar como importante"}
           >
-            {memory.importance >= 3 ? 
+            {(memory.importance || 0) >= 3 ? 
               <Star className="h-4 w-4 text-amber-500" /> : 
               <StarOff className="h-4 w-4" />}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm whitespace-pre-wrap">{memory.message}</p>
+        <p className="text-sm whitespace-pre-wrap">{memory.message || 'Mensagem não disponível'}</p>
         
         {memory.entities && memory.entities.length > 0 && (
           <div className="mt-2">
             <p className="text-xs text-muted-foreground mb-1">Entidades:</p>
             <div className="flex flex-wrap gap-1">
-              {memory.entities.map((entity: unknown, idx: number) => (
+              {memory.entities.map((entity: any, idx: number) => (
                 <Badge key={idx} variant="outline" className="text-xs">
-                  {entity.name}
+                  {entity.name || 'Entidade'}
                 </Badge>
               ))}
             </div>
@@ -142,16 +142,16 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
           <div>
             <h4 className="text-sm font-medium mb-2">Entidades Principais</h4>
             {contextSummary.entities.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
-                {contextSummary.entities.slice(0, 10).map((entity: unknown, idx: number) => (
-                  <Badge key={idx} variant="outline" className="text-xs">
-                    {entity.name}
-                  </Badge>
-                ))}
-                {contextSummary.entities.length > 10 && (
-                  <Badge variant="outline" className="text-xs">+{contextSummary.entities.length - 10}</Badge>
-                )}
-              </div>
+            <div className="flex flex-wrap gap-1">
+              {contextSummary.entities.slice(0, 10).map((entity: any, idx: number) => (
+                <Badge key={idx} variant="outline" className="text-xs">
+                  {entity.name || 'Entidade'}
+                </Badge>
+              ))}
+              {contextSummary.entities.length > 10 && (
+                <Badge variant="outline" className="text-xs">+{contextSummary.entities.length - 10}</Badge>
+              )}
+            </div>
             ) : (
               <p className="text-xs text-muted-foreground">Nenhuma entidade identificada</p>
             )}
@@ -176,9 +176,11 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
               Memória Mais Importante
             </h4>
             <div className="text-xs p-2 border rounded-md">
-              <p className="font-medium">{contextSummary.most_important.message}</p>
+              <p className="font-medium">{(contextSummary.most_important as any)?.message || 'Memória não disponível'}</p>
               <p className="text-muted-foreground mt-1">
-                {format(new Date(contextSummary.most_important.created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR })}
+                {(contextSummary.most_important as any)?.created_at 
+                  ? format(new Date((contextSummary.most_important as any).created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR })
+                  : 'Data não disponível'}
               </p>
             </div>
           </div>

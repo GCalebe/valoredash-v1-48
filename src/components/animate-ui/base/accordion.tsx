@@ -64,16 +64,15 @@ type AccordionTriggerProps = React.ComponentProps<
   chevron?: boolean;
 };
 
-function AccordionTrigger({
-  ref,
+const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionTriggerProps>(({
   className,
   children,
   transition = { type: 'spring', stiffness: 150, damping: 22 },
   chevron = true,
   ...props
-}: AccordionTriggerProps) {
+}, ref) => {
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
-  React.useImperativeHandle(ref, () => triggerRef.current as HTMLButtonElement);
+  React.useImperativeHandle(ref, () => triggerRef.current!);
   const { isOpen, setIsOpen } = useAccordionItem();
 
   React.useEffect(() => {
@@ -121,7 +120,9 @@ function AccordionTrigger({
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );
-}
+});
+
+AccordionTrigger.displayName = "AccordionTrigger";
 
 type AccordionPanelProps = React.ComponentProps<
   typeof AccordionPrimitive.Panel

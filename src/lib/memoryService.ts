@@ -1,4 +1,5 @@
 import { logger } from '@/utils/logger';
+import { Memory, MemoryType } from '@/types/memory';
 
 /**
  * Serviço de memória - Simplificado durante unificação
@@ -7,7 +8,7 @@ export const memoryService = {
   /**
    * Obtém todas as memórias - Desabilitado temporariamente
    */
-  getAllMemories: async (sessionId: string, useCache = true): Promise<unknown[]> => {
+  getAllMemories: async (sessionId: string, useCache = true): Promise<Memory[]> => {
     logger.info('memoryService: Funcionalidade desabilitada durante unificação');
     return [];
   },
@@ -17,10 +18,10 @@ export const memoryService = {
    */
   getMemoriesBySession: async (
     sessionId: string,
-    memoryType?: unknown,
+    memoryType?: MemoryType,
     limit = 50,
     useCache = true
-  ): Promise<unknown[]> => {
+  ): Promise<Memory[]> => {
     logger.info('memoryService: Funcionalidade desabilitada durante unificação');
     return [];
   },
@@ -28,7 +29,7 @@ export const memoryService = {
   /**
    * Armazena uma nova memória - Desabilitado temporariamente
    */
-  storeMemory: async (memory: unknown): Promise<unknown> => {
+  storeMemory: async (memory: unknown): Promise<null> => {
     logger.info('memoryService: Armazenamento de memória desabilitado durante unificação');
     return null;
   },
@@ -40,7 +41,7 @@ export const memoryService = {
     sessionId: string,
     minImportance = 3,
     useCache = true
-  ): Promise<unknown[]> => {
+  ): Promise<Memory[]> => {
     logger.info('memoryService: Busca por importância desabilitada durante unificação');
     return [];
   },

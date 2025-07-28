@@ -257,7 +257,10 @@ const DiagnosticPanel: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="navigation" className="space-y-4">
-            <NavigationTestTab testNavigation={testNavigation} location={location} />
+            <div className="space-y-4">
+              <h3 className="font-semibold mb-2">Teste de Navegação</h3>
+              <p className="text-sm text-muted-foreground">Componente de teste de navegação temporariamente desabilitado</p>
+            </div>
           </TabsContent>
           
           <TabsContent value="details" className="space-y-4">

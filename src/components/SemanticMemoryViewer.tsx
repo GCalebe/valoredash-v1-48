@@ -47,10 +47,6 @@ export function SemanticMemoryViewer({ sessionId }: SemanticMemoryViewerProps) {
     },
   ];
 
-  useEffect(() => {
-    loadEntities();
-  }, [loadEntities]);
-
   const loadEntities = async () => {
     setLoading(true);
     try {
@@ -63,6 +59,10 @@ export function SemanticMemoryViewer({ sessionId }: SemanticMemoryViewerProps) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadEntities();
+  }, []);
 
   const filteredEntities = entities.filter(entity =>
     entity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

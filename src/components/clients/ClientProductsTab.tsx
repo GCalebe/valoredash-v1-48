@@ -22,13 +22,6 @@ const ClientProductsTab: React.FC<ClientProductsTabProps> = ({ client, onUpdate 
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Fetch client products and available products
-  useEffect(() => {
-    if (client?.id) {
-      loadClientProducts();
-    }
-  }, [loadClientProducts]);
-
   // Load client products - this function now returns different values based on the client
   const loadClientProducts = async () => {
     setIsLoading(true);
@@ -48,6 +41,13 @@ const ClientProductsTab: React.FC<ClientProductsTabProps> = ({ client, onUpdate 
       setIsLoading(false);
     }
   };
+
+  // Fetch client products and available products
+  useEffect(() => {
+    if (client?.id) {
+      loadClientProducts();
+    }
+  }, []);
 
   // Add product to client
   const handleAddProduct = async () => {

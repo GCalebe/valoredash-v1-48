@@ -1,22 +1,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import { logger } from '@/utils/logger';
+import { N8nChatMemory, SemanticEntity, EntityRelationship } from '@/types/memory';
 
 interface ContextSummary {
   short_term_count: number;
   medium_term_count: number;
   long_term_count: number;
   total_memories: number;
-  entities: unknown[];
-  relationships: unknown[];
+  entities: SemanticEntity[];
+  relationships: EntityRelationship[];
   context: Record<string, unknown>;
-  most_important: unknown | null;
+  most_important: N8nChatMemory | null;
 }
 
 interface UseContextualMemoryResult {
-  memories: unknown[];
-  shortTermMemories: unknown[];
-  mediumTermMemories: unknown[];
-  longTermMemories: unknown[];
+  memories: N8nChatMemory[];
+  shortTermMemories: N8nChatMemory[];
+  mediumTermMemories: N8nChatMemory[];
+  longTermMemories: N8nChatMemory[];
   contextSummary: ContextSummary;
   loading: boolean;
   error: Error | null;
@@ -30,10 +31,10 @@ interface UseContextualMemoryResult {
  * Hook para gerenciar memória contextual - Simplificado durante unificação
  */
 export function useContextualMemory(options: unknown): UseContextualMemoryResult {
-  const [memories, setMemories] = useState<unknown[]>([]);
-  const [shortTermMemories, setShortTermMemories] = useState<unknown[]>([]);
-  const [mediumTermMemories, setMediumTermMemories] = useState<unknown[]>([]);
-  const [longTermMemories, setLongTermMemories] = useState<unknown[]>([]);
+  const [memories, setMemories] = useState<N8nChatMemory[]>([]);
+  const [shortTermMemories, setShortTermMemories] = useState<N8nChatMemory[]>([]);
+  const [mediumTermMemories, setMediumTermMemories] = useState<N8nChatMemory[]>([]);
+  const [longTermMemories, setLongTermMemories] = useState<N8nChatMemory[]>([]);
   const [contextSummary, setContextSummary] = useState<ContextSummary>({
     short_term_count: 0,
     medium_term_count: 0,
