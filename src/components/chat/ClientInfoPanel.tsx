@@ -63,39 +63,45 @@ const ClientInfoPanel = ({
   }
 
   return (
-    <div className="h-full flex flex-col max-w-full overflow-hidden">
+    <div className="h-full w-full flex flex-col min-w-0 overflow-hidden">
       {/* Header com título */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
           Informações do Cliente
         </h2>
       </div>
       
-      <ScrollArea className="flex-1 max-w-full">
-        <div className="p-4 pr-6 space-y-6 max-w-full overflow-x-auto">
+      <ScrollArea className="flex-1 w-full min-w-0">
+        <div className="p-3 space-y-4 min-w-0 w-full">
           {/* Tags Field */}
-          <TagsField selectedChat={selectedChat} />
+          <div className="min-w-0 w-full">
+            <TagsField selectedChat={selectedChat} />
+          </div>
 
           {/* Painel de Informações */}
-          <ClientInfo
-            clientData={clientData}
-            dynamicFields={{
-              basic: dynamicFields.basic,
-              commercial: dynamicFields.commercial,
-              personalized: dynamicFields.personalized,
-              documents: dynamicFields.documents,
-            }}
-            onFieldUpdate={handleFieldUpdate}
-            context="chat"
-          />
+          <div className="min-w-0 w-full">
+            <ClientInfo
+              clientData={clientData}
+              dynamicFields={{
+                basic: dynamicFields.basic,
+                commercial: dynamicFields.commercial,
+                personalized: dynamicFields.personalized,
+                documents: dynamicFields.documents,
+              }}
+              onFieldUpdate={handleFieldUpdate}
+              context="chat"
+            />
+          </div>
 
           {/* Notes Field */}
-          <div className="mt-2">
+          <div className="min-w-0 w-full">
             <NotesField selectedChat={selectedChat} />
           </div>
 
           {/* Display validation errors if any */}
-          <ValidationErrors validationErrors={validationErrors} />
+          <div className="min-w-0 w-full">
+            <ValidationErrors validationErrors={validationErrors} />
+          </div>
         </div>
       </ScrollArea>
     </div>

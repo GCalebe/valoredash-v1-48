@@ -45,54 +45,62 @@ const ChatLayout = ({
   };
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-full max-w-full overflow-hidden">
-      <ResizablePanel
-        defaultSize={25}
-        minSize={20}
-        maxSize={30}
-        className="bg-white dark:bg-gray-800 max-w-full overflow-hidden"
-      >
-        <ConversationList
-          conversations={conversations}
-          filteredConversations={filteredConversations}
-          selectedChat={selectedChat}
-          setSelectedChat={handleSelectChat}
-          isLoading={isLoading}
-          openPauseDialog={openPauseDialog}
-          startBot={startBot}
-          loading={loading}
-        />
-      </ResizablePanel>
+    <div className="h-full w-full flex overflow-hidden">
+      <ResizablePanelGroup direction="horizontal" className="h-full w-full min-w-0">
+        <ResizablePanel
+          defaultSize={25}
+          minSize={20}
+          maxSize={30}
+          className="bg-white dark:bg-gray-800 min-w-0 flex-shrink-0"
+        >
+          <div className="h-full w-full min-w-0 overflow-hidden">
+            <ConversationList
+              conversations={conversations}
+              filteredConversations={filteredConversations}
+              selectedChat={selectedChat}
+              setSelectedChat={handleSelectChat}
+              isLoading={isLoading}
+              openPauseDialog={openPauseDialog}
+              startBot={startBot}
+              loading={loading}
+            />
+          </div>
+        </ResizablePanel>
 
-      <ResizableHandle withHandle />
+        <ResizableHandle withHandle />
 
-      <ResizablePanel
-        defaultSize={50}
-        minSize={40}
-        className="bg-gray-50 dark:bg-gray-900 flex flex-col max-w-full overflow-hidden"
-      >
-        <ChatArea
-          selectedChat={selectedChat}
-          selectedConversation={selectedConversation}
-          messages={messages}
-          loading={loading}
-        />
-      </ResizablePanel>
+        <ResizablePanel
+          defaultSize={50}
+          minSize={40}
+          className="bg-gray-50 dark:bg-gray-900 flex flex-col min-w-0 flex-1"
+        >
+          <div className="h-full w-full min-w-0 overflow-hidden">
+            <ChatArea
+              selectedChat={selectedChat}
+              selectedConversation={selectedConversation}
+              messages={messages}
+              loading={loading}
+            />
+          </div>
+        </ResizablePanel>
 
-      <ResizableHandle withHandle />
+        <ResizableHandle withHandle />
 
-      <ResizablePanel
-        defaultSize={25}
-        minSize={20}
-        maxSize={30}
-        className="bg-white dark:bg-gray-800 max-w-full overflow-hidden"
-      >
-        <ClientInfoPanel
-          selectedChat={selectedChat}
-          selectedConversation={selectedConversation}
-        />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+        <ResizablePanel
+          defaultSize={25}
+          minSize={20}
+          maxSize={30}
+          className="bg-white dark:bg-gray-800 min-w-0 flex-shrink-0"
+        >
+          <div className="h-full w-full min-w-0 overflow-hidden">
+            <ClientInfoPanel
+              selectedChat={selectedChat}
+              selectedConversation={selectedConversation}
+            />
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
   );
 };
 
