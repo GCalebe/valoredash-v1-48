@@ -13,7 +13,7 @@ import { User } from "@/types/user";
 
 interface AIAccessTabProps {
   users: User[];
-  aiProducts: unknown[];
+  aiProducts: any[];
 }
 
 export const AIAccessTab: React.FC<AIAccessTabProps> = ({

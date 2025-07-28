@@ -13,7 +13,7 @@ export const aiProductsKeys = {
 };
 
 // Fetch AI products
-const fetchAIProducts = async (): Promise<unknown[]> => {
+const fetchAIProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase
     .from('products')
     .select('*')
@@ -28,7 +28,7 @@ const fetchAIProducts = async (): Promise<unknown[]> => {
 };
 
 // Create AI product
-const createAIProduct = async (product: { name: string; description?: string; category?: string; features?: string[]; icon?: string; image?: string; popular?: boolean; new?: boolean }): Promise<unknown> => {
+const createAIProduct = async (product: { name: string; description?: string; category?: string; features?: string[]; icon?: string; image?: string; popular?: boolean; new?: boolean }): Promise<Product> => {
   const { data, error } = await supabase
     .from('products')
     .insert([{ id: crypto.randomUUID(), ...product }])
@@ -44,7 +44,7 @@ const createAIProduct = async (product: { name: string; description?: string; ca
 };
 
 // Update AI product
-const updateAIProduct = async ({ id, ...updates }: { id: string } & Partial<{ name: string; description: string; category: string; features: string[]; icon: string; image: string; popular: boolean; new: boolean }>): Promise<unknown> => {
+const updateAIProduct = async ({ id, ...updates }: { id: string } & Partial<{ name: string; description: string; category: string; features: string[]; icon: string; image: string; popular: boolean; new: boolean }>): Promise<Product> => {
   const { data, error } = await supabase
     .from('products')
     .update(updates)

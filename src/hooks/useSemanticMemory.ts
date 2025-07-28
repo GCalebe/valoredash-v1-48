@@ -9,15 +9,15 @@ interface UseSemanticMemoryOptions {
 }
 
 interface UseSemanticMemoryResult {
-  memories: unknown[];
-  entities: unknown[];
-  relationships: unknown[];
+  memories: any[];
+  entities: any[];
+  relationships: any[];
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
-  searchBySimilarity: (query: string, limit?: number) => Promise<unknown[]>;
-  searchByEntity: (entityName: string) => Promise<unknown[]>;
-  storeMemory: (memory: unknown) => Promise<unknown>;
+  searchBySimilarity: (query: string, limit?: number) => Promise<any[]>;
+  searchByEntity: (entityName: string) => Promise<any[]>;
+  storeMemory: (memory: any) => Promise<any>;
   updateImportance: (memoryId: number, importance: number) => Promise<boolean>;
   clearCache: (pattern?: string) => void;
 }
@@ -31,9 +31,9 @@ export function useSemanticMemory({
   autoRefresh = false,
   refreshInterval = 30000,
 }: UseSemanticMemoryOptions): UseSemanticMemoryResult {
-  const [memories, setMemories] = useState<unknown[]>([]);
-  const [entities, setEntities] = useState<unknown[]>([]);
-  const [relationships, setRelationships] = useState<unknown[]>([]);
+  const [memories, setMemories] = useState<any[]>([]);
+  const [entities, setEntities] = useState<any[]>([]);
+  const [relationships, setRelationships] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -42,17 +42,17 @@ export function useSemanticMemory({
     setLoading(false);
   }, []);
 
-  const searchBySimilarity = useCallback(async (query: string, limit = 10): Promise<unknown[]> => {
+  const searchBySimilarity = useCallback(async (query: string, limit = 10): Promise<any[]> => {
     logger.info('useSemanticMemory: Busca por similaridade desabilitada durante unificação');
     return [];
   }, []);
 
-  const searchByEntity = useCallback(async (entityName: string): Promise<unknown[]> => {
+  const searchByEntity = useCallback(async (entityName: string): Promise<any[]> => {
     logger.info('useSemanticMemory: Busca por entidade desabilitada durante unificação');
     return [];
   }, []);
 
-  const storeMemory = useCallback(async (memory: unknown): Promise<unknown> => {
+  const storeMemory = useCallback(async (memory: any): Promise<any> => {
     logger.info('useSemanticMemory: Armazenamento de memória desabilitado durante unificação');
     return null;
   }, []);
