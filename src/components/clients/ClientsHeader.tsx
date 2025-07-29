@@ -130,7 +130,7 @@ const ClientsHeader = ({
             {settings.brandName}{" "}
           </h1>
           <span className="text-base ml-1 opacity-80 text-white">
-            Clientes
+            Pipeline
           </span>
         </div>
 

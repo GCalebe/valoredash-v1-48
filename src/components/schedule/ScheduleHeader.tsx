@@ -76,7 +76,7 @@ const ScheduleHeader = ({
             }}
           />
           <h1 className="text-2xl font-bold text-white tracking-tight leading-none">
-            Agenda
+            Calendário
           </h1>
           {lastUpdated && (
             <Badge

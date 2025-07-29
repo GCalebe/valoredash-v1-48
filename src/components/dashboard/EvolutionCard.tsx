@@ -26,7 +26,7 @@ const EvolutionCard = () => {
       <CardHeader className="pb-2 bg-gradient-to-r from-blue-400 to-cyan-500 dark:from-blue-500 dark:to-cyan-600 text-white rounded-t-lg">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Link className="h-4 w-4" />
-          Whatsapp
+          Conexões
         </CardTitle>
         <CardDescription className="text-blue-100 text-xs">
           Conectar e sincronizar

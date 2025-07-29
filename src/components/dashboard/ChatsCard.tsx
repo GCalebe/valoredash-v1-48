@@ -48,7 +48,7 @@ const ChatsCard = () => {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
             <MessageSquare className="h-4 w-4" />
-            Chats
+            Conversas
           </div>
           <Button
             variant="ghost"

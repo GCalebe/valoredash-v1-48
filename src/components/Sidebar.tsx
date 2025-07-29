@@ -44,12 +44,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           path: "/dashboard",
         },
         {
-          name: "Agenda",
+          name: "Calendário",
           icon: Calendar,
           path: "/schedule",
         },
         {
-          name: "Clientes",
+          name: "Pipeline",
           icon: Users,
           path: "/clients",
         },
@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       title: "ANALYTICS",
       items: [
         {
-          name: "Relatórios",
+          name: "Métricas",
           icon: BarChart,
           path: "/metrics",
         },

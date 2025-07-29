@@ -64,7 +64,7 @@ const ScheduleCard = () => {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" />
-            Agenda
+            Calendário
           </div>
           <Button
             variant="ghost"
@@ -146,7 +146,7 @@ const ScheduleCard = () => {
           variant="outline"
           className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800/50 text-xs"
         >
-          Acessar agenda
+          Acessar calendário
         </Badge>
       </CardFooter>
     </Card>

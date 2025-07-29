@@ -26,7 +26,7 @@ const ClientsCard = () => {
       <CardHeader className="pb-2 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 text-white rounded-t-lg">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Users className="h-4 w-4" />
-          Clientes
+          Pipeline
         </CardTitle>
         <CardDescription className="text-blue-100 text-xs">
           CRM e gerenciamento
