@@ -126,7 +126,7 @@ const CalendarInterface: React.FC = () => {
         <div className="flex items-center">
           <Calendar className="h-6 w-6 text-blue-400 mr-2" />
           <div>
-            <h2 className="text-lg font-semibold text-white">Calendário</h2>
+            <h2 className="text-lg font-semibold text-white">Agenda</h2>
             <div className="flex items-center text-gray-400 text-xs">
               <span className="flex items-center gap-1">
                 <input type="checkbox" className="rounded bg-gray-700 border-gray-600" checked />
