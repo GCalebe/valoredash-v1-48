@@ -43,10 +43,14 @@ const useFAQManagement = () => {
 
   const filteredFAQs = useMemo(() => {
     return faqs.filter((item) => {
+      const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
-        item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchTerm.toLowerCase());
+        item.question.toLowerCase().includes(searchLower) ||
+        item.answer.toLowerCase().includes(searchLower) ||
+        item.category.toLowerCase().includes(searchLower) ||
+        (Array.isArray(item.tags) ? item.tags.some(tag => 
+          tag.toLowerCase().includes(searchLower)
+        ) : false);
 
       const matchesCategory =
         selectedCategory === "all" || item.category === selectedCategory;
@@ -82,8 +86,6 @@ const useFAQManagement = () => {
           .split(",")
           .map((tag) => tag.trim())
           .filter(Boolean),
-        associated_agendas: newFAQ.associated_agendas,
-        created_by: userId,
       });
       setNewFAQ({ question: "", answer: "", category: "Geral", tags: "", associated_agendas: [] });
       setIsAddDialogOpen(false);
@@ -122,7 +124,6 @@ const useFAQManagement = () => {
           .split(",")
           .map((tag: string) => tag.trim())
           .filter(Boolean),
-        associated_agendas: editingFAQ.associated_agendas,
       });
       setEditingFAQ(null);
       setIsEditDialogOpen(false);

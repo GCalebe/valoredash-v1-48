@@ -1,12 +1,10 @@
 import React from "react";
-import Select from 'react-select';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { FAQFormData } from "@/hooks/useFAQManagement";
-import { useAgendasQuery } from "@/hooks/useAgendasQuery";
 
 interface FAQFormProps {
   faq: FAQFormData;
@@ -25,16 +23,6 @@ const FAQForm: React.FC<FAQFormProps> = ({
   isLoading,
   submitLabel,
 }) => {
-  const { data: agendas, isLoading: isLoadingAgendas } = useAgendasQuery();
-
-  const agendaOptions = agendas?.map(agenda => ({
-    value: agenda.id,
-    label: agenda.name,
-  })) || [];
-
-  const selectedAgendas = agendaOptions.filter(option => 
-    faq.associated_agendas?.includes(option.value)
-  );
 
   return (
     <>
@@ -58,44 +46,15 @@ const FAQForm: React.FC<FAQFormProps> = ({
           />
         </div>
         <div>
-          <Label>Agendas Associadas</Label>
-          <Select
-            isMulti
-            options={agendaOptions}
-            value={selectedAgendas}
-            onChange={(selectedOptions) => {
-              const selectedIds = selectedOptions.map(option => option.value);
-              setFaq({ ...faq, associated_agendas: selectedIds });
-            }}
-            isLoading={isLoadingAgendas}
-            placeholder="Selecione uma ou mais agendas..."
-            noOptionsMessage={() => "Nenhuma agenda encontrada."}
-            styles={{
-                control: (base) => ({
-                  ...base,
-                  background: 'hsl(var(--input))',
-                  borderColor: 'hsl(var(--input))',
-                }),
-                menu: (base) => ({
-                  ...base,
-                  background: 'hsl(var(--background))',
-                  zIndex: 50,
-                }),
-                option: (base, { isFocused }) => ({
-                    ...base,
-                    background: isFocused ? 'hsl(var(--accent))' : 'hsl(var(--background))',
-                }),
-                multiValue: (base) => ({
-                    ...base,
-                    backgroundColor: 'hsl(var(--primary))',
-                }),
-                multiValueLabel: (base) => ({
-                    ...base,
-                    color: 'hsl(var(--primary-foreground))',
-                }),
-            }}
+          <Label htmlFor="category">Categoria *</Label>
+          <Input
+            id="category"
+            placeholder="Digite ou selecione uma categoria..."
+            value={faq.category}
+            onChange={(e) => setFaq({ ...faq, category: e.target.value })}
           />
         </div>
+
         <div>
           <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
           <Input

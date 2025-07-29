@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, Edit, Trash2, Search, Download, Filter, HelpCircle } from "lucide-react";
+import { Plus, Search, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,10 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useFAQManagement from "@/hooks/useFAQManagement";
 import FAQForm from "@/components/knowledge/faq/FAQForm";
+import FAQTreeView from "@/components/knowledge/faq/FAQTreeView";
 
 const FAQTab = () => {
+  
   const {
     isAddDialogOpen,
     setIsAddDialogOpen,
@@ -123,25 +126,10 @@ const FAQTab = () => {
             />
           </div>
           
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-48">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Filtrar por categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as categorias</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
         </div>
 
         <div className="flex items-center gap-2">
-          
-
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -169,65 +157,13 @@ const FAQTab = () => {
         </div>
       </div>
 
-      {/* FAQ List */}
-      <div className="space-y-4">
-        {filteredFAQs.length === 0 ? (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-            <h3 className="text-lg font-medium mb-1">Nenhuma FAQ encontrada</h3>
-            <p className="text-sm">
-              {searchTerm
-                ? "Nenhuma FAQ corresponde à sua pesquisa."
-                : "Comece adicionando perguntas frequentes."}
-            </p>
-          </div>
-        ) : (
-          filteredFAQs.map((item) => (
-            <Card key={item.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-base">{item.question}</CardTitle>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => editFAQ(item)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteFAQ(item.id)}
-                      className="text-red-500 hover:text-red-600"
-                      disabled={deleteFAQMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-300 mb-3">
-                  {item.answer}
-                </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{item.category}</Badge>
-                    {(Array.isArray(item.tags) ? item.tags : []).map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    Atualizado: {new Date(item.updated_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+      {/* FAQ Content */}
+      <FAQTreeView
+        faqs={filteredFAQs}
+        onEdit={editFAQ}
+        onDelete={deleteFAQ}
+        isDeleting={deleteFAQMutation.isPending}
+      />
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
