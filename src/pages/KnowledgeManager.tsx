@@ -17,7 +17,7 @@ import AgendaTab from "@/components/knowledge/tabs/AgendaTab";
 import AIPersonalityTab from "@/components/knowledge/tabs/AIPersonalityTab";
 // import AIStagesTab from "@/components/knowledge/tabs/AIStagesTab";
 import AIMessagesTab from "@/components/knowledge/tabs/AIMessagesTab";
-import AITestTab from "@/components/knowledge/tabs/AITestTab";
+// AITestTab component was removed
 
 const KnowledgeManager = () => {
   const { user, signOut, isLoading: authLoading } = useAuth();
@@ -200,7 +200,10 @@ const KnowledgeManager = () => {
               </TabsContent>
 
               <TabsContent value="ai-test" className="mt-0">
-                <AITestTab />
+                {/* AITestTab component was removed */}
+              <div className="p-4 text-center text-muted-foreground">
+                Aba de teste de IA removida
+              </div>
               </TabsContent>
             </div>
           </Tabs>

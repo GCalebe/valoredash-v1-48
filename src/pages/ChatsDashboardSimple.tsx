@@ -1,6 +1,6 @@
 import React from "react";
 import { MessageCircle } from "lucide-react";
-import PageTest from "@/components/PageTest";
+// PageTest component was removed
 
 const ChatsDashboardSimple = () => {
   return (
@@ -55,7 +55,7 @@ const ChatsDashboardSimple = () => {
         </div>
         
         {/* Componente de teste */}
-        <PageTest />
+        {/* PageTest component was removed */}
       </main>
     </div>
   );

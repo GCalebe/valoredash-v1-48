@@ -1,6 +1,6 @@
 import React from "react";
 import { LineChart } from "lucide-react";
-import PageTest from "@/components/PageTest";
+// PageTest component was removed
 
 const MetricsDashboardSimple = () => {
   return (
@@ -42,7 +42,7 @@ const MetricsDashboardSimple = () => {
         </div>
         
         {/* Componente de teste */}
-        <PageTest />
+        {/* PageTest component was removed */}
       </main>
     </div>
   );

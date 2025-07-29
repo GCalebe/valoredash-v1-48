@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Contact } from "@/types/client";
-import ClientDetailSheet from "@/components/clients/ClientDetailSheet";
+// ClientDetailSheet component was removed
 import EditClientForm from "@/components/clients/EditClientForm";
 import SendMessageDialog from "@/components/clients/SendMessageDialog";
 import PauseDurationDialog from "@/components/PauseDurationDialog";
@@ -64,14 +64,7 @@ const ClientsModals = ({
     <>
       {selectedContact && (
         <>
-          <ClientDetailSheet
-            isOpen={isDetailSheetOpen}
-            onClose={() => setIsDetailSheetOpen(false)}
-            contact={selectedContact}
-            onEditClient={openEditModal}
-            onDeleteClient={() => setIsDeleteDialogOpen(true)}
-            onSendMessage={() => setIsMessageDialogOpen(true)}
-          />
+          {/* ClientDetailSheet component was removed */}
           <EditClientForm
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}

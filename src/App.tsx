@@ -5,13 +5,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import MetricsDashboard from "./pages/MetricsDashboard";
-import ChatsDashboard from "./pages/ChatsDashboard";
 import KnowledgeManager from "./pages/KnowledgeManager";
 import ClientsDashboard from "./pages/ClientsDashboard";
 import Evolution from "./pages/Evolution";
 import Schedule from "./pages/Schedule";
 import ThemeSettings from "./pages/ThemeSettings";
-import { ScheduleTestComponent } from "./components/schedule/ScheduleTestComponent";
 import AdminDashboard from "./pages/AdminDashboard";
 import AIStore from "./pages/AIStore";
 import Pricing from "./pages/Pricing";
@@ -22,7 +20,6 @@ import Conversations from "./pages/Conversations";
 import Reports from "./pages/Reports";
 import Connections from "./pages/Connections";
 import Settings from "./pages/Settings";
-import PersonalityConfigDemo from "./pages/PersonalityConfigDemo";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -50,7 +47,7 @@ const App = () => (
                   <Route path="/clients" element={<ClientsDashboard />} />
                   <Route path="/evolution" element={<Evolution />} />
                   <Route path="/schedule" element={<Schedule />} />
-                  <Route path="/schedule-test" element={<ScheduleTestComponent />} />
+                  {/* ScheduleTestComponent route was removed */}
                   <Route path="/theme-settings" element={<ThemeSettings />} />
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/user-management" element={<UserManagement />} />
@@ -65,7 +62,7 @@ const App = () => (
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/connections" element={<Connections />} />
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/personality-demo" element={<PersonalityConfigDemo />} />
+                  {/* PersonalityConfigDemo route was removed */}
                 </Route>
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

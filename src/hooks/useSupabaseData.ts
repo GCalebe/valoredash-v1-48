@@ -22,16 +22,7 @@ import {
   deleteContact,
   useContacts
 } from './useSupabaseContactsData';
-import {
-  getDashboardMetrics,
-  getMetricsByDateRange,
-  useRealTimeMetrics
-} from './useSupabaseMetrics';
-import {
-  getFunnelData,
-  getFunnelByDateRange,
-  addFunnelData
-} from './useSupabaseFunnelData';
+// Removed imports for deleted test files
 
 // =====================================================
 // HOOK PRINCIPAL PARA DADOS DO DASHBOARD
