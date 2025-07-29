@@ -8,27 +8,15 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Info, Edit, Trash2, Users, Calendar, Clock, Repeat } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Host } from '@/hooks/useHosts';
 import { LocalAgenda, AgendaCategory, categoryDetails, tooltipTexts, InfoTooltip, FormField } from './AgendaTab';
+import { Step1BasicInfo } from './agenda-form/Step1BasicInfo';
+import { Step2TimeSettings } from './agenda-form/Step2TimeSettings';
+import { Step3AvailabilitySettings } from './agenda-form/Step3AvailabilitySettings';
+import { Step4ServiceTypes } from './agenda-form/Step4ServiceTypes';
+import { Step5PostRegistrationActions } from './agenda-form/Step5PostRegistrationActions';
+import { Step6RemindersSettings } from './agenda-form/Step6RemindersSettings';
 
 const initialAgendaState: Omit<LocalAgenda, 'id'> = {
   title: '',
@@ -61,6 +49,25 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
   const [currentAgenda, setCurrentAgenda] = useState<Omit<LocalAgenda, 'id'>>(initialAgendaState);
   const [step, setStep] = useState(1);
   const totalSteps = 6;
+
+  // Estado para gerenciar múltiplos lembretes
+  const [reminders, setReminders] = useState<Array<{
+    id: number;
+    days: number;
+    hours: number;
+    minutes: number;
+    subject: string;
+    sendTo: 'inscrito' | 'anfitriao';
+    channel: 'whatsapp' | 'email';
+  }>>([{
+    id: 1,
+    days: 0,
+    hours: 1,
+    minutes: 0,
+    subject: '1 hora para a reunião',
+    sendTo: 'inscrito',
+    channel: 'whatsapp'
+  }]);
 
   // Estado para gerenciar múltiplos horários de funcionamento
   const [operatingHours, setOperatingHours] = useState<Record<string, Array<{start: string, end: string}>>>({
@@ -173,13 +180,37 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
     }));
   };
 
+  // Funções para gerenciar lembretes
+  const addReminder = () => {
+    const newId = Math.max(...reminders.map(r => r.id), 0) + 1;
+    setReminders(prev => [...prev, {
+      id: newId,
+      days: 0,
+      hours: 1,
+      minutes: 0,
+      subject: 'Lembrete do agendamento',
+      sendTo: 'inscrito',
+      channel: 'whatsapp'
+    }]);
+  };
+
+  const removeReminder = (id: number) => {
+    setReminders(prev => prev.filter(reminder => reminder.id !== id));
+  };
+
+  const updateReminder = (id: number, field: string, value: any) => {
+    setReminders(prev => prev.map(reminder => 
+      reminder.id === id ? { ...reminder, [field]: value } : reminder
+    ));
+  };
+
   const handleSaveClick = () => {
     onSave(currentAgenda);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto bg-background border">
+      <DialogContent className="w-[900px] h-[700px] max-w-none max-h-none bg-background border flex flex-col">
         <DialogHeader className="space-y-4 pb-6">
           <div>
             <DialogTitle className="text-2xl font-bold">{editingAgenda ? 'Editar' : 'Nova'} Agenda - Etapa {step} de {totalSteps}</DialogTitle>
@@ -199,363 +230,71 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-              {step === 1 && (
-                <>
-                  <FormField label="Título" tooltipText={tooltipTexts.title}>
-                      <Input id="title" value={currentAgenda.title} onChange={handleInputChange} />
-                  </FormField>
-                  <FormField label="Descrição">
-                      <Textarea id="description" value={currentAgenda.description} onChange={handleInputChange} />
-                  </FormField>
-                  <FormField label="Anfitrião" tooltipText={tooltipTexts.host}>
-                      <Select 
-                        value={currentAgenda.host} 
-                        onValueChange={(value) => setCurrentAgenda(prev => ({ ...prev, host: value }))}
-                        disabled={hostsLoading}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={hostsLoading ? "Carregando anfitriões..." : "Selecione um anfitrião"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {hosts.map((host) => (
-                            <SelectItem key={host.id} value={host.name}>
-                              {host.name} - {host.role}
-                            </SelectItem>
-                          ))}
-                          {hosts.length === 0 && !hostsLoading && (
-                            <div className="p-2 text-sm text-gray-500 text-center">
-                              Nenhum anfitrião encontrado
-                            </div>
-                          )}
-                        </SelectContent>
-                      </Select>
-                  </FormField>
-                  <FormField label="Limite de Inscrições">
-                      <Input id="maxParticipants" type="number" value={currentAgenda.maxParticipants || ''} onChange={handleInputChange} />
-                  </FormField>
-                </>
-              )}
-              
-              {step === 2 && (
-                <>
-                  <FormField label="Duração de Cada Sessão (em Minutos)" tooltipText={tooltipTexts.duration}>
-                      <Select 
-                        value={currentAgenda.duration.toString()} 
-                        onValueChange={(value) => setCurrentAgenda(prev => ({ ...prev, duration: Number(value) }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a duração" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from({ length: 24 }, (_, i) => (i + 1) * 15).map((minutes) => (
-                            <SelectItem key={minutes} value={minutes.toString()}>
-                              {minutes} minutos
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                  </FormField>
-                  <FormField label="Margem de Segurança entre Sessões (em Minutos)" tooltipText={tooltipTexts.breakTime}>
-                      <Select 
-                        value={currentAgenda.breakTime.toString()} 
-                        onValueChange={(value) => setCurrentAgenda(prev => ({ ...prev, breakTime: Number(value) }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o intervalo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from({ length: 16 }, (_, i) => i * 15).map((minutes) => (
-                            <SelectItem key={minutes} value={minutes.toString()}>
-                              {minutes} minutos
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                  </FormField>
-                  <FormField label="Espaçamento de Disponibilidade entre Sessões (em Minutos)" tooltipText={tooltipTexts.availabilityInterval}>
-                      <Select 
-                        value={currentAgenda.availabilityInterval.toString()} 
-                        onValueChange={(value) => setCurrentAgenda(prev => ({ ...prev, availabilityInterval: Number(value) }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o incremento" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from({ length: 16 }, (_, i) => (i + 1) * 15).map((minutes) => (
-                            <SelectItem key={minutes} value={minutes.toString()}>
-                              {minutes} minutos
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                  </FormField>
-                </>
-              )}
+        <div className="flex-1 overflow-y-auto py-4 pr-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+          {step === 1 && (
+            <Step1BasicInfo 
+              currentAgenda={currentAgenda}
+              setCurrentAgenda={setCurrentAgenda}
+              handleInputChange={handleInputChange}
+              hosts={hosts}
+              hostsLoading={hostsLoading}
+            />
+          )}
+          
+          {step === 2 && (
+             <Step2TimeSettings 
+               currentAgenda={currentAgenda}
+               setCurrentAgenda={setCurrentAgenda}
+               handleInputChange={handleInputChange}
+             />
+           )}
 
-              {step === 3 && (
-                <>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">Datas Disponíveis</h3>
-                      <InfoTooltip text={tooltipTexts.availableDates} />
-                    </div>
-                    <div className="bg-muted/30 rounded-lg p-4 space-y-3">
-                      {[
-                        { name: 'Janeiro', days: 31 }, { name: 'Fevereiro', days: 29 }, { name: 'Março', days: 31 },
-                        { name: 'Abril', days: 30 }, { name: 'Maio', days: 31 }, { name: 'Junho', days: 30 },
-                        { name: 'Julho', days: 31 }, { name: 'Agosto', days: 31 }, { name: 'Setembro', days: 30 },
-                        { name: 'Outubro', days: 31 }, { name: 'Novembro', days: 30 }, { name: 'Dezembro', days: 31 }
-                      ].map((month) => (
-                        <div key={month.name} className="space-y-2">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center space-x-3 w-28">
-                              <Checkbox defaultChecked id={`month-${month.name}`} />
-                              <Label htmlFor={`month-${month.name}`} className="text-sm font-medium text-foreground cursor-pointer">{month.name}</Label>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="w-8 h-8 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold"
-                                onClick={() => addAvailableDate(month.name)}
-                              >
-                                +
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="ml-32 space-y-2">
-                            {availableDates[month.name]?.map((dateRange, index) => (
-                              <div key={index} className="flex items-center gap-2">
-                                <Select 
-                                  value={dateRange.start.toString()} 
-                                  onValueChange={(value) => updateAvailableDate(month.name, index, 'start', parseInt(value))}
-                                >
-                                  <SelectTrigger className="w-16">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (
-                                      <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <span className="text-sm text-muted-foreground">até</span>
-                                <Select 
-                                  value={dateRange.end.toString()} 
-                                  onValueChange={(value) => updateAvailableDate(month.name, index, 'end', parseInt(value))}
-                                >
-                                  <SelectTrigger className="w-16">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {Array.from({ length: month.days }, (_, i) => i + 1).map((day) => (
-                                      <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                {availableDates[month.name].length > 1 && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="w-8 h-8 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
-                                    onClick={() => removeAvailableDate(month.name, index)}
-                                  >
-                                    ×
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+          {step === 3 && (
+            <Step3AvailabilitySettings 
+              currentAgenda={currentAgenda}
+              setCurrentAgenda={setCurrentAgenda}
+              handleInputChange={handleInputChange}
+              availableDates={availableDates}
+              setAvailableDates={setAvailableDates}
+              operatingHours={operatingHours}
+              setOperatingHours={setOperatingHours}
+              addAvailableDate={addAvailableDate}
+              removeAvailableDate={removeAvailableDate}
+              updateAvailableDate={updateAvailableDate}
+              addOperatingHour={addOperatingHour}
+              removeOperatingHour={removeOperatingHour}
+              updateOperatingHour={updateOperatingHour}
+            />
+          )}
 
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">Horário de Funcionamento</h3>
-                      <InfoTooltip text={tooltipTexts.operatingHours} />
-                    </div>
-                    <div className="bg-muted/30 rounded-lg p-4">
-                      <p className="text-sm text-muted-foreground mb-4">Defina o horário de abertura e fechamento. Para intervalos (como almoço), clique no '+' para adicionar mais faixas de horário.</p>
-                      <div className="space-y-3">
-                        {['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'].map((day) => (
-                          <div key={day} className="space-y-2">
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center space-x-3 w-36">
-                                <Checkbox defaultChecked id={`day-${day}`} />
-                                <Label htmlFor={`day-${day}`} className="text-sm font-medium text-foreground cursor-pointer">{day}</Label>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="w-8 h-8 text-primary hover:text-primary/80 hover:bg-primary/10 font-bold"
-                                  onClick={() => addOperatingHour(day)}
-                                >
-                                  +
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="ml-40 space-y-2">
-                              {operatingHours[day]?.map((timeRange, index) => (
-                                <div key={index} className="flex items-center gap-2">
-                                  <Input 
-                                    type="time" 
-                                    value={timeRange.start} 
-                                    onChange={(e) => updateOperatingHour(day, index, 'start', e.target.value)}
-                                    className="w-24" 
-                                  />
-                                  <span className="text-sm text-muted-foreground">até</span>
-                                  <Input 
-                                    type="time" 
-                                    value={timeRange.end} 
-                                    onChange={(e) => updateOperatingHour(day, index, 'end', e.target.value)}
-                                    className="w-24" 
-                                  />
-                                  {operatingHours[day].length > 1 && (
-                                    <Button 
-                                      variant="ghost" 
-                                      size="icon" 
-                                      className="w-8 h-8 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
-                                      onClick={() => removeOperatingHour(day, index)}
-                                    >
-                                      ×
-                                    </Button>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+          {step === 4 && (
+            <Step4ServiceTypes 
+              currentAgenda={currentAgenda}
+              setCurrentAgenda={setCurrentAgenda}
+            />
+          )}
 
-                  <FormField label="Antecedência (horas)"><Input id="minNotice" type="number" value={currentAgenda.minNotice} onChange={handleInputChange} /></FormField>
-                </>
-              )}
+          {step === 5 && (
+            <Step5PostRegistrationActions 
+              currentAgenda={currentAgenda}
+              setCurrentAgenda={setCurrentAgenda}
+              handleInputChange={handleInputChange}
+            />
+          )}
 
-              {step === 4 && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold">Tipos de Atendimento</h3>
-                  <p className="text-sm text-muted-foreground">Selecione os tipos de atendimento disponíveis para esta agenda. Você pode escolher múltiplas opções.</p>
-                  
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        currentAgenda.serviceTypes.includes('Online') 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-border hover:border-primary/60'
-                      }`} onClick={() => {
-                        const newTypes = currentAgenda.serviceTypes.includes('Online')
-                          ? currentAgenda.serviceTypes.filter(type => type !== 'Online')
-                          : [...currentAgenda.serviceTypes, 'Online'];
-                        setCurrentAgenda(prev => ({ ...prev, serviceTypes: newTypes }));
-                      }}>
-                        <div className="text-center space-y-2">
-                          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
-                            currentAgenda.serviceTypes.includes('Online') 
-                              ? 'bg-primary text-primary-foreground' 
-                              : 'bg-muted text-muted-foreground'
-                          }`}>
-                            <span className="text-2xl">💻</span>
-                          </div>
-                          <h4 className="font-semibold text-foreground">Online</h4>
-                          <p className="text-sm text-muted-foreground">Atendimento virtual via videochamada</p>
-                        </div>
-                      </div>
-                      
-                      <div className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        currentAgenda.serviceTypes.includes('Presencial') 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-border hover:border-primary/60'
-                      }`} onClick={() => {
-                        const newTypes = currentAgenda.serviceTypes.includes('Presencial')
-                          ? currentAgenda.serviceTypes.filter(type => type !== 'Presencial')
-                          : [...currentAgenda.serviceTypes, 'Presencial'];
-                        setCurrentAgenda(prev => ({ ...prev, serviceTypes: newTypes }));
-                      }}>
-                        <div className="text-center space-y-2">
-                          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
-                            currentAgenda.serviceTypes.includes('Presencial') 
-                              ? 'bg-primary text-primary-foreground' 
-                              : 'bg-muted text-muted-foreground'
-                          }`}>
-                            <span className="text-2xl">🏢</span>
-                          </div>
-                          <h4 className="font-semibold text-foreground">Presencial</h4>
-                          <p className="text-sm text-muted-foreground">Atendimento no local físico</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {currentAgenda.serviceTypes.length === 0 && (
-                      <p className="text-sm text-destructive text-center">Selecione pelo menos um tipo de atendimento</p>
-                    )}
-                  </div>
-                </div>
-              )}
+          {step === 6 && (
+             <Step6RemindersSettings 
+               currentAgenda={currentAgenda}
+               handleSwitchChange={handleSwitchChange}
+               reminders={reminders}
+               addReminder={addReminder}
+               removeReminder={removeReminder}
+               updateReminder={updateReminder}
+             />
+           )}
+        </div>
 
-              {step === 5 && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold">Ação após a inscrição</h3>
-                  <div className="space-y-4">
-                    <div className="flex gap-4">
-                      <div className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${currentAgenda.actionAfterRegistration === 'success_message' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/60'}`} onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'success_message' }))}>
-                        <div className="text-center space-y-2">
-                          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${currentAgenda.actionAfterRegistration === 'success_message' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}><span className="text-2xl">💬</span></div>
-                          <h4 className="font-semibold text-foreground">Exibir mensagem de sucesso</h4>
-                          <p className="text-sm text-muted-foreground">Seu cliente verá uma mensagem de confirmação.</p>
-                        </div>
-                      </div>
-                      <div className={`flex-1 p-4 border-2 rounded-lg cursor-pointer transition-all ${currentAgenda.actionAfterRegistration === 'redirect_url' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/60'}`} onClick={() => setCurrentAgenda(prev => ({ ...prev, actionAfterRegistration: 'redirect_url' }))}>
-                        <div className="text-center space-y-2">
-                          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${currentAgenda.actionAfterRegistration === 'redirect_url' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}><span className="text-2xl">🌐</span></div>
-                          <h4 className="font-semibold text-foreground">Redirecionar para URL</h4>
-                          <p className="text-sm text-muted-foreground">O cliente será redirecionado para um site externo.</p>
-                        </div>
-                      </div>
-                    </div>
-                    {currentAgenda.actionAfterRegistration === 'success_message' && (<div className="space-y-2"><Label className="text-base font-semibold text-foreground">Mensagem de sucesso <span className="text-red-500">*</span></Label><div className="relative"><Textarea id="successMessage" value={currentAgenda.successMessage || ''} onChange={handleInputChange} placeholder="Obrigado por se inscrever!" className="resize-none" maxLength={255} /><div className="absolute bottom-2 right-2 text-xs text-muted-foreground">{(currentAgenda.successMessage || '').length}/255</div></div></div>)}
-                    {currentAgenda.actionAfterRegistration === 'redirect_url' && (<div className="space-y-2"><Label className="text-base font-semibold text-foreground">URL de redirecionamento <span className="text-red-500">*</span></Label><Input id="redirectUrl" value={currentAgenda.redirectUrl || ''} onChange={handleInputChange} placeholder="https://example.com" type="url" /></div>)}
-                  </div>
-                </div>
-              )}
-
-              {step === 6 && (
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold">Lembretes</h3>
-                  <div className="p-4 border rounded-lg bg-muted/30">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label htmlFor="sendReminders" className="text-base font-semibold text-foreground cursor-pointer">Enviar lembretes automáticos</Label>
-                        <p className="text-sm text-muted-foreground">Notifique os participantes antes do evento.</p>
-                      </div>
-                      <Switch id="sendReminders" checked={currentAgenda.sendReminders} onCheckedChange={handleSwitchChange} />
-                    </div>
-                  </div>
-                  {currentAgenda.sendReminders && (
-                    <div className="space-y-6 border-t pt-6">
-                      <div className="border border-border rounded-lg p-6 bg-muted/30">
-                        <h4 className="text-lg font-semibold mb-4 text-foreground">Configurar Lembrete</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField label="Quando"><Input type="text" defaultValue="0 Dia(s) 1 Hora(s) 0 Minuto(s) antes" className="w-full" /></FormField>
-                          <FormField label="Assunto"><Input type="text" defaultValue="1 hora para a reunião" className="w-full" /></FormField>
-                          <FormField label="Enviar para"><Select defaultValue="inscrito"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="inscrito">Inscrito</SelectItem><SelectItem value="anfitriao">Anfitrião</SelectItem></SelectContent></Select></FormField>
-                          <FormField label="Canais"><Select defaultValue="whatsapp"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="whatsapp">Whatsapp</SelectItem></SelectContent></Select></FormField>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-
-            </div>
-
-        <DialogFooter className="flex justify-between w-full pt-6">
+        <DialogFooter className="flex justify-between w-full pt-6 border-t bg-background mt-auto">
           <div>{step > 1 && <Button variant="outline" onClick={() => setStep(s => s - 1)}>Voltar</Button>}</div>
           <div className="flex gap-2">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
