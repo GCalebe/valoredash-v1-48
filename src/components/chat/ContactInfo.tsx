@@ -7,9 +7,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, MessageCircle, Plus, X } from "lucide-react";
+import { Phone, MessageCircle, Plus, X, Settings, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AddCustomFieldDialog from "./AddCustomFieldDialog";
+import EditCustomFieldDialog from "./EditCustomFieldDialog";
 import CustomFieldRenderer from "../clients/CustomFieldRenderer";
 import { useCustomFields } from "@/hooks/useCustomFields";
 import { useDynamicFields } from "@/hooks/useDynamicFields";
@@ -43,10 +44,12 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
   const [newTag, setNewTag] = useState("");
   const [customFields, setCustomFields] = useState<{[key: string]: any}>({});
   const [addFieldDialogOpen, setAddFieldDialogOpen] = useState(false);
+  const [editFieldDialogOpen, setEditFieldDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"basico" | "comercial" | "utm" | "midia">("basico");
+  const [editingField, setEditingField] = useState<any>(null);
   
   // Hooks para campos customizados
-  const { customFields: allCustomFields, fetchCustomFields } = useCustomFields();
+  const { customFields: allCustomFields, fetchCustomFields, deleteCustomField } = useCustomFields();
   const { dynamicFields, updateField, refetch } = useDynamicFields(contact.id);
 
   // Função para lidar com a adição de novos campos
@@ -75,6 +78,37 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
       default:
         return [];
     }
+  };
+
+  // Função para editar campo
+  const handleEditField = (fieldId: string, fieldName: string, fieldType: string, fieldOptions: string[] | null) => {
+    setEditingField({
+      id: fieldId,
+      name: fieldName,
+      type: fieldType,
+      options: fieldOptions || []
+    });
+    setEditFieldDialogOpen(true);
+  };
+
+  // Função para excluir campo
+  const handleDeleteField = async (fieldId: string, fieldName: string) => {
+    if (window.confirm(`Tem certeza que deseja excluir o campo "${fieldName}"? Esta ação não pode ser desfeita.`)) {
+      try {
+        await deleteCustomField(fieldId);
+        refetch();
+        fetchCustomFields();
+      } catch (error) {
+        console.error("Erro ao excluir campo:", error);
+      }
+    }
+  };
+
+  // Função para lidar com a edição concluída
+  const handleFieldEdited = () => {
+    refetch();
+    fetchCustomFields();
+    setEditingField(null);
   };
 
   return (
@@ -173,6 +207,14 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
             targetTab={selectedTab}
             onFieldAdded={handleFieldAdded}
           />
+          
+          {/* Dialog para editar campos customizados */}
+          <EditCustomFieldDialog
+            isOpen={editFieldDialogOpen}
+            onClose={() => setEditFieldDialogOpen(false)}
+            field={editingField}
+            onFieldEdited={handleFieldEdited}
+          />
 
           <ScrollArea className="h-[calc(100%-60px)]">
             <TabsContent value="basico" className="mt-0">
@@ -225,8 +267,28 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                   
                   {/* Campos Customizados */}
                   {getFieldsForTab("basico").map((field) => (
-                    <div key={field.id}>
-                      <label className="text-xs text-muted-foreground">{field.name}</label>
+                    <div key={field.id} className="relative group">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs text-muted-foreground">{field.name}</label>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-blue-600"
+                            onClick={() => handleEditField(field.id, field.name, field.type, field.options)}
+                          >
+                            <Settings className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-red-600"
+                            onClick={() => handleDeleteField(field.id, field.name)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
                       <CustomFieldRenderer
                         field={{
                           id: field.id,
@@ -294,24 +356,44 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                   </div>
                   
                   {/* Campos Customizados */}
-                  {getFieldsForTab("comercial").map((field) => (
-                    <div key={field.id}>
-                      <label className="text-xs text-muted-foreground">{field.name}</label>
-                      <CustomFieldRenderer
-                        field={{
-                          id: field.id,
-                          field_name: field.name,
-                          field_type: field.type as "text" | "single_select" | "multi_select",
-                          field_options: field.options,
-                          is_required: false,
-                          created_at: "",
-                          updated_at: ""
-                        }}
-                        value={field.value}
-                        onChange={(value) => updateField(field.id, value)}
-                      />
-                    </div>
-                  ))}
+                   {getFieldsForTab("comercial").map((field) => (
+                     <div key={field.id} className="relative group">
+                       <div className="flex items-center justify-between">
+                         <label className="text-xs text-muted-foreground">{field.name}</label>
+                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <Button
+                             size="sm"
+                             variant="ghost"
+                             className="h-6 w-6 p-0 text-muted-foreground hover:text-blue-600"
+                             onClick={() => handleEditField(field.id, field.name, field.type, field.options)}
+                           >
+                             <Settings className="w-3 h-3" />
+                           </Button>
+                           <Button
+                             size="sm"
+                             variant="ghost"
+                             className="h-6 w-6 p-0 text-muted-foreground hover:text-red-600"
+                             onClick={() => handleDeleteField(field.id, field.name)}
+                           >
+                             <X className="w-3 h-3" />
+                           </Button>
+                         </div>
+                       </div>
+                       <CustomFieldRenderer
+                         field={{
+                           id: field.id,
+                           field_name: field.name,
+                           field_type: field.type as "text" | "single_select" | "multi_select",
+                           field_options: field.options,
+                           is_required: false,
+                           created_at: "",
+                           updated_at: ""
+                         }}
+                         value={field.value}
+                         onChange={(value) => updateField(field.id, value)}
+                       />
+                     </div>
+                   ))}
                 </div>
               </div>
             </TabsContent>
@@ -353,24 +435,44 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                   </div>
                   
                   {/* Campos Customizados */}
-                  {getFieldsForTab("utm").map((field) => (
-                    <div key={field.id}>
-                      <label className="text-xs text-muted-foreground">{field.name}</label>
-                      <CustomFieldRenderer
-                        field={{
-                          id: field.id,
-                          field_name: field.name,
-                          field_type: field.type as "text" | "single_select" | "multi_select",
-                          field_options: field.options,
-                          is_required: false,
-                          created_at: "",
-                          updated_at: ""
-                        }}
-                        value={field.value}
-                        onChange={(value) => updateField(field.id, value)}
-                      />
-                    </div>
-                  ))}
+                   {getFieldsForTab("utm").map((field) => (
+                     <div key={field.id} className="relative group">
+                       <div className="flex items-center justify-between">
+                         <label className="text-xs text-muted-foreground">{field.name}</label>
+                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <Button
+                             size="sm"
+                             variant="ghost"
+                             className="h-6 w-6 p-0 text-muted-foreground hover:text-blue-600"
+                             onClick={() => handleEditField(field.id, field.name, field.type, field.options)}
+                           >
+                             <Settings className="w-3 h-3" />
+                           </Button>
+                           <Button
+                             size="sm"
+                             variant="ghost"
+                             className="h-6 w-6 p-0 text-muted-foreground hover:text-red-600"
+                             onClick={() => handleDeleteField(field.id, field.name)}
+                           >
+                             <X className="w-3 h-3" />
+                           </Button>
+                         </div>
+                       </div>
+                       <CustomFieldRenderer
+                         field={{
+                           id: field.id,
+                           field_name: field.name,
+                           field_type: field.type as "text" | "single_select" | "multi_select",
+                           field_options: field.options,
+                           is_required: false,
+                           created_at: "",
+                           updated_at: ""
+                         }}
+                         value={field.value}
+                         onChange={(value) => updateField(field.id, value)}
+                       />
+                     </div>
+                   ))}
                 </div>
               </div>
             </TabsContent>
@@ -402,24 +504,44 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                 </Button>
                 
                 {/* Campos Customizados */}
-                {getFieldsForTab("midia").map((field) => (
-                  <div key={field.id}>
-                    <label className="text-xs text-muted-foreground">{field.name}</label>
-                    <CustomFieldRenderer
-                      field={{
-                        id: field.id,
-                        field_name: field.name,
-                        field_type: field.type as "text" | "single_select" | "multi_select",
-                        field_options: field.options,
-                        is_required: false,
-                        created_at: "",
-                        updated_at: ""
-                      }}
-                      value={field.value}
-                      onChange={(value) => updateField(field.id, value)}
-                    />
-                  </div>
-                ))}
+                 {getFieldsForTab("midia").map((field) => (
+                   <div key={field.id} className="relative group">
+                     <div className="flex items-center justify-between">
+                       <label className="text-xs text-muted-foreground">{field.name}</label>
+                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <Button
+                           size="sm"
+                           variant="ghost"
+                           className="h-6 w-6 p-0 text-muted-foreground hover:text-blue-600"
+                           onClick={() => handleEditField(field.id, field.name, field.type, field.options)}
+                         >
+                           <Settings className="w-3 h-3" />
+                         </Button>
+                         <Button
+                           size="sm"
+                           variant="ghost"
+                           className="h-6 w-6 p-0 text-muted-foreground hover:text-red-600"
+                           onClick={() => handleDeleteField(field.id, field.name)}
+                         >
+                           <X className="w-3 h-3" />
+                         </Button>
+                       </div>
+                     </div>
+                     <CustomFieldRenderer
+                       field={{
+                         id: field.id,
+                         field_name: field.name,
+                         field_type: field.type as "text" | "single_select" | "multi_select",
+                         field_options: field.options,
+                         is_required: false,
+                         created_at: "",
+                         updated_at: ""
+                       }}
+                       value={field.value}
+                       onChange={(value) => updateField(field.id, value)}
+                     />
+                   </div>
+                 ))}
               </div>
             </TabsContent>
           </ScrollArea>
