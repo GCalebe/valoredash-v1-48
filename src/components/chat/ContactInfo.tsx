@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, MessageCircle, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AddCustomFieldDialog from "./AddCustomFieldDialog";
+import CustomFieldRenderer from "../clients/CustomFieldRenderer";
+import { useCustomFields } from "@/hooks/useCustomFields";
+import { useDynamicFields } from "@/hooks/useDynamicFields";
+import { CustomField } from "@/types/customFields";
 
 interface Contact {
   id: string;
@@ -36,6 +42,40 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
   ]);
   const [newTag, setNewTag] = useState("");
   const [customFields, setCustomFields] = useState<{[key: string]: any}>({});
+  const [addFieldDialogOpen, setAddFieldDialogOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<"basico" | "comercial" | "utm" | "midia">("basico");
+  
+  // Hooks para campos customizados
+  const { customFields: allCustomFields, fetchCustomFields } = useCustomFields();
+  const { dynamicFields, updateField, refetch } = useDynamicFields(contact.id);
+
+  // Função para lidar com a adição de novos campos
+  const handleFieldAdded = () => {
+    refetch();
+    fetchCustomFields();
+  };
+
+  // Função para abrir o diálogo de adicionar campo
+  const handleAddField = (tab: "basico" | "comercial" | "utm" | "midia") => {
+    setSelectedTab(tab);
+    setAddFieldDialogOpen(true);
+  };
+
+  // Função para filtrar campos por categoria/aba
+  const getFieldsForTab = (tab: string) => {
+    switch (tab) {
+      case "basico":
+        return dynamicFields.basic || [];
+      case "comercial":
+        return dynamicFields.commercial || [];
+      case "utm":
+        return dynamicFields.personalized || []; // UTM pode usar personalized
+      case "midia":
+        return dynamicFields.documents || [];
+      default:
+        return [];
+    }
+  };
 
   return (
     <div className="border-l border-border bg-background flex flex-col" style={{ width: `${width}px` }}>
@@ -127,12 +167,24 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
             <TabsTrigger value="midia" className="text-xs">Mídia</TabsTrigger>
           </TabsList>
 
+          <AddCustomFieldDialog
+            isOpen={addFieldDialogOpen}
+            onClose={() => setAddFieldDialogOpen(false)}
+            targetTab={selectedTab}
+            onFieldAdded={handleFieldAdded}
+          />
+
           <ScrollArea className="h-[calc(100%-60px)]">
             <TabsContent value="basico" className="mt-0">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium">Informações Básicas</h4>
-                  <Button size="sm" variant="outline" className="h-7 text-xs">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="h-7 text-xs"
+                    onClick={() => handleAddField("basico")}
+                  >
                     <Plus className="w-3 h-3 mr-1" />Campo
                   </Button>
                 </div>
@@ -170,6 +222,26 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                       className="w-full h-20 px-3 py-2 text-sm border border-input bg-background rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                     />
                   </div>
+                  
+                  {/* Campos Customizados */}
+                  {getFieldsForTab("basico").map((field) => (
+                    <div key={field.id}>
+                      <label className="text-xs text-muted-foreground">{field.name}</label>
+                      <CustomFieldRenderer
+                        field={{
+                          id: field.id,
+                          field_name: field.name,
+                          field_type: field.type as "text" | "single_select" | "multi_select",
+                          field_options: field.options,
+                          is_required: false,
+                          created_at: "",
+                          updated_at: ""
+                        }}
+                        value={field.value}
+                        onChange={(value) => updateField(field.id, value)}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             </TabsContent>
@@ -178,7 +250,12 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium">Informações Comerciais</h4>
-                  <Button size="sm" variant="outline" className="h-7 text-xs">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="h-7 text-xs"
+                    onClick={() => handleAddField("comercial")}
+                  >
                     <Plus className="w-3 h-3 mr-1" />Campo
                   </Button>
                 </div>
@@ -215,6 +292,26 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                     <label className="text-xs text-muted-foreground">Cargo</label>
                     <Input placeholder="Posição na empresa" className="h-8 text-sm" />
                   </div>
+                  
+                  {/* Campos Customizados */}
+                  {getFieldsForTab("comercial").map((field) => (
+                    <div key={field.id}>
+                      <label className="text-xs text-muted-foreground">{field.name}</label>
+                      <CustomFieldRenderer
+                        field={{
+                          id: field.id,
+                          field_name: field.name,
+                          field_type: field.type as "text" | "single_select" | "multi_select",
+                          field_options: field.options,
+                          is_required: false,
+                          created_at: "",
+                          updated_at: ""
+                        }}
+                        value={field.value}
+                        onChange={(value) => updateField(field.id, value)}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             </TabsContent>
@@ -223,7 +320,12 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium">Parâmetros UTM</h4>
-                  <Button size="sm" variant="outline" className="h-7 text-xs">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="h-7 text-xs"
+                    onClick={() => handleAddField("utm")}
+                  >
                     <Plus className="w-3 h-3 mr-1" />Campo
                   </Button>
                 </div>
@@ -249,13 +351,43 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                     <label className="text-xs text-muted-foreground">UTM Content</label>
                     <Input placeholder="conteudo-especifico" className="h-8 text-sm" />
                   </div>
+                  
+                  {/* Campos Customizados */}
+                  {getFieldsForTab("utm").map((field) => (
+                    <div key={field.id}>
+                      <label className="text-xs text-muted-foreground">{field.name}</label>
+                      <CustomFieldRenderer
+                        field={{
+                          id: field.id,
+                          field_name: field.name,
+                          field_type: field.type as "text" | "single_select" | "multi_select",
+                          field_options: field.options,
+                          is_required: false,
+                          created_at: "",
+                          updated_at: ""
+                        }}
+                        value={field.value}
+                        onChange={(value) => updateField(field.id, value)}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             </TabsContent>
 
             <TabsContent value="midia" className="mt-0">
               <div className="space-y-4">
-                <h4 className="text-sm font-medium">Mídia Compartilhada</h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium">Mídia Compartilhada</h4>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="h-7 text-xs"
+                    onClick={() => handleAddField("midia")}
+                  >
+                    <Plus className="w-3 h-3 mr-1" />Campo
+                  </Button>
+                </div>
                 
                 <div className="grid grid-cols-3 gap-2">
                   {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -268,10 +400,32 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                 <Button variant="outline" className="w-full h-8 text-xs">
                   Ver toda a mídia
                 </Button>
+                
+                {/* Campos Customizados */}
+                {getFieldsForTab("midia").map((field) => (
+                  <div key={field.id}>
+                    <label className="text-xs text-muted-foreground">{field.name}</label>
+                    <CustomFieldRenderer
+                      field={{
+                        id: field.id,
+                        field_name: field.name,
+                        field_type: field.type as "text" | "single_select" | "multi_select",
+                        field_options: field.options,
+                        is_required: false,
+                        created_at: "",
+                        updated_at: ""
+                      }}
+                      value={field.value}
+                      onChange={(value) => updateField(field.id, value)}
+                    />
+                  </div>
+                ))}
               </div>
             </TabsContent>
           </ScrollArea>
         </Tabs>
+        
+
       </div>
     </div>
   );
