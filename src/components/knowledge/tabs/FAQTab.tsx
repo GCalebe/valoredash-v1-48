@@ -1,5 +1,5 @@
-import React from "react";
-import { Plus, Search, HelpCircle } from "lucide-react";
+import React, { useState } from "react";
+import { Plus, Search, HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ import FAQForm from "@/components/knowledge/faq/FAQForm";
 import FAQTreeView from "@/components/knowledge/faq/FAQTreeView";
 
 const FAQTab = () => {
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
   const {
     isAddDialogOpen,
@@ -53,6 +54,27 @@ const FAQTab = () => {
     updateFAQMutation,
     deleteFAQMutation,
   } = useFAQManagement();
+
+  const toggleCategory = (categoryName: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryName)) {
+        newSet.delete(categoryName);
+      } else {
+        newSet.add(categoryName);
+      }
+      return newSet;
+    });
+  };
+
+  const expandAll = () => {
+    const allCategories = categories;
+    setExpandedCategories(new Set(allCategories));
+  };
+
+  const collapseAll = () => {
+    setExpandedCategories(new Set());
+  };
 
   if (isLoading) {
     return (
@@ -126,6 +148,27 @@ const FAQTab = () => {
             />
           </div>
           
+          {/* Controles de expansão */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={expandAll}
+              className="text-xs"
+            >
+              <ChevronDown className="h-3 w-3 mr-1" />
+              Expandir Todas
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={collapseAll}
+              className="text-xs"
+            >
+              <ChevronUp className="h-3 w-3 mr-1" />
+              Recolher Todas
+            </Button>
+          </div>
 
         </div>
 
@@ -163,6 +206,8 @@ const FAQTab = () => {
         onEdit={editFAQ}
         onDelete={deleteFAQ}
         isDeleting={deleteFAQMutation.isPending}
+        expandedCategories={expandedCategories}
+        onToggleCategory={toggleCategory}
       />
 
       {/* Edit Dialog */}

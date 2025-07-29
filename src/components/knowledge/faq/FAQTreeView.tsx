@@ -19,6 +19,8 @@ interface FAQTreeViewProps {
   onEdit: (item: FAQItem) => void;
   onDelete: (id: string) => void;
   isDeleting: boolean;
+  expandedCategories: Set<string>;
+  onToggleCategory: (categoryName: string) => void;
 }
 
 interface CategoryNode {
@@ -32,8 +34,9 @@ const FAQTreeView: React.FC<FAQTreeViewProps> = ({
   onEdit,
   onDelete,
   isDeleting,
+  expandedCategories,
+  onToggleCategory,
 }) => {
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   // Organizar FAQs por categoria
   const categorizedFAQs = useMemo(() => {
@@ -58,24 +61,7 @@ const FAQTreeView: React.FC<FAQTreeViewProps> = ({
   }, [faqs, expandedCategories]);
 
   const toggleCategory = (categoryName: string) => {
-    setExpandedCategories(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(categoryName)) {
-        newSet.delete(categoryName);
-      } else {
-        newSet.add(categoryName);
-      }
-      return newSet;
-    });
-  };
-
-  const expandAll = () => {
-    const allCategories = categorizedFAQs.map(cat => cat.name);
-    setExpandedCategories(new Set(allCategories));
-  };
-
-  const collapseAll = () => {
-    setExpandedCategories(new Set());
+    onToggleCategory(categoryName);
   };
 
   if (faqs.length === 0) {
@@ -92,25 +78,6 @@ const FAQTreeView: React.FC<FAQTreeViewProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Controles de expansão */}
-      <div className="flex gap-2 mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={expandAll}
-          className="text-xs"
-        >
-          Expandir Todas
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={collapseAll}
-          className="text-xs"
-        >
-          Recolher Todas
-        </Button>
-      </div>
 
       {/* Árvore de categorias */}
       <div className="space-y-3">
