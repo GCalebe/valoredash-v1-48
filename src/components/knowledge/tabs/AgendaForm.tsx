@@ -210,7 +210,7 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[900px] h-[700px] max-w-none max-h-none bg-background border flex flex-col">
+      <DialogContent className="w-[900px] h-screen max-w-none max-h-none bg-background border flex flex-col">
         <DialogHeader className="space-y-4 pb-6">
           <div>
             <DialogTitle className="text-2xl font-bold">{editingAgenda ? 'Editar' : 'Nova'} Agenda - Etapa {step} de {totalSteps}</DialogTitle>
