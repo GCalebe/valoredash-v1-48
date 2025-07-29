@@ -45,7 +45,7 @@ const App = () => (
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/metrics" element={<MetricsDashboard />} />
                   <Route path="/analytics-portals" element={<Navigate to="/metrics" replace />} />
-                  <Route path="/chats" element={<ChatsDashboard />} />
+                  <Route path="/chats" element={<Conversations />} />
                   <Route path="/knowledge" element={<KnowledgeManager />} />
                   <Route path="/clients" element={<ClientsDashboard />} />
                   <Route path="/evolution" element={<Evolution />} />
@@ -61,7 +61,7 @@ const App = () => (
                   <Route path="/contracts" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/subscription" element={<Subscription />} />
-                  <Route path="/conversations" element={<Conversations />} />
+
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/connections" element={<Connections />} />
                   <Route path="/settings" element={<Settings />} />

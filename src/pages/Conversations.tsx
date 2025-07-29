@@ -1,157 +1,345 @@
-import { useState } from 'react';
-import AppLayout from '@/components/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Search, Filter, Plus } from 'lucide-react';
 
-interface Conversation {
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+
+// Hooks para integração com banco de dados
+import { useConversations } from "@/hooks/useConversations";
+import { useChatMessages } from "@/hooks/useChatMessages";
+// import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
+import { useToast } from "@/hooks/use-toast";
+import { useConversationFilters } from "@/hooks/useConversationFilters";
+import { Conversation as DBConversation, ChatMessage } from "@/types/chat";
+
+// Componentes refatorados
+import ConversationListPanel from "@/components/chat/ConversationListPanel";
+import ConversationHeader from "@/components/chat/ConversationHeader";
+import MessageArea from "@/components/chat/MessageArea";
+import MessageInput from "@/components/chat/MessageInput";
+import ContactInfo from "@/components/chat/ContactInfo";
+import ResizeHandle from "@/components/chat/ResizeHandle";
+import ConversationFilterDialog from "@/components/chat/ConversationFilterDialog";
+
+// Adaptador para converter dados do banco para a interface do componente
+interface Contact {
   id: string;
-  contact: string;
+  name: string;
+  avatar: string;
   lastMessage: string;
   timestamp: string;
-  status: 'active' | 'pending' | 'closed';
-  unreadCount: number;
+  unreadCount?: number;
+  isOnline: boolean;
+  status?: "online" | "away" | "offline";
+  phone?: string;
+  email?: string;
+  sessionId?: string;
 }
 
-const mockConversations: Conversation[] = [
-  {
-    id: '1',
-    contact: 'João Silva',
-    lastMessage: 'Obrigado pelas informações sobre o produto.',
-    timestamp: '10:30',
-    status: 'active',
-    unreadCount: 2
-  },
-  {
-    id: '2',
-    contact: 'Maria Santos',
-    lastMessage: 'Quando podemos agendar uma reunião?',
-    timestamp: '09:15',
-    status: 'pending',
-    unreadCount: 1
-  },
-  {
-    id: '3',
-    contact: 'Pedro Costa',
-    lastMessage: 'Perfeito! Vamos fechar o negócio.',
-    timestamp: 'Ontem',
-    status: 'closed',
-    unreadCount: 0
-  }
-];
+// Função para converter conversas do banco para o formato do componente
+const convertDBConversationToContact = (conversation: DBConversation): Contact => {
+  return {
+    id: conversation.id,
+    name: conversation.name || conversation.clientName || 'Cliente',
+    avatar: conversation.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${conversation.name}`,
+    lastMessage: conversation.lastMessage || 'Nova conversa',
+    timestamp: conversation.time,
+    unreadCount: conversation.unread || 0,
+    isOnline: Math.random() > 0.5, // Simulação de status online
+    status: Math.random() > 0.5 ? 'online' : 'away',
+    phone: conversation.phone,
+    email: conversation.email,
+    sessionId: conversation.sessionId
+  };
+};
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (status?: string) => {
   switch (status) {
-    case 'active': return 'bg-green-100 text-green-800';
-    case 'pending': return 'bg-yellow-100 text-yellow-800';
-    case 'closed': return 'bg-gray-100 text-gray-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case "online": return "bg-green-500";
+    case "away": return "bg-yellow-500";
+    case "offline": return "bg-gray-400";
+    default: return "bg-gray-400";
   }
 };
 
-const getStatusText = (status: string) => {
-  switch (status) {
-    case 'active': return 'Ativo';
-    case 'pending': return 'Pendente';
-    case 'closed': return 'Fechado';
-    default: return 'Desconhecido';
-  }
-};
+interface ConversationLayoutProps {
+  contacts: Contact[];
+  selectedContactId?: string;
+  onContactSelect: (contactId: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  onFilterClick: () => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  sortBy: string;
+  onSortChange: (sort: string) => void;
+  messages: ChatMessage[];
+  messagesLoading: boolean;
+  className?: string;
+}
 
-export default function Conversations() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+function ConversationLayout({
+  contacts,
+  selectedContactId,
+  onContactSelect,
+  searchQuery,
+  onSearchChange,
+  onFilterClick,
+  activeTab,
+  onTabChange,
+  sortBy,
+  onSortChange,
+  messages,
+  messagesLoading,
+  className,
+}: ConversationLayoutProps) {
+  const [leftPanelWidth, setLeftPanelWidth] = useState(320);
+  const [rightPanelWidth, setRightPanelWidth] = useState(320);
+  const [isResizing, setIsResizing] = useState<'left' | 'right' | null>(null);
+  
+  const handleMouseDown = (panel: 'left' | 'right') => {
+    setIsResizing(panel);
+  };
+  
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    if (isResizing === 'left') {
+      const newWidth = Math.max(250, Math.min(500, e.clientX));
+      setLeftPanelWidth(newWidth);
+    } else if (isResizing === 'right') {
+      const newWidth = Math.max(250, Math.min(500, window.innerWidth - e.clientX));
+      setRightPanelWidth(newWidth);
+    }
+  };
+  
+  const handleMouseUp = () => {
+    setIsResizing(null);
+  };
+  
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing]);
 
-  const filteredConversations = mockConversations.filter(conversation => {
-    const matchesSearch = conversation.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         conversation.lastMessage.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === 'all' || conversation.status === selectedStatus;
-    return matchesSearch && matchesStatus;
-  });
+  const selectedContactData = contacts.find(c => c.id === selectedContactId);
+
+  const handleSendMessage = (message: string) => {
+    // TODO: Implementar envio de mensagem
+    console.log('Enviando mensagem:', message);
+  };
 
   return (
-    <AppLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Conversas</h1>
-            <p className="text-muted-foreground">
-              Gerencie suas conversas e mensagens com clientes
-            </p>
-          </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Conversa
-          </Button>
-        </div>
+    <div className={cn("flex h-screen bg-background", className)}>
+      {/* Left Panel - Conversation List */}
+      <ConversationListPanel
+        contacts={contacts}
+        selectedContactId={selectedContactId}
+        onContactSelect={onContactSelect}
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        onFilterClick={onFilterClick}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+        sortBy={sortBy}
+        onSortChange={onSortChange}
+        getStatusColor={getStatusColor}
+        width={leftPanelWidth}
+      />
 
-        <div className="flex gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar conversas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+      {/* Left Resize Handle */}
+      <ResizeHandle onMouseDown={() => handleMouseDown('left')} />
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {selectedContactData ? (
+          <>
+            {/* Chat Header */}
+            <ConversationHeader 
+              contact={selectedContactData}
+              getStatusColor={getStatusColor}
             />
+
+            {/* Messages Area */}
+            <MessageArea 
+              messages={messages}
+              loading={messagesLoading}
+            />
+
+            {/* Message Input */}
+            <MessageInput 
+              onSendMessage={handleSendMessage}
+              disabled={messagesLoading}
+            />
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💬</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Selecione uma conversa</h3>
+              <p className="text-muted-foreground">Escolha uma conversa da lista para começar a conversar</p>
+            </div>
           </div>
-          <Button variant="outline">
-            <Filter className="mr-2 h-4 w-4" />
-            Filtros
-          </Button>
-        </div>
-
-        <div className="grid gap-4">
-          {filteredConversations.map((conversation) => (
-            <Card key={conversation.id} className="cursor-pointer hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <MessageCircle className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{conversation.contact}</CardTitle>
-                      <CardDescription className="text-sm">
-                        {conversation.timestamp}
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {conversation.unreadCount > 0 && (
-                      <Badge variant="destructive" className="rounded-full">
-                        {conversation.unreadCount}
-                      </Badge>
-                    )}
-                    <Badge className={getStatusColor(conversation.status)}>
-                      {getStatusText(conversation.status)}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground line-clamp-2">
-                  {conversation.lastMessage}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredConversations.length === 0 && (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <MessageCircle className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Nenhuma conversa encontrada</h3>
-              <p className="text-muted-foreground text-center">
-                {searchTerm ? 'Tente ajustar os filtros de busca.' : 'Comece uma nova conversa com seus clientes.'}
-              </p>
-            </CardContent>
-          </Card>
         )}
       </div>
-    </AppLayout>
+
+      {/* Right Resize Handle */}
+      {selectedContactData && (
+        <ResizeHandle onMouseDown={() => handleMouseDown('right')} />
+      )}
+
+      {/* Right Panel - Contact Info */}
+      {selectedContactData && (
+        <ContactInfo 
+          contact={selectedContactData}
+          getStatusColor={getStatusColor}
+          width={rightPanelWidth}
+        />
+      )}
+    </div>
   );
 }
+
+export default function Conversations() {
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
+  const [sortBy, setSortBy] = useState("recent");
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  
+  // Hooks para integração com banco de dados
+  const { conversations, loading: conversationsLoading, fetchConversations } = useConversations();
+  const { messages, loading: messagesLoading } = useChatMessages(selectedContact?.sessionId || null);
+  const { toast } = useToast();
+  const filters = useConversationFilters();
+  
+  // TODO: Configurar atualizações em tempo real
+  // useRealtimeUpdates({ updateConversationLastMessage, fetchConversations });
+  
+  // Carregar conversas ao montar o componente
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
+  
+  // Converter conversas do banco para o formato do componente
+  const contacts: Contact[] = conversations.map(convertDBConversationToContact);
+  
+  const filteredContacts = contacts.filter(contact => {
+    const matchesSearch = contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         contact.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesTab = activeTab === "all" || 
+                      (activeTab === "unread" && contact.unreadCount && contact.unreadCount > 0) ||
+                      (activeTab === "online" && contact.isOnline);
+    
+    return matchesSearch && matchesTab;
+  }).sort((a, b) => {
+    if (sortBy === "recent") {
+      return b.timestamp.localeCompare(a.timestamp);
+    } else if (sortBy === "name") {
+      return a.name.localeCompare(b.name);
+    } else if (sortBy === "unread") {
+      return (b.unreadCount || 0) - (a.unreadCount || 0);
+    }
+    return 0;
+  });
+  
+  const handleContactSelect = (contactId: string) => {
+    const contact = contacts.find(c => c.id === contactId);
+    setSelectedContact(contact || null);
+  };
+  
+  if (conversationsLoading) {
+    return (
+      <>
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando conversas...</p>
+          </div>
+        </div>
+        
+        {/* Filter Dialog */}
+        <ConversationFilterDialog
+          isOpen={filterDialogOpen}
+          onOpenChange={setFilterDialogOpen}
+          statusFilter={filters.statusFilter}
+          segmentFilter={filters.segmentFilter}
+          lastContactFilter={filters.lastContactFilter}
+          unreadFilter={filters.unreadFilter}
+          lastMessageFilter={filters.lastMessageFilter}
+          clientTypeFilter={filters.clientTypeFilter}
+          customFieldFilters={filters.customFieldFilters}
+          onStatusFilterChange={filters.setStatusFilter}
+          onSegmentFilterChange={filters.setSegmentFilter}
+          onLastContactFilterChange={filters.setLastContactFilter}
+          onUnreadFilterChange={filters.setUnreadFilter}
+          onLastMessageFilterChange={filters.setLastMessageFilter}
+          onClientTypeFilterChange={filters.setClientTypeFilter}
+          onAddCustomFieldFilter={filters.addCustomFieldFilter}
+          onRemoveCustomFieldFilter={filters.removeCustomFieldFilter}
+          onClearFilters={() => filters.clearAll()}
+          onClearCustomFieldFilters={() => filters.clearAll("customFields")}
+          hasActiveFilters={filters.hasActiveFilters}
+        />
+      </>
+    );
+  }
+  
+  return (
+    <>
+      <ConversationLayout 
+        contacts={filteredContacts}
+        selectedContactId={selectedContact?.id}
+        onContactSelect={handleContactSelect}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onFilterClick={() => setFilterDialogOpen(true)}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        messages={messages}
+        messagesLoading={messagesLoading}
+      />
+      
+      {/* Filter Dialog */}
+      <ConversationFilterDialog
+        isOpen={filterDialogOpen}
+        onOpenChange={setFilterDialogOpen}
+        statusFilter={filters.statusFilter}
+        segmentFilter={filters.segmentFilter}
+        lastContactFilter={filters.lastContactFilter}
+        unreadFilter={filters.unreadFilter}
+        lastMessageFilter={filters.lastMessageFilter}
+        clientTypeFilter={filters.clientTypeFilter}
+        customFieldFilters={filters.customFieldFilters}
+        onStatusFilterChange={filters.setStatusFilter}
+        onSegmentFilterChange={filters.setSegmentFilter}
+        onLastContactFilterChange={filters.setLastContactFilter}
+        onUnreadFilterChange={filters.setUnreadFilter}
+        onLastMessageFilterChange={filters.setLastMessageFilter}
+        onClientTypeFilterChange={filters.setClientTypeFilter}
+        onAddCustomFieldFilter={filters.addCustomFieldFilter}
+        onRemoveCustomFieldFilter={filters.removeCustomFieldFilter}
+        onClearFilters={() => filters.clearAll()}
+        onClearCustomFieldFilters={() => filters.clearAll("customFields")}
+        hasActiveFilters={filters.hasActiveFilters}
+      />
+    </>
+  );
+}
+

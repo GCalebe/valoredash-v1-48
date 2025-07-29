@@ -101,6 +101,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           icon: MessageSquare,
           path: "/chats",
         },
+        // Conversas 2.0 desativado - agora integrado ao item principal
+        // {
+        //   name: "Conversas 2.0",
+        //   icon: MessageSquare,
+        //   path: "/conversations2",
+        // },
       ],
     },
     {
