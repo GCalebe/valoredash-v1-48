@@ -14,7 +14,7 @@ interface ClientInfoProps {
     documents: DynamicCategory[];
   };
   onFieldUpdate?: (fieldId: string, newValue: unknown) => void;
-  context: "chat" | "table" | "details" | "edit";
+  context: "chat" | "chat-edit" | "table" | "details" | "edit";
   compact?: boolean;
 }
 
@@ -38,8 +38,14 @@ const ClientInfo: React.FC<ClientInfoProps> = ({
   // Configurações específicas para cada contexto
   const contextConfig = {
     chat: {
-      showTabs: ["basic", "commercial", "utm", "custom", "docs"],
+      showTabs: ["basic", "commercial", "utm", "midia"],
       readOnly: true,
+      compact: true,
+      className: "h-[500px] max-h-[500px]"
+    },
+    "chat-edit": {
+      showTabs: ["basic", "commercial", "utm", "midia"],
+      readOnly: false,
       compact: true,
       className: "h-[500px] max-h-[500px]"
     },

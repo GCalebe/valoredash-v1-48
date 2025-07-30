@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, MessageCircle, Plus, X, Settings, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Plus, Settings, Trash2, X, Phone, MessageCircle } from "lucide-react";
 import AddCustomFieldDialog from "./AddCustomFieldDialog";
 import EditCustomFieldDialog from "./EditCustomFieldDialog";
 import CustomFieldRenderer from "../clients/CustomFieldRenderer";
@@ -37,16 +36,16 @@ interface ContactInfoProps {
 }
 
 export default function ContactInfo({ contact, getStatusColor, width }: ContactInfoProps) {
-  const [tags, setTags] = useState<{id: string; label: string; color: string}[]>([
-    { id: "1", label: "VIP", color: "bg-purple-500" },
-    { id: "2", label: "Cliente", color: "bg-green-500" }
-  ]);
-  const [newTag, setNewTag] = useState("");
   const [customFields, setCustomFields] = useState<{[key: string]: any}>({});
   const [addFieldDialogOpen, setAddFieldDialogOpen] = useState(false);
   const [editFieldDialogOpen, setEditFieldDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"basico" | "comercial" | "utm" | "midia">("basico");
   const [editingField, setEditingField] = useState<any>(null);
+  const [tags, setTags] = useState<{id: string; label: string; color: string}[]>([
+    { id: "1", label: "VIP", color: "bg-purple-500" },
+    { id: "2", label: "Cliente", color: "bg-green-500" }
+  ]);
+  const [newTag, setNewTag] = useState("");
   
   // Hooks para campos customizados
   const { customFields: allCustomFields, fetchCustomFields, deleteCustomField } = useCustomFields();
@@ -112,7 +111,7 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
   };
 
   return (
-    <div className="border-l border-border bg-background flex flex-col" style={{ width: `${width}px` }}>
+    <div className="bg-background flex flex-col h-full">
       {/* Contact Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-start gap-4">
@@ -123,24 +122,24 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
             </Avatar>
             <div className={cn(
               "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-background",
-              getStatusColor(contact.status)
+              contact.status === 'online' ? 'bg-green-500' : contact.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'
             )} />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-semibold text-foreground mb-1">{contact.name}</h3>
             <p className="text-sm text-muted-foreground capitalize mb-2">
-              {contact.isOnline ? contact.status : 'offline'}
+              {contact.status || 'offline'}
             </p>
             
             {/* Contact Details */}
             <div className="space-y-2 text-xs">
               <div className="flex items-center gap-2">
                 <Phone className="w-3 h-3 text-muted-foreground" />
-                <span className="text-muted-foreground">+1 (555) 123-4567</span>
+                <span className="text-muted-foreground">{contact.phone || '+1 (555) 123-4567'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-3 h-3 text-muted-foreground" />
-                <span className="text-muted-foreground">@{contact.name.toLowerCase().replace(' ', '_')}</span>
+                <span className="text-muted-foreground">{contact.email || '@conversa_de_demonstração'}</span>
               </div>
             </div>
             
@@ -190,7 +189,7 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
           </div>
         </div>
       </div>
-
+      
       {/* Tabs Content */}
       <div className="flex-1 p-4">
         <Tabs defaultValue="basico" className="h-full">
@@ -257,14 +256,6 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground">Anotações</label>
-                    <textarea 
-                      placeholder="Adicione anotações sobre o contato..."
-                      className="w-full h-20 px-3 py-2 text-sm border border-input bg-background rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    />
-                  </div>
-                  
                   {/* Campos Customizados */}
                   {getFieldsForTab("basico").map((field) => (
                     <div key={field.id} className="relative group">
@@ -394,6 +385,15 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                        />
                      </div>
                    ))}
+                   
+                   {/* Anotações - movidas para o final */}
+                   <div>
+                     <label className="text-xs text-muted-foreground">Anotações</label>
+                     <textarea 
+                       placeholder="Adicione anotações sobre o contato..."
+                       className="w-full h-20 px-3 py-2 text-sm border border-input bg-background rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                     />
+                   </div>
                 </div>
               </div>
             </TabsContent>
@@ -473,6 +473,15 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                        />
                      </div>
                    ))}
+                   
+                   {/* Anotações - movidas para o final */}
+                   <div>
+                     <label className="text-xs text-muted-foreground">Anotações</label>
+                     <textarea 
+                       placeholder="Adicione anotações sobre UTM..."
+                       className="w-full h-20 px-3 py-2 text-sm border border-input bg-background rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                     />
+                   </div>
                 </div>
               </div>
             </TabsContent>
@@ -491,13 +500,13 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                   </Button>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-2">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="aspect-square bg-muted rounded-lg flex items-center justify-center hover:bg-muted/80 transition-colors cursor-pointer">
-                      <div className="w-6 h-6 bg-primary/20 rounded"></div>
-                    </div>
-                  ))}
-                </div>
+                <div className="grid grid-cols-6 gap-1">
+                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                     <div key={i} className="aspect-square bg-muted rounded-sm flex items-center justify-center hover:bg-muted/80 transition-colors cursor-pointer text-xs">
+                       <div className="w-3 h-3 bg-primary/20 rounded"></div>
+                     </div>
+                   ))}
+                 </div>
                 
                 <Button variant="outline" className="w-full h-8 text-xs">
                   Ver toda a mídia
@@ -541,7 +550,16 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                        onChange={(value) => updateField(field.id, value)}
                      />
                    </div>
-                 ))}
+                   ))}
+                   
+                   {/* Anotações - movidas para o final */}
+                   <div>
+                     <label className="text-xs text-muted-foreground">Anotações</label>
+                     <textarea 
+                       placeholder="Adicione anotações sobre mídia..."
+                       className="w-full h-20 px-3 py-2 text-sm border border-input bg-background rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                     />
+                   </div>
               </div>
             </TabsContent>
           </ScrollArea>

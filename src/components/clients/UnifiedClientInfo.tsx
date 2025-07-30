@@ -48,9 +48,10 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
   } = useUnifiedClientInfo(showTabs);
 
   const tabConfig = {
-    basic: { label: "Básico", icon: "👤" },
-    commercial: { label: "Comercial", icon: "💼" },
-    utm: { label: "UTM", icon: "📊" },
+    basic: { label: "Básico", icon: "" },
+    commercial: { label: "Comercial", icon: "" },
+    utm: { label: "UTM", icon: "" },
+    midia: { label: "Mídia", icon: "" },
     custom: { label: "Personalizado", icon: "⚙️" },
     docs: { label: "Arquivos", icon: "📁" }
   };
@@ -104,6 +105,19 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
           />
         );
       case "utm":
+        return (
+          <ClientStats
+            section="utm"
+            clientData={clientData}
+            customFields={customFields}
+            consultationStageOptions={consultationStageOptions}
+            fieldVisibility={fieldVisibility}
+            onFieldUpdate={onFieldUpdate}
+            onVisibilityChange={handleVisibilityChange}
+            readOnly={readOnly}
+          />
+        );
+      case "midia":
         return (
           <ClientStats
             section="utm"
@@ -175,9 +189,11 @@ const UnifiedClientInfo: React.FC<UnifiedClientInfoProps> = ({
                   }
                 `}
               >
-                <span className="mr-2 text-base">
-                  {tabConfig[tab as keyof typeof tabConfig]?.icon}
-                </span>
+                {tabConfig[tab as keyof typeof tabConfig]?.icon && (
+                  <span className="mr-2 text-base">
+                    {tabConfig[tab as keyof typeof tabConfig]?.icon}
+                  </span>
+                )}
                 {tabConfig[tab as keyof typeof tabConfig]?.label}
               </button>
             ))}

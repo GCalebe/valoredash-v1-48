@@ -2,7 +2,7 @@
 import React from "react";
 import { Contact } from "@/types/client";
 // ClientDetailSheet component was removed
-import EditClientForm from "@/components/clients/EditClientForm";
+import EditClientPanel from "@/components/clients/EditClientPanel";
 import SendMessageDialog from "@/components/clients/SendMessageDialog";
 import PauseDurationDialog from "@/components/PauseDurationDialog";
 
@@ -65,7 +65,7 @@ const ClientsModals = ({
       {selectedContact && (
         <>
           {/* ClientDetailSheet component was removed */}
-          <EditClientForm
+          <EditClientPanel
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
             selectedContact={selectedContact}
