@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, User, Edit, Trash2, Calendar, X, Clock } from "lucide-react";
+import HostsHeader from '../hosts/HostsHeader';
+import HostsHierarchicalView from '../hosts/HostsHierarchicalView';
 import {
   Dialog,
   DialogContent,
@@ -36,72 +38,111 @@ type Agenda = {
 
 const HostsTab = () => {
   const { user } = useAuth();
-  const { agendas: supabaseAgendas } = useAgendas();
   const [hosts, setHosts] = useState<Host[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingHost, setEditingHost] = useState<Host | null>(null);
-  const [selectedAgendas, setSelectedAgendas] = useState<Agenda[]>([]);
-  const [formData, setFormData] = useState({
-    name: "",
-    role: "",
-    description: "",
-  });
-
-  // Estado para gerenciar múltiplos horários de funcionamento
+  const [selectedAgendas, setSelectedAgendas] = useState<string[]>([]);
+  const [formData, setFormData] = useState({ name: '', role: '', description: '' });
+  
+  // Estados para busca, ordenacao e filtros
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'role' | 'created_at'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [roleFilter, setRoleFilter] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'grid' | 'hierarchy'>('grid');
+  
+  // Estado para gerenciar multiplos horarios de funcionamento
   const [operatingHours, setOperatingHours] = useState<Record<string, Array<{start: string, end: string}>>>({
-    'Domingo': [{start: '08:00', end: '17:00'}],
     'Segunda-Feira': [{start: '08:00', end: '17:00'}],
-    'Terça-Feira': [{start: '08:00', end: '17:00'}],
+    'Terca-Feira': [{start: '08:00', end: '17:00'}],
     'Quarta-Feira': [{start: '08:00', end: '17:00'}],
     'Quinta-Feira': [{start: '08:00', end: '17:00'}],
     'Sexta-Feira': [{start: '08:00', end: '17:00'}],
-    'Sábado': [{start: '08:00', end: '17:00'}]
+    'Sabado': [{start: '08:00', end: '17:00'}]
   });
-
-  // Estado para dias disponíveis
-  const [availableDays, setAvailableDays] = useState<string[]>(['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
-
+  
+  // Estado para dias disponiveis
+  const [availableDays, setAvailableDays] = useState<string[]>(['Segunda-Feira', 'Terca-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
+  
+  const { data: agendas = [] } = useAgendas();
+  
   const fetchHosts = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user) return;
     
     try {
       const { data, error } = await supabase
-        .from("employees")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
+        .from('employees')
+        .select('*')
+        .eq('user_id', user.id);
+      
       if (error) throw error;
-      setHosts(data as Host[] || []);
+      setHosts(data || []);
     } catch (error) {
-      console.error("Erro ao buscar anfitriões:", error);
+      console.error("Erro ao buscar anfitrioes:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar os anfitriões.",
-        variant: "destructive",
+        description: "Nao foi possivel carregar os anfitrioes.",
+        variant: "destructive"
       });
     }
-  }, [user?.id]);
-
+  }, [user]);
+  
   useEffect(() => {
     fetchHosts();
   }, [fetchHosts]);
-
-  // Funções para gerenciar horários de funcionamento
+  
+  // Filtrar e ordenar hosts
+  const displayHosts = useMemo(() => {
+    let filtered = hosts.filter(host => {
+      const matchesSearch = host.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           host.role.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesRole = !roleFilter || host.role === roleFilter;
+      return matchesSearch && matchesRole;
+    });
+    
+    // Aplicar filtro de funcao
+    if (roleFilter) {
+      filtered = filtered.filter(host => host.role === roleFilter);
+    }
+    
+    // Aplicar ordenacao
+    filtered.sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+      
+      if (sortBy === 'created_at') {
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
+      } else {
+        aValue = aValue.toString().toLowerCase();
+        bValue = bValue.toString().toLowerCase();
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+    
+    return filtered;
+  }, [hosts, searchTerm, sortBy, sortOrder, roleFilter]);
+  
+  // Funcoes para gerenciar horarios de funcionamento
   const addOperatingHour = (day: string) => {
     setOperatingHours(prev => ({
       ...prev,
       [day]: [...prev[day], { start: '08:00', end: '17:00' }]
     }));
   };
-
+  
   const removeOperatingHour = (day: string, index: number) => {
     setOperatingHours(prev => ({
       ...prev,
       [day]: prev[day].filter((_, i) => i !== index)
     }));
   };
-
+  
   const updateOperatingHour = (day: string, index: number, field: 'start' | 'end', value: string) => {
     setOperatingHours(prev => ({
       ...prev,
@@ -110,349 +151,369 @@ const HostsTab = () => {
       )
     }));
   };
-
-  const toggleAvailableDay = (day: string) => {
-    setAvailableDays(prev => 
-      prev.includes(day) 
-        ? prev.filter(d => d !== day)
-        : [...prev, day]
-    );
-  };
-
-
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.role) {
+    if (!formData.name.trim() || !formData.role.trim()) {
       toast({
         title: "Erro",
-        description: "Nome e função são obrigatórios.",
-        variant: "destructive",
+        description: "Nome e funcao sao obrigatorios.",
+        variant: "destructive"
       });
       return;
     }
-
+    
+    // Preparar dados dos horarios de funcionamento
+    const operatingHoursData = Object.entries(operatingHours)
+      .filter(([day]) => availableDays.includes(day))
+      .reduce((acc, [day, hours]) => {
+        acc[day] = hours;
+        return acc;
+      }, {} as Record<string, Array<{start: string, end: string}>>);
+    
     try {
-      // Preparar dados dos horários de funcionamento
-      const availableHoursData = Object.entries(operatingHours)
-        .filter(([day]) => availableDays.includes(day))
-        .map(([day, hours]) => ({
-          day,
-          hours: hours.map(h => `${h.start}-${h.end}`)
-        }));
-
-      const employeeData = {
-        name: formData.name,
-        role: formData.role,
-        description: formData.description,
-        available_days: availableDays,
-        available_hours: availableHoursData
-      };
-
       if (editingHost) {
         const { error } = await supabase
-          .from("employees")
-          .update(employeeData)
-          .eq("id", editingHost.id);
+          .from('employees')
+          .update({
+            name: formData.name,
+            role: formData.role,
+            description: formData.description,
+            operating_hours: operatingHoursData,
+            available_days: availableDays
+          })
+          .eq('id', editingHost.id);
+        
         if (error) throw error;
-        toast({ title: "Sucesso", description: "Anfitrião atualizado com sucesso!" });
+        toast({ title: "Sucesso", description: "Anfitriao atualizado com sucesso!" });
       } else {
         const { error } = await supabase
-          .from("employees")
-          .insert({ ...employeeData, user_id: user?.id })
-          .select()
-          .single();
+          .from('employees')
+          .insert({
+            name: formData.name,
+            role: formData.role,
+            description: formData.description,
+            user_id: user?.id,
+            operating_hours: operatingHoursData,
+            available_days: availableDays
+          });
+        
         if (error) throw error;
-        toast({ title: "Sucesso", description: "Anfitrião adicionado com sucesso!" });
+        toast({ title: "Sucesso", description: "Anfitriao adicionado com sucesso!" });
       }
-
+      
+      fetchHosts();
       resetForm();
       setIsDialogOpen(false);
-      fetchHosts();
     } catch (error) {
-      console.error("Erro ao salvar anfitrião:", error);
-      toast({ title: "Erro", description: "Não foi possível salvar o anfitrião.", variant: "destructive" });
+      console.error("Erro ao salvar anfitriao:", error);
+      toast({ title: "Erro", description: "Nao foi possivel salvar o anfitriao.", variant: "destructive" });
     }
   };
-
+  
   const handleEdit = (host: Host) => {
     setEditingHost(host);
-    setFormData({ name: host.name, role: host.role, description: host.description || "" });
+    setFormData({ name: host.name, role: host.role, description: host.description || '' });
     
-    // Carregar dias disponíveis
-    if (host.available_days) {
+    // Carregar dias disponiveis
+    if (host.available_days && Array.isArray(host.available_days)) {
       setAvailableDays(host.available_days);
     } else {
-      setAvailableDays(['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
+      setAvailableDays(['Segunda-Feira', 'Terca-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
     }
     
-    // Carregar horários de funcionamento
-    if (host.available_hours && Array.isArray(host.available_hours)) {
-      const hoursData: Record<string, Array<{start: string, end: string}>> = {
-        'Domingo': [{start: '08:00', end: '17:00'}],
-        'Segunda-Feira': [{start: '08:00', end: '17:00'}],
-        'Terça-Feira': [{start: '08:00', end: '17:00'}],
-        'Quarta-Feira': [{start: '08:00', end: '17:00'}],
-        'Quinta-Feira': [{start: '08:00', end: '17:00'}],
-        'Sexta-Feira': [{start: '08:00', end: '17:00'}],
-        'Sábado': [{start: '08:00', end: '17:00'}]
-      };
-      
-      host.available_hours.forEach((dayData: any) => {
-        if (dayData.day && dayData.hours) {
-          hoursData[dayData.day] = dayData.hours.map((timeRange: string) => {
-            const [start, end] = timeRange.split('-');
-            return { start, end };
-          });
-        }
-      });
-      
-      setOperatingHours(hoursData);
+    // Carregar horarios de funcionamento
+    if (host.operating_hours && typeof host.operating_hours === 'object') {
+      setOperatingHours(host.operating_hours as Record<string, Array<{start: string, end: string}>>);
     } else {
-      // Reset para horários padrão
       setOperatingHours({
-        'Domingo': [{start: '08:00', end: '17:00'}],
         'Segunda-Feira': [{start: '08:00', end: '17:00'}],
-        'Terça-Feira': [{start: '08:00', end: '17:00'}],
+        'Terca-Feira': [{start: '08:00', end: '17:00'}],
         'Quarta-Feira': [{start: '08:00', end: '17:00'}],
         'Quinta-Feira': [{start: '08:00', end: '17:00'}],
         'Sexta-Feira': [{start: '08:00', end: '17:00'}],
-        'Sábado': [{start: '08:00', end: '17:00'}]
+        'Sabado': [{start: '08:00', end: '17:00'}]
       });
     }
     
-    setSelectedAgendas([]); 
     setIsDialogOpen(true);
   };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este anfitrião?")) return;
-    try {
-      const { error } = await supabase.from("employees").delete().eq("id", id);
-      if (error) throw error;
-      toast({ title: "Sucesso", description: "Anfitrião excluído com sucesso!" });
-      fetchHosts();
-    } catch (error) {
-      console.error("Erro ao excluir anfitrião:", error);
-      toast({ title: "Erro", description: "Não foi possível excluir o anfitrião.", variant: "destructive" });
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({ name: "", role: "", description: "" });
-    setSelectedAgendas([]);
-    setEditingHost(null);
-    
-    // Reset horários de funcionamento para padrão
+  
+  const resetOperatingHours = () => {
+    // Reset para horarios padrao
     setOperatingHours({
-      'Domingo': [{start: '08:00', end: '17:00'}],
       'Segunda-Feira': [{start: '08:00', end: '17:00'}],
-      'Terça-Feira': [{start: '08:00', end: '17:00'}],
+      'Terca-Feira': [{start: '08:00', end: '17:00'}],
       'Quarta-Feira': [{start: '08:00', end: '17:00'}],
       'Quinta-Feira': [{start: '08:00', end: '17:00'}],
       'Sexta-Feira': [{start: '08:00', end: '17:00'}],
-      'Sábado': [{start: '08:00', end: '17:00'}]
+      'Sabado': [{start: '08:00', end: '17:00'}]
+    });
+  };
+  
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este anfitriao?")) return;
+    
+    try {
+      const { error } = await supabase.from('employees').delete().eq('id', id);
+      if (error) throw error;
+      toast({ title: "Sucesso", description: "Anfitriao excluido com sucesso!" });
+      fetchHosts();
+    } catch (error) {
+      console.error("Erro ao excluir anfitriao:", error);
+      toast({ title: "Erro", description: "Nao foi possivel excluir o anfitriao.", variant: "destructive" });
+    }
+  };
+  
+  const resetForm = () => {
+    setFormData({ name: '', role: '', description: '' });
+    setSelectedAgendas([]);
+    setEditingHost(null);
+    
+    // Reset horarios de funcionamento para padrao
+    setOperatingHours({
+      'Segunda-Feira': [{start: '08:00', end: '17:00'}],
+      'Terca-Feira': [{start: '08:00', end: '17:00'}],
+      'Quarta-Feira': [{start: '08:00', end: '17:00'}],
+      'Quinta-Feira': [{start: '08:00', end: '17:00'}],
+      'Sexta-Feira': [{start: '08:00', end: '17:00'}],
+      'Sabado': [{start: '08:00', end: '17:00'}]
     });
     
-    // Reset dias disponíveis para padrão
-    setAvailableDays(['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
+    // Reset dias disponiveis para padrao
+    setAvailableDays(['Segunda-Feira', 'Terca-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
   };
-
+  
+  const openDialog = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+  
+  // Handlers para o header
+  const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+    setSortBy(newSortBy as 'name' | 'role' | 'created_at');
+    setSortOrder(newSortOrder);
+  };
+  
+  const handleImport = () => {
+    // TODO: Implementar importacao
+    console.log('Importar anfitrioes');
+  };
+  
+  const handleExport = () => {
+    // TODO: Implementar exportacao
+    console.log('Exportar anfitrioes');
+  };
+  
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">Anfitriões</h3>
-          <p className="text-sm text-muted-foreground">Gerencie os anfitriões e suas agendas associadas.</p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Adicionar Anfitrião</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{editingHost ? "Editar Anfitrião" : "Novo Anfitrião"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label htmlFor="name">Nome *</Label><Input id="name" value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} required /></div>
-                <div className="space-y-2"><Label htmlFor="role">Função *</Label><Input id="role" value={formData.role} onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))} required /></div>
-              </div>
-              <div className="space-y-2"><Label htmlFor="description">Descrição</Label><Textarea id="description" value={formData.description} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} /></div>
+      <HostsHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onAddHost={openDialog}
+        onImport={handleImport}
+        onExport={handleExport}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        totalHosts={hosts.length}
+        filteredHosts={displayHosts.length}
+        roleFilter={roleFilter}
+        onRoleFilterChange={setRoleFilter}
+      />
+      
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <Button><Plus className="h-4 w-4 mr-2" />Adicionar Anfitriao</Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingHost ? "Editar Anfitriao" : "Novo Anfitriao"}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label htmlFor="name">Nome *</Label><Input id="name" value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} required /></div>
+              <div className="space-y-2"><Label htmlFor="role">Funcao *</Label><Input id="role" value={formData.role} onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))} required /></div>
+            </div>
+            <div className="space-y-2"><Label htmlFor="description">Descricao</Label><Textarea id="description" value={formData.description} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} /></div>
+            
+            <div className="space-y-4">
+              <Label className="text-sm font-medium">Horario de Funcionamento</Label>
               
-              {/* Seção de Horário de Funcionamento */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <Label className="text-sm font-medium">Horário de Funcionamento</Label>
-                </div>
-                
-                {/* Dias Disponíveis */}
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Dias Disponíveis</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'].map((day) => (
-                      <div key={day} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`day-${day}`}
-                          checked={availableDays.includes(day)}
-                          onCheckedChange={() => toggleAvailableDay(day)}
-                        />
-                        <Label htmlFor={`day-${day}`} className="text-sm">
-                          {day}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Horários por Dia */}
-                <div className="space-y-3">
-                  {availableDays.map((day) => (
-                    <div key={day} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium">{day}</Label>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => addOperatingHour(day)}
-                          className="h-6 w-6 p-0"
-                        >
-                          +
-                        </Button>
-                      </div>
-                      <div className="space-y-2">
-                        {operatingHours[day]?.map((hour, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <Input
-                              type="time"
-                              value={hour.start}
-                              onChange={(e) => updateOperatingHour(day, index, 'start', e.target.value)}
-                              className="flex-1"
-                            />
-                            <span className="text-sm text-muted-foreground">até</span>
-                            <Input
-                              type="time"
-                              value={hour.end}
-                              onChange={(e) => updateOperatingHour(day, index, 'end', e.target.value)}
-                              className="flex-1"
-                            />
-                            {operatingHours[day]?.length > 1 && (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => removeOperatingHour(day, index)}
-                                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                              >
-                                ×
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Dias Disponiveis</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['Domingo', 'Segunda-Feira', 'Terca-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sabado'].map((day) => (
+                    <div key={day} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={day}
+                        checked={availableDays.includes(day)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setAvailableDays(prev => [...prev, day]);
+                          } else {
+                            setAvailableDays(prev => prev.filter(d => d !== day));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={day} className="text-sm">{day}</Label>
                     </div>
                   ))}
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label>Agendas Associadas</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start h-auto min-h-10">
-                      {selectedAgendas.length > 0 ? (
-                        <div className="flex gap-1 flex-wrap">
-                          {selectedAgendas.map(agenda => (
-                            <Badge key={agenda.id} variant="secondary">{agenda.title}</Badge>
-                          ))}
+              
+              <div className="space-y-3">
+                {availableDays.map((day) => (
+                  <div key={day} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">{day}</Label>
+                      <Button type="button" variant="outline" size="sm" onClick={() => addOperatingHour(day)}>
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <div className="space-y-2">
+                      {operatingHours[day]?.map((hour, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Input
+                            type="time"
+                            value={hour.start}
+                            onChange={(e) => updateOperatingHour(day, index, 'start', e.target.value)}
+                            className="w-32"
+                          />
+                          <span className="text-sm text-muted-foreground">ate</span>
+                          <Input
+                            type="time"
+                            value={hour.end}
+                            onChange={(e) => updateOperatingHour(day, index, 'end', e.target.value)}
+                            className="w-32"
+                          />
+                          {operatingHours[day].length > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeOperatingHour(day, index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
-                      ) : "Selecione as agendas"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                    <Command>
-                      <CommandInput placeholder="Buscar agenda..." />
-                      <CommandList>
-                        <CommandEmpty>Nenhuma agenda encontrada.</CommandEmpty>
-                        <CommandGroup>
-                          {(supabaseAgendas || []).map(agenda => {
-                            const mappedAgenda = {
-                              id: agenda.id,
-                              title: agenda.name,
-                              description: agenda.description || '',
-                              category: agenda.category || '',
-                              host: '',
-                              duration: agenda.duration_minutes || 60,
-                              breakTime: agenda.buffer_time_minutes || 0
-                            };
-                            return (
-                              <CommandItem
-                                key={agenda.id}
-                                onSelect={() => {
-                                  setSelectedAgendas(current => 
-                                    current.some(a => a.id === agenda.id)
-                                      ? current.filter(a => a.id !== agenda.id)
-                                      : [...current, mappedAgenda]
-                                  )
-                                }}
-                              >
-                                <div className={`mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary ${selectedAgendas.some(a => a.id === agenda.id) ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible"}`}>
-                                  <X className="h-4 w-4" />
-                                </div>
-                                {agenda.name}
-                              </CommandItem>
-                            );
-                           })}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-
-              <DialogFooter><Button type="button" variant="outline" onClick={() => { setIsDialogOpen(false); resetForm(); }}>Cancelar</Button><Button type="submit">{editingHost ? "Atualizar" : "Adicionar"}</Button></DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {hosts.map((host) => (
-          <Card key={host.id} className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <User className="h-6 w-6 text-primary" />
-                  <div>
-                    <CardTitle className="text-base">{host.name}</CardTitle>
-                    <Badge variant="secondary" className="text-xs mt-1">{host.role}</Badge>
+            </div>
+            
+            <div className="space-y-4">
+              <Label className="text-sm font-medium">Agendas Associadas</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    {selectedAgendas.length > 0 ? `${selectedAgendas.length} agendas selecionadas` : "Selecionar agendas"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0">
+                  <Command>
+                    <CommandInput placeholder="Buscar agendas..." />
+                    <CommandEmpty>Nenhuma agenda encontrada.</CommandEmpty>
+                    <CommandGroup>
+                      <CommandList>
+                        {agendas.map((agenda) => (
+                          <CommandItem
+                            key={agenda.id}
+                            onSelect={() => {
+                              const agendaId = agenda.id.toString();
+                              setSelectedAgendas(prev => 
+                                prev.includes(agendaId)
+                                  ? prev.filter(id => id !== agendaId)
+                                  : [...prev, agendaId]
+                              );
+                            }}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={selectedAgendas.includes(agenda.id.toString())}
+                                readOnly
+                              />
+                              <span>{agenda.title}</span>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+              <Button type="submit">{editingHost ? "Atualizar" : "Adicionar"}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {viewMode === 'hierarchy' ? (
+        <HostsHierarchicalView
+          hosts={displayHosts}
+          agendas={agendas}
+          searchTerm={searchTerm}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {displayHosts.map((host) => (
+            <Card key={host.id} className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <User className="h-6 w-6 text-primary" />
+                    <div>
+                      <CardTitle className="text-base">{host.name}</CardTitle>
+                      <Badge variant="secondary" className="text-xs mt-1">{host.role}</Badge>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(host)}><Edit className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(host.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => handleEdit(host)}><Edit className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(host.id)}><Trash2 className="h-4 w-4" /></Button>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {host.description && <p className="text-sm text-muted-foreground">{host.description}</p>}
+                <div>
+                  <div className="flex items-center gap-2 mb-2"><Calendar className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-medium">Agendas:</span></div>
+                  <div className="flex flex-wrap gap-1">
+                    <Badge variant="outline">Consulta de Terapia</Badge>
+                    <Badge variant="outline">Aula de Yoga</Badge>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {host.description && <p className="text-sm text-muted-foreground">{host.description}</p>}
-              <div>
-                <div className="flex items-center gap-2 mb-2"><Calendar className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-medium">Agendas:</span></div>
-                <div className="flex flex-wrap gap-1">
-                  <Badge variant="outline">Consulta de Terapia</Badge>
-                  <Badge variant="outline">Aula de Yoga</Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
+      {displayHosts.length === 0 && hosts.length > 0 && (
+        <div className="text-center py-12">
+          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium">Nenhum anfitriao encontrado</h3>
+          <p className="text-sm text-muted-foreground">Tente ajustar os filtros de busca.</p>
+        </div>
+      )}
+      
       {hosts.length === 0 && (
-        <div className="text-center py-12"><User className="h-12 w-12 text-gray-400 mx-auto mb-4" /><h3 className="text-lg font-medium">Nenhum anfitrião cadastrado</h3><p className="text-sm text-muted-foreground">Comece adicionando anfitriões à sua equipe.</p></div>
+        <div className="text-center py-12">
+          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium">Nenhum anfitriao cadastrado</h3>
+          <p className="text-sm text-muted-foreground">Comece adicionando anfitrioes a sua equipe.</p>
+        </div>
       )}
     </div>
   );

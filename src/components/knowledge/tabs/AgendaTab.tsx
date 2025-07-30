@@ -1,8 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { AgendaForm } from './AgendaForm';
 import { useHosts } from '@/hooks/useHosts';
 import { useAgendas } from '@/hooks/useAgendas';
+import AgendaHeader from '../agenda/AgendaHeader';
+import AgendaHierarchicalView from '../agenda/AgendaHierarchicalView';
 import {
   Dialog,
   DialogContent,
@@ -164,8 +166,14 @@ export const FormField = ({ label, tooltipText, children }: { label: string, too
 const AgendaTab = () => {
   const { hosts, loading: hostsLoading } = useHosts();
   const { agendas: supabaseAgendas, agendasLoading, refetchAgendas, createAgenda, updateAgenda, deleteAgenda } = useAgendas();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAgenda, setEditingAgenda] = useState<LocalAgenda | null>(null);
+  
+  // Estados para o header
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'date' | 'created_at'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [viewMode, setViewMode] = useState<'grid' | 'hierarchy'>('grid');
 
   // Função para converter agenda do Supabase para formato local
   const convertSupabaseToLocal = (supabaseAgenda: SupabaseAgenda): LocalAgenda => {
@@ -191,13 +199,51 @@ const AgendaTab = () => {
   };
 
   // Usar dados do Supabase convertidos para formato local
-  const displayAgendas = supabaseAgendas.map(convertSupabaseToLocal);
+  const baseAgendas = supabaseAgendas.map(convertSupabaseToLocal);
+  
+  // Filtrar e ordenar agendas
+  const displayAgendas = useMemo(() => {
+    let filtered = baseAgendas;
+    
+    // Aplicar filtro de busca
+    if (searchTerm) {
+      filtered = filtered.filter(agenda => 
+        agenda.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        agenda.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        agenda.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Não há filtro de categoria específico aqui, mas pode ser adicionado futuramente
+    
+    // Aplicar ordenação
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'name':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'date':
+          // Para agendas, vamos usar a data de criação como proxy
+          comparison = a.id.localeCompare(b.id);
+          break;
+        case 'created_at':
+          comparison = a.id.localeCompare(b.id);
+          break;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+    
+    return filtered;
+  }, [baseAgendas, searchTerm, sortBy, sortOrder]);
 
   const isLoading = agendasLoading || hostsLoading;
 
   
 
-  const handleSave = async (agendaData: Omit<LocalAgenda, 'id'>) => {
+  const handleSave = async (currentAgenda: Omit<LocalAgenda, 'id'>) => {
     try {
       const agendaData = {
         name: currentAgenda.title,
@@ -230,6 +276,22 @@ const AgendaTab = () => {
     }
   };
   
+  // Handlers para o header
+  const handleSortChange = (newSortBy: 'name' | 'date' | 'created_at', newSortOrder: 'asc' | 'desc') => {
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+  };
+  
+  const handleImport = () => {
+    // TODO: Implementar importação
+    console.log('Importar agendas');
+  };
+  
+  const handleExport = () => {
+    // TODO: Implementar exportação
+    console.log('Exportar agendas');
+  };
+  
   const openDialog = () => {
     setEditingAgenda(null);
     setIsDialogOpen(true);
@@ -255,24 +317,30 @@ const AgendaTab = () => {
    };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-foreground">Controle de Agenda</h2>
-          <p className="text-lg text-muted-foreground mt-1">Gerencie suas agendas e horários de atendimento</p>
-        </div>
-        <Button onClick={openDialog} size="lg" className="font-semibold">
-          Criar Nova Agenda
-        </Button>
-        <AgendaForm 
-          isOpen={isDialogOpen} 
-          onOpenChange={setIsDialogOpen} 
-          onSave={handleSave}
-          editingAgenda={editingAgenda}
-          hosts={hosts}
-          hostsLoading={hostsLoading}
-        />
-      </div>
+    <div className="space-y-6">
+      <AgendaHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onCreateNew={openDialog}
+        onImport={handleImport}
+        onExport={handleExport}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        totalAgendas={baseAgendas.length}
+        filteredAgendas={displayAgendas.length}
+      />
+      
+      <AgendaForm 
+        isOpen={isDialogOpen} 
+        onOpenChange={setIsDialogOpen} 
+        onSave={handleSave}
+        editingAgenda={editingAgenda}
+        hosts={hosts}
+        hostsLoading={hostsLoading}
+      />
 
       {isLoading ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -307,6 +375,14 @@ const AgendaTab = () => {
           <p className="text-lg text-muted-foreground">Nenhuma agenda criada ainda.</p>
           <p className="text-base text-muted-foreground mt-2">Clique em "Criar Nova Agenda" para começar.</p>
         </div>
+      ) : viewMode === "hierarchy" ? (
+        <AgendaHierarchicalView
+          agendas={displayAgendas}
+          onEdit={handleEditAgenda}
+          onDelete={handleDeleteAgenda}
+          searchTerm={searchTerm}
+          supabaseAgendas={supabaseAgendas}
+        />
       ) : (
         <div className="max-h-[800px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

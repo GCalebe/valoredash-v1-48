@@ -89,34 +89,51 @@ const TemplateView: React.FC<TemplateViewProps> = ({ dbTemplates, templatesLoadi
           <p className="text-muted-foreground">Nenhum template encontrado</p>
         </div>
       ) : (
-        <PersonalityCards
-          personalities={predefinedPersonalities}
-          onSelect={(personality) => {
-            // Converter PersonalityConfig para AIPersonalityTemplate
-            const template: AIPersonalityTemplate = {
-              id: personality.name.toLowerCase().replace(/\s+/g, '-'),
-              name: personality.name,
-              description: personality.description,
-              category: personality.category,
-              settings: personality
-            };
-            handleTemplateSelect(template);
-          }}
-          onPreview={(personality) => {
-            const template: AIPersonalityTemplate = {
-              id: personality.name.toLowerCase().replace(/\s+/g, '-'),
-              name: personality.name,
-              description: personality.description,
-              category: personality.category,
-              settings: personality
-            };
-            handleTemplatePreview(template);
-          }}
-          onActivate={(personality) => {
-            // Implementar lógica de ativação da personalidade
-            console.log('Ativando personalidade:', personality.name);
-          }}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {templates.map((template) => (
+            <div
+              key={template.id}
+              className={`p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow ${
+                isTemplateActive(template) ? 'border-green-500 bg-green-50' : 'border-gray-200'
+              }`}
+              onClick={() => handleTemplateSelect(template)}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">{template.icon}</div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{template.name}</h3>
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      {template.category}
+                    </span>
+                    {isTemplateActive(template) && (
+                      <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded">
+                        Ativo
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTemplatePreview(template);
+                    }}
+                    className="p-1 hover:bg-gray-100 rounded"
+                    title="Visualizar"
+                  >
+                    👁️
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">{template.description}</p>
+              <div className="text-xs text-gray-500">
+                <div>Indústria: {template.industry}</div>
+                <div>Métricas: {template.metrics}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       <PersonalityPreviewDialog

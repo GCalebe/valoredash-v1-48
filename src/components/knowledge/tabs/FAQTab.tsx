@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Plus, Search, HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import FAQHeader from "@/components/knowledge/faq/FAQHeader";
 import {
   Dialog,
   DialogContent,
@@ -24,9 +25,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useFAQManagement from "@/hooks/useFAQManagement";
 import FAQForm from "@/components/knowledge/faq/FAQForm";
 import FAQTreeView from "@/components/knowledge/faq/FAQTreeView";
+import FAQHierarchicalView from "@/components/knowledge/faq/FAQHierarchicalView";
 
 const FAQTab = () => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<"question" | "category" | "created_at">("question");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [viewMode, setViewMode] = useState<"grid" | "hierarchy">("grid");
   
   const {
     isAddDialogOpen,
@@ -76,6 +81,41 @@ const FAQTab = () => {
     setExpandedCategories(new Set());
   };
 
+  // Ordenar FAQs com base nos critérios de ordenação
+  const sortedFAQs = useMemo(() => {
+    if (!filteredFAQs) return [];
+    
+    return [...filteredFAQs].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case "question":
+          comparison = a.question.localeCompare(b.question);
+          break;
+        case "category":
+          comparison = a.category.localeCompare(b.category);
+          break;
+        case "created_at":
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+      }
+      
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  }, [filteredFAQs, sortBy, sortOrder]);
+  
+  // Handler para mudança de ordenação
+  const handleSortChange = (newSortBy: "question" | "category" | "created_at", newSortOrder: "asc" | "desc") => {
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+  };
+  
+  // Handlers para importação e exportação
+  const handleImport = () => {
+    // TODO: Implementar importação
+    console.log("Importar FAQs");
+  };
+  
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -126,89 +166,59 @@ const FAQTab = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-          Perguntas & Respostas (FAQ)
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Gerencie as perguntas frequentes da base de conhecimento
-        </p>
-      </div>
-
-      {/* Search and Actions */}
-      <div className="flex justify-between items-center gap-4">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              placeholder="Buscar FAQ..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          {/* Controles de expansão */}
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={expandAll}
-              className="text-xs"
-            >
-              <ChevronDown className="h-3 w-3 mr-1" />
-              Expandir Todas
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={collapseAll}
-              className="text-xs"
-            >
-              <ChevronUp className="h-3 w-3 mr-1" />
-              Recolher Todas
-            </Button>
-          </div>
-
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar FAQ
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Adicionar Nova FAQ</DialogTitle>
-                <DialogDescription>
-                  Crie uma nova pergunta e resposta para a base de conhecimento.
-                </DialogDescription>
-              </DialogHeader>
-              <FAQForm
-                faq={newFAQ}
-                setFaq={setNewFAQ}
-                onCancel={() => setIsAddDialogOpen(false)}
-                onSubmit={addFAQ}
-                isLoading={createFAQMutation.isPending}
-                submitLabel="Adicionar"
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
+      <FAQHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onAddFAQ={() => setIsAddDialogOpen(true)}
+        onImport={handleImport}
+        onExport={exportFAQs}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
+        totalFAQs={filteredFAQs?.length || 0}
+        filteredFAQs={sortedFAQs?.length || 0}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
+      
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Nova FAQ</DialogTitle>
+            <DialogDescription>
+              Crie uma nova pergunta e resposta para a base de conhecimento.
+            </DialogDescription>
+          </DialogHeader>
+          <FAQForm
+            faq={newFAQ}
+            setFaq={setNewFAQ}
+            onCancel={() => setIsAddDialogOpen(false)}
+            onSubmit={addFAQ}
+            isLoading={createFAQMutation.isPending}
+            submitLabel="Adicionar"
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* FAQ Content */}
-      <FAQTreeView
-        faqs={filteredFAQs}
-        onEdit={editFAQ}
-        onDelete={deleteFAQ}
-        isDeleting={deleteFAQMutation.isPending}
-        expandedCategories={expandedCategories}
-        onToggleCategory={toggleCategory}
-      />
+      {viewMode === "hierarchy" ? (
+        <FAQHierarchicalView
+          faqs={sortedFAQs}
+          onEdit={editFAQ}
+          onDelete={deleteFAQ}
+          isDeleting={deleteFAQMutation.isPending}
+          searchTerm={searchTerm}
+        />
+      ) : (
+        <FAQTreeView
+          faqs={sortedFAQs}
+          onEdit={editFAQ}
+          onDelete={deleteFAQ}
+          isDeleting={deleteFAQMutation.isPending}
+          expandedCategories={expandedCategories}
+          onToggleCategory={toggleCategory}
+        />
+      )}
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

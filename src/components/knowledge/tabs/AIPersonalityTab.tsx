@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAIPersonalityForm } from "@/hooks/useAIPersonalityForm";
 import { useAIPersonalityQuery } from "@/hooks/useAIPersonalityQuery";
@@ -8,6 +8,8 @@ import { usePersonalityTemplates } from "@/hooks/usePersonalityTemplates";
 import { useToast } from "@/hooks/use-toast";
 import TemplateView from "@/components/knowledge/personality/TemplateView";
 import ConfigurationView from "@/components/knowledge/personality/ConfigurationView";
+import PersonalityHeader from "@/components/knowledge/personality/PersonalityHeader";
+import PersonalityHierarchicalView from "@/components/knowledge/personality/PersonalityHierarchicalView";
 
 const AIPersonalityTab = () => {
   const { toast } = useToast();
@@ -36,9 +38,24 @@ const AIPersonalityTab = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<AIPersonalityTemplate | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<AIPersonalityTemplate | null>(null);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  
+  // Estados para o header
+  const [searchTerm, setSearchTerm] = useState('');
+  const [displayMode, setDisplayMode] = useState<'grid' | 'hierarchy'>('grid');
 
 
   const templates = dbTemplates || [];
+  
+  // Filtrar templates com base na busca
+  const filteredTemplates = useMemo(() => {
+    if (!searchTerm) return templates;
+    
+    return templates.filter(template => 
+      template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.category?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [templates, searchTerm]);
 
   const isTemplateActive = (template: AIPersonalityTemplate) => {
     return activeTemplateId === template.id;
@@ -77,6 +94,21 @@ const AIPersonalityTab = () => {
   const onSave = () => {
     handleSave(selectedTemplate?.id || null);
   };
+  
+  // Handlers para o header
+  const handleImport = () => {
+    // TODO: Implementar importação
+    console.log('Importar template');
+  };
+  
+  const handleExport = () => {
+    // TODO: Implementar exportação
+    console.log('Exportar configuração');
+  };
+  
+  const handleReset = () => {
+    reset();
+  };
 
 
 
@@ -94,22 +126,46 @@ const AIPersonalityTab = () => {
 
   return (
     <div className="space-y-6">
+      <PersonalityHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onCreateNew={currentView === 'templates' ? handleCreateNew : onSave}
+        onImport={handleImport}
+        onExport={handleExport}
+        onReset={currentView === 'configuration' ? handleReset : undefined}
+        viewMode={currentView}
+        onViewModeChange={setCurrentView}
+        displayMode={displayMode}
+        onDisplayModeChange={setDisplayMode}
+        totalTemplates={templates.length}
+        filteredTemplates={filteredTemplates.length}
+        hasChanges={hasChanges}
+      />
+      
       {currentView === 'templates' ? (
-        <TemplateView
-          templates={templates}
-          dbTemplates={dbTemplates || []}
-          templatesLoading={templatesLoading}
-          templatesError={templatesError}
-          isTemplateActive={isTemplateActive}
-          handleTemplateSelect={handleTemplateSelect}
-          handleTemplatePreview={handleTemplatePreview}
-          showPreviewDialog={showPreviewDialog}
-          setShowPreviewDialog={setShowPreviewDialog}
-          previewTemplate={previewTemplate}
-          handleApplyTemplate={handleApplyTemplate}
-          refetchTemplates={refetchTemplates}
-          handleCreateNew={handleCreateNew}
-        />
+        displayMode === 'hierarchy' ? (
+          <PersonalityHierarchicalView
+            templates={filteredTemplates}
+            onPreview={handleTemplatePreview}
+            searchTerm={searchTerm}
+          />
+        ) : (
+          <TemplateView
+            templates={filteredTemplates}
+            dbTemplates={dbTemplates || []}
+            templatesLoading={templatesLoading}
+            templatesError={templatesError}
+            isTemplateActive={isTemplateActive}
+            handleTemplateSelect={handleTemplateSelect}
+            handleTemplatePreview={handleTemplatePreview}
+            showPreviewDialog={showPreviewDialog}
+            setShowPreviewDialog={setShowPreviewDialog}
+            previewTemplate={previewTemplate}
+            handleApplyTemplate={handleApplyTemplate}
+            refetchTemplates={refetchTemplates}
+            handleCreateNew={handleCreateNew}
+          />
+        )
       ) : (
         <ConfigurationView
           settings={settings}
