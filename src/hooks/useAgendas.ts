@@ -66,7 +66,7 @@ export function useAgendas() {
 
       const { data, error } = await supabase
         .from('agendas')
-        .insert([{ ...agendaData, created_by: user.id, user_id: user.id }]) // Adicionando ambos por segurança
+        .insert([{ ...agendaData, created_by: user.id }]) // Apenas created_by existe na tabela
         .select();
 
       if (error) {
@@ -94,9 +94,12 @@ export function useAgendas() {
 
   const updateAgenda = async (id: string, agendaData: Partial<Omit<Agenda, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by'>>) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from('agendas')
-        .update({ ...agendaData, updated_at: new Date().toISOString() })
+        .update({ ...agendaData, updated_at: new Date().toISOString(), updated_by: user.id })
         .eq('id', id)
         .select();
 
@@ -125,9 +128,12 @@ export function useAgendas() {
 
   const deleteAgenda = async (id: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { error } = await supabase
         .from('agendas')
-        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .update({ is_active: false, updated_at: new Date().toISOString(), updated_by: user.id })
         .eq('id', id);
 
       if (error) {

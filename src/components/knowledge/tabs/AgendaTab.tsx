@@ -14,6 +14,16 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -169,6 +179,10 @@ const AgendaTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAgenda, setEditingAgenda] = useState<LocalAgenda | null>(null);
   
+  // Estados para confirmação de exclusão
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [agendaToDelete, setAgendaToDelete] = useState<string | null>(null);
+  
   // Estados para o header
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'created_at'>('name');
@@ -302,17 +316,38 @@ const AgendaTab = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDeleteAgenda = async (agendaId: string | number) => {
-     if (window.confirm('Tem certeza que deseja excluir esta agenda?')) {
-       try {
-         // Encontrar a agenda original do Supabase para pegar o ID correto
-         const supabaseAgenda = supabaseAgendas.find(sa => parseInt(sa.id) === agendaId);
-         if (supabaseAgenda) {
-           await deleteAgenda(supabaseAgenda.id);
-         }
-       } catch (error) {
-         console.error('Erro ao deletar agenda:', error);
+  const handleDeleteAgenda = (agendaId: string | number) => {
+     console.log('🗑️ handleDeleteAgenda chamada com ID:', agendaId);
+     const agendaIdStr = agendaId.toString();
+     setAgendaToDelete(agendaIdStr);
+     setIsDeleteDialogOpen(true);
+   };
+
+   const confirmDeleteAgenda = async () => {
+     if (!agendaToDelete) return;
+     
+     console.log('📋 Agendas disponíveis:', supabaseAgendas.map(a => ({ id: a.id, name: a.name })));
+     
+     try {
+       console.log('🔍 Procurando agenda com ID:', agendaToDelete);
+       
+       // Encontrar a agenda original do Supabase para pegar o ID correto
+       const supabaseAgenda = supabaseAgendas.find(sa => sa.id === agendaToDelete);
+       console.log('📍 Agenda encontrada:', supabaseAgenda);
+       
+       if (supabaseAgenda) {
+         console.log('🚀 Chamando deleteAgenda com ID:', supabaseAgenda.id);
+         await deleteAgenda(supabaseAgenda.id);
+         console.log('✅ Agenda excluída com sucesso!');
+       } else {
+         console.error('❌ Agenda não encontrada:', agendaToDelete);
+         console.error('📋 IDs disponíveis:', supabaseAgendas.map(a => a.id));
        }
+     } catch (error) {
+       console.error('💥 Erro ao deletar agenda:', error);
+     } finally {
+       setIsDeleteDialogOpen(false);
+       setAgendaToDelete(null);
      }
    };
 
@@ -443,6 +478,32 @@ const AgendaTab = () => {
           </div>
         </div>
       )}
+      
+      {/* Diálogo de confirmação de exclusão */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A agenda será permanentemente removida do sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setIsDeleteDialogOpen(false);
+              setAgendaToDelete(null);
+            }}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteAgenda}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

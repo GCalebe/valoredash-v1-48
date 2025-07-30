@@ -50,26 +50,26 @@ const HostsHierarchicalView: React.FC<HostsHierarchicalViewProps> = ({
       agendaMap[agenda.id] = [];
     });
     
-    // Adicionar hosts às suas agendas correspondentes
-    // Como não temos a relação direta no estado atual, vamos simular com base no nome do host
-    // Em uma implementação real, você usaria a tabela employee_agendas
-    hosts.forEach(host => {
-      // Filtrar hosts com base no termo de busca
-      if (
-        searchTerm &&
-        !host.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !host.role.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !host.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      ) {
-        return;
-      }
-      
-      // Distribuir o host para todas as agendas (simulação)
-      // Em uma implementação real, você verificaria a tabela employee_agendas
-      agendas.forEach(agenda => {
-        agendaMap[agenda.id].push(host);
-      });
+    // Filtrar hosts com base no termo de busca
+    const filteredHosts = hosts.filter(host => {
+      if (!searchTerm) return true;
+      return (
+        host.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        host.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        host.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     });
+    
+    // Distribuir os hosts filtrados para suas agendas
+    // Como a tabela employee_agendas pode não ter dados ainda,
+    // vamos criar uma categoria "Sem Agenda Específica" para mostrar todos os hosts
+    const virtualAgendaId = 'no-specific-agenda';
+    agendaMap[virtualAgendaId] = [];
+    
+    // Adicionar todos os hosts filtrados à categoria "Sem Agenda Específica"
+    if (filteredHosts.length > 0) {
+      agendaMap[virtualAgendaId] = filteredHosts;
+    }
     
     return agendaMap;
   }, [hosts, agendas, searchTerm]);
@@ -99,30 +99,45 @@ const HostsHierarchicalView: React.FC<HostsHierarchicalViewProps> = ({
 
   // Função para obter o nome da agenda
   const getAgendaName = (agendaId: string) => {
+    if (agendaId === 'no-specific-agenda') {
+      return 'Sem Agenda Específica';
+    }
     const agenda = agendas.find(a => a.id === agendaId);
     return agenda?.name || 'Agenda sem nome';
   };
 
   // Função para obter a duração da agenda
   const getAgendaDuration = (agendaId: string) => {
+    if (agendaId === 'no-specific-agenda') {
+      return 0;
+    }
     const agenda = agendas.find(a => a.id === agendaId);
     return agenda?.duration_minutes || 0;
   };
 
   // Função para obter o preço da agenda
   const getAgendaPrice = (agendaId: string) => {
+    if (agendaId === 'no-specific-agenda') {
+      return 0;
+    }
     const agenda = agendas.find(a => a.id === agendaId);
     return agenda?.price || 0;
   };
 
   // Função para formatar o preço
   const formatPrice = (agendaId: string) => {
+    if (agendaId === 'no-specific-agenda') {
+      return 'N/A';
+    }
     const price = getAgendaPrice(agendaId);
     return price ? `R$ ${price.toFixed(2)}` : 'Gratuito';
   };
 
   // Função para obter a categoria da agenda
   const getAgendaCategory = (agendaId: string) => {
+    if (agendaId === 'no-specific-agenda') {
+      return 'geral';
+    }
     const agenda = agendas.find(a => a.id === agendaId);
     return agenda?.category || 'sem-categoria';
   };
@@ -180,16 +195,18 @@ const HostsHierarchicalView: React.FC<HostsHierarchicalViewProps> = ({
                 </AccordionTrigger>
                 <AccordionPanel className="px-4 py-2">
                   <div className="grid gap-4 mt-2">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        <span>Duração: {agendaDuration} min</span>
+                    {agendaId !== 'no-specific-agenda' && (
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          <span>Duração: {agendaDuration} min</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          <span>Preço: {formatPrice(agendaId)}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        <span>Preço: {formatPrice(agendaId)}</span>
-                      </div>
-                    </div>
+                    )}
                     
                     <div className="space-y-3 mt-2">
                       {agendaHosts.map((host) => (
