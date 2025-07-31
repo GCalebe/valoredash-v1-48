@@ -10,13 +10,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useKanbanStages } from "@/hooks/useKanbanStages";
+import { useKanbanStagesSupabase } from "@/hooks/useKanbanStagesSupabase";
 
 export function KanbanSettings() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newStage, setNewStage] = useState("");
-  const { stages, loading, addStage, removeStage, reorderStages, fetchStages } =
-    useKanbanStages();
+  const { stages, loading, addStage, removeStage, fetchStages } =
+    useKanbanStagesSupabase();
 
   // For drag-and-drop reordering UI (optional)
   // For now, simple click-up/down arrows, or just a basic non-draggable reorder, focusing on add/remove.

@@ -225,6 +225,46 @@ export function useKanbanStagesSupabase() {
     try {
       console.log("Removing stage:", stageId);
 
+      // First, check if there are contacts using this stage
+      const { data: contactsUsingStage, error: contactsError } = await supabase
+        .from('contacts')
+        .select('id')
+        .eq('kanban_stage_id', stageId)
+        .eq('user_id', user?.id);
+
+      if (contactsError) throw contactsError;
+
+      // If there are contacts using this stage, move them to the first available stage
+      if (contactsUsingStage && contactsUsingStage.length > 0) {
+        const remainingStages = stages.filter(stage => stage.id !== stageId);
+        
+        if (remainingStages.length === 0) {
+          toast({
+            title: "Não é possível remover",
+            description: "Você deve ter pelo menos uma etapa no kanban.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const firstStageId = remainingStages[0].id;
+        
+        // Move all contacts to the first remaining stage
+        const { error: updateError } = await supabase
+          .from('contacts')
+          .update({ kanban_stage_id: firstStageId })
+          .eq('kanban_stage_id', stageId)
+          .eq('user_id', user?.id);
+
+        if (updateError) throw updateError;
+
+        toast({
+          title: "Contatos movidos",
+          description: `${contactsUsingStage.length} contato(s) foram movidos para "${remainingStages[0].title}".`,
+        });
+      }
+
+      // Now remove the stage
       const { error } = await supabase
         .from('kanban_stages')
         .delete()
