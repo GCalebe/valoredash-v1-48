@@ -61,7 +61,7 @@ const config: Config = {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
-        // Valore Náutico theme colors
+        // Valore Comercial theme colors
         "valore-blue": "hsl(var(--valore-blue))",
         "valore-gold": "hsl(var(--valore-gold))",
         "valore-navy": "hsl(var(--valore-navy))",

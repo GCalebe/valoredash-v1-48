@@ -25,7 +25,7 @@ const sampleClients = [
     consultation_stage: 'Nova consulta',
     tags: ['vip', 'interessado'],
     budget: 150000.00,
-    client_sector: 'Náutico',
+    client_sector: 'Comercial',
     notes: 'Cliente interessado em lancha de luxo'
   },
   {
@@ -38,7 +38,7 @@ const sampleClients = [
     consultation_stage: 'Qualificado',
     tags: ['premium', 'urgente'],
     budget: 250000.00,
-    client_sector: 'Náutico',
+    client_sector: 'Comercial',
     notes: 'Procura iate para eventos corporativos'
   },
   {
@@ -51,7 +51,7 @@ const sampleClients = [
     consultation_stage: 'Proposta enviada',
     tags: ['corporativo'],
     budget: 80000.00,
-    client_sector: 'Náutico',
+    client_sector: 'Comercial',
     notes: 'Interessado em embarcação para pesca esportiva'
   },
   {
@@ -64,7 +64,7 @@ const sampleClients = [
     consultation_stage: 'Negociação',
     tags: ['luxury', 'repeat-customer'],
     budget: 500000.00,
-    client_sector: 'Náutico',
+    client_sector: 'Comercial',
     notes: 'Cliente fiel, procura upgrade de iate'
   },
   {
@@ -77,7 +77,7 @@ const sampleClients = [
     consultation_stage: 'Chamada agendada',
     tags: ['new-client'],
     budget: 120000.00,
-    client_sector: 'Náutico',
+    client_sector: 'Comercial',
     notes: 'Primeiro contato, interessado em lancha para família'
   }
 ];

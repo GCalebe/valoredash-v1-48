@@ -51,9 +51,9 @@ export function AppointmentsSection({
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Novo Agendamento Náutico</DialogTitle>
+            <DialogTitle>Novo Agendamento Comercial</DialogTitle>
             <DialogDescription>
-              Preencha os dados para criar um novo agendamento náutico.
+              Preencha os dados para criar um novo agendamento Comercial.
             </DialogDescription>
           </DialogHeader>
 
@@ -206,9 +206,9 @@ export function AppointmentsSection({
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar Agendamento Náutico</DialogTitle>
+            <DialogTitle>Editar Agendamento Comercial</DialogTitle>
             <DialogDescription>
-              Atualize os dados do agendamento náutico.
+              Atualize os dados do agendamento Comercial.
             </DialogDescription>
           </DialogHeader>
 
@@ -281,7 +281,7 @@ export function AppointmentsSection({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-service">Serviço Náutico</Label>
+                <Label htmlFor="edit-service">Serviço Comercial</Label>
                 <select
                   id="edit-service"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
@@ -371,7 +371,7 @@ export function AppointmentsSection({
           <DialogHeader>
             <DialogTitle>Confirmar Exclusão</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir este agendamento náutico? Esta ação
+              Tem certeza que deseja excluir este agendamento Comercial? Esta ação
               não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>

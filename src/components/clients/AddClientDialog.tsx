@@ -145,10 +145,10 @@ const AddClientDialog = ({
         <DialogHeader>
           <DialogTitle className="text-lg flex items-center gap-2">
             <UserPlus className="h-5 w-5 text-green-500" />
-            Adicionar Novo Cliente Náutico
+            Adicionar Novo Cliente Comercial
           </DialogTitle>
           <DialogDescription className="text-gray-600 dark:text-gray-300">
-            Preencha as informações para adicionar um novo cliente náutico ao
+            Preencha as informações para adicionar um novo cliente Comercial ao
             seu CRM.
           </DialogDescription>
         </DialogHeader>

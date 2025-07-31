@@ -379,7 +379,7 @@ async function seedClientCustomValues(contacts, customFields) {
           break;
         case 'multi_select':
           if (field.field_name === 'Atividades Preferidas') {
-            const options = ['Pesca', 'Mergulho', 'Passeio', 'Esportes Náuticos', 'Festas'];
+            const options = ['Pesca', 'Mergulho', 'Passeio', 'Esportes Comercials', 'Festas'];
             const numOptions = randomInt(1, 3);
             fieldValue = Array.from({length: numOptions}, () => randomChoice(options));
           } else if (field.field_name === 'Documentos Enviados') {

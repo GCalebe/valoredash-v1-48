@@ -15,7 +15,7 @@ type ThemeSettingsContextType = {
 };
 
 const defaultSettings: ThemeSettings = {
-  brandName: "Valore Náutico",
+  brandName: "Valore Comercial",
   logo: null,
   primaryColor: "#1e40af",
   secondaryColor: "#f59e0b",

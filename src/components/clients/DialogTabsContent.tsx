@@ -32,7 +32,7 @@ const DialogTabsContent = React.memo(({ newContact }: DialogTabsContentProps) =>
       <TabsContent value="produtos" className="space-y-4">
         <div className="text-center py-8 text-gray-500">
           <h3 className="text-lg font-medium mb-2">Produtos de Interesse</h3>
-          <p>Selecione os produtos náuticos de interesse do cliente.</p>
+          <p>Selecione os produtos Comercials de interesse do cliente.</p>
           <p className="text-sm mt-2">Em desenvolvimento</p>
         </div>
       </TabsContent>

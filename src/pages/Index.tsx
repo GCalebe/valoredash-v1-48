@@ -141,7 +141,7 @@ const Index = () => {
               className="text-white/80 text-center mb-6 animate-slide-up"
               style={{ animationDelay: "0.3s" }}
             >
-              Entre para gerenciar seu assistente náutico
+              Entre para gerenciar seu assistente comercial
             </p>
 
             <div
