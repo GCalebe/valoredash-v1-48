@@ -41,6 +41,24 @@ const productSchema = z.object({
   has_promotion: z.boolean().nullable().optional(),
   new: z.boolean().nullable().optional(),
   popular: z.boolean().nullable().optional(),
+  // Campos condicionais para promoção
+  promotion_name: z.string().nullable().optional(),
+  promotion_description: z.string().nullable().optional(),
+  discount_percentage: z.number().min(0).max(100).nullable().optional(),
+  discount_amount: z.number().min(0).nullable().optional(),
+  promotion_start_date: z.string().nullable().optional(),
+  promotion_end_date: z.string().nullable().optional(),
+  // Campos condicionais para combo
+  combo_name: z.string().nullable().optional(),
+  combo_description: z.string().nullable().optional(),
+  combo_discount_percentage: z.number().min(0).max(100).nullable().optional(),
+  combo_products: z.array(z.string()).nullable().optional(),
+  // Campos condicionais para upgrade
+  upgrade_name: z.string().nullable().optional(),
+  upgrade_description: z.string().nullable().optional(),
+  upgrade_price: z.number().min(0).nullable().optional(),
+  upgrade_benefits: z.array(z.string()).nullable().optional(),
+  upgrade_target_product: z.string().nullable().optional(),
 });
 
 interface ProductFormProps {
@@ -83,6 +101,22 @@ const ProductForm: React.FC<ProductFormProps> = ({
       has_promotion: false,
       new: false,
       popular: false,
+      // Valores padrão para campos condicionais
+      promotion_name: "",
+      promotion_description: "",
+      discount_percentage: undefined,
+      discount_amount: undefined,
+      promotion_start_date: "",
+      promotion_end_date: "",
+      combo_name: "",
+      combo_description: "",
+      combo_discount_percentage: undefined,
+      combo_products: [],
+      upgrade_name: "",
+      upgrade_description: "",
+      upgrade_price: undefined,
+      upgrade_benefits: [],
+      upgrade_target_product: "",
       ...initialData,
     },
   });
@@ -371,6 +405,66 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <Label htmlFor="has_promotion">Em promoção</Label>
               </div>
 
+              {/* Campos condicionais para promoção */}
+              {watchedValues.has_promotion && (
+                <div className="ml-6 space-y-3 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                  <h4 className="font-medium text-orange-800 dark:text-orange-200">Configurações da Promoção</h4>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="promotion_name">Nome da Promoção</Label>
+                      <Input
+                        id="promotion_name"
+                        {...register("promotion_name")}
+                        placeholder="Ex: Black Friday 2024"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="discount_percentage">Desconto (%)</Label>
+                      <Input
+                        id="discount_percentage"
+                        type="number"
+                        min="0"
+                        max="100"
+                        {...register("discount_percentage", { valueAsNumber: true })}
+                        placeholder="Ex: 25"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="promotion_description">Descrição da Promoção</Label>
+                    <Textarea
+                      id="promotion_description"
+                      {...register("promotion_description")}
+                      placeholder="Descreva os detalhes da promoção..."
+                      rows={2}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="promotion_start_date">Data de Início</Label>
+                      <Input
+                        id="promotion_start_date"
+                        type="datetime-local"
+                        {...register("promotion_start_date")}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="promotion_end_date">Data de Fim</Label>
+                      <Input
+                        id="promotion_end_date"
+                        type="datetime-local"
+                        {...register("promotion_end_date")}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center space-x-2">
                 <Switch
                   id="has_combo"
@@ -380,6 +474,46 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <Label htmlFor="has_combo">Oferece combo</Label>
               </div>
 
+              {/* Campos condicionais para combo */}
+              {watchedValues.has_combo && (
+                <div className="ml-6 space-y-3 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-medium text-blue-800 dark:text-blue-200">Configurações do Combo</h4>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="combo_name">Nome do Combo</Label>
+                      <Input
+                        id="combo_name"
+                        {...register("combo_name")}
+                        placeholder="Ex: Pacote Completo"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="combo_discount_percentage">Desconto do Combo (%)</Label>
+                      <Input
+                        id="combo_discount_percentage"
+                        type="number"
+                        min="0"
+                        max="100"
+                        {...register("combo_discount_percentage", { valueAsNumber: true })}
+                        placeholder="Ex: 15"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="combo_description">Descrição do Combo</Label>
+                    <Textarea
+                      id="combo_description"
+                      {...register("combo_description")}
+                      placeholder="Descreva o que está incluído no combo..."
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center space-x-2">
                 <Switch
                   id="has_upgrade"
@@ -388,6 +522,55 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 />
                 <Label htmlFor="has_upgrade">Oferece upgrade</Label>
               </div>
+
+              {/* Campos condicionais para upgrade */}
+              {watchedValues.has_upgrade && (
+                <div className="ml-6 space-y-3 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <h4 className="font-medium text-green-800 dark:text-green-200">Configurações do Upgrade</h4>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="upgrade_name">Nome do Upgrade</Label>
+                      <Input
+                        id="upgrade_name"
+                        {...register("upgrade_name")}
+                        placeholder="Ex: Versão Premium"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="upgrade_price">Preço do Upgrade (R$)</Label>
+                      <Input
+                        id="upgrade_price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        {...register("upgrade_price", { valueAsNumber: true })}
+                        placeholder="Ex: 199.90"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="upgrade_description">Descrição do Upgrade</Label>
+                    <Textarea
+                      id="upgrade_description"
+                      {...register("upgrade_description")}
+                      placeholder="Descreva os benefícios do upgrade..."
+                      rows={2}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="upgrade_target_product">Produto de Destino</Label>
+                    <Input
+                      id="upgrade_target_product"
+                      {...register("upgrade_target_product")}
+                      placeholder="ID ou nome do produto de upgrade"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center space-x-2">
                 <Switch

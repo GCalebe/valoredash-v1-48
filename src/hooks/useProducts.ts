@@ -75,7 +75,89 @@ const createProduct = async (productData: ProductFormData): Promise<Product> => 
     throw new Error(`Failed to create product: ${error.message}`);
   }
 
-  return data;
+  const createdProduct = data;
+
+  // Salvar dados condicionais se os switches estiverem ativados
+  try {
+    // Salvar promoção se ativada
+    if (productData.has_promotion && productData.promotion_name) {
+      const promotionData = {
+        product_id: createdProduct.id,
+        name: productData.promotion_name,
+        description: productData.promotion_description,
+        discount_percentage: productData.discount_percentage,
+        discount_amount: productData.discount_amount,
+        start_date: productData.promotion_start_date ? new Date(productData.promotion_start_date).toISOString() : null,
+        end_date: productData.promotion_end_date ? new Date(productData.promotion_end_date).toISOString() : null,
+        is_active: true
+      };
+
+      const { error: promotionError } = await supabase
+        .from('product_promotions')
+        .insert([promotionData]);
+
+      if (promotionError) {
+        console.warn('Warning: Failed to save promotion data:', promotionError);
+      }
+    }
+
+    // Salvar combo se ativado
+    if (productData.has_combo && productData.combo_name) {
+      const comboData = {
+        name: productData.combo_name,
+        description: productData.combo_description,
+        discount_percentage: productData.combo_discount_percentage
+      };
+
+      const { data: comboResult, error: comboError } = await supabase
+        .from('product_combos')
+        .insert([comboData])
+        .select()
+        .single();
+
+      if (comboError) {
+        console.warn('Warning: Failed to save combo data:', comboError);
+      } else if (comboResult) {
+        // Associar produto ao combo
+        const { error: comboItemError } = await supabase
+          .from('product_combo_items')
+          .insert([{
+            combo_id: comboResult.id,
+            product_id: createdProduct.id
+          }]);
+
+        if (comboItemError) {
+          console.warn('Warning: Failed to associate product with combo:', comboItemError);
+        }
+      }
+    }
+
+    // Salvar upgrade se ativado
+    if (productData.has_upgrade && productData.upgrade_name) {
+      const upgradeData = {
+        base_product_id: createdProduct.id,
+        upgrade_product_id: productData.upgrade_target_product || createdProduct.id,
+        name: productData.upgrade_name,
+        description: productData.upgrade_description,
+        upgrade_price: productData.upgrade_price,
+        benefits: productData.upgrade_benefits || [],
+        is_active: true
+      };
+
+      const { error: upgradeError } = await supabase
+        .from('product_upgrades')
+        .insert([upgradeData]);
+
+      if (upgradeError) {
+        console.warn('Warning: Failed to save upgrade data:', upgradeError);
+      }
+    }
+  } catch (relatedDataError) {
+    console.warn('Warning: Some related data could not be saved:', relatedDataError);
+    // Não falha a criação do produto principal por causa de dados relacionados
+  }
+
+  return createdProduct;
 };
 
 // Update product

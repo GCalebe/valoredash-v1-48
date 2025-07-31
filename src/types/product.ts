@@ -54,4 +54,22 @@ export interface ProductFormData {
   has_promotion?: boolean;
   new?: boolean;
   popular?: boolean;
+  // Campos condicionais para promoção
+  promotion_name?: string;
+  promotion_description?: string;
+  discount_percentage?: number;
+  discount_amount?: number;
+  promotion_start_date?: string;
+  promotion_end_date?: string;
+  // Campos condicionais para combo
+  combo_name?: string;
+  combo_description?: string;
+  combo_discount_percentage?: number;
+  combo_products?: string[];
+  // Campos condicionais para upgrade
+  upgrade_name?: string;
+  upgrade_description?: string;
+  upgrade_price?: number;
+  upgrade_benefits?: string[];
+  upgrade_target_product?: string;
 }
