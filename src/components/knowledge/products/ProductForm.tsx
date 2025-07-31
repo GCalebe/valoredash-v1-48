@@ -10,6 +10,10 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useProductsQuery } from "@/hooks/useProducts";
 import ObjectionsManager from "./ObjectionsManager";
 import { ProductObjection, ProductFormData } from "@/types/product";
 import { 
@@ -22,6 +26,10 @@ import {
   Award,
   Target,
   TrendingUp,
+  Percent,
+  ArrowUp,
+  ArrowDown,
+  Repeat,
   type LucideIcon
 } from "lucide-react";
 
@@ -44,6 +52,7 @@ const productSchema = z.object({
   // Campos condicionais para promoção
   promotion_name: z.string().nullable().optional(),
   promotion_description: z.string().nullable().optional(),
+  discount_type: z.enum(["percentage", "fixed"]).nullable().optional(),
   discount_percentage: z.number().min(0).max(100).nullable().optional(),
   discount_amount: z.number().min(0).nullable().optional(),
   promotion_start_date: z.string().nullable().optional(),
@@ -51,14 +60,23 @@ const productSchema = z.object({
   // Campos condicionais para combo
   combo_name: z.string().nullable().optional(),
   combo_description: z.string().nullable().optional(),
-  combo_discount_percentage: z.number().min(0).max(100).nullable().optional(),
   combo_products: z.array(z.string()).nullable().optional(),
+  combo_benefit: z.string().nullable().optional(),
+  combo_discount_percentage: z.number().min(0).max(100).nullable().optional(),
   // Campos condicionais para upgrade
   upgrade_name: z.string().nullable().optional(),
   upgrade_description: z.string().nullable().optional(),
   upgrade_price: z.number().min(0).nullable().optional(),
   upgrade_benefits: z.array(z.string()).nullable().optional(),
   upgrade_target_product: z.string().nullable().optional(),
+  // Campos para recorrência
+  is_recurring: z.boolean().nullable().optional(),
+  // Campos para upsell
+  has_upsell: z.boolean().nullable().optional(),
+  upsell_product: z.string().nullable().optional(),
+  // Campos para downsell
+  has_downsell: z.boolean().nullable().optional(),
+  downsell_product: z.string().nullable().optional(),
 });
 
 interface ProductFormProps {
@@ -67,6 +85,161 @@ interface ProductFormProps {
   isLoading?: boolean;
   mode: "create" | "edit";
 }
+
+// Componente para seleção única de produto
+interface ProductSingleSelectorProps {
+  selectedProduct: string;
+  onSelectionChange: (productId: string) => void;
+  placeholder?: string;
+  excludeCurrentProduct?: string;
+}
+
+const ProductSingleSelector: React.FC<ProductSingleSelectorProps> = ({
+  selectedProduct,
+  onSelectionChange,
+  placeholder = "Selecione um produto...",
+  excludeCurrentProduct
+}) => {
+  const { data: products = [] } = useProductsQuery();
+  
+  const availableProducts = products.filter(product => 
+    product.id !== excludeCurrentProduct
+  );
+
+  const selectedProductData = availableProducts.find(p => p.id === selectedProduct);
+
+  return (
+    <Select value={selectedProduct} onValueChange={onSelectionChange}>
+      <SelectTrigger>
+        <SelectValue placeholder={placeholder}>
+          {selectedProductData ? (
+            <div className="flex items-center justify-between w-full">
+              <span>{selectedProductData.name}</span>
+              {selectedProductData.price && (
+                <span className="text-xs text-green-600 font-medium">
+                  R$ {selectedProductData.price.toFixed(2)}
+                </span>
+              )}
+            </div>
+          ) : (
+            placeholder
+          )}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <ScrollArea className="h-48">
+          {availableProducts.length === 0 ? (
+            <div className="p-2 text-sm text-muted-foreground text-center">
+              Nenhum produto disponível
+            </div>
+          ) : (
+            availableProducts.map((product) => (
+              <SelectItem key={product.id} value={product.id}>
+                <div className="flex items-center justify-between w-full">
+                  <div>
+                    <div className="font-medium">{product.name}</div>
+                    {product.description && (
+                      <div className="text-xs text-muted-foreground truncate max-w-xs">
+                        {product.description}
+                      </div>
+                    )}
+                  </div>
+                  {product.price && (
+                    <div className="text-xs text-green-600 font-medium ml-2">
+                      R$ {product.price.toFixed(2)}
+                    </div>
+                  )}
+                </div>
+              </SelectItem>
+            ))
+          )}
+        </ScrollArea>
+      </SelectContent>
+    </Select>
+  );
+};
+
+// Componente para seleção múltipla de produtos
+interface ProductMultiSelectorProps {
+  selectedProducts: string[];
+  onSelectionChange: (products: string[]) => void;
+  placeholder?: string;
+  excludeCurrentProduct?: string;
+}
+
+const ProductMultiSelector: React.FC<ProductMultiSelectorProps> = ({
+  selectedProducts,
+  onSelectionChange,
+  placeholder = "Selecione produtos...",
+  excludeCurrentProduct
+}) => {
+  const { data: products = [] } = useProductsQuery();
+  
+  const availableProducts = products.filter(product => 
+    product.id !== excludeCurrentProduct
+  );
+
+  const handleProductToggle = (productId: string) => {
+    const isSelected = selectedProducts.includes(productId);
+    if (isSelected) {
+      onSelectionChange(selectedProducts.filter(id => id !== productId));
+    } else {
+      onSelectionChange([...selectedProducts, productId]);
+    }
+  };
+
+  const getSelectedProductsText = () => {
+    if (selectedProducts.length === 0) return placeholder;
+    if (selectedProducts.length === 1) {
+      const product = availableProducts.find(p => p.id === selectedProducts[0]);
+      return product?.name || "Produto selecionado";
+    }
+    return `${selectedProducts.length} produtos selecionados`;
+  };
+
+  return (
+    <Select>
+      <SelectTrigger>
+        <SelectValue placeholder={getSelectedProductsText()} />
+      </SelectTrigger>
+      <SelectContent>
+        <ScrollArea className="h-48">
+          {availableProducts.length === 0 ? (
+            <div className="p-2 text-sm text-muted-foreground text-center">
+              Nenhum produto disponível
+            </div>
+          ) : (
+            availableProducts.map((product) => (
+              <div key={product.id} className="flex items-center space-x-2 p-2 hover:bg-accent">
+                <Checkbox
+                  id={`product-${product.id}`}
+                  checked={selectedProducts.includes(product.id)}
+                  onCheckedChange={() => handleProductToggle(product.id)}
+                />
+                <label
+                  htmlFor={`product-${product.id}`}
+                  className="flex-1 text-sm cursor-pointer"
+                >
+                  <div className="font-medium">{product.name}</div>
+                  {product.description && (
+                    <div className="text-xs text-muted-foreground truncate">
+                      {product.description}
+                    </div>
+                  )}
+                  {product.price && (
+                    <div className="text-xs text-green-600 font-medium">
+                      R$ {product.price.toFixed(2)}
+                    </div>
+                  )}
+                </label>
+              </div>
+            ))
+          )}
+        </ScrollArea>
+      </SelectContent>
+    </Select>
+  );
+};
 
 const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
@@ -101,8 +274,34 @@ const ProductForm: React.FC<ProductFormProps> = ({
       has_promotion: false,
       new: false,
       popular: false,
-      // Valores padrão para campos condicionais
+      // Valores padrão para promoção
       promotion_name: "",
+      promotion_description: "",
+      discount_type: "percentage",
+      discount_percentage: undefined,
+      discount_amount: undefined,
+      promotion_start_date: "",
+      promotion_end_date: "",
+      // Valores padrão para combo
+      combo_name: "",
+      combo_description: "",
+      combo_products: [],
+      combo_benefit: "",
+      combo_discount_percentage: undefined,
+      // Valores padrão para upgrade
+      upgrade_name: "",
+      upgrade_description: "",
+      upgrade_price: undefined,
+      upgrade_benefits: [],
+      upgrade_target_product: "",
+      // Valores padrão para recorrência
+      is_recurring: false,
+      // Valores padrão para upsell
+      has_upsell: false,
+      upsell_product: "",
+      // Valores padrão para downsell
+      has_downsell: false,
+      downsell_product: "",
       promotion_description: "",
       discount_percentage: undefined,
       discount_amount: undefined,
@@ -407,8 +606,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
               {/* Campos condicionais para promoção */}
               {watchedValues.has_promotion && (
-                <div className="ml-6 space-y-3 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
-                  <h4 className="font-medium text-orange-800 dark:text-orange-200">Configurações da Promoção</h4>
+                <div className="ml-6 space-y-4 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                  <h4 className="font-medium text-orange-800 dark:text-orange-200 flex items-center gap-2">
+                    <Percent className="h-4 w-4" />
+                    Configurações da Promoção
+                  </h4>
                   
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -421,15 +623,56 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     </div>
                     
                     <div>
-                      <Label htmlFor="discount_percentage">Desconto (%)</Label>
-                      <Input
-                        id="discount_percentage"
-                        type="number"
-                        min="0"
-                        max="100"
-                        {...register("discount_percentage", { valueAsNumber: true })}
-                        placeholder="Ex: 25"
-                      />
+                      <Label>Por quanto?</Label>
+                      <Select
+                        value={watchedValues.discount_type || "percentage"}
+                        onValueChange={(value) => setValue("discount_type", value as "percentage" | "fixed")}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tipo de desconto" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="percentage">Porcentagem (%)</SelectItem>
+                          <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    {watchedValues.discount_type === "percentage" ? (
+                      <div>
+                        <Label htmlFor="discount_percentage">Desconto (%)</Label>
+                        <Input
+                          id="discount_percentage"
+                          type="number"
+                          min="0"
+                          max="100"
+                          {...register("discount_percentage", { valueAsNumber: true })}
+                          placeholder="Ex: 25"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <Label htmlFor="discount_amount">Valor do Desconto (R$)</Label>
+                        <Input
+                          id="discount_amount"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          {...register("discount_amount", { valueAsNumber: true })}
+                          placeholder="Ex: 50.00"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex items-end">
+                      <div className="text-sm text-muted-foreground bg-muted p-2 rounded border">
+                        {watchedValues.discount_type === "percentage" 
+                          ? "💡 Desconto será calculado como porcentagem do preço"
+                          : "💡 Desconto será um valor fixo em reais"
+                        }
+                      </div>
                     </div>
                   </div>
                   
@@ -476,19 +719,42 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
               {/* Campos condicionais para combo */}
               {watchedValues.has_combo && (
-                <div className="ml-6 space-y-3 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <h4 className="font-medium text-blue-800 dark:text-blue-200">Configurações do Combo</h4>
+                <div className="ml-6 space-y-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-medium text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Configurações do Combo
+                  </h4>
+                  
+                  <div>
+                    <Label htmlFor="combo_name">Qual seria o combo?</Label>
+                    <Input
+                      id="combo_name"
+                      {...register("combo_name")}
+                      placeholder="Ex: Pacote Completo, Kit Iniciante, Bundle Premium"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Com quais produtos?</Label>
+                    <ProductMultiSelector
+                      selectedProducts={watchedValues.combo_products || []}
+                      onSelectionChange={(products) => setValue("combo_products", products)}
+                      placeholder="Selecione os produtos do combo..."
+                      excludeCurrentProduct={initialData?.id}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="combo_benefit">O que o cliente ganha?</Label>
+                    <Textarea
+                      id="combo_benefit"
+                      {...register("combo_benefit")}
+                      placeholder="Descreva os benefícios e vantagens do combo\nEx: Economia de 30%, acesso a conteúdo exclusivo, suporte prioritário"
+                      rows={3}
+                    />
+                  </div>
                   
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="combo_name">Nome do Combo</Label>
-                      <Input
-                        id="combo_name"
-                        {...register("combo_name")}
-                        placeholder="Ex: Pacote Completo"
-                      />
-                    </div>
-                    
                     <div>
                       <Label htmlFor="combo_discount_percentage">Desconto do Combo (%)</Label>
                       <Input
@@ -562,12 +828,93 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   </div>
                   
                   <div>
-                    <Label htmlFor="upgrade_target_product">Produto de Destino</Label>
-                    <Input
-                      id="upgrade_target_product"
-                      {...register("upgrade_target_product")}
-                      placeholder="ID ou nome do produto de upgrade"
+                    <Label>Produto de Destino</Label>
+                    <ProductSingleSelector
+                      selectedProduct={watchedValues.upgrade_target_product || ""}
+                      onSelectionChange={(productId) => setValue("upgrade_target_product", productId)}
+                      placeholder="Selecione o produto de upgrade..."
+                      excludeCurrentProduct={initialData?.id}
                     />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_recurring"
+                  checked={watchedValues.is_recurring}
+                  onCheckedChange={(checked) => setValue("is_recurring", checked)}
+                />
+                <Label htmlFor="is_recurring" className="flex items-center gap-2">
+                  <Repeat className="h-4 w-4" />
+                  Se o cliente adquirir este produto, ele pode comprar de novo depois?
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="has_upsell"
+                  checked={watchedValues.has_upsell}
+                  onCheckedChange={(checked) => setValue("has_upsell", checked)}
+                />
+                <Label htmlFor="has_upsell" className="flex items-center gap-2">
+                  <ArrowUp className="h-4 w-4" />
+                  Se o cliente adquirir este produto, há algum Upsell imediato?
+                </Label>
+              </div>
+
+              {/* Campo condicional para upsell */}
+              {watchedValues.has_upsell && (
+                <div className="ml-6 space-y-3 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <h4 className="font-medium text-green-800 dark:text-green-200 flex items-center gap-2">
+                    <ArrowUp className="h-4 w-4" />
+                    Configurações do Upsell
+                  </h4>
+                  
+                  <div>
+                    <Label>Com qual produto?</Label>
+                    <ProductSingleSelector
+                      selectedProduct={watchedValues.upsell_product || ""}
+                      onSelectionChange={(productId) => setValue("upsell_product", productId)}
+                      placeholder="Selecione o produto para upsell..."
+                      excludeCurrentProduct={initialData?.id}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="has_downsell"
+                  checked={watchedValues.has_downsell}
+                  onCheckedChange={(checked) => setValue("has_downsell", checked)}
+                />
+                <Label htmlFor="has_downsell" className="flex items-center gap-2">
+                  <ArrowDown className="h-4 w-4" />
+                  Se o cliente não adquirir este produto, há algum Downsell imediato?
+                </Label>
+              </div>
+
+              {/* Campo condicional para downsell */}
+              {watchedValues.has_downsell && (
+                <div className="ml-6 space-y-3 p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <h4 className="font-medium text-red-800 dark:text-red-200 flex items-center gap-2">
+                    <ArrowDown className="h-4 w-4" />
+                    Configurações do Downsell
+                  </h4>
+                  
+                  <div>
+                    <Label>Produto alternativo para oferecer</Label>
+                    <ProductSingleSelector
+                      selectedProduct={watchedValues.downsell_product || ""}
+                      onSelectionChange={(productId) => setValue("downsell_product", productId)}
+                      placeholder="Selecione o produto para downsell..."
+                      excludeCurrentProduct={initialData?.id}
+                    />
+                  </div>
+                  
+                  <div className="text-sm text-muted-foreground bg-muted p-2 rounded border">
+                    💡 Este produto será oferecido imediatamente se o cliente recusar a compra principal
                   </div>
                 </div>
               )}

@@ -57,6 +57,7 @@ export interface ProductFormData {
   // Campos condicionais para promoção
   promotion_name?: string;
   promotion_description?: string;
+  discount_type?: "percentage" | "fixed";
   discount_percentage?: number;
   discount_amount?: number;
   promotion_start_date?: string;
@@ -64,12 +65,21 @@ export interface ProductFormData {
   // Campos condicionais para combo
   combo_name?: string;
   combo_description?: string;
-  combo_discount_percentage?: number;
   combo_products?: string[];
+  combo_benefit?: string;
+  combo_discount_percentage?: number;
   // Campos condicionais para upgrade
   upgrade_name?: string;
   upgrade_description?: string;
   upgrade_price?: number;
   upgrade_benefits?: string[];
   upgrade_target_product?: string;
+  // Campos para recorrência
+  is_recurring?: boolean;
+  // Campos para upsell
+  has_upsell?: boolean;
+  upsell_product?: string;
+  // Campos para downsell
+  has_downsell?: boolean;
+  downsell_product?: string;
 }
