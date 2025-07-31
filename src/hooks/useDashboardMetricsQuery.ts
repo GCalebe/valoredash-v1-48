@@ -29,10 +29,10 @@ export const useDashboardMetricsQuery = () => {
         leadsResult,
         scheduleResult
       ] = await Promise.allSettled([
-        supabase.from('contacts').select('id, kanban_stage_id, sales, budget').limit(1000),
-        supabase.from('conversation_metrics').select('*').limit(100),
-        supabase.from('contacts').select('id, sales, budget').limit(100),
-        supabase.from('calendar_events').select('*').gte('start_time', new Date().toISOString().split('T')[0])
+        supabase.from('contacts').select('id, stage, value').limit(1000),
+        supabase.from('conversations').select('id, status, created_at').limit(100),
+        supabase.from('contacts').select('id, stage, value').eq('stage', 'lead').limit(100),
+        supabase.from('appointments').select('*').gte('scheduled_at', new Date().toISOString().split('T')[0])
       ]);
 
       // Processar resultados com fallbacks seguros
@@ -43,20 +43,16 @@ export const useDashboardMetricsQuery = () => {
 
       // Cálculos otimizados
       const totalClients = clients.length;
-      const activeConversations = conversations.length;
-      const pendingLeads = clients.filter(c => 
-        c.kanban_stage_id === 'lead' || c.kanban_stage_id === 'contato-inicial'
-      ).length;
+      const activeConversations = conversations.filter(c => c.status === 'active').length;
+      const pendingLeads = leads.length;
       
       const conversionRate = 0; // Set to 0 since conversion_probability doesn't exist
 
-      const responseTime = conversations.length > 0 
-        ? conversations.reduce((acc, curr) => acc + (curr.avg_response_time || 0), 0) / conversations.length
-        : 0;
+      const responseTime = 0; // Placeholder - implementar lógica real depois
 
       const todayScheduled = schedule.length;
       
-      const monthlyRevenue = clients.reduce((acc, curr) => acc + (curr.sales || curr.budget || 0), 0);
+      const monthlyRevenue = clients.reduce((acc, curr) => acc + (curr.value || 0), 0);
       
       // Calcular crescimento (mock - implementar lógica real depois)
       const growthRate = Math.random() * 20 - 10; // Placeholder

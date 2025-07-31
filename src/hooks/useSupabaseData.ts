@@ -41,11 +41,23 @@ export const useSupabaseData = (initialFilters?: MetricsFilters): UseSupabaseDat
       setError(null);
 
       // Carregar dados em paralelo
-      const [contactsResult, metricsResult, funnelResult] = await Promise.all([
+      const [contactsResult, funnelResult] = await Promise.all([
         getContacts(),
-        getDashboardMetrics(),
         getFunnelData()
       ]);
+      
+      // Buscar métricas do dashboard usando a view
+      const { data: metricsData, error: metricsError } = await supabase
+        .from('dashboard_metrics')
+        .select('*')
+        .limit(1)
+        .single();
+      
+      const metricsResult = {
+        success: !metricsError,
+        data: metricsData,
+        error: metricsError
+      };
 
       if (contactsResult.success) {
         setContacts(contactsResult.data || []);
@@ -194,16 +206,15 @@ export const seedTestData = async (): Promise<SupabaseResponse<boolean>> => {
   }
 };
 
+// Re-export functions from their respective modules
 export {
   getContacts,
   addContact,
   updateContact,
   deleteContact,
-  useContacts,
-  getDashboardMetrics,
-  getMetricsByDateRange,
-  useRealTimeMetrics,
-  getFunnelData,
-  getFunnelByDateRange,
-  addFunnelData
-};
+  useContacts
+} from './useSupabaseContactsData';
+
+export { useDashboardMetricsQuery as getDashboardMetrics } from './useDashboardMetricsQuery';
+export { useRealTimeMetrics } from './useRealTimeMetrics';
+export { getFunnelData, getFunnelByDateRange, addFunnelData } from './useSupabaseFunnelData';
