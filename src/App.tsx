@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import MetricsDashboard from "./pages/MetricsDashboard";
 import KnowledgeManager from "./pages/KnowledgeManager";
 import ClientsDashboard from "./pages/ClientsDashboard";
+
 import Evolution from "./pages/Evolution";
 import Schedule from "./pages/Schedule";
 import ThemeSettings from "./pages/ThemeSettings";

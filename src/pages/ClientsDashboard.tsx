@@ -10,6 +10,7 @@ import ClientsTable from "@/components/clients/ClientsTable";
 import KanbanView from "@/components/clients/KanbanView";
 import ClientsModals from "@/components/clients/ClientsModals";
 import EditStageDialog from "@/components/clients/EditStageDialog";
+import { ClientTreeView2, ClientTreeView4 } from '@/components/clients/tree-views';
 
 const ClientsDashboard = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -18,7 +19,7 @@ const ClientsDashboard = () => {
   const { customFieldFilters, addCustomFieldFilter, removeCustomFieldFilter } =
     filter;
 
-  const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
+  const [viewMode, setViewMode] = useState<"table" | "kanban" | "tree-sales" | "tree-marketing">("kanban");
   const [isCompactView, setIsCompactView] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   
@@ -144,7 +145,7 @@ const ClientsDashboard = () => {
             }}
             onEditClient={openEditModal}
           />
-        ) : (
+        ) : viewMode === "kanban" ? (
           <KanbanView
             contacts={contacts}
             onContactClick={handleContactClick}
@@ -155,7 +156,23 @@ const ClientsDashboard = () => {
             stages={kanbanStages.stages}
             onStageEdit={handleStageEdit}
           />
-        )}
+        ) : viewMode === "tree-sales" ? (
+          <div className="h-full overflow-auto p-4">
+            <ClientTreeView2
+              contacts={contacts}
+              onContactClick={handleContactClick}
+              onEditClick={openEditModal}
+            />
+          </div>
+        ) : viewMode === "tree-marketing" ? (
+          <div className="h-full overflow-auto p-4">
+            <ClientTreeView4
+              contacts={contacts}
+              onContactClick={handleContactClick}
+              onEditClick={openEditModal}
+            />
+          </div>
+        ) : null}
       </div>
 
       <ClientsModals
