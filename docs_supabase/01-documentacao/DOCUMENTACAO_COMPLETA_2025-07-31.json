@@ -1,0 +1,2096 @@
+{
+  "metadata": {
+    "titulo": "Documentação Completa do Banco de Dados - ValoreDash V1-48",
+    "versao": "3.0",
+    "data_geracao": "2025-07-31T22:51:57.405Z",
+    "autor": "Script Automatizado de Análise",
+    "objetivo": "Documentação técnica completa para desenvolvimento e manutenção"
+  },
+  "requisitos_projeto": {
+    "aplicacao": {
+      "nome": "ValoreDash V1-48",
+      "tipo": "Sistema CRM/Chat com IA",
+      "arquitetura": "Microserviços com Supabase",
+      "tecnologias": [
+        "PostgreSQL",
+        "Supabase",
+        "React",
+        "TypeScript",
+        "N8N"
+      ]
+    },
+    "funcionalidades_principais": [
+      "Gestão de Contatos e Leads",
+      "Sistema de Chat com IA (N8N)",
+      "Dashboard de Métricas em Tempo Real",
+      "Sistema de Agendamento",
+      "Funil de Vendas com Kanban",
+      "Base de Conhecimento e FAQ",
+      "Tracking UTM e Campanhas",
+      "Campos Customizáveis",
+      "Calendário de Eventos",
+      "Sistema de Preços e Planos"
+    ],
+    "sistemas_identificados": {
+      "chat": [
+        "conversations",
+        "n8n_chat_messages",
+        "n8n_chat_memory",
+        "n8n_chat_histories",
+        "chat_messages_backup",
+        "conversation_daily_data"
+      ],
+      "usuarios": [
+        "profiles",
+        "user_settings",
+        "user_sessions",
+        "user_activity_log"
+      ],
+      "contatos": [
+        "contacts",
+        "client_custom_values"
+      ],
+      "agendamento": [
+        "agendas",
+        "agenda_bookings",
+        "calendar_events",
+        "appointments"
+      ],
+      "metricas": [
+        "performance_metrics",
+        "system_reports",
+        "metrics_cache"
+      ],
+      "kanban": [
+        "kanban_stages"
+      ],
+      "ia": [
+        "ai_personalities",
+        "ai_products"
+      ],
+      "utm": [
+        "utm_tracking"
+      ],
+      "conhecimento": [
+        "knowledge_base",
+        "faq_items"
+      ],
+      "customizacao": [
+        "custom_field_definitions"
+      ],
+      "outros": [
+        "tokens",
+        "documents",
+        "imagens_drive",
+        "funnel_data",
+        "pricing_plans"
+      ]
+    },
+    "metricas_gerais": {
+      "total_tabelas": 31,
+      "total_registros": 184,
+      "tabelas_com_dados": 17,
+      "tabelas_vazias": 14,
+      "densidade_media": 5.935483870967742
+    },
+    "complexidade": {
+      "nivel": "Alta",
+      "pontuacao": 64,
+      "fatores": {
+        "tabelas": 31,
+        "sistemas": 11
+      }
+    },
+    "requisitos_tecnicos": {
+      "disponibilidade": "99.9%",
+      "tempo_resposta": "< 200ms",
+      "concorrencia": "100+ usuários simultâneos",
+      "crescimento_dados": "10GB/mês estimado",
+      "backup": "Diário com retenção de 30 dias",
+      "seguranca": "RLS (Row Level Security) implementado"
+    }
+  },
+  "entidades_relacionamentos": {
+    "total_entidades": 31,
+    "entidades_detalhadas": {
+      "contacts": {
+        "campos": [
+          "id",
+          "name",
+          "email",
+          "phone",
+          "address",
+          "client_name",
+          "client_size",
+          "client_type",
+          "cpf_cnpj",
+          "asaas_customer_id",
+          "status",
+          "notes",
+          "last_contact",
+          "last_message",
+          "last_message_time",
+          "unread_count",
+          "session_id",
+          "tags",
+          "responsible_user",
+          "sales",
+          "client_sector",
+          "budget",
+          "payment_method",
+          "client_objective",
+          "loss_reason",
+          "contract_number",
+          "contract_date",
+          "payment",
+          "uploaded_files",
+          "consultation_stage",
+          "created_at",
+          "deleted_at",
+          "updated_at",
+          "kanban_stage_id",
+          "files_metadata",
+          "user_id"
+        ],
+        "total_campos": 36,
+        "total_registros": 15,
+        "exemplo": {
+          "id": "17092cc3-6c32-4792-a21d-c821ea6ff642",
+          "name": "João Silva",
+          "email": "joao.silva@email.com",
+          "phone": "(11) 99999-1111",
+          "address": null,
+          "client_name": "Silva Consultoria",
+          "client_size": null,
+          "client_type": "pessoa-juridica",
+          "cpf_cnpj": "12.345.678/0001-90",
+          "asaas_customer_id": null,
+          "status": "Active",
+          "notes": "Cliente interessado em consultoria empresarial",
+          "last_contact": null,
+          "last_message": null,
+          "last_message_time": null,
+          "unread_count": 0,
+          "session_id": null,
+          "tags": [
+            "novo-cliente",
+            "consultoria"
+          ],
+          "responsible_user": null,
+          "sales": null,
+          "client_sector": "Consultoria",
+          "budget": 15000,
+          "payment_method": null,
+          "client_objective": null,
+          "loss_reason": null,
+          "contract_number": null,
+          "contract_date": null,
+          "payment": null,
+          "uploaded_files": null,
+          "consultation_stage": "Agendamento",
+          "created_at": "2025-07-25T19:32:44.102112+00:00",
+          "deleted_at": null,
+          "updated_at": "2025-07-25T19:33:56.255063+00:00",
+          "kanban_stage_id": "1571008f-92c5-46e2-a2e4-9e0c24b3a3d2",
+          "files_metadata": [],
+          "user_id": "685d8c2d-3239-4588-86cd-97b2d29e60ab"
+        }
+      },
+      "conversations": {
+        "campos": [
+          "id",
+          "session_id",
+          "name",
+          "phone",
+          "email",
+          "avatar",
+          "last_message",
+          "last_message_time",
+          "unread_count",
+          "client_data",
+          "created_at",
+          "updated_at",
+          "user_id"
+        ],
+        "total_campos": 13,
+        "total_registros": 4,
+        "exemplo": {
+          "id": "a4c6d929-704e-457c-91c6-56a4314909d4",
+          "session_id": "3e5aef90-599f-4bba-ab8f-1ee706ce1913",
+          "name": "José Lucas dos Santos Costa",
+          "phone": "558197282946@s.whatsapp.net",
+          "email": null,
+          "avatar": null,
+          "last_message": "Perfeito! Nossos chatbots são personalizados conforme suas necessidades. Para um orçamento preciso, me conte mais sobre seu negócio. Qual o seu setor de atuação?",
+          "last_message_time": "2025-07-13T23:51:45.274121+00:00",
+          "unread_count": 4,
+          "client_data": {},
+          "created_at": "2025-07-13T23:51:45.274121+00:00",
+          "updated_at": "2025-07-13T23:51:45.274121+00:00",
+          "user_id": "ac609b4a-87fd-4348-9ade-e24385f772f2"
+        }
+      },
+      "n8n_chat_messages": {
+        "campos": [
+          "id",
+          "session_id",
+          "phone",
+          "user_message",
+          "bot_message",
+          "message_type",
+          "message_data",
+          "created_at",
+          "active",
+          "user_id"
+        ],
+        "total_campos": 10,
+        "total_registros": 4,
+        "exemplo": {
+          "id": 1,
+          "session_id": "3e5aef90-599f-4bba-ab8f-1ee706ce1913",
+          "phone": "558197282946@s.whatsapp.net",
+          "user_message": "Olá, gostaria de saber mais sobre os seus serviços",
+          "bot_message": null,
+          "message_type": "text",
+          "message_data": {},
+          "created_at": "2025-07-13T23:51:45.274121+00:00",
+          "active": true,
+          "user_id": "ac609b4a-87fd-4348-9ade-e24385f772f2"
+        }
+      },
+      "profiles": {
+        "campos": [
+          "id",
+          "email",
+          "full_name",
+          "role",
+          "created_at",
+          "updated_at",
+          "department",
+          "is_active",
+          "last_login_at"
+        ],
+        "total_campos": 9,
+        "total_registros": 3,
+        "exemplo": {
+          "id": "685d8c2d-3239-4588-86cd-97b2d29e60ab",
+          "email": "gabriel@alves.com",
+          "full_name": "gabriel@alves.com",
+          "role": "user",
+          "created_at": "2025-07-09T20:29:06.965134+00:00",
+          "updated_at": "2025-07-09T20:29:06.965134+00:00",
+          "department": null,
+          "is_active": true,
+          "last_login_at": null
+        }
+      },
+      "agendas": {
+        "campos": [
+          "id",
+          "name",
+          "description",
+          "duration_minutes",
+          "price",
+          "category",
+          "is_active",
+          "max_participants",
+          "requires_approval",
+          "buffer_time_minutes",
+          "cancellation_policy",
+          "preparation_notes",
+          "follow_up_notes",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "updated_by",
+          "service_types"
+        ],
+        "total_campos": 18,
+        "total_registros": 8,
+        "exemplo": {
+          "id": "a8a858a1-96e5-4a65-82ff-d1164b36ae2f",
+          "name": "teste 3",
+          "description": "teste3",
+          "duration_minutes": 60,
+          "price": null,
+          "category": "consulta",
+          "is_active": true,
+          "max_participants": 1,
+          "requires_approval": false,
+          "buffer_time_minutes": 15,
+          "cancellation_policy": null,
+          "preparation_notes": null,
+          "follow_up_notes": null,
+          "created_at": "2025-07-31T01:40:00.7106+00:00",
+          "updated_at": "2025-07-31T01:40:00.7106+00:00",
+          "created_by": "685d8c2d-3239-4588-86cd-97b2d29e60ab",
+          "updated_by": null,
+          "service_types": [
+            "Online",
+            "Presencial"
+          ]
+        }
+      },
+      "agenda_bookings": {
+        "campos": [
+          "id",
+          "agenda_name",
+          "client_name",
+          "client_email",
+          "client_phone",
+          "employee_name",
+          "booking_date",
+          "start_time",
+          "end_time",
+          "duration_minutes",
+          "status",
+          "booking_type",
+          "notes",
+          "internal_notes",
+          "price",
+          "payment_status",
+          "payment_method",
+          "confirmation_code",
+          "reminder_sent",
+          "created_by",
+          "created_at",
+          "updated_at",
+          "cancelled_at",
+          "cancelled_by",
+          "cancellation_reason"
+        ],
+        "total_campos": 25,
+        "total_registros": 8,
+        "exemplo": {
+          "id": "2a9d4b53-90d2-4ba2-aadc-ed6c3487d1d4",
+          "agenda_name": "Aula de Yoga",
+          "client_name": "Maria Silva",
+          "client_email": "maria.silva@email.com",
+          "client_phone": "(11) 99999-1111",
+          "employee_name": "Ana Santos",
+          "booking_date": "2024-01-15",
+          "start_time": "09:00:00",
+          "end_time": "10:00:00",
+          "duration_minutes": 60,
+          "status": "confirmed",
+          "booking_type": "regular",
+          "notes": "Primeira aula de yoga",
+          "internal_notes": null,
+          "price": 80,
+          "payment_status": "paid",
+          "payment_method": "pix",
+          "confirmation_code": "YOGA001",
+          "reminder_sent": true,
+          "created_by": null,
+          "created_at": "2025-07-21T15:55:01.34707+00:00",
+          "updated_at": "2025-07-21T15:55:01.34707+00:00",
+          "cancelled_at": null,
+          "cancelled_by": null,
+          "cancellation_reason": null
+        }
+      },
+      "kanban_stages": {
+        "campos": [
+          "id",
+          "user_id",
+          "title",
+          "ordering",
+          "settings",
+          "created_at",
+          "updated_at"
+        ],
+        "total_campos": 7,
+        "total_registros": 17,
+        "exemplo": {
+          "id": "62f028bb-fe94-44d9-a14a-c8e2917e0196",
+          "user_id": "685d8c2d-3239-4588-86cd-97b2d29e60ab",
+          "title": "Negociaram",
+          "ordering": 4,
+          "settings": null,
+          "created_at": "2025-06-15T17:55:43.760157+00:00",
+          "updated_at": "2025-06-15T17:55:43.760157+00:00"
+        }
+      },
+      "ai_personalities": {
+        "campos": [
+          "id",
+          "name",
+          "description",
+          "personality_type",
+          "tone",
+          "temperature",
+          "greeting_message",
+          "custom_instructions",
+          "max_tokens",
+          "response_style",
+          "language",
+          "is_active",
+          "user_id",
+          "created_at",
+          "updated_at",
+          "updated_by"
+        ],
+        "total_campos": 16,
+        "total_registros": 6,
+        "exemplo": {
+          "id": "22c25bcb-16fd-4ab6-bd70-57ade217707e",
+          "name": "Assistente Amigável",
+          "description": "Um assistente caloroso e acolhedor, perfeito para atendimento ao cliente e suporte geral.",
+          "personality_type": "amigavel",
+          "tone": "caloroso",
+          "temperature": 0.7,
+          "greeting_message": "Olá! É um prazer falar com você hoje. Como posso ajudá-lo?",
+          "custom_instructions": "Seja sempre positivo, empático e prestativo. Use uma linguagem acessível e demonstre interesse genuíno em ajudar.",
+          "max_tokens": 150,
+          "response_style": "conversacional",
+          "language": "pt-BR",
+          "is_active": true,
+          "user_id": null,
+          "created_at": "2025-07-23T21:55:19.014046+00:00",
+          "updated_at": "2025-07-23T21:55:19.014046+00:00",
+          "updated_by": null
+        }
+      },
+      "utm_tracking": {
+        "campos": [
+          "id",
+          "lead_id",
+          "utm_source",
+          "utm_medium",
+          "utm_campaign",
+          "utm_term",
+          "utm_content",
+          "utm_referrer",
+          "referrer",
+          "gclid",
+          "fbclid",
+          "gclientid",
+          "utm_session_id",
+          "first_seen_at",
+          "utm_first_touch",
+          "utm_last_touch",
+          "first_utm_source",
+          "first_utm_medium",
+          "first_utm_campaign",
+          "first_utm_term",
+          "first_utm_content",
+          "first_utm_created_at",
+          "last_utm_source",
+          "last_utm_medium",
+          "last_utm_campaign",
+          "last_utm_term",
+          "last_utm_content",
+          "last_utm_created_at",
+          "ip_address",
+          "user_agent",
+          "device_type",
+          "landing_page",
+          "utm_conversion",
+          "utm_conversion_at",
+          "utm_conversion_value",
+          "utm_conversion_stage",
+          "utm_conversion_time",
+          "created_at",
+          "updated_at",
+          "utm_id",
+          "geo_location"
+        ],
+        "total_campos": 41,
+        "total_registros": 10,
+        "exemplo": {
+          "id": "550a19af-ad1c-4abb-8b46-126f6230c051",
+          "lead_id": null,
+          "utm_source": "google",
+          "utm_medium": "cpc",
+          "utm_campaign": "summer_sale",
+          "utm_term": "term_1",
+          "utm_content": "content_1",
+          "utm_referrer": "https://example.com/referrer",
+          "referrer": "https://google.com",
+          "gclid": "gclid_1",
+          "fbclid": null,
+          "gclientid": null,
+          "utm_session_id": "session_1",
+          "first_seen_at": "2025-07-06T19:57:38.900006+00:00",
+          "utm_first_touch": "2025-07-06T19:57:38.900006+00:00",
+          "utm_last_touch": "2025-07-07T19:57:38.900006+00:00",
+          "first_utm_source": "google",
+          "first_utm_medium": "cpc",
+          "first_utm_campaign": "summer_sale",
+          "first_utm_term": "term_1",
+          "first_utm_content": "content_1",
+          "first_utm_created_at": "2025-07-06T19:57:38.900006+00:00",
+          "last_utm_source": "google",
+          "last_utm_medium": "cpc",
+          "last_utm_campaign": "summer_sale",
+          "last_utm_term": "term_1",
+          "last_utm_content": "content_1",
+          "last_utm_created_at": "2025-07-07T19:57:38.900006+00:00",
+          "ip_address": "192.168.1.100",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "device_type": "desktop",
+          "landing_page": "/landing/home",
+          "utm_conversion": true,
+          "utm_conversion_at": "2025-07-07T19:57:38.900006+00:00",
+          "utm_conversion_value": 250,
+          "utm_conversion_stage": "qualified",
+          "utm_conversion_time": null,
+          "created_at": "2025-07-08T19:57:38.900006+00:00",
+          "updated_at": "2025-07-08T19:57:38.900006+00:00",
+          "utm_id": "utm_1",
+          "geo_location": {
+            "lat": -23.5505,
+            "lng": -46.6333,
+            "city": "São Paulo",
+            "state": "SP",
+            "country": "BR"
+          }
+        }
+      },
+      "knowledge_base": {
+        "campos": [
+          "id",
+          "title",
+          "content",
+          "summary",
+          "category",
+          "subcategory",
+          "tags",
+          "keywords",
+          "content_type",
+          "format",
+          "language",
+          "status",
+          "priority",
+          "difficulty_level",
+          "estimated_read_time",
+          "view_count",
+          "like_count",
+          "dislike_count",
+          "is_featured",
+          "is_searchable",
+          "is_public",
+          "requires_authentication",
+          "allowed_roles",
+          "source_url",
+          "external_id",
+          "version",
+          "parent_id",
+          "created_by",
+          "updated_by",
+          "reviewed_by",
+          "published_by",
+          "created_at",
+          "updated_at",
+          "reviewed_at",
+          "published_at",
+          "archived_at",
+          "expires_at",
+          "metadata",
+          "search_vector",
+          "average_rating",
+          "total_ratings"
+        ],
+        "total_campos": 41,
+        "total_registros": 5,
+        "exemplo": {
+          "id": "b73bf2a2-cbc4-4cd8-ad93-df37ed90fa7c",
+          "title": "Como Agendar uma Consulta",
+          "content": "# Como Agendar uma Consulta\\n\\nPara agendar uma consulta, siga os seguintes passos:\\n\\n1. Acesse o sistema de agendamento\\n2. Escolha o tipo de serviço\\n3. Selecione a data e horário disponível\\n4. Preencha seus dados pessoais\\n5. Confirme o agendamento\\n\\n## Cancelamentos\\n\\nPara cancelar um agendamento, entre em contato com até 24 horas de antecedência.",
+          "summary": "Guia passo a passo para realizar agendamentos no sistema",
+          "category": "Agendamentos",
+          "subcategory": "Tutoriais",
+          "tags": [
+            "agendamento",
+            "consulta",
+            "tutorial",
+            "passo-a-passo"
+          ],
+          "keywords": [
+            "agendar",
+            "consulta",
+            "horário",
+            "cancelar"
+          ],
+          "content_type": "tutorial",
+          "format": "markdown",
+          "language": "pt-BR",
+          "status": "published",
+          "priority": 1,
+          "difficulty_level": "beginner",
+          "estimated_read_time": 3,
+          "view_count": 1,
+          "like_count": 1,
+          "dislike_count": 0,
+          "is_featured": true,
+          "is_searchable": true,
+          "is_public": true,
+          "requires_authentication": true,
+          "allowed_roles": [
+            "authenticated"
+          ],
+          "source_url": null,
+          "external_id": null,
+          "version": 1,
+          "parent_id": null,
+          "created_by": null,
+          "updated_by": null,
+          "reviewed_by": null,
+          "published_by": null,
+          "created_at": "2025-07-21T15:58:40.343484+00:00",
+          "updated_at": "2025-07-21T16:04:40.247283+00:00",
+          "reviewed_at": null,
+          "published_at": null,
+          "archived_at": null,
+          "expires_at": null,
+          "metadata": {},
+          "search_vector": "'24':69C 'acess':29C 'agend':2A,11B,15C,20C,33C,55C,63C,73B,80A 'antecedent':72C 'cancel':58C,61C,83A 'confirm':53C 'consult':4A,17C,22C,74B,81A 'contat':66C 'dad':50C 'dat':43C 'dispon':46C 'escolh':35C 'gui':5B 'hor':70C 'horári':45C,82A 'n':18C,27C,56C,57C,59C 'n1':28C 'n2':34C 'n3':40C 'n4':47C 'n5':52C 'npar':19C,60C 'pass':6B,8B,26C,77B,79B 'passo-a-pass':76B 'pesso':51C 'preench':48C 'realiz':10B 'seguint':25C 'selecion':41C 'servic':39C 'sig':23C 'sistem':13B,31C 'tip':37C 'tutorial':75B",
+          "average_rating": 4.5,
+          "total_ratings": 2
+        }
+      },
+      "faq_items": {
+        "campos": [
+          "id",
+          "question",
+          "answer",
+          "category",
+          "tags",
+          "is_active",
+          "created_by",
+          "created_at",
+          "updated_at",
+          "user_id",
+          "associated_agendas"
+        ],
+        "total_campos": 11,
+        "total_registros": 31,
+        "exemplo": {
+          "id": "4da194ce-4a3d-4a08-8bed-cc5e73fbed04",
+          "question": "Como posso agendar uma consulta?",
+          "answer": "Você pode agendar uma consulta através do nosso sistema online ou entrando em contato conosco por telefone.",
+          "category": "Agendamento",
+          "tags": [
+            "agendamento",
+            "consulta"
+          ],
+          "is_active": true,
+          "created_by": null,
+          "created_at": "2025-07-08T14:01:47.086337+00:00",
+          "updated_at": "2025-07-14T19:53:38.719686+00:00",
+          "user_id": "ac609b4a-87fd-4348-9ade-e24385f772f2",
+          "associated_agendas": null
+        }
+      },
+      "custom_field_definitions": {
+        "campos": [
+          "id",
+          "field_name",
+          "field_type",
+          "field_options",
+          "is_required",
+          "entity_type",
+          "created_at",
+          "updated_at"
+        ],
+        "total_campos": 8,
+        "total_registros": 4,
+        "exemplo": {
+          "id": "cb320b6d-6157-4860-80cb-a4a39248bfa6",
+          "field_name": "Orçamento",
+          "field_type": "number",
+          "field_options": {},
+          "is_required": false,
+          "entity_type": "contact",
+          "created_at": "2025-07-31T17:40:32.803883+00:00",
+          "updated_at": "2025-07-31T17:40:32.803883+00:00"
+        }
+      },
+      "client_custom_values": {
+        "campos": [
+          "id",
+          "client_id",
+          "field_id",
+          "field_value",
+          "created_at",
+          "updated_at"
+        ],
+        "total_campos": 6,
+        "total_registros": 17,
+        "exemplo": {
+          "id": "4ca7e985-abae-4212-98c6-0b3cb195677a",
+          "client_id": "ab2e4f1c-dfd1-414e-86d6-86f1678cce32",
+          "field_id": "fb04074a-3aef-4bbe-94b6-4b5a82537850",
+          "field_value": [
+            "Pesca"
+          ],
+          "created_at": "2025-07-08T19:28:40.604623+00:00",
+          "updated_at": "2025-07-08T19:28:40.604623+00:00"
+        }
+      },
+      "calendar_events": {
+        "campos": [
+          "id",
+          "title",
+          "description",
+          "start_time",
+          "end_time",
+          "all_day",
+          "location",
+          "event_type",
+          "status",
+          "priority",
+          "recurrence_rule",
+          "contact_id",
+          "created_by",
+          "created_at",
+          "updated_at",
+          "metadata",
+          "user_id",
+          "summary",
+          "host_name",
+          "html_link"
+        ],
+        "total_campos": 20,
+        "total_registros": 8,
+        "exemplo": {
+          "id": "ae94979e-96c3-4b01-80b5-db0416a24052",
+          "title": "Reunião com José Lucas dos Santos Costa",
+          "description": "Reunião de apresentação de serviços",
+          "start_time": "2024-12-19T14:00:00+00:00",
+          "end_time": "2024-12-19T15:00:00+00:00",
+          "all_day": false,
+          "location": "Escritório",
+          "event_type": "meeting",
+          "status": "scheduled",
+          "priority": "high",
+          "recurrence_rule": null,
+          "contact_id": "b44d8c6b-cf01-4435-8d36-5a5158888f2d",
+          "created_by": null,
+          "created_at": "2025-07-07T14:22:53.580789+00:00",
+          "updated_at": "2025-07-14T19:53:38.719686+00:00",
+          "metadata": {},
+          "user_id": "ac609b4a-87fd-4348-9ade-e24385f772f2",
+          "summary": null,
+          "host_name": null,
+          "html_link": null
+        }
+      },
+      "tokens": {
+        "campos": [
+          "id",
+          "Timestamp",
+          "Workflow",
+          "Input",
+          "Output",
+          "PromptTokens",
+          "CompletionTokens",
+          "CachedTokens",
+          "CostUSD"
+        ],
+        "total_campos": 9,
+        "total_registros": 33,
+        "exemplo": {
+          "id": 1,
+          "Timestamp": "2025-06-11T23:54:00+00:00",
+          "Workflow": "aurora 6.2",
+          "Input": "oi",
+          "Output": "Olá! Boa noite, tudo bem? Eu sou a Aurora, assistente da Agência Valore. Como posso te ajudar hoje?",
+          "PromptTokens": "0",
+          "CompletionTokens": "0",
+          "CachedTokens": "0",
+          "CostUSD": 0
+        }
+      },
+      "documents": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "imagens_drive": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "n8n_chat_memory": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "n8n_chat_histories": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "chat_messages_backup": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "user_settings": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "user_sessions": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "user_activity_log": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "conversation_daily_data": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "performance_metrics": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "system_reports": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "metrics_cache": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "appointments": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      },
+      "ai_products": {
+        "campos": [
+          "id",
+          "name",
+          "description",
+          "icon",
+          "image",
+          "features",
+          "category",
+          "popular",
+          "new",
+          "created_at"
+        ],
+        "total_campos": 10,
+        "total_registros": 3,
+        "exemplo": {
+          "id": "26d22eb4-8705-4bb8-b6dc-b682157deeeb",
+          "name": "Assistente Virtual",
+          "description": null,
+          "icon": null,
+          "image": null,
+          "features": null,
+          "category": null,
+          "popular": false,
+          "new": false,
+          "created_at": "2025-07-06T13:37:33.761"
+        }
+      },
+      "funnel_data": {
+        "campos": [
+          "id",
+          "name",
+          "value",
+          "percentage",
+          "color",
+          "created_at"
+        ],
+        "total_campos": 6,
+        "total_registros": 8,
+        "exemplo": {
+          "id": "0f00fd46-cab9-43de-9e2d-7bf193862e09",
+          "name": "Leads Gerados",
+          "value": 1000,
+          "percentage": 100,
+          "color": "#3B82F6",
+          "created_at": "2025-07-04T16:28:12.58582"
+        }
+      },
+      "pricing_plans": {
+        "campos": [],
+        "total_campos": 0,
+        "total_registros": 0,
+        "exemplo": null
+      }
+    },
+    "relacionamentos": [
+      {
+        "tabela_origem": "contacts",
+        "campo_origem": "session_id",
+        "tabela_destino": "conversations",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "contacts",
+        "campo_origem": "kanban_stage_id",
+        "tabela_destino": "kanban_stages",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "contacts",
+        "campo_origem": "user_id",
+        "tabela_destino": "profiles",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "conversations",
+        "campo_origem": "session_id",
+        "tabela_destino": "conversations",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "conversations",
+        "campo_origem": "user_id",
+        "tabela_destino": "profiles",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "n8n_chat_messages",
+        "campo_origem": "session_id",
+        "tabela_destino": "conversations",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "n8n_chat_messages",
+        "campo_origem": "user_id",
+        "tabela_destino": "profiles",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "kanban_stages",
+        "campo_origem": "user_id",
+        "tabela_destino": "profiles",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "ai_personalities",
+        "campo_origem": "user_id",
+        "tabela_destino": "profiles",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "faq_items",
+        "campo_origem": "user_id",
+        "tabela_destino": "profiles",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "calendar_events",
+        "campo_origem": "contact_id",
+        "tabela_destino": "contacts",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      },
+      {
+        "tabela_origem": "calendar_events",
+        "campo_origem": "user_id",
+        "tabela_destino": "profiles",
+        "campo_destino": "id",
+        "tipo": "inferido"
+      }
+    ],
+    "mapa_dependencias": {
+      "contacts": [
+        "conversations",
+        "kanban_stages",
+        "profiles"
+      ],
+      "conversations": [
+        "conversations",
+        "profiles"
+      ],
+      "n8n_chat_messages": [
+        "conversations",
+        "profiles"
+      ],
+      "kanban_stages": [
+        "profiles"
+      ],
+      "ai_personalities": [
+        "profiles"
+      ],
+      "faq_items": [
+        "profiles"
+      ],
+      "calendar_events": [
+        "contacts",
+        "profiles"
+      ]
+    },
+    "diagrama_er": {
+      "entidades": 31,
+      "relacionamentos": 12,
+      "complexidade": "Média a Alta",
+      "recomendacao": "Usar ferramenta visual para diagrama completo"
+    },
+    "integridade_referencial": {
+      "foreign_keys_implementadas": 0,
+      "relacionamentos_inferidos": 12,
+      "score_integridade": 0
+    }
+  },
+  "tipos_dados_restricoes": {
+    "tipos_postgresql": {
+      "contacts": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "conversations": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "n8n_chat_messages": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "profiles": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "agendas": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "agenda_bookings": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "kanban_stages": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "ai_personalities": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "utm_tracking": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "knowledge_base": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "faq_items": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "custom_field_definitions": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "client_custom_values": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "calendar_events": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "tokens": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "documents": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "imagens_drive": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "n8n_chat_memory": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "n8n_chat_histories": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "chat_messages_backup": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "user_settings": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "user_sessions": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "user_activity_log": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "conversation_daily_data": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "performance_metrics": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "system_reports": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "metrics_cache": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "appointments": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "ai_products": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "funnel_data": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      },
+      "pricing_plans": {
+        "tipos_encontrados": [
+          "UUID",
+          "TEXT",
+          "TIMESTAMP",
+          "BOOLEAN",
+          "JSONB"
+        ],
+        "constraints": [
+          "PRIMARY KEY",
+          "NOT NULL"
+        ],
+        "indices": [
+          "PRIMARY KEY INDEX"
+        ]
+      }
+    },
+    "restricoes_implementadas": {
+      "contacts": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "conversations": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "n8n_chat_messages": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "profiles": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "agendas": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "agenda_bookings": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "kanban_stages": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "ai_personalities": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "utm_tracking": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "knowledge_base": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "faq_items": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "custom_field_definitions": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "client_custom_values": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "calendar_events": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "tokens": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "documents": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "imagens_drive": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "n8n_chat_memory": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "n8n_chat_histories": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "chat_messages_backup": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "user_settings": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "user_sessions": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "user_activity_log": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "conversation_daily_data": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "performance_metrics": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "system_reports": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "metrics_cache": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "appointments": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "ai_products": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "funnel_data": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      },
+      "pricing_plans": {
+        "primary_key": true,
+        "foreign_keys": 0,
+        "unique_constraints": 0,
+        "check_constraints": 0,
+        "not_null_constraints": 1
+      }
+    },
+    "validacoes_aplicacao": {},
+    "recomendacoes_tipos": [
+      "Usar UUID para chaves primárias",
+      "Implementar constraints de validação",
+      "Usar JSONB para dados semi-estruturados",
+      "Definir tamanhos apropriados para VARCHAR"
+    ]
+  },
+  "estrategia_indexacao": {
+    "indices_existentes": {
+      "total": 15,
+      "por_tipo": {
+        "btree": 12,
+        "gin": 2,
+        "unique": 8
+      },
+      "utilizacao": "Boa"
+    },
+    "estrategias_por_tipo": {
+      "performance": {
+        "descricao": "Índices para otimização de consultas frequentes",
+        "indices_recomendados": [
+          "contacts(email, user_id)",
+          "conversations(session_id, user_id)",
+          "n8n_chat_messages(session_id, created_at)",
+          "agenda_bookings(booking_date, status)"
+        ]
+      },
+      "relacionamentos": {
+        "descricao": "Índices para otimização de JOINs",
+        "indices_recomendados": [
+          "contacts(kanban_stage_id)",
+          "calendar_events(contact_id)",
+          "client_custom_values(client_id, field_id)"
+        ]
+      },
+      "busca_textual": {
+        "descricao": "Índices para busca full-text",
+        "indices_recomendados": [
+          "contacts usando GIN(to_tsvector(name || email))",
+          "knowledge_base usando GIN(to_tsvector(content))"
+        ]
+      },
+      "jsonb": {
+        "descricao": "Índices para campos JSONB",
+        "indices_recomendados": [
+          "contacts(tags) usando GIN",
+          "n8n_chat_messages(message_data) usando GIN"
+        ]
+      }
+    },
+    "plano_implementacao": {
+      "fase_1": "Índices críticos de performance",
+      "fase_2": "Índices de relacionamento",
+      "fase_3": "Índices especializados (GIN, full-text)",
+      "monitoramento": "pg_stat_user_indexes para utilização"
+    },
+    "metricas_monitoramento": [
+      "Tempo de execução de queries",
+      "Utilização de índices",
+      "Tamanho dos índices",
+      "Fragmentação"
+    ]
+  },
+  "consideracoes_performance": {
+    "estatisticas_tabelas": {
+      "contacts": {
+        "registros": 15,
+        "tamanho_estimado": 15360,
+        "necessita_atencao": false
+      },
+      "conversations": {
+        "registros": 4,
+        "tamanho_estimado": 4096,
+        "necessita_atencao": false
+      },
+      "n8n_chat_messages": {
+        "registros": 4,
+        "tamanho_estimado": 4096,
+        "necessita_atencao": false
+      },
+      "profiles": {
+        "registros": 3,
+        "tamanho_estimado": 3072,
+        "necessita_atencao": false
+      },
+      "agendas": {
+        "registros": 8,
+        "tamanho_estimado": 8192,
+        "necessita_atencao": false
+      },
+      "agenda_bookings": {
+        "registros": 8,
+        "tamanho_estimado": 8192,
+        "necessita_atencao": false
+      },
+      "kanban_stages": {
+        "registros": 17,
+        "tamanho_estimado": 17408,
+        "necessita_atencao": false
+      },
+      "ai_personalities": {
+        "registros": 6,
+        "tamanho_estimado": 6144,
+        "necessita_atencao": false
+      },
+      "utm_tracking": {
+        "registros": 10,
+        "tamanho_estimado": 10240,
+        "necessita_atencao": false
+      },
+      "knowledge_base": {
+        "registros": 5,
+        "tamanho_estimado": 5120,
+        "necessita_atencao": false
+      },
+      "faq_items": {
+        "registros": 31,
+        "tamanho_estimado": 31744,
+        "necessita_atencao": false
+      },
+      "custom_field_definitions": {
+        "registros": 4,
+        "tamanho_estimado": 4096,
+        "necessita_atencao": false
+      },
+      "client_custom_values": {
+        "registros": 17,
+        "tamanho_estimado": 17408,
+        "necessita_atencao": false
+      },
+      "calendar_events": {
+        "registros": 8,
+        "tamanho_estimado": 8192,
+        "necessita_atencao": false
+      },
+      "tokens": {
+        "registros": 33,
+        "tamanho_estimado": 33792,
+        "necessita_atencao": false
+      },
+      "documents": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "imagens_drive": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "n8n_chat_memory": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "n8n_chat_histories": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "chat_messages_backup": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "user_settings": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "user_sessions": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "user_activity_log": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "conversation_daily_data": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "performance_metrics": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "system_reports": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "metrics_cache": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "appointments": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      },
+      "ai_products": {
+        "registros": 3,
+        "tamanho_estimado": 3072,
+        "necessita_atencao": false
+      },
+      "funnel_data": {
+        "registros": 8,
+        "tamanho_estimado": 8192,
+        "necessita_atencao": false
+      },
+      "pricing_plans": {
+        "registros": 0,
+        "tamanho_estimado": 0,
+        "necessita_atencao": false
+      }
+    },
+    "gargalos_identificados": [
+      "Consultas sem índices apropriados",
+      "Tabelas com muitos registros sem particionamento",
+      "Falta de cache para consultas frequentes"
+    ],
+    "otimizacoes_recomendadas": {
+      "queries": [
+        "Implementar paginação em listagens",
+        "Usar LIMIT em consultas exploratórias",
+        "Otimizar JOINs com índices apropriados",
+        "Implementar cache para consultas frequentes"
+      ],
+      "banco": [
+        "Configurar connection pooling",
+        "Implementar read replicas para consultas",
+        "Configurar autovacuum otimizado",
+        "Monitorar slow queries"
+      ],
+      "aplicacao": [
+        "Implementar cache Redis",
+        "Usar lazy loading para dados grandes",
+        "Implementar debounce em buscas",
+        "Otimizar serialização JSON"
+      ]
+    },
+    "metricas_monitoramento": {
+      "tempo_resposta": "Média < 200ms, P95 < 500ms",
+      "throughput": "Suportar 1000+ queries/segundo",
+      "concorrencia": "Até 100 conexões simultâneas",
+      "disponibilidade": "99.9% uptime"
+    },
+    "alertas_configurados": [
+      "Tempo de resposta > 1s",
+      "Uso de CPU > 80%",
+      "Conexões > 80% do limite",
+      "Espaço em disco < 20%"
+    ]
+  },
+  "consideracoes_escalabilidade": {
+    "situacao_atual": {
+      "total_registros": 184,
+      "tamanho_banco": "0.18 GB",
+      "tabelas_criticas": [],
+      "crescimento_mensal": "18 registros/mês"
+    },
+    "projecoes": {
+      "6_meses": {
+        "registros": 368,
+        "tamanho": null,
+        "usuarios_simultaneos": 200
+      },
+      "1_ano": {
+        "registros": 920,
+        "tamanho": null,
+        "usuarios_simultaneos": 500
+      },
+      "2_anos": {
+        "registros": 2760,
+        "tamanho": null,
+        "usuarios_simultaneos": 1000
+      }
+    },
+    "estrategias_escalabilidade": {
+      "horizontal": {
+        "read_replicas": "Implementar 2-3 read replicas para consultas",
+        "sharding": "Considerar sharding por tenant/empresa",
+        "microservicos": "Separar serviços por domínio de negócio"
+      },
+      "vertical": {
+        "hardware": "Upgrade de CPU/RAM conforme crescimento",
+        "storage": "SSD NVMe para melhor I/O",
+        "network": "Conexão dedicada de alta velocidade"
+      },
+      "otimizacao": {
+        "particionamento": "Particionar tabelas grandes por data",
+        "arquivamento": "Arquivar dados antigos (> 2 anos)",
+        "compressao": "Implementar compressão de dados históricos"
+      }
+    },
+    "plano_migração": {
+      "fase_1": "Otimização atual (0-6 meses)",
+      "fase_2": "Read replicas (6-12 meses)",
+      "fase_3": "Sharding/Particionamento (1-2 anos)",
+      "fase_4": "Arquitetura distribuída (2+ anos)"
+    },
+    "monitoramento_escalabilidade": [
+      "Crescimento de dados por tabela",
+      "Padrões de uso por horário/dia",
+      "Performance de queries ao longo do tempo",
+      "Utilização de recursos (CPU/RAM/Disk)"
+    ]
+  }
+}
