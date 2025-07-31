@@ -38,16 +38,62 @@ export const useSupabaseFunnelData = () => {
 
   const getFunnelByDateRange = async (startDate: string, endDate: string) => {
     try {
-      // Try conversion_funnel_view first, fallback to funnel_data
-      const { data, error } = await supabase
-        .from('conversion_funnel_view')
-        .select('*')
-        .gte('created_at', startDate)
-        .lte('created_at', endDate)
-        .order('created_at', { ascending: false });
+      // Usar dados das novas tabelas implementadas para construir o funil
+      const [conversationsData, contactsData, metricsData] = await Promise.all([
+        supabase
+          .from('conversations')
+          .select('id, status, created_at, user_id')
+          .gte('created_at', startDate)
+          .lte('created_at', endDate),
+        supabase
+          .from('contacts')
+          .select('id, stage, value, created_at')
+          .gte('created_at', startDate)
+          .lte('created_at', endDate),
+        supabase
+          .from('conversation_daily_data')
+          .select('*')
+          .gte('date', startDate)
+          .lte('date', endDate)
+      ]);
 
-      if (error) {
-        // Fallback to funnel_data table
+      // Construir dados do funil baseado nas novas tabelas
+      const conversations = conversationsData.data || [];
+      const contacts = contactsData.data || [];
+      const metrics = metricsData.data || [];
+
+      // Calcular estágios do funil
+      const funnelStages = [
+        {
+          name: 'Visitantes',
+          value: contacts.length,
+          percentage: 100,
+          created_at: new Date().toISOString()
+        },
+        {
+          name: 'Leads',
+          value: contacts.filter(c => c.stage === 'lead').length,
+          percentage: contacts.length > 0 ? (contacts.filter(c => c.stage === 'lead').length / contacts.length) * 100 : 0,
+          created_at: new Date().toISOString()
+        },
+        {
+          name: 'Conversas Ativas',
+          value: conversations.filter(c => c.status === 'active').length,
+          percentage: contacts.length > 0 ? (conversations.filter(c => c.status === 'active').length / contacts.length) * 100 : 0,
+          created_at: new Date().toISOString()
+        },
+        {
+          name: 'Clientes',
+          value: contacts.filter(c => c.stage === 'client').length,
+          percentage: contacts.length > 0 ? (contacts.filter(c => c.stage === 'client').length / contacts.length) * 100 : 0,
+          created_at: new Date().toISOString()
+        }
+      ];
+
+      return funnelStages;
+    } catch (error) {
+      console.error('Erro ao buscar dados do funil:', error);
+      // Fallback para dados mockados se houver erro
         const fallback = await supabase
           .from('funnel_data')
           .select('*')

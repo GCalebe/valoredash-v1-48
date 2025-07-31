@@ -46,16 +46,25 @@ export const useSupabaseData = (initialFilters?: MetricsFilters): UseSupabaseDat
         getFunnelData()
       ]);
       
-      // Buscar métricas do dashboard usando a view
-      const { data: metricsData, error: metricsError } = await supabase
-        .from('dashboard_metrics')
-        .select('*')
-        .limit(1)
-        .single();
+      // Buscar métricas do dashboard usando as novas tabelas implementadas
+      const [metricsData, conversationMetrics, performanceMetrics] = await Promise.all([
+        supabase.from('conversation_daily_data').select('*').limit(1).single(),
+        supabase.from('performance_metrics').select('*').limit(1).single(),
+        supabase.from('metrics_cache').select('*').limit(1).single()
+      ]);
+      
+      // Combinar dados das diferentes tabelas de métricas
+      const combinedMetrics = {
+        ...metricsData.data,
+        ...conversationMetrics.data,
+        ...performanceMetrics.data
+      };
+      
+      const metricsError = metricsData.error || conversationMetrics.error || performanceMetrics.error;
       
       const metricsResult = {
         success: !metricsError,
-        data: metricsData,
+        data: combinedMetrics,
         error: metricsError
       };
 
