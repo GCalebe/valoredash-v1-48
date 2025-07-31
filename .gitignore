@@ -31,3 +31,26 @@ bmad.db
 # Backup files
 *.ai-backup
 *.backup
+
+# Organized folders
+scripts-root/
+docs-temp/
+reports/
+
+# Temporary files
+*.tmp
+*.temp
+database-consistency-report.json
+
+# Development artifacts
+eslint-*.json
+eslint-*.md
+typescript-*.md
+*-report.json
+*-report.txt
+
+# Dashboard and preview files
+dashboard-preview.html
+monitor-*.cjs
+validate-*.cjs
+test-*.cjs

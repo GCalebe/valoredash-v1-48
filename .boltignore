@@ -23,9 +23,35 @@ README.md
 # Ignorar arquivos relacionados ao banco de dados (Supabase migrations e config)
 supabase/
 
+# Ignorar pastas organizacionais
+scripts-root/
+docs-temp/
+reports/
+docs_supabase/
+archive/
+
+# Ignorar arquivos de desenvolvimento e análise
+*.cjs
+*.py
+*.ps1
+*.sql
+eslint-*.json
+eslint-*.md
+typescript-*.md
+*-report.json
+*-report.txt
+database-consistency-report.json
+dashboard-preview.html
+
 # Ignorar arquivos de utilitários e bibliotecas de baixo nível que não afetam diretamente o design
 src/utils/logger.ts
 src/hooks/utils/retryFetch.ts
 src/hooks/useDebouncedCallback.ts
 src/lib/memoryService.ts
 src/lib/chatService.ts
+
+# Ignorar arquivos temporários e de backup
+*.tmp
+*.temp
+*.backup
+*.ai-backup
