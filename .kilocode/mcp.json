@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "supabase-mcp": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@supabase-community/supabase-mcp",
+        "--key",
+        "aec1b775-353c-4946-9ac4-98f2711d047d",
+        "--profile",
+        "alive-barnacle-neLA2p"
+      ],
+      "alwaysAllow": [
+        "list_projects",
+        "list_tables"
+      ]
+    }
+  }
+}

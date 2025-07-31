@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { toast } from '@/hooks/use-toast';
 
-type Host = Database['public']['Tables']['employees']['Row'];
+export type Host = Database['public']['Tables']['employees']['Row'];
 
 export const useHosts = () => {
   const { user } = useAuth();

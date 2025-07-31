@@ -22,12 +22,20 @@ export interface Agenda {
   updated_by: string | null;
 }
 
-export function useAgendas() {
+export function useAgendas(userId?: string) {
   const [agendas, setAgendas] = useState<Agenda[]>([]);
   const [agendasLoading, setAgendasLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchAgendas = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const idToFetch = userId || user?.id;
+
+    if (!idToFetch) {
+      setAgendas([]);
+      setAgendasLoading(false);
+      return;
+    }
     try {
       setAgendasLoading(true);
       
@@ -35,6 +43,7 @@ export function useAgendas() {
         .from('agendas')
         .select('*')
         .eq('is_active', true)
+        .eq('created_by', idToFetch)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -53,7 +62,7 @@ export function useAgendas() {
     } finally {
       setAgendasLoading(false);
     }
-  }, [toast]);
+  }, [toast, userId]);
 
   useEffect(() => {
     fetchAgendas();

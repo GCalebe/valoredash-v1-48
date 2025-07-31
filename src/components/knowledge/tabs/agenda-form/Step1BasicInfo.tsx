@@ -35,8 +35,8 @@ export const Step1BasicInfo: React.FC<Step1BasicInfoProps> = ({
         <Textarea id="description" value={currentAgenda.description} onChange={handleInputChange} />
       </FormField>
       <FormField label="Anfitrião" tooltipText={tooltipTexts.host}>
-        <Select 
-          value={currentAgenda.host} 
+        <Select
+          value={currentAgenda.host}
           onValueChange={(value) => setCurrentAgenda(prev => ({ ...prev, host: value }))}
           disabled={hostsLoading}
         >
@@ -45,7 +45,7 @@ export const Step1BasicInfo: React.FC<Step1BasicInfoProps> = ({
           </SelectTrigger>
           <SelectContent>
             {hosts.map((host) => (
-              <SelectItem key={host.id} value={host.name}>
+              <SelectItem key={host.id} value={host.id}>
                 {host.name} - {host.role}
               </SelectItem>
             ))}

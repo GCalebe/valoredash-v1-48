@@ -1,10 +1,12 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { AgendaForm } from './AgendaForm';
 import { useHosts } from '@/hooks/useHosts';
 import { useAgendas } from '@/hooks/useAgendas';
 import AgendaHeader from '../agenda/AgendaHeader';
 import AgendaHierarchicalView from '../agenda/AgendaHierarchicalView';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -190,13 +192,29 @@ const AgendaTab = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'hierarchy'>('grid');
 
   // Função para converter agenda do Supabase para formato local
-  const convertSupabaseToLocal = (supabaseAgenda: SupabaseAgenda): LocalAgenda => {
+  const convertSupabaseToLocal = async (supabaseAgenda: SupabaseAgenda): Promise<LocalAgenda> => {
+    // Buscar anfitrião associado à agenda
+    let hostId = '';
+    try {
+      const { data: employeeAgenda } = await supabase
+        .from('employee_agendas')
+        .select('employee_id')
+        .eq('agenda_id', supabaseAgenda.id)
+        .single();
+      
+      if (employeeAgenda) {
+        hostId = employeeAgenda.employee_id;
+      }
+    } catch (error) {
+      console.log('Nenhum anfitrião associado à agenda:', supabaseAgenda.id);
+    }
+
     return {
       id: supabaseAgenda.id, // Mantém como string para evitar problemas de conversão
       title: supabaseAgenda.name,
       description: supabaseAgenda.description || '',
       category: (supabaseAgenda.category as AgendaCategory) || '',
-      host: '', // Será preenchido com dados dos hosts
+      host: hostId, // Preenchido com o ID do anfitrião associado
       duration: supabaseAgenda.duration_minutes,
       breakTime: supabaseAgenda.buffer_time_minutes,
       availabilityInterval: 30, // Valor padrão
@@ -213,7 +231,23 @@ const AgendaTab = () => {
   };
 
   // Usar dados do Supabase convertidos para formato local
-  const baseAgendas = supabaseAgendas.map(convertSupabaseToLocal);
+  const [baseAgendas, setBaseAgendas] = useState<LocalAgenda[]>([]);
+  
+  // Carregar agendas com anfitriões associados
+  useEffect(() => {
+    const loadAgendasWithHosts = async () => {
+      if (supabaseAgendas.length > 0) {
+        const agendasWithHosts = await Promise.all(
+          supabaseAgendas.map(agenda => convertSupabaseToLocal(agenda))
+        );
+        setBaseAgendas(agendasWithHosts);
+      } else {
+        setBaseAgendas([]);
+      }
+    };
+    
+    loadAgendasWithHosts();
+  }, [supabaseAgendas]);
   
   // Filtrar e ordenar agendas
   const displayAgendas = useMemo(() => {
@@ -275,18 +309,60 @@ const AgendaTab = () => {
         service_types: currentAgenda.serviceTypes
       };
 
+      let agendaId: string;
+
       if (editingAgenda) {
         await updateAgenda(editingAgenda.id, agendaData);
+        agendaId = editingAgenda.id;
+        
+        // Remover associações antigas de anfitriões
+        await supabase
+          .from('employee_agendas')
+          .delete()
+          .eq('agenda_id', agendaId);
       } else {
-        await createAgenda(agendaData);
+        const { data, error } = await supabase
+          .from('agendas')
+          .insert(agendaData)
+          .select('id')
+          .single();
+        
+        if (error || !data) throw error;
+        agendaId = data.id;
+      }
+
+      // Associar anfitrião selecionado à agenda
+      if (currentAgenda.host) {
+        const { error: hostError } = await supabase
+          .from('employee_agendas')
+          .insert({
+            employee_id: currentAgenda.host,
+            agenda_id: agendaId
+          });
+        
+        if (hostError) {
+          console.error('Erro ao associar anfitrião:', hostError);
+          toast({
+            title: "Aviso",
+            description: "Agenda salva, mas houve erro ao associar o anfitrião.",
+            variant: "destructive"
+          });
+        }
       }
 
       setIsDialogOpen(false);
       setEditingAgenda(null);
-
+      
+      // Recarregar agendas para mostrar as mudanças
+      refetchAgendas();
       
     } catch (error) {
       console.error('Erro ao salvar agenda:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar a agenda.",
+        variant: "destructive"
+      });
     }
   };
   
