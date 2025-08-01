@@ -65,6 +65,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           icon: Link,
           path: "/evolution",
         },
+        {
+          name: "Conversas",
+          icon: MessageSquare,
+          path: "/chats",
+        },
       ],
     },
     {
@@ -101,11 +106,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           name: "Base Conhecimento",
           icon: BookOpen,
           path: "/knowledge-base",
-        },
-        {
-          name: "Conversas",
-          icon: MessageSquare,
-          path: "/chats",
         },
         // Conversas 2.0 desativado - agora integrado ao item principal
         // {
