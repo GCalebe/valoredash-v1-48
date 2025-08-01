@@ -18,6 +18,7 @@ import {
   CreditCard,
   Shield,
   UserCog,
+  BookOpen,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -95,6 +96,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           name: "Conhecimento",
           icon: FileText,
           path: "/knowledge",
+        },
+        {
+          name: "Base Conhecimento",
+          icon: BookOpen,
+          path: "/knowledge-base",
         },
         {
           name: "Conversas",

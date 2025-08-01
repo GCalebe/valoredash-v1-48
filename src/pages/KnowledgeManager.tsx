@@ -17,7 +17,7 @@ import AgendaTab from "@/components/knowledge/tabs/AgendaTab";
 import AIPersonalityTab from "@/components/knowledge/tabs/AIPersonalityTab";
 // import AIStagesTab from "@/components/knowledge/tabs/AIStagesTab";
 import AIMessagesTab from "@/components/knowledge/tabs/AIMessagesTab";
-// AITestTab component was removed
+// import KnowledgeBaseTab from "@/components/knowledge/tabs/KnowledgeBaseTab"; // Removido - agora é uma página independente
 
 const KnowledgeManager = () => {
   const { user, signOut, isLoading: authLoading } = useAuth();
@@ -30,10 +30,12 @@ const KnowledgeManager = () => {
 
   // AI products are automatically loaded by React Query
 
-  // Get the AI product ID from the URL query parameters
+  // Get the AI product ID and tab from the URL query parameters
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const aiProductId = searchParams.get("aiProduct");
+    const tabParam = searchParams.get("tab");
+    
     if (aiProductId) {
       setSelectedAIProduct(aiProductId);
       
@@ -44,6 +46,11 @@ const KnowledgeManager = () => {
           console.log(`Loaded AI Product: ${product.name}`);
         }
       }
+    }
+    
+    // Set active tab from URL parameter
+    if (tabParam) {
+      setActiveTab(tabParam);
     }
   }, [location, aiProducts]);
 
@@ -143,7 +150,7 @@ const KnowledgeManager = () => {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-7 lg:grid-cols-7 bg-gray-100 dark:bg-gray-700 p-1 rounded-t-lg">
+            <TabsList className="grid w-full grid-cols-6 lg:grid-cols-6 bg-gray-100 dark:bg-gray-700 p-1 rounded-t-lg">
               <TabsTrigger value="agenda" className="text-sm">
                 Agenda
               </TabsTrigger>
@@ -159,14 +166,8 @@ const KnowledgeManager = () => {
               <TabsTrigger value="ai-personality" className="text-sm">
                 Personalidade
               </TabsTrigger>
-              {/* <TabsTrigger value="ai-stages" className="text-sm">
-                Etapas
-              </TabsTrigger> */}
               <TabsTrigger value="ai-messages" className="text-sm">
                 Mensagens
-              </TabsTrigger>
-              <TabsTrigger value="ai-test" className="text-sm">
-                Teste
               </TabsTrigger>
             </TabsList>
 
@@ -191,19 +192,8 @@ const KnowledgeManager = () => {
                 <AIPersonalityTab />
               </TabsContent>
 
-              {/* <TabsContent value="ai-stages" className="mt-0">
-                <AIStagesTab />
-              </TabsContent> */}
-
               <TabsContent value="ai-messages" className="mt-0">
                 <AIMessagesTab />
-              </TabsContent>
-
-              <TabsContent value="ai-test" className="mt-0">
-                {/* AITestTab component was removed */}
-              <div className="p-4 text-center text-muted-foreground">
-                Aba de teste de IA removida
-              </div>
               </TabsContent>
             </div>
           </Tabs>

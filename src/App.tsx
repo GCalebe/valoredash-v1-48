@@ -6,6 +6,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import MetricsDashboard from "./pages/MetricsDashboard";
 import KnowledgeManager from "./pages/KnowledgeManager";
+import KnowledgeBase from "./pages/KnowledgeBase";
 import ClientsDashboard from "./pages/ClientsDashboard";
 
 import Evolution from "./pages/Evolution";
@@ -45,6 +46,7 @@ const App = () => (
                   <Route path="/analytics-portals" element={<Navigate to="/metrics" replace />} />
                   <Route path="/chats" element={<Conversations />} />
                   <Route path="/knowledge" element={<KnowledgeManager />} />
+                  <Route path="/knowledge-base" element={<KnowledgeBase />} />
                   <Route path="/clients" element={<ClientsDashboard />} />
                   <Route path="/evolution" element={<Evolution />} />
                   <Route path="/schedule" element={<Schedule />} />
