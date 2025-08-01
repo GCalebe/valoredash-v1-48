@@ -162,10 +162,122 @@ export function useChatMessages(selectedChat: string | null) {
     }
   }, [selectedChat]); // fetchMessages removida das dependências para evitar re-execuções desnecessárias
 
-  const handleNewMessage = (message: ChatMessage) => {
+  // Função para salvar mensagem no histórico
+  const saveToHistory = useCallback(async (sessionId: string, messageData: ChatMessage) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('n8n_chat_histories')
+        .insert({
+          session_id: sessionId,
+          message_data: {
+            id: messageData.id,
+            content: messageData.content,
+            role: messageData.role,
+            type: messageData.type,
+            timestamp: messageData.timestamp
+          },
+          sender: messageData.role === 'user' ? 'user' : 'assistant',
+          message_type: messageData.type || 'text'
+        });
+
+      if (error) {
+        console.error('❌ Erro ao salvar no histórico:', error);
+      } else {
+        console.log('✅ Mensagem salva no histórico:', messageData.id);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao salvar mensagem no histórico:', error);
+    }
+  }, []);
+
+  // Função para salvar/atualizar memória contextual
+  const saveToMemory = useCallback(async (sessionId: string, memoryData: any) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Buscar memória existente para esta sessão
+      const { data: existingMemory } = await supabase
+        .from('n8n_chat_memory')
+        .select('*')
+        .eq('session_id', sessionId)
+        .single();
+
+      if (existingMemory) {
+        // Atualizar memória existente
+        const { error } = await supabase
+          .from('n8n_chat_memory')
+          .update({
+            memory_data: {
+              ...existingMemory.memory_data,
+              ...memoryData,
+              last_updated: new Date().toISOString()
+            },
+            updated_at: new Date().toISOString()
+          })
+          .eq('session_id', sessionId);
+
+        if (error) {
+          console.error('❌ Erro ao atualizar memória:', error);
+        } else {
+          console.log('✅ Memória atualizada para sessão:', sessionId);
+        }
+      } else {
+        // Criar nova memória
+        const { error } = await supabase
+          .from('n8n_chat_memory')
+          .insert({
+            session_id: sessionId,
+            memory_data: {
+              ...memoryData,
+              created: new Date().toISOString()
+            }
+          });
+
+        if (error) {
+          console.error('❌ Erro ao criar memória:', error);
+        } else {
+          console.log('✅ Nova memória criada para sessão:', sessionId);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao salvar memória:', error);
+    }
+  }, []);
+
+  const handleNewMessage = useCallback(async (message: ChatMessage, sessionId?: string) => {
     logger.debug("📨 Adicionando nova mensagem ao estado local:", message);
     setMessages((currentMessages) => [...currentMessages, message]);
-  };
 
-  return { messages, loading, handleNewMessage, fetchMessages };
+    // Salvar mensagem no histórico se sessionId for fornecido
+    if (sessionId) {
+      await saveToHistory(sessionId, message);
+      
+      // Atualizar memória contextual com informações da conversa
+      const memoryData = {
+        last_message: message.content,
+        last_message_time: message.timestamp,
+        message_count: messages.length + 1,
+        conversation_context: {
+          recent_topics: [message.content.substring(0, 100)],
+          user_preferences: {},
+          conversation_flow: message.role
+        }
+      };
+      
+      await saveToMemory(sessionId, memoryData);
+    }
+  }, [messages.length, saveToHistory, saveToMemory]);
+
+  return { 
+    messages, 
+    loading, 
+    handleNewMessage, 
+    fetchMessages,
+    saveToHistory,
+    saveToMemory
+  };
 }
