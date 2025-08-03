@@ -28,6 +28,17 @@ interface ContextualMemory {
   context?: Record<string, unknown>;
 }
 
+// Type that handles both N8nChatMemory and ContextualMemory
+type MemoryItem = {
+  id: number;
+  message: unknown;
+  importance?: number;
+  memory_level?: 'short_term' | 'medium_term' | 'long_term';
+  created_at?: string;
+  entities?: MemoryEntity[];
+  context?: Record<string, unknown>;
+};
+
 interface MostImportantMemory {
   message?: string;
   created_at?: string;
@@ -62,7 +73,7 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
   };
 
   // Renderizar um item de memória
-  const renderMemoryItem = (memory: ContextualMemory) => (
+  const renderMemoryItem = (memory: MemoryItem) => (
     <Card key={memory.id} className={cn(
       'mb-4 transition-all duration-200',
       (memory.importance || 0) >= 3 ? 'border-amber-400 dark:border-amber-500' : ''
@@ -73,13 +84,14 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
             <CardTitle className="text-base flex items-center">
               <Brain className="h-4 w-4 mr-2" />
               Memória Contextual
-              <Badge variant="outline" className="ml-2 text-xs">
-                {memory.memory_level === 'short_term' ? 'Curto Prazo' : 
-                 memory.memory_level === 'medium_term' ? 'Médio Prazo' : 'Longo Prazo'}
-              </Badge>
+               <Badge variant="outline" className="ml-2 text-xs">
+                 {memory.memory_level === 'short_term' ? 'Curto Prazo' : 
+                  memory.memory_level === 'medium_term' ? 'Médio Prazo' : 
+                  memory.memory_level === 'long_term' ? 'Longo Prazo' : 'Geral'}
+               </Badge>
             </CardTitle>
             <CardDescription className="text-xs">
-              {memory.created_at ? format(new Date(memory.created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR }) : 'Data não disponível'}
+               {memory.created_at ? format(new Date(memory.created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR }) : 'Data não disponível'}
             </CardDescription>
           </div>
           <Button 
@@ -95,7 +107,7 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm whitespace-pre-wrap">{memory.message || 'Mensagem não disponível'}</p>
+        <p className="text-sm whitespace-pre-wrap">{String(memory.message || 'Mensagem não disponível')}</p>
         
         {memory.entities && memory.entities.length > 0 && (
           <div className="mt-2">
@@ -198,10 +210,14 @@ export function ContextualMemoryViewer({ sessionId, autoRefresh = false }: Conte
               Memória Mais Importante
             </h4>
             <div className="text-xs p-2 border rounded-md">
-              <p className="font-medium">{(contextSummary.most_important as MostImportantMemory)?.message || 'Memória não disponível'}</p>
+              <p className="font-medium">{
+                typeof contextSummary.most_important === 'object' && contextSummary.most_important !== null 
+                  ? String((contextSummary.most_important as any)?.message || 'Memória não disponível')
+                  : 'Memória não disponível'
+              }</p>
               <p className="text-muted-foreground mt-1">
-                {(contextSummary.most_important as MostImportantMemory)?.created_at 
-                  ? format(new Date((contextSummary.most_important as MostImportantMemory).created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR })
+                {typeof contextSummary.most_important === 'object' && contextSummary.most_important !== null && (contextSummary.most_important as any)?.created_at
+                  ? format(new Date((contextSummary.most_important as any).created_at), 'dd MMM yyyy HH:mm:ss', { locale: ptBR })
                   : 'Data não disponível'}
               </p>
             </div>
