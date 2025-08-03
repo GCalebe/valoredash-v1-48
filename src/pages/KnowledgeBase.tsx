@@ -15,7 +15,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR, es, enUS } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { useThemeSettings } from '@/context/ThemeSettingsContext';
-import { ThemeToggle } from '@/components/ThemeToggle';
+
 
 const LANGUAGES = {
   'pt-BR': { label: 'Português', locale: ptBR, flag: '🇧🇷' },
@@ -126,7 +126,6 @@ const KnowledgeBasePage = () => {
               >
                 {user?.user_metadata?.name || user?.email}
               </Badge>
-              <ThemeToggle />
               <Button
                 variant="outline"
                 onClick={signOut}
@@ -187,7 +186,6 @@ const KnowledgeBasePage = () => {
             >
               {user?.user_metadata?.name || user?.email}
             </Badge>
-            <ThemeToggle />
             <Button
               variant="outline"
               onClick={signOut}

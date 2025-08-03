@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import { useToast } from "@/hooks/use-toast";
 import StatsCards from "@/components/evolution/StatsCards";
 import AddInstanceDialog from "@/components/evolution/AddInstanceDialog";
@@ -410,7 +410,6 @@ const Evolution = () => {
             >
               {user?.user_metadata?.name || user?.email}
             </Badge>
-            <ThemeToggle />
           </div>
         </div>
       </header>

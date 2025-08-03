@@ -1,15 +1,25 @@
-import { useThemeSettings as useThemeSettingsContext } from '@/context/ThemeSettingsContext';
+import { useThemeSettings as useThemeSettingsContext } from "@/context/ThemeSettingsContext";
 
-// Enhanced hook for compatibility with optimized components
-export function useThemeSettings() {
-  const { settings } = useThemeSettingsContext();
+export const useThemeSettings = () => {
+  const context = useThemeSettingsContext();
   
+  if (!context) {
+    throw new Error("useThemeSettings must be used within a ThemeSettingsProvider");
+  }
+
+  const { settings, loading, initialized } = context;
+
+  // Derive chat colors from primary color
+  const chatBackgroundColor = settings.primaryColor + "10"; // 10% opacity
+  const chatBubbleColor = settings.primaryColor;
+  const chatBubbleTextColor = "#ffffff";
+
   return {
-    themeSettings: {
-      chatBackgroundColor: settings.primaryColor + '10', // Add some transparency
-      chatBubbleColor: settings.primaryColor,
-      chatBubbleTextColor: '#ffffff',
-    },
-    settings,
+    ...context,
+    chatBackgroundColor,
+    chatBubbleColor,
+    chatBubbleTextColor,
+    loading,
+    initialized,
   };
-}
+};

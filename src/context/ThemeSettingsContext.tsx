@@ -1,4 +1,7 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { useUserSettings } from "@/hooks/useUserSettings";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export interface ThemeSettings {
   brandName: string;
@@ -12,6 +15,8 @@ type ThemeSettingsContextType = {
   settings: ThemeSettings;
   updateSettings: (newSettings: Partial<ThemeSettings>) => void;
   resetSettings: () => void;
+  loading: boolean;
+  initialized: boolean;
 };
 
 const defaultSettings: ThemeSettings = {
@@ -22,6 +27,8 @@ const defaultSettings: ThemeSettings = {
   accentColor: "#1e3a8a",
 };
 
+const THEME_SETTINGS_KEY = 'theme_settings';
+
 const ThemeSettingsContext = createContext<
   ThemeSettingsContextType | undefined
 >(undefined);
@@ -31,32 +38,141 @@ export function ThemeSettingsProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, setSettings] = useState<ThemeSettings>(() => {
-    const saved = localStorage.getItem("valore-theme-settings");
-    return saved ? JSON.parse(saved) : defaultSettings;
-  });
+  const [settings, setSettings] = useState<ThemeSettings>(defaultSettings);
+  const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { saveSetting, getSetting } = useUserSettings();
+  const { toast } = useToast();
 
+  // Verificar se usuário está autenticado
   useEffect(() => {
-    localStorage.setItem("valore-theme-settings", JSON.stringify(settings));
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
 
-    // Apply theme colors to CSS variables
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session?.user);
+      if (event === 'SIGNED_OUT') {
+        // Voltar para configurações padrão quando usuário sair
+        setSettings(defaultSettings);
+        setInitialized(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Carregar configurações do banco ou localStorage
+  const loadSettings = useCallback(async () => {
+    setLoading(true);
+    try {
+      if (isAuthenticated) {
+        // Usuário autenticado: buscar do banco
+        const savedSettings = getSetting(THEME_SETTINGS_KEY);
+        if (savedSettings) {
+          setSettings({ ...defaultSettings, ...savedSettings });
+        } else {
+          // Migrar do localStorage se existir
+          const localStorageSettings = localStorage.getItem("valore-theme-settings");
+          if (localStorageSettings) {
+            const parsedSettings = JSON.parse(localStorageSettings);
+            const migratedSettings = { ...defaultSettings, ...parsedSettings };
+            setSettings(migratedSettings);
+            // Salvar no banco
+            await saveSetting(THEME_SETTINGS_KEY, migratedSettings);
+            // Limpar localStorage
+            localStorage.removeItem("valore-theme-settings");
+            toast({
+              title: "Configurações migradas",
+              description: "Suas configurações de tema foram migradas para sua conta.",
+            });
+          } else {
+            setSettings(defaultSettings);
+          }
+        }
+      } else {
+        // Usuário não autenticado: usar localStorage como fallback
+        const saved = localStorage.getItem("valore-theme-settings");
+        setSettings(saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings);
+      }
+      setInitialized(true);
+    } catch (error) {
+      console.error('Erro ao carregar configurações de tema:', error);
+      setSettings(defaultSettings);
+      setInitialized(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, getSetting, saveSetting, toast]);
+
+  // Carregar configurações quando componente montar ou autenticação mudar
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
+
+  // Aplicar variáveis CSS quando configurações mudarem
+  useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--valore-blue", settings.primaryColor);
     root.style.setProperty("--valore-gold", settings.secondaryColor);
     root.style.setProperty("--valore-navy", settings.accentColor);
   }, [settings]);
 
-  const updateSettings = (newSettings: Partial<ThemeSettings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }));
-  };
+  const updateSettings = useCallback(async (newSettings: Partial<ThemeSettings>) => {
+    const updatedSettings = { ...settings, ...newSettings };
+    setSettings(updatedSettings);
 
-  const resetSettings = () => {
+    try {
+      if (isAuthenticated) {
+        // Salvar no banco
+        await saveSetting(THEME_SETTINGS_KEY, updatedSettings);
+      } else {
+        // Salvar no localStorage como fallback
+        localStorage.setItem("valore-theme-settings", JSON.stringify(updatedSettings));
+      }
+    } catch (error) {
+      console.error('Erro ao salvar configurações de tema:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as configurações de tema.",
+        variant: "destructive",
+      });
+      // Reverter mudanças em caso de erro
+      setSettings(settings);
+    }
+  }, [settings, isAuthenticated, saveSetting, toast]);
+
+  const resetSettings = useCallback(async () => {
     setSettings(defaultSettings);
-  };
+
+    try {
+      if (isAuthenticated) {
+        // Salvar configurações padrão no banco
+        await saveSetting(THEME_SETTINGS_KEY, defaultSettings);
+      } else {
+        // Remover do localStorage
+        localStorage.removeItem("valore-theme-settings");
+      }
+      toast({
+        title: "Configurações resetadas",
+        description: "Todas as configurações foram restauradas para o padrão.",
+      });
+    } catch (error) {
+      console.error('Erro ao resetar configurações de tema:', error);
+      toast({
+        title: "Erro ao resetar",
+        description: "Não foi possível resetar as configurações de tema.",
+        variant: "destructive",
+      });
+    }
+  }, [isAuthenticated, saveSetting, toast]);
 
   return (
     <ThemeSettingsContext.Provider
-      value={{ settings, updateSettings, resetSettings }}
+      value={{ settings, updateSettings, resetSettings, loading, initialized }}
     >
       {children}
     </ThemeSettingsContext.Provider>

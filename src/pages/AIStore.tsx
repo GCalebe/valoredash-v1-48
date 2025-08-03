@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import {
   Card,
   CardContent,
@@ -125,7 +125,6 @@ const AIStore = () => {
             >
               {user?.user_metadata?.name || user?.email}
             </Badge>
-            <ThemeToggle />
             <Button
               variant="outline"
               onClick={signOut}

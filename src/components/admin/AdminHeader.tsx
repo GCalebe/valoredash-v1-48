@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import { ArrowLeft, ShipWheel, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -76,7 +76,6 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           >
             {user?.user_metadata?.name || user?.email}
           </Badge>
-          <ThemeToggle />
           <Button
             variant="outline"
             onClick={onSignOut}

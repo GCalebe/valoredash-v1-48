@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ShipWheel, LogOut, ArrowLeft, Filter, Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import { useAdvancedSearch, SearchResult } from "@/hooks/useAdvancedSearch";
 import SearchModeSelector from "./SearchModeSelector";
 import SearchResults from "./SearchResults";
@@ -148,7 +148,6 @@ const ChatHeader = ({
           >
             {user?.user_metadata?.name || user?.email}
           </Badge>
-          <ThemeToggle />
           <Button
             variant="outline"
             onClick={signOut}

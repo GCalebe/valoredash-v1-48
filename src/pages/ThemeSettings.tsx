@@ -8,6 +8,7 @@ import {
   Sun,
   Moon,
   Monitor,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useThemeSettings } from "@/context/ThemeSettingsContext";
+import { useThemeSettings } from "@/hooks/useThemeSettings";
 import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/hooks/use-toast";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -28,11 +29,28 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 const ThemeSettings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { settings, updateSettings, resetSettings } = useThemeSettings();
+  const { settings, updateSettings, resetSettings, loading, initialized } = useThemeSettings();
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Mostrar loading enquanto não inicializado
+  if (!initialized) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+        <DashboardHeader />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span>Carregando configurações...</span>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
@@ -45,24 +63,33 @@ const ThemeSettings = () => {
       }
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const result = e.target?.result as string;
-        updateSettings({ logo: result });
-        toast({
-          title: "Logo atualizada",
-          description: "A logo foi carregada com sucesso!",
-        });
+        try {
+          await updateSettings({ logo: result });
+          toast({
+            title: "Logo atualizada",
+            description: "A logo foi carregada com sucesso!",
+          });
+        } catch (error) {
+          toast({
+            title: "Erro ao salvar logo",
+            description: "Não foi possível salvar a logo. Tente novamente.",
+            variant: "destructive",
+          });
+        }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleReset = () => {
-    resetSettings();
-    toast({
-      title: "Configurações resetadas",
-      description: "Todas as configurações foram restauradas para o padrão.",
-    });
+  const handleReset = async () => {
+    try {
+      await resetSettings();
+    } catch (error) {
+      // O erro já é tratado no contexto, mas podemos adicionar log aqui se necessário
+      console.error('Erro ao resetar configurações:', error);
+    }
   };
 
   const handleThemeChange = (value: string) => {
@@ -170,10 +197,15 @@ const ThemeSettings = () => {
                   <Input
                     id="brandName"
                     value={settings.brandName}
-                    onChange={(e) =>
-                      updateSettings({ brandName: e.target.value })
-                    }
+                    onChange={async (e) => {
+                      try {
+                        await updateSettings({ brandName: e.target.value });
+                      } catch (error) {
+                        console.error('Erro ao atualizar nome da marca:', error);
+                      }
+                    }}
                     placeholder="Digite o nome da sua marca"
+                    disabled={loading}
                   />
                 </div>
               </CardContent>
@@ -194,15 +226,35 @@ const ThemeSettings = () => {
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
                       className="flex items-center gap-2"
+                      disabled={loading}
                     >
-                      <Upload className="h-4 w-4" />
+                      {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
                       Fazer Upload
                     </Button>
                     {settings.logo && (
                       <Button
                         variant="ghost"
-                        onClick={() => updateSettings({ logo: null })}
+                        onClick={async () => {
+                          try {
+                            await updateSettings({ logo: null });
+                            toast({
+                              title: "Logo removida",
+                              description: "A logo foi removida com sucesso!",
+                            });
+                          } catch (error) {
+                            toast({
+                              title: "Erro ao remover logo",
+                              description: "Não foi possível remover a logo. Tente novamente.",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
                         className="text-red-600 hover:text-red-700"
+                        disabled={loading}
                       >
                         Remover Logo
                       </Button>
@@ -248,18 +300,28 @@ const ThemeSettings = () => {
                         id="primaryColor"
                         type="color"
                         value={settings.primaryColor}
-                        onChange={(e) =>
-                          updateSettings({ primaryColor: e.target.value })
-                        }
+                        onChange={async (e) => {
+                          try {
+                            await updateSettings({ primaryColor: e.target.value });
+                          } catch (error) {
+                            console.error('Erro ao atualizar cor primária:', error);
+                          }
+                        }}
                         className="w-12 h-10 rounded border cursor-pointer"
+                        disabled={loading}
                       />
                       <Input
                         value={settings.primaryColor}
-                        onChange={(e) =>
-                          updateSettings({ primaryColor: e.target.value })
-                        }
+                        onChange={async (e) => {
+                          try {
+                            await updateSettings({ primaryColor: e.target.value });
+                          } catch (error) {
+                            console.error('Erro ao atualizar cor primária:', error);
+                          }
+                        }}
                         placeholder="#1a365d"
                         className="flex-1"
+                        disabled={loading}
                       />
                     </div>
                   </div>
@@ -271,18 +333,28 @@ const ThemeSettings = () => {
                         id="secondaryColor"
                         type="color"
                         value={settings.secondaryColor}
-                        onChange={(e) =>
-                          updateSettings({ secondaryColor: e.target.value })
-                        }
+                        onChange={async (e) => {
+                          try {
+                            await updateSettings({ secondaryColor: e.target.value });
+                          } catch (error) {
+                            console.error('Erro ao atualizar cor secundária:', error);
+                          }
+                        }}
                         className="w-12 h-10 rounded border cursor-pointer"
+                        disabled={loading}
                       />
                       <Input
                         value={settings.secondaryColor}
-                        onChange={(e) =>
-                          updateSettings({ secondaryColor: e.target.value })
-                        }
+                        onChange={async (e) => {
+                          try {
+                            await updateSettings({ secondaryColor: e.target.value });
+                          } catch (error) {
+                            console.error('Erro ao atualizar cor secundária:', error);
+                          }
+                        }}
                         placeholder="#fbbf24"
                         className="flex-1"
+                        disabled={loading}
                       />
                     </div>
                   </div>
@@ -294,18 +366,28 @@ const ThemeSettings = () => {
                         id="accentColor"
                         type="color"
                         value={settings.accentColor}
-                        onChange={(e) =>
-                          updateSettings({ accentColor: e.target.value })
-                        }
+                        onChange={async (e) => {
+                          try {
+                            await updateSettings({ accentColor: e.target.value });
+                          } catch (error) {
+                            console.error('Erro ao atualizar cor de destaque:', error);
+                          }
+                        }}
                         className="w-12 h-10 rounded border cursor-pointer"
+                        disabled={loading}
                       />
                       <Input
                         value={settings.accentColor}
-                        onChange={(e) =>
-                          updateSettings({ accentColor: e.target.value })
-                        }
+                        onChange={async (e) => {
+                          try {
+                            await updateSettings({ accentColor: e.target.value });
+                          } catch (error) {
+                            console.error('Erro ao atualizar cor de destaque:', error);
+                          }
+                        }}
                         placeholder="#172554"
                         className="flex-1"
+                        disabled={loading}
                       />
                     </div>
                   </div>
@@ -319,8 +401,13 @@ const ThemeSettings = () => {
                 onClick={handleReset}
                 variant="outline"
                 className="flex items-center gap-2"
+                disabled={loading}
               >
-                <RotateCcw className="h-4 w-4" />
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RotateCcw className="h-4 w-4" />
+                )}
                 Resetar Configurações
               </Button>
             </div>

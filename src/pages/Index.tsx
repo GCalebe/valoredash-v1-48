@@ -6,7 +6,7 @@ import { ShipWheel, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import ForgotPasswordForm from "@/components/ForgotPasswordForm";
 import SignupForm from "@/components/SignupForm";
 
@@ -267,9 +267,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">
-      <div className="absolute top-4 right-4 z-30">
-        <ThemeToggle />
-      </div>
 
       <div className="absolute inset-0 z-0">
         <img

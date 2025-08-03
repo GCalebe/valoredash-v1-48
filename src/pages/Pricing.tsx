@@ -14,7 +14,7 @@ import {
   Shield,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import {
   Card,
   CardContent,
@@ -100,7 +100,6 @@ const Pricing = () => {
             >
               {user?.user_metadata?.name || user?.email}
             </Badge>
-            <ThemeToggle />
             <Button
               variant="outline"
               onClick={signOut}

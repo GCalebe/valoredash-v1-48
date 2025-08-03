@@ -5,7 +5,7 @@ import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import { Button } from "@/components/ui/button";
 import { ShipWheel, LogOut, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAIProductsQuery } from "@/hooks/useAIProductsQuery";
 
@@ -105,7 +105,6 @@ const KnowledgeManager = () => {
             >
               {user?.user_metadata?.name || user?.email}
             </Badge>
-            <ThemeToggle />
             <Button
               variant="outline"
               onClick={signOut}
