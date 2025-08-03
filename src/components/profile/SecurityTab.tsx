@@ -28,19 +28,28 @@ export function SecurityTab() {
   });
 
   const handlePasswordChange = async () => {
-    if (passwords.new !== passwords.confirm) {
+    if (!passwords.current) {
       toast({
         title: "Erro",
+        description: "Digite sua senha atual.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwords.new !== passwords.confirm) {
+      toast({
+        title: "Erro", 
         description: "As senhas não coincidem.",
         variant: "destructive",
       });
       return;
     }
 
-    if (passwords.new.length < 6) {
+    if (passwords.new.length < 8) {
       toast({
         title: "Erro",
-        description: "A nova senha deve ter pelo menos 6 caracteres.",
+        description: "A nova senha deve ter pelo menos 8 caracteres.",
         variant: "destructive",
       });
       return;
