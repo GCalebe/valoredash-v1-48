@@ -36,6 +36,13 @@ bmad.db
 scripts-root/
 docs-temp/
 reports/
+docs_supabase
+dist
+docs
+archive
+node_modules
+scripts
+scripts-root
 
 # Temporary files
 *.tmp
