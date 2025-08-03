@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -100,7 +101,8 @@ const runEnvDiagnostics = (): DiagnosticResult[] => {
 const DiagnosticPanel: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, session, userProfile, isLoading: authLoading, isAdmin } = useAuth();
+  const { user, session, isLoading: authLoading } = useAuth();
+  const { isAdmin, userProfile } = useUserRole();
   const { settings } = useThemeSettings();
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);

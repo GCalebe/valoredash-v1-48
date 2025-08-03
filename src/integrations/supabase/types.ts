@@ -1103,6 +1103,33 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages_backup: {
+        Row: {
+          backup_reason: string | null
+          created_at: string | null
+          id: string
+          message_data: Json | null
+          original_message_id: string | null
+          session_id: string | null
+        }
+        Insert: {
+          backup_reason?: string | null
+          created_at?: string | null
+          id?: string
+          message_data?: Json | null
+          original_message_id?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          backup_reason?: string | null
+          created_at?: string | null
+          id?: string
+          message_data?: Json | null
+          original_message_id?: string | null
+          session_id?: string | null
+        }
+        Relationships: []
+      }
       client_custom_values: {
         Row: {
           client_id: string
@@ -1361,8 +1388,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "contacts_kanban_stage_fk"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "mv_kanban_stages_cache"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "contacts_responsible_user_fk"
             columns: ["responsible_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contacts_kanban_stage"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "kanban_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contacts_kanban_stage"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "mv_kanban_stages_cache"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contacts_user"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1625,7 +1680,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_conversations_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conversion_by_time: {
         Row: {
@@ -1745,6 +1808,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      custom_field_definitions: {
+        Row: {
+          created_at: string | null
+          entity_type: string | null
+          field_name: string
+          field_options: Json | null
+          field_type: string | null
+          id: string
+          is_required: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_type?: string | null
+          field_name: string
+          field_options?: Json | null
+          field_type?: string | null
+          id?: string
+          is_required?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_type?: string | null
+          field_name?: string
+          field_options?: Json | null
+          field_type?: string | null
+          id?: string
+          is_required?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       custom_field_validation_rules: {
         Row: {
@@ -2089,6 +2185,7 @@ export type Database = {
       faq_items: {
         Row: {
           answer: string
+          associated_agendas: string[] | null
           category: string
           created_at: string | null
           created_by: string | null
@@ -2101,6 +2198,7 @@ export type Database = {
         }
         Insert: {
           answer: string
+          associated_agendas?: string[] | null
           category?: string
           created_at?: string | null
           created_by?: string | null
@@ -2113,6 +2211,7 @@ export type Database = {
         }
         Update: {
           answer?: string
+          associated_agendas?: string[] | null
           category?: string
           created_at?: string | null
           created_by?: string | null
@@ -2324,7 +2423,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_kanban_stages_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       knowledge_analytics: {
         Row: {
@@ -2910,6 +3017,33 @@ export type Database = {
         }
         Relationships: []
       }
+      metrics_cache: {
+        Row: {
+          cache_data: Json
+          cache_key: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          cache_data: Json
+          cache_key: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          cache_data?: Json
+          cache_key?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       monthly_growth: {
         Row: {
           active_users: number | null
@@ -2957,6 +3091,57 @@ export type Database = {
           new_deals?: number | null
           new_users?: number | null
           revenue?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      n8n_chat_histories: {
+        Row: {
+          created_at: string | null
+          id: string
+          message_data: Json
+          message_type: string | null
+          sender: string | null
+          session_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message_data: Json
+          message_type?: string | null
+          sender?: string | null
+          session_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message_data?: Json
+          message_type?: string | null
+          sender?: string | null
+          session_id?: string
+        }
+        Relationships: []
+      }
+      n8n_chat_memory: {
+        Row: {
+          created_at: string | null
+          id: string
+          memory_data: Json | null
+          session_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          memory_data?: Json | null
+          session_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          memory_data?: Json | null
+          session_id?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -3102,6 +3287,36 @@ export type Database = {
           type?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          id: string
+          metric_name: string
+          metric_type: string | null
+          metric_value: number | null
+          tags: Json | null
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          metric_name: string
+          metric_type?: string | null
+          metric_value?: number | null
+          tags?: Json | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          metric_name?: string
+          metric_type?: string | null
+          metric_value?: number | null
+          tags?: Json | null
+          timestamp?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -3326,6 +3541,81 @@ export type Database = {
         }
         Relationships: []
       }
+      system_alerts: {
+        Row: {
+          alert_category: string
+          alert_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_resolved: boolean | null
+          metadata: Json | null
+          metric_value: number | null
+          resolved_at: string | null
+          severity: number | null
+          table_name: string | null
+          title: string
+        }
+        Insert: {
+          alert_category: string
+          alert_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          metric_value?: number | null
+          resolved_at?: string | null
+          severity?: number | null
+          table_name?: string | null
+          title: string
+        }
+        Update: {
+          alert_category?: string
+          alert_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          metric_value?: number | null
+          resolved_at?: string | null
+          severity?: number | null
+          table_name?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      system_reports: {
+        Row: {
+          generated_at: string | null
+          generated_by: string | null
+          id: string
+          parameters: Json | null
+          report_data: Json
+          report_name: string
+          report_type: string | null
+        }
+        Insert: {
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          parameters?: Json | null
+          report_data: Json
+          report_name: string
+          report_type?: string | null
+        }
+        Update: {
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          parameters?: Json | null
+          report_data?: Json
+          report_name?: string
+          report_type?: string | null
+        }
+        Relationships: []
+      }
       test_connection: {
         Row: {
           created_at: string | null
@@ -3383,6 +3673,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -3404,6 +3727,63 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          ip_address: unknown | null
+          session_token: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          session_token?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          session_token?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          setting_key: string
+          setting_value: Json | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          setting_key: string
+          setting_value?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -3726,6 +4106,26 @@ export type Database = {
         }
         Relationships: []
       }
+      dashboard_fase3: {
+        Row: {
+          active_tables: number | null
+          chat_histories_count: number | null
+          chat_memory_count: number | null
+          contacts_count: number | null
+          foreign_keys: number | null
+          functionality_percentage: number | null
+          integrity_alerts: number | null
+          last_updated: string | null
+          performance_alerts: number | null
+          profiles_count: number | null
+          security_alerts: number | null
+          system_health: string | null
+          total_indexes: number | null
+          user_sessions_count: number | null
+          user_settings_count: number | null
+        }
+        Relationships: []
+      }
       dashboard_metrics: {
         Row: {
           conversion_rate: number | null
@@ -3740,11 +4140,75 @@ export type Database = {
         }
         Relationships: []
       }
+      mv_faq_items_cache: {
+        Row: {
+          answer: string | null
+          answer_length: number | null
+          cache_updated_at: string | null
+          category: string | null
+          category_rank: number | null
+          created_at: string | null
+          created_by: string | null
+          id: string | null
+          is_active: boolean | null
+          question: string | null
+          tags: string[] | null
+          tags_count: number | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      mv_kanban_stages_cache: {
+        Row: {
+          cache_updated_at: string | null
+          contacts_count: number | null
+          created_at: string | null
+          id: string | null
+          ordering: number | null
+          settings: Json | null
+          stage_group: string | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_kanban_stages_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_kanban_stages_optimized: {
+        Row: {
+          contacts_count: number | null
+          created_at: string | null
+          data_source: string | null
+          id: string | null
+          ordering: number | null
+          settings: Json | null
+          stage_group: string | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_daily_conversation_stats: {
         Args: { target_date?: string }
         Returns: undefined
+      }
+      check_alerts_fase3: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      collect_metrics_fase3: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       debug_kanban_stage_update: {
         Args: { contact_uuid: string; new_stage_id: string }
@@ -3777,6 +4241,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_foreign_keys: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          source_table: string
+          source_column: string
+          target_table: string
+          target_column: string
+        }[]
+      }
       get_funnel_by_date_range: {
         Args: { start_date?: string; end_date?: string }
         Returns: {
@@ -3784,6 +4257,14 @@ export type Database = {
           value: number
           percentage: number
           color: string
+        }[]
+      }
+      get_indexes: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          tablename: string
+          indexname: string
+          indexdef: string
         }[]
       }
       get_metrics_by_date_range: {
@@ -3795,6 +4276,16 @@ export type Database = {
           negotiated_value: number
         }[]
       }
+      get_schema_details: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          table_name: string
+          column_name: string
+          data_type: string
+          is_nullable: string
+          column_default: string
+        }[]
+      }
       get_stage_history_by_period: {
         Args: { start_date?: string; end_date?: string }
         Returns: {
@@ -3804,6 +4295,13 @@ export type Database = {
           new_stage: string
           changed_at: string
           metadata: Json
+        }[]
+      }
+      get_table_sizes: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          table: string
+          total_size: string
         }[]
       }
       get_utm_metrics: {
@@ -3837,6 +4335,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_knowledge_base_views: {
+        Args: { kb_id: string }
+        Returns: undefined
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -3854,9 +4356,38 @@ export type Database = {
           similarity: number
         }[]
       }
+      monitor_cache_fase3: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cache_name: string
+          total_rows: number
+          cache_size_mb: number
+          last_refresh: string
+          cache_age_minutes: number
+          recommendation: string
+        }[]
+      }
+      refresh_cache_fase3: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cache_name: string
+          refresh_status: string
+          rows_updated: number
+          execution_time_ms: number
+        }[]
+      }
       reorder_ai_stages: {
         Args: { personality_uuid: string; stage_ids: string[] }
         Returns: undefined
+      }
+      run_monitoring_fase3: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          status: string
+          metrics_result: string
+          alerts_result: string
+          execution_time_ms: number
+        }[]
       }
       set_limit: {
         Args: { "": number }

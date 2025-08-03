@@ -94,6 +94,7 @@ export const useSupabaseFunnelData = () => {
     } catch (error) {
       console.error('Erro ao buscar dados do funil:', error);
       // Fallback para dados mockados se houver erro
+      try {
         const fallback = await supabase
           .from('funnel_data')
           .select('*')
@@ -103,12 +104,10 @@ export const useSupabaseFunnelData = () => {
         
         if (fallback.error) throw fallback.error;
         return fallback.data || [];
+      } catch (err) {
+        console.error('Erro ao buscar funil por período:', err);
+        return [];
       }
-      
-      return data || [];
-    } catch (err) {
-      console.error('Erro ao buscar funil por período:', err);
-      return [];
     }
   };
 
