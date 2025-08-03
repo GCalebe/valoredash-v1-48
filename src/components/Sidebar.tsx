@@ -103,11 +103,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           icon: FileText,
           path: "/knowledge",
         },
-        {
-          name: "Base Conhecimento",
-          icon: BookOpen,
-          path: "/knowledge-base",
-        },
         // Conversas 2.0 desativado - agora integrado ao item principal
         // {
         //   name: "Conversas 2.0",
@@ -119,6 +114,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     {
       title: "OUTROS",
       items: [
+        {
+          name: "Tutoriais",
+          icon: BookOpen,
+          path: "/knowledge-base",
+        },
         {
           name: "Assinatura",
           icon: CreditCard,
