@@ -1,9 +1,9 @@
 # Ignorar diretórios de build e dependências
-node_modules/
-dist/
+node_modules/*
+dist/*
 
 # Ignorar arquivos de configuração de ferramentas de desenvolvimento
-.git/
+.git/*
 .pre-commit-config.yaml
 eslint.config.js
 postcss.config.js
@@ -21,14 +21,14 @@ README.md
 .gitignore
 
 # Ignorar arquivos relacionados ao banco de dados (Supabase migrations e config)
-supabase/
+supabase/*
 
 # Ignorar pastas organizacionais
-scripts-root/
-docs-temp/
-reports/
-docs_supabase/
-archive/
+scripts-root/*
+docs-temp/*
+reports/*
+docs_supabase/*
+archive/*
 
 # Ignorar arquivos de desenvolvimento e análise
 *.cjs
@@ -73,7 +73,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/*
 .DS_Store
 *.suo
 *.ntvs*
@@ -91,16 +91,15 @@ bmad.db
 *.backup
 
 # Organized folders
-scripts-root/
-docs-temp/
-reports/
-docs_supabase
-dist
-docs
-archive
-node_modules
-scripts
-scripts-root
+scripts-root/*
+docs-temp/*
+reports/*
+docs_supabase/*
+dist/*
+docs/*
+archive/*
+node_modules/*
+scripts/*
 
 # Temporary files
 *.tmp
