@@ -15,6 +15,15 @@ export interface AIPersonalityTemplate {
     max_tokens: number;
     response_style: string;
     language: string;
+    // Propriedades adicionais
+    system_prompt?: string;
+    fallback_responses?: string[];
+    is_active?: boolean;
+    topP?: number;
+    formality?: number;
+    empathy?: number;
+    creativity?: number;
+    directness?: number;
   };
 }
 

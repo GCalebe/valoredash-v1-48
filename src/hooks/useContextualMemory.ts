@@ -9,7 +9,7 @@ interface ContextSummary {
   total_memories: number;
   entities: SemanticEntity[];
   relationships: EntityRelationship[];
-  context: Record<string, unknown>;
+  context: Record<string, any>;
   most_important: N8nChatMemory | null;
 }
 
@@ -30,7 +30,7 @@ interface UseContextualMemoryResult {
 /**
  * Hook para gerenciar memória contextual - Simplificado durante unificação
  */
-export function useContextualMemory(options: unknown): UseContextualMemoryResult {
+export function useContextualMemory(options: any): UseContextualMemoryResult {
   const [memories, setMemories] = useState<N8nChatMemory[]>([]);
   const [shortTermMemories, setShortTermMemories] = useState<N8nChatMemory[]>([]);
   const [mediumTermMemories, setMediumTermMemories] = useState<N8nChatMemory[]>([]);

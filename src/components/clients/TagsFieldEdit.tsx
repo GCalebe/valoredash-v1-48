@@ -68,7 +68,7 @@ const TagsFieldEdit = ({ contactId }: TagsFieldEditProps) => {
     }
   };
 
-  const parseTags = (tagsData: unknown): Tag[] => {
+  const parseTags = (tagsData: any): Tag[] => {
     if (!tagsData) return [];
     try {
       const parsed = typeof tagsData === "string" ? JSON.parse(tagsData) : tagsData;

@@ -55,7 +55,7 @@ export const useWhatsAppConnection = () => {
     }
   };
 
-  const processConnectionResponse = (responseData: unknown) => {
+  const processConnectionResponse = (responseData: any) => {
     if (responseData && typeof responseData.respond === 'string') {
       const status = responseData.respond;
       if (status === 'positivo') {

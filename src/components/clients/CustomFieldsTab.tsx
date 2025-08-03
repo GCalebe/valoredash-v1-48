@@ -30,7 +30,7 @@ import {
 
 interface CustomFieldsTabProps {
   clientId?: string;
-  onFieldUpdate?: (fieldId: string, value: unknown) => void;
+  onFieldUpdate?: (fieldId: string, value: any) => void;
   readOnly?: boolean;
 }
 
@@ -43,7 +43,7 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
   const [customFieldsWithValues, setCustomFieldsWithValues] = useState<CustomFieldWithValue[]>([]);
   const { customFields, loading, deleteCustomField, updateCustomField } = useCustomFields();
 
-  const handleFieldChange = (fieldId: string, value: unknown) => {
+  const handleFieldChange = (fieldId: string, value: any) => {
     if (onFieldUpdate) {
       onFieldUpdate(`custom_${fieldId}`, value);
     }

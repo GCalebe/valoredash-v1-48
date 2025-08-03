@@ -27,6 +27,13 @@ export interface PersonalityConfig {
   temperature: number[];
   topP: number[];
   maxTokens: number[];
+  // Propriedades adicionais
+  tone?: string;
+  personality_type?: string;
+  custom_instructions?: string;
+  fallback_responses?: string[];
+  is_active?: boolean;
+  language?: string;
 }
 
 export interface ConfigurationViewProps {

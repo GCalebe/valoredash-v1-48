@@ -7,7 +7,7 @@ interface SemanticMemory {
   importance: number;
   timestamp: string;
   sessionId: string;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 interface SemanticEntity {

@@ -21,13 +21,13 @@ export interface ClientCustomValue {
   id: string;
   client_id: string;
   field_id: string;
-  field_value: unknown;
+  field_value: any;
   created_at: string;
   updated_at: string;
 }
 
 export interface CustomFieldWithValue extends CustomField {
-  value?: unknown;
+  value?: any;
   validationRules?: ValidationRule[];
 }
 
@@ -51,8 +51,8 @@ export interface AuditLogEntry {
   id: string;
   client_id: string;
   field_id: string;
-  old_value?: unknown;
-  new_value?: unknown;
+  old_value?: any;
+  new_value?: any;
   changed_by?: string;
   change_type: "create" | "update" | "delete";
   created_at: string;

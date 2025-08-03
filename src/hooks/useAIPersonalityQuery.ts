@@ -15,7 +15,7 @@ interface AIPersonalitySettings {
   greeting_message: string | null;
   response_style: string | null;
   custom_instructions: string | null;
-  fallback_responses: unknown | null;
+  fallback_responses: any | null;
   is_active: boolean | null;
   created_at: string | null;
   updated_at: string | null;
@@ -35,7 +35,7 @@ interface AIPersonalityInsert {
   greeting_message?: string;
   response_style?: string;
   custom_instructions?: string;
-  fallback_responses?: unknown;
+  fallback_responses?: any;
   is_active?: boolean;
 }
 
@@ -51,7 +51,7 @@ interface AIPersonalityUpdate {
   greeting_message?: string;
   response_style?: string;
   custom_instructions?: string;
-  fallback_responses?: unknown;
+  fallback_responses?: any;
   is_active?: boolean;
 }
 

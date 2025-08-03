@@ -9,9 +9,9 @@ import { X, Plus } from "lucide-react";
 import { useAgendaServiceTypes } from "@/hooks/useAgendaServiceTypes";
 
 interface AttendanceSelectionTabProps {
-  state: unknown;
-  updateState: (updates: unknown) => void;
-  constants: unknown;
+  state: any;
+  updateState: (updates: any) => void;
+  constants: any;
   addTag: () => void;
   removeTag: (id: string) => void;
   onPrevious: () => void;
@@ -92,7 +92,7 @@ export function AttendanceSelectionTab({
       <div className="space-y-2">
         <Label>Tags Personalizadas</Label>
         <div className="flex flex-wrap gap-2 mb-2">
-          {(state.tags || []).map((tag: unknown) => (
+          {(state.tags || []).map((tag: any) => (
             <Badge 
               key={tag.id} 
               style={{backgroundColor: tag.color}}

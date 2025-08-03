@@ -20,7 +20,7 @@ export interface CalendarEvent {
   created_by?: string;
   created_at: string;
   updated_at: string;
-  metadata?: unknown;
+  metadata?: any;
   // Campos calculados para compatibilidade com o componente
   date: Date;
   time: string;
@@ -67,7 +67,7 @@ const priorityColors = {
 };
 
 // Função para transformar dados do Supabase para o formato do componente
-const transformEventData = (event: unknown): CalendarEvent => {
+const transformEventData = (event: any): CalendarEvent => {
   const startDate = new Date(event.start_time);
   const color = priorityColors[event.priority as keyof typeof priorityColors] || eventTypeColors[event.event_type as keyof typeof eventTypeColors] || '#6b7280';
   

@@ -6,9 +6,9 @@ import { useOptimizedHosts } from "@/hooks/useOptimizedHosts";
 import { useProducts } from "@/hooks/useProducts";
 
 interface ServiceSelectionTabProps {
-  state: unknown;
-  updateState: (updates: unknown) => void;
-  constants: unknown;
+  state: any;
+  updateState: (updates: any) => void;
+  constants: any;
   onNext: () => void;
   onPrevious: () => void;
 }
@@ -91,7 +91,7 @@ export function ServiceSelectionTab({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {(constants.DURATIONS || []).map((duration: unknown) => (
+            {(constants.DURATIONS || []).map((duration: any) => (
               <SelectItem key={duration.value} value={duration.value.toString()}>
                 {duration.label}
               </SelectItem>

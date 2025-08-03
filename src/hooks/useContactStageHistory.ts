@@ -7,7 +7,7 @@ interface StageHistoryEntry {
   new_stage: string;
   changed_at: string;
   changed_by: string | null;
-  metadata: unknown;
+  metadata: any;
 }
 
 interface StageHistoryWithContact {
@@ -16,7 +16,7 @@ interface StageHistoryWithContact {
   old_stage: string | null;
   new_stage: string;
   changed_at: string;
-  metadata: unknown;
+  metadata: any;
 }
 
 export const useContactStageHistory = (contactId: string | null) => {

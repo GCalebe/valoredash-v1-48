@@ -24,7 +24,7 @@ export const useClientCustomFields = (contactId?: string) => {
 
   const saveCustomFields = async (
     id: string,
-    values: { fieldId: string; value: unknown }[],
+    values: { fieldId: string; value: any }[],
   ) => {
     try {
       await saveClientCustomValues(id, values);
