@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, ShipWheel, Shield } from "lucide-react";
@@ -9,7 +10,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import NotificationIcon from "@/components/dashboard/NotificationIcon";
 
 const DashboardHeader = () => {
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const { settings } = useThemeSettings();
   const navigate = useNavigate();
 

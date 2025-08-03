@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import {
   BarChart,
@@ -29,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { settings } = useThemeSettings();
-  const { isAdmin } = useAuth();
+  const { isAdmin } = useUserRole();
 
   const isActive = (path: string) => {
     return location.pathname === path;

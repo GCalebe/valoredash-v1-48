@@ -6,8 +6,6 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
-  userProfile?: unknown; // Add userProfile for compatibility
-  isAdmin?: boolean; // Add isAdmin for compatibility
   signIn: (email: string, password: string) => Promise<{ error?: unknown }>;
   signOut: () => Promise<void>;
 }
@@ -59,8 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     isLoading,
-    userProfile: null, // Mock value for now
-    isAdmin: false, // Mock value for now
     signIn,
     signOut,
   };
