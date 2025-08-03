@@ -16,7 +16,7 @@ import { ColumnConfig, defaultColumnConfig, saveColumnConfig } from "@/config/co
 
 interface DraggableColumnItemProps {
   column: ColumnConfig;
-  provided: unknown;
+  provided: any;
   toggleColumnVisibility: (id: string) => void;
 }
 
@@ -86,7 +86,7 @@ const ColumnConfigDialog: React.FC<ColumnConfigDialogProps> = ({
 }) => {
   const [columns, setColumns] = useState<ColumnConfig[]>(columnConfig);
 
-  const handleDragEnd = (result: unknown) => {
+  const handleDragEnd = (result: any) => {
     if (!result.destination) return;
 
     const items = Array.from(columns);

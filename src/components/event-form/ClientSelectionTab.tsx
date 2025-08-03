@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Contact } from "@/types/client";
 
 interface ClientSelectionTabProps {
-  state: unknown;
-  updateState: (updates: unknown) => void;
+  state: any;
+  updateState: (updates: any) => void;
   filteredContacts: Contact[];
   onSelectClient: (contact: Contact) => void;
   onNewClient: () => void;
