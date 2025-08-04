@@ -8,6 +8,8 @@ import MetricsDashboard from "./pages/MetricsDashboard";
 import KnowledgeManager from "./pages/KnowledgeManager";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import ClientsDashboard from "./pages/ClientsDashboard";
+import Disparador from './pages/Disparador';
+import Prospectar from './pages/Prospectar';
 
 import Evolution from "./pages/Evolution";
 import Schedule from "./pages/Schedule";
@@ -47,6 +49,8 @@ const App = () => (
                   <Route path="/chats" element={<Conversations />} />
                   <Route path="/knowledge" element={<KnowledgeManager />} />
                   <Route path="/knowledge-base" element={<KnowledgeBase />} />
+                  <Route path="/disparador" element={<Disparador />} />
+            <Route path="/prospectar" element={<Prospectar />} />
                   <Route path="/clients" element={<ClientsDashboard />} />
                   <Route path="/evolution" element={<Evolution />} />
                   <Route path="/schedule" element={<Schedule />} />

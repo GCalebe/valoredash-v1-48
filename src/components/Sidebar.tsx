@@ -20,6 +20,8 @@ import {
   Shield,
   UserCog,
   BookOpen,
+  Zap,
+  Search,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -103,6 +105,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           icon: FileText,
           path: "/knowledge",
         },
+        {
+          name: "Disparador",
+          icon: Zap,
+          path: "/disparador",
+        },
+        {
+            name: "Prospectar",
+            icon: Search,
+            path: "/prospectar",
+          },
         // Conversas 2.0 desativado - agora integrado ao item principal
         // {
         //   name: "Conversas 2.0",

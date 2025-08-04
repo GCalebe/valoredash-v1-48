@@ -1,0 +1,154 @@
+/* Custom styles */
+        .gradient-text {
+            background: linear-gradient(135deg, #0d6efd, #6f42c1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0d6efd, #6f42c1);
+        }
+
+        .gradient-bg-success {
+            background: linear-gradient(135deg, #198754, #0d6efd);
+        }
+
+        .prospect-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .prospect-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .prospect-card.selected {
+            border: 2px solid #0d6efd !important;
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-bs-theme="dark"] .stats-card {
+            background: linear-gradient(135deg, #212529, #495057);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .export-section {
+            background: linear-gradient(135deg, rgba(25, 135, 84, 0.1), rgba(13, 110, 253, 0.1));
+            border-radius: 15px;
+            border: 2px dashed #198754;
+        }
+
+        .search-header {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(111, 66, 193, 0.1));
+            border-radius: 15px;
+        }
+
+        .whatsapp-status {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 12px;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+        }
+
+        .loading-spinner {
+            display: none;
+        }
+
+        .export-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #0d6efd, #6f42c1);
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+        }
+
+        .pagination-controls {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.05), rgba(111, 66, 193, 0.05));
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        #minimap {
+            height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+
+        .prospect-popup {
+            min-width: 200px;
+        }
+
+        .prospect-popup h6 {
+            margin: 0 0 5px 0;
+            color: #0d6efd;
+        }
+
+        .prospect-popup .badge {
+            font-size: 0.7rem;
+        }
+
+        .debug-section {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(40, 167, 69, 0.1));
+            border-radius: 15px;
+            border: 2px dashed #ffc107;
+        }
+
+        .filter-status {
+            background: rgba(13, 110, 253, 0.1);
+            border: 1px solid rgba(13, 110, 253, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
