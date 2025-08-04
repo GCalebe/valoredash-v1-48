@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { ArrowLeft, Eye, Clock, Calendar, User, Tag, Share2, BookOpen, ThumbsUp, ThumbsDown, Printer } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -295,7 +296,12 @@ export const KnowledgeBaseArticle: React.FC<KnowledgeBaseArticleProps> = ({
           {/* Content */}
           <div 
             className="prose prose-lg max-w-none"
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ 
+              __html: DOMPurify.sanitize(article.content, {
+                ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ol', 'ul', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre', 'a', 'img'],
+                ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel']
+              })
+            }}
           />
 
           {/* Source URL */}
