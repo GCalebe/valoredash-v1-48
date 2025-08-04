@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSupabaseSubscription } from "@/hooks/useSupabaseSubscription";
 import { usePricingQuery } from "@/hooks/usePricingQuery";
 
 // Define AIProduct interface locally to avoid mock dependency
@@ -34,7 +34,7 @@ const AIProductPriceTag: React.FC<AIProductPriceTagProps> = ({
   size = "md",
 }) => {
   const navigate = useNavigate();
-  const { subscription, getCurrentPlan } = useSubscription();
+  const { subscription, getCurrentPlan } = useSupabaseSubscription();
   const { data: supabasePlans = [] } = usePricingQuery();
   
   const currentPlan = getCurrentPlan();

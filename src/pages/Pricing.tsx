@@ -24,7 +24,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSupabaseSubscription } from "@/hooks/useSupabaseSubscription";
 import { useToast } from "@/hooks/use-toast";
 import { PricingPlan } from "@/types/pricing";
 import { usePricingQuery, usePricingByPeriodQuery } from "@/hooks/usePricingQuery";
@@ -36,7 +36,7 @@ const Pricing = () => {
   const { settings } = useThemeSettings();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { subscription, subscribeToPlan, getCurrentPlan, processingPayment } = useSubscription();
+  const { subscription, subscribeToPlan, getCurrentPlan, processingPayment } = useSupabaseSubscription();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);

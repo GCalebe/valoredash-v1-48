@@ -5,7 +5,7 @@ import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import { Shield, Bot, LockKeyhole } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useUsers } from "@/hooks/useUsers";
+import { useSupabaseUsers } from "@/hooks/useSupabaseUsers";
 import { User, UserFormData } from "@/types/user";
 import { useAIProductsQuery } from "@/hooks/useAIProductsQuery";
 import PermissionsManager from "@/components/admin/PermissionsManager";
@@ -21,7 +21,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { users, loading, fetchUsers, addUser, updateUser, deleteUser } =
-    useUsers();
+    useSupabaseUsers();
   const { data: aiProducts = [] } = useAIProductsQuery();
 
   const [activeTab, setActiveTab] = useState("users");

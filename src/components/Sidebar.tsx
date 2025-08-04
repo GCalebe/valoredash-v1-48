@@ -22,6 +22,7 @@ import {
   BookOpen,
   Zap,
   Search,
+  FolderOpen,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -130,6 +131,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           name: "Tutoriais",
           icon: BookOpen,
           path: "/knowledge-base",
+        },
+        {
+          name: "Documentos",
+          icon: FolderOpen,
+          path: "/documents",
         },
         {
           name: "Assinatura",
