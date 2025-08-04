@@ -200,10 +200,10 @@ const AgendaTab = () => {
         .from('employee_agendas')
         .select('employee_id')
         .eq('agenda_id', supabaseAgenda.id)
-        .single();
+        .limit(1);
       
-      if (employeeAgenda) {
-        hostId = employeeAgenda.employee_id;
+      if (employeeAgenda && employeeAgenda.length > 0) {
+        hostId = employeeAgenda[0].employee_id;
       }
     } catch (error) {
       // Nenhum anfitrião associado à agenda
