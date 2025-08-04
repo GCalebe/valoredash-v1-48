@@ -206,7 +206,7 @@ const AgendaTab = () => {
         hostId = employeeAgenda.employee_id;
       }
     } catch (error) {
-      console.log('Nenhum anfitrião associado à agenda:', supabaseAgenda.id);
+      // Nenhum anfitrião associado à agenda
     }
 
     return {
@@ -327,7 +327,9 @@ const AgendaTab = () => {
           .select('id')
           .single();
         
-        if (error || !data) throw error;
+        if (error || !data) {
+          throw error;
+        }
         agendaId = data.id;
       }
 
@@ -341,7 +343,6 @@ const AgendaTab = () => {
           });
         
         if (hostError) {
-          console.error('Erro ao associar anfitrião:', hostError);
           toast({
             title: "Aviso",
             description: "Agenda salva, mas houve erro ao associar o anfitrião.",
@@ -354,10 +355,9 @@ const AgendaTab = () => {
       setEditingAgenda(null);
       
       // Recarregar agendas para mostrar as mudanças
-      refetchAgendas();
+      await refetchAgendas();
       
     } catch (error) {
-      console.error('Erro ao salvar agenda:', error);
       toast({
         title: "Erro",
         description: "Não foi possível salvar a agenda.",
@@ -374,12 +374,10 @@ const AgendaTab = () => {
   
   const handleImport = () => {
     // TODO: Implementar importação
-    console.log('Importar agendas');
   };
   
   const handleExport = () => {
     // TODO: Implementar exportação
-    console.log('Exportar agendas');
   };
   
   const openDialog = () => {
@@ -393,7 +391,6 @@ const AgendaTab = () => {
   };
 
   const handleDeleteAgenda = (agendaId: string | number) => {
-     console.log('🗑️ handleDeleteAgenda chamada com ID:', agendaId);
      const agendaIdStr = agendaId.toString();
      setAgendaToDelete(agendaIdStr);
      setIsDeleteDialogOpen(true);
@@ -402,25 +399,17 @@ const AgendaTab = () => {
    const confirmDeleteAgenda = async () => {
      if (!agendaToDelete) return;
      
-     console.log('📋 Agendas disponíveis:', supabaseAgendas.map(a => ({ id: a.id, name: a.name })));
-     
      try {
-       console.log('🔍 Procurando agenda com ID:', agendaToDelete);
-       
        // Encontrar a agenda original do Supabase para pegar o ID correto
        const supabaseAgenda = supabaseAgendas.find(sa => sa.id === agendaToDelete);
-       console.log('📍 Agenda encontrada:', supabaseAgenda);
        
        if (supabaseAgenda) {
-         console.log('🚀 Chamando deleteAgenda com ID:', supabaseAgenda.id);
          await deleteAgenda(supabaseAgenda.id);
-         console.log('✅ Agenda excluída com sucesso!');
-       } else {
-         console.error('❌ Agenda não encontrada:', agendaToDelete);
-         console.error('📋 IDs disponíveis:', supabaseAgendas.map(a => a.id));
+         // Forçar atualização da lista após exclusão
+         await refetchAgendas();
        }
      } catch (error) {
-       console.error('💥 Erro ao deletar agenda:', error);
+       // Error handling pode ser adicionado aqui se necessário
      } finally {
        setIsDeleteDialogOpen(false);
        setAgendaToDelete(null);

@@ -9,8 +9,9 @@ type CachedMonthData = {
   events: CalendarEvent[];
 };
 
-export function getCacheKey(date: Date): string {
-  return `${CACHE_PREFIX}-${format(date, "yyyy-MM")}`;
+export function getCacheKey(date: Date, viewType?: string): string {
+  const baseKey = `${CACHE_PREFIX}-${format(date, "yyyy-MM")}`;
+  return viewType ? `${baseKey}-${viewType}` : baseKey;
 }
 
 export function loadFromCache(key: string): CalendarEvent[] | null {

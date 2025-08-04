@@ -31,7 +31,10 @@ export function useAgendas(userId?: string) {
     const { data: { user } } = await supabase.auth.getUser();
     const idToFetch = userId || user?.id;
 
+    console.log('🔍 Buscando agendas para usuário:', idToFetch);
+
     if (!idToFetch) {
+      console.log('❌ Nenhum usuário encontrado');
       setAgendas([]);
       setAgendasLoading(false);
       return;
@@ -39,18 +42,23 @@ export function useAgendas(userId?: string) {
     try {
       setAgendasLoading(true);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('agendas')
         .select('*')
-        .eq('is_active', true)
-        .eq('created_by', idToFetch)
-        .order('created_at', { ascending: false });
+        .eq('is_active', true);
+      
+      // Se há um usuário autenticado, filtrar por created_by
+      // Caso contrário, mostrar todas as agendas ativas
+      if (idToFetch) {
+        query = query.or(`created_by.eq.${idToFetch},created_by.is.null`);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Erro ao buscar agendas:', error);
         throw error;
       }
-
       setAgendas(data as unknown as Agenda[] || []);
     } catch (error) {
       console.error('Erro ao buscar agendas:', error);

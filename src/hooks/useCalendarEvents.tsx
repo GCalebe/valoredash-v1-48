@@ -12,9 +12,10 @@ import {
 
 type UseCalendarEventsProps = {
   currentMonth: Date;
+  calendarViewType?: "mes" | "semana" | "dia" | "lista";
 };
 
-export function useCalendarEvents({ currentMonth }: UseCalendarEventsProps) {
+export function useCalendarEvents({ currentMonth, calendarViewType }: UseCalendarEventsProps) {
   const [events, setEvents] = React.useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | null>(null);
@@ -23,7 +24,7 @@ export function useCalendarEvents({ currentMonth }: UseCalendarEventsProps) {
   const lastFetchedMonth = React.useRef<string | null>(null);
 
   const fetchEventsForMonth = React.useCallback(async (month: Date, forceRefresh = false) => {
-    const cacheKey = getCacheKey(month);
+    const cacheKey = getCacheKey(month, calendarViewType);
     
     if (!forceRefresh) {
       const cachedEvents = loadFromCache(cacheKey);
@@ -38,8 +39,15 @@ export function useCalendarEvents({ currentMonth }: UseCalendarEventsProps) {
     setError(null);
 
     try {
-      const range = { start: startOfMonth(month), end: endOfMonth(month) };
-      const fetchedEvents = await fetchCalendarEvents(undefined, range);
+      let fetchedEvents;
+      if (calendarViewType === "lista") {
+        // Para visualização de lista, buscar todos os eventos
+        fetchedEvents = await fetchCalendarEvents();
+      } else {
+        // Para outras visualizações, buscar apenas do mês atual
+        const range = { start: startOfMonth(month), end: endOfMonth(month) };
+        fetchedEvents = await fetchCalendarEvents(undefined, range);
+      }
       
       setEvents(fetchedEvents || []);
       saveToCache(cacheKey, fetchedEvents || []);
@@ -55,7 +63,7 @@ export function useCalendarEvents({ currentMonth }: UseCalendarEventsProps) {
       setIsLoading(false);
       lastFetchedMonth.current = cacheKey;
     }
-  }, []);
+  }, [calendarViewType]);
 
   React.useEffect(() => {
     const monthCacheKey = getCacheKey(currentMonth);

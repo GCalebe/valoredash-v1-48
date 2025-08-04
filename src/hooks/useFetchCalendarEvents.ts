@@ -8,6 +8,14 @@ export async function fetchCalendarEvents(
   range?: { start: Date; end: Date },
 ): Promise<CalendarEvent[]> {
   try {
+    console.log('[fetchCalendarEvents] Iniciando busca de eventos:', {
+      date: date?.toISOString(),
+      range: range ? {
+        start: range.start.toISOString(),
+        end: range.end.toISOString()
+      } : null
+    });
+    
     let query = supabase
       .from('calendar_events')
       .select('*')
@@ -31,8 +39,10 @@ export async function fetchCalendarEvents(
       throw error;
     }
 
+    console.log('[fetchCalendarEvents] Eventos encontrados:', data?.length || 0);
+
     // Mapear dados do Supabase para CalendarEvent
-    return (data || []).map((event: unknown) => ({
+    return (data || []).map((event: any) => ({
       id: event.id,
       summary: event.summary || event.title || "Evento sem título",
       description: event.description || "",

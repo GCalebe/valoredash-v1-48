@@ -53,6 +53,10 @@ const Schedule = () => {
     handleSubmit,
   } = useAppointmentForm(appointments, setAppointments);
 
+  const [calendarViewTab, setCalendarViewTab] = useState<
+    "mes" | "semana" | "dia" | "agenda"
+  >("mes");
+
   const {
     events,
     isLoading: isEventsLoading,
@@ -62,7 +66,10 @@ const Schedule = () => {
     addEvent,
     editEvent,
     deleteEvent,
-  } = useCalendarEvents({ currentMonth });
+  } = useCalendarEvents({ 
+    currentMonth, 
+    calendarViewType: calendarViewTab === "agenda" ? "lista" : calendarViewTab 
+  });
 
   // Passar o hostFilter para o hook useScheduleData
   const {
@@ -74,10 +81,6 @@ const Schedule = () => {
 
   const isAnyLoading = isEventsLoading || isScheduleLoading;
   const isAnyRefreshing = isSubmitting || isScheduleRefreshing;
-
-  const [calendarViewTab, setCalendarViewTab] = useState<
-    "mes" | "semana" | "dia" | "agenda"
-  >("mes");
 
   const handleRefreshAll = useCallback(() => {
     console.log("Atualizando todos os dados...");
