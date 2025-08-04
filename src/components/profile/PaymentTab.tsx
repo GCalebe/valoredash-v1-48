@@ -12,10 +12,10 @@ import {
   AlertCircle,
   DollarSign
 } from 'lucide-react';
-import { useSupabaseSubscription } from '@/hooks/useSupabaseSubscription';
+import { useSubscription } from '@/hooks/useSubscription';
 
 export function PaymentTab() {
-  const { subscription, paymentMethods, invoices, loading } = useSupabaseSubscription();
+  const { subscription, paymentMethods, invoices, loading } = useSubscription();
 
   const accountHealth = {
     status: subscription?.status === 'active' ? 'healthy' : 'attention',

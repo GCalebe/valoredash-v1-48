@@ -1,13 +1,17 @@
 import { useMemo } from "react";
-import { useSupabaseSubscription } from "@/hooks/useSupabaseSubscription";
+import { useSubscription } from "@/hooks/useSubscription";
+import { usePricingQuery } from "@/hooks/usePricingQuery";
 import { calculateDaysLeft } from "@/utils/subscriptionUtils";
 import type { PricingPlan } from "@/types/pricing";
 
 export const useSubscriptionPageData = () => {
-  const subscriptionData = useSupabaseSubscription();
+  const subscriptionData = useSubscription();
+  const { data: supabasePlans = [] } = usePricingQuery();
+
+  const availablePlans = supabasePlans.length > 0 ? supabasePlans : [];
 
   const currentPlan = useMemo<PricingPlan | null>(() => {
-    const plan = subscriptionData.availablePlans.find((plan) => plan.id === subscriptionData.subscription?.planId);
+    const plan = availablePlans.find((plan) => plan.id === subscriptionData.subscription?.planId);
     if (!plan) return null;
     
     // Ensure the plan has required description field
@@ -15,7 +19,7 @@ export const useSubscriptionPageData = () => {
       ...plan,
       description: plan.description || 'Plan description not available'
     } as PricingPlan;
-  }, [subscriptionData.availablePlans, subscriptionData.subscription]);
+  }, [availablePlans, subscriptionData.subscription]);
 
   const daysLeft = useMemo(() => {
     return subscriptionData.subscription
@@ -25,6 +29,7 @@ export const useSubscriptionPageData = () => {
 
   return {
     ...subscriptionData,
+    availablePlans,
     currentPlan,
     daysLeft,
   };

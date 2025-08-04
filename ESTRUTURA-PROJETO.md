@@ -244,59 +244,6 @@ cat reports/database-consistency-report.json
 
 ---
 
-## 🆕 **Atualizações Recentes - Janeiro 2025**
-
-### **📄 Sistema de Documentos Implementado**
-```
-src/
-├── pages/
-│   └── Documents.tsx          # Nova página de gestão de documentos
-├── hooks/
-│   └── useSupabaseDocuments.ts # Hook para operações CRUD de documentos
-└── components/
-    └── ui/                    # Componentes UI atualizados
-```
-
-### **🔧 Correções e Melhorias**
-- ✅ **Sintaxe corrigida** em `useSupabaseSubscription.ts` (linhas 242, 319)
-- ✅ **Imports corrigidos** em `useSupabaseUsers.ts` (caminho Supabase)
-- ✅ **Navegação atualizada** na `Sidebar.tsx` (menu Documentos)
-- ✅ **Roteamento expandido** no `App.tsx` (rota /documents)
-
-### **🗄️ Banco de Dados - Nova Tabela**
-```sql
--- Tabela documents adicionada ao schema
-CREATE TABLE documents (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title TEXT NOT NULL,
-  description TEXT,
-  file_url TEXT,
-  file_type TEXT,
-  file_size INTEGER,
-  category TEXT,
-  tags TEXT[],
-  user_id UUID REFERENCES auth.users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### **🚀 Funcionalidades Adicionadas**
-- **Upload de arquivos** com drag & drop
-- **Busca avançada** por título, categoria e tags
-- **Visualização em grid/lista** responsiva
-- **Download direto** de documentos
-- **Categorização automática** por tipo de arquivo
-- **Sistema de tags** para organização
-- **Controle de acesso** por usuário (RLS)
-
-### **🛠️ Hooks Personalizados**
-- `useSupabaseDocuments` - CRUD completo para documentos
-- `useSupabaseSubscription` - Gestão de assinaturas (corrigido)
-- `useSupabaseUsers` - Gestão de usuários (imports corrigidos)
-
----
-
 ## 🎉 **Resultado Final**
 
 > **"Projeto completamente reorganizado! 80+ arquivos da raiz organizados em 4 categorias especializadas, com documentação completa e estrutura escalável para desenvolvimento eficiente."**

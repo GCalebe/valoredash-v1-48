@@ -1,59 +1,8 @@
-# 🚀 ValoreDash V1-48
+# Welcome to your Lovable project
 
-> **Sistema de Gestão de Relacionamento com Cliente (CRM) integrado com Supabase**
+## Project info
 
-## 📋 Sobre o Projeto
-
-ValoreDash é uma plataforma completa de CRM desenvolvida em React + TypeScript, integrada com Supabase para gerenciamento de dados em tempo real. O sistema oferece funcionalidades avançadas para gestão de clientes, agendamentos, documentos, métricas e muito mais.
-
-**URL do Projeto**: https://lovable.dev/projects/3b798310-9314-49a9-9604-c5927962c5fd
-
-## ✨ Funcionalidades Principais
-
-### 🏢 **Gestão de Clientes**
-- Dashboard completo com métricas em tempo real
-- Gerenciamento de contatos e leads
-- Sistema de tags e categorização
-- Histórico de interações
-
-### 📅 **Sistema de Agendamentos**
-- Calendário interativo
-- Agendamentos recorrentes
-- Notificações automáticas
-- Gestão de disponibilidade
-
-### 📄 **Gestão de Documentos** *(Novo!)*
-- Upload e organização de arquivos
-- Categorização por tipo
-- Sistema de busca avançada
-- Controle de acesso por usuário
-
-### 💳 **Sistema de Assinaturas**
-- Integração com Supabase para pagamentos
-- Planos flexíveis
-- Gestão de faturas
-- Controle de acesso baseado em planos
-
-### 📊 **Métricas e Relatórios**
-- Dashboard em tempo real
-- Relatórios personalizados
-- Análise de conversão
-- Exportação de dados
-
-### 🔐 **Segurança e Controle**
-- Autenticação via Supabase Auth
-- Row Level Security (RLS)
-- Controle de permissões
-- Logs de auditoria
-
-## 🆕 Atualizações Recentes
-
-### **Janeiro 2025 - v1.48**
-- ✅ **Sistema de Documentos**: Implementação completa do módulo de gestão de documentos
-- ✅ **Correções de Bugs**: Resolvidos erros de sintaxe e importações
-- ✅ **Melhorias de Performance**: Otimizações no sistema de assinaturas
-- ✅ **Navegação Aprimorada**: Adicionado menu para documentos na sidebar
-- ✅ **Integração Supabase**: Hooks personalizados para melhor gestão de dados
+**URL**: https://lovable.dev/projects/3b798310-9314-49a9-9604-c5927962c5fd
 
 ## How can I edit this code?
 
@@ -107,67 +56,24 @@ Para mais informações sobre o pre-commit, consulte o [guia de uso do pre-commi
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## 🛠️ Tecnologias Utilizadas
+## What technologies are used for this project?
 
-### **Frontend**
-- **React 18** - Biblioteca principal para UI
-- **TypeScript** - Tipagem estática
-- **Vite** - Build tool e dev server
-- **Tailwind CSS** - Framework CSS utilitário
-- **shadcn/ui** - Componentes UI modernos
-- **Lucide React** - Ícones
-- **React Router** - Roteamento
-- **React Hook Form** - Gerenciamento de formulários
-- **Recharts** - Gráficos e visualizações
+This project is built with .
 
-### **Backend & Database**
-- **Supabase** - Backend as a Service
-- **PostgreSQL** - Banco de dados relacional
-- **Supabase Auth** - Autenticação
-- **Supabase Storage** - Armazenamento de arquivos
-- **Row Level Security (RLS)** - Segurança de dados
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-### **Ferramentas de Desenvolvimento**
-- **ESLint** - Linting de código
-- **Prettier** - Formatação de código
-- **Pre-commit hooks** - Validação antes de commits
-- **TypeScript** - Verificação de tipos
+## Where are the Supabase scripts?
 
-### **Bibliotecas Auxiliares**
-- **date-fns** - Manipulação de datas
-- **clsx** - Utilitário para classes CSS
-- **React Query/TanStack Query** - Gerenciamento de estado servidor
-- **Sonner** - Notificações toast
-- **React Dropzone** - Upload de arquivos
-
-## 🗄️ Documentação do Banco de Dados
-
-### **Localização dos Scripts**
-Toda a documentação e scripts do banco de dados estão organizados na pasta `docs_supabase/`:
+All database documentation and seeding scripts now live under the
+`docs_supabase/` folder. Run them with the folder prefix, for example:
 
 ```bash
-npm run seed        # executa "node docs_supabase/supabase-data-seeder.js"
+npm run seed        # runs "node docs_supabase/supabase-data-seeder.js"
 ```
-
-### **Documentação Disponível**
-- **`DOCUMENTACAO_BANCO_DADOS.md`** - Documentação completa do schema do banco
-- **`ESTRUTURA-PROJETO.md`** - Estrutura detalhada do projeto
-- **`docs_supabase/`** - Scripts de seeding e configuração
-
-### **Principais Tabelas**
-- `profiles` - Perfis de usuários
-- `subscriptions` - Assinaturas e planos
-- `documents` - Sistema de documentos (novo!)
-- `calendar_events` - Eventos do calendário
-- `commercial_bookings` - Agendamentos comerciais
-- `leads` - Gestão de leads
-- `metrics` - Métricas do sistema
-
-### **Recursos Avançados**
-- **Row Level Security (RLS)** implementado em todas as tabelas
-- **Triggers** para auditoria e logs
-- **Functions** personalizadas para lógica de negócio
-- **Embeddings** para busca semântica de documentos
 
 ## How can I deploy this project?
 
