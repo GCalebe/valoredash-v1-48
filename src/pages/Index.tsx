@@ -8,7 +8,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
 
 import ForgotPasswordForm from "@/components/ForgotPasswordForm";
-import SignupForm from "@/components/SignupForm";
 
 // Modified schema to make password optional
 const loginSchema = z.object({
@@ -16,7 +15,7 @@ const loginSchema = z.object({
   password: z.string().optional(),
 });
 
-type FormMode = "login" | "signup" | "forgot-password";
+type FormMode = "login" | "forgot-password";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -126,8 +125,6 @@ const Index = () => {
     switch (formMode) {
       case "forgot-password":
         return <ForgotPasswordForm onBack={() => setFormMode("login")} />;
-      case "signup":
-        return <SignupForm onSuccess={() => setFormMode("login")} />;
       default:
         return (
           <>
@@ -244,22 +241,6 @@ const Index = () => {
               {isLoading ? "Entrando..." : "Login"}
             </button>
 
-            <div
-              className="text-center animate-slide-up"
-              style={{ animationDelay: "0.7s" }}
-            >
-              <p className="text-white/80 text-sm">
-                Não tem uma conta?{" "}
-                <button
-                  type="button"
-                  onClick={() => setFormMode("signup")}
-                  className="text-valore-gold hover:text-white transition-colors duration-300"
-                  style={{ color: settings.secondaryColor }}
-                >
-                  Criar conta
-                </button>
-              </p>
-            </div>
           </>
         );
     }
