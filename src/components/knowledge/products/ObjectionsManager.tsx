@@ -364,6 +364,7 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
           </p>
         </div>
         <Button 
+          type="button"
           onClick={() => setIsAddingNew(true)}
           className="flex items-center gap-2"
         >
@@ -400,12 +401,14 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
             </div>
             <div className="flex gap-2">
               <Button 
+                type="button"
                 onClick={editingObjection ? handleUpdateObjection : handleAddObjection}
                 disabled={!newQuestion.trim() || !newAnswer.trim()}
               >
                 {editingObjection ? 'Atualizar' : 'Adicionar'}
               </Button>
               <Button 
+                type="button"
                 variant="outline" 
                 onClick={() => {
                   setIsAddingNew(false);
@@ -431,7 +434,7 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
               <p className="text-muted-foreground mb-4">
                 Comece adicionando objeções comuns que seus clientes fazem
               </p>
-              <Button onClick={() => setIsAddingNew(true)}>
+              <Button type="button" onClick={() => setIsAddingNew(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar Primeira Objeção
               </Button>
@@ -450,20 +453,21 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
                       </div>
                       <p className="font-medium">{objection.question}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditObjection(objection.id)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
+                     <div className="flex items-center gap-2">
+                       <Button
+                         type="button"
+                         variant="outline"
+                         size="sm"
+                         onClick={() => handleEditObjection(objection.id)}
+                       >
+                         <Edit className="h-4 w-4" />
+                       </Button>
+                       <AlertDialog>
+                         <AlertDialogTrigger asChild>
+                           <Button type="button" variant="outline" size="sm">
+                             <Trash2 className="h-4 w-4" />
+                           </Button>
+                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
