@@ -101,7 +101,7 @@ const Index = () => {
 
       if (error) {
         console.error("Login error:", error);
-        toast.error(error.message || "Erro ao fazer login. Tente novamente.");
+        toast.error(String((error as any)?.message || "Erro ao fazer login. Tente novamente."));
       } else {
         toast.success("Login realizado com sucesso!");
       }

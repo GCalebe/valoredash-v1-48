@@ -261,7 +261,6 @@ const Evolution = () => {
       toast({
         title: "Nome obrigatório",
         description: "Por favor, insira um nome para a instância.",
-        variant: "destructive",
       });
       return;
     }
@@ -295,14 +294,12 @@ const Evolution = () => {
             toast({
               title: "Instância criada!",
               description: "Escaneie o QR code para conectar o WhatsApp.",
-              variant: "default",
             });
           } else {
             console.error("No QR code in response:", responseData);
             toast({
               title: "Erro na criação",
               description: "Instância criada, mas não foi possível obter o QR code.",
-              variant: "destructive",
             });
           }
         } catch (parseError) {
@@ -310,7 +307,6 @@ const Evolution = () => {
           toast({
             title: "Erro de formato",
             description: "A resposta do servidor não está em formato JSON válido.",
-            variant: "destructive",
           });
         }
       } else {
@@ -318,7 +314,6 @@ const Evolution = () => {
         toast({
           title: "Erro na criação",
           description: `Erro HTTP: ${response.status} ${response.statusText}`,
-          variant: "destructive",
         });
       }
     } catch (error) {
@@ -326,7 +321,6 @@ const Evolution = () => {
       toast({
         title: "Erro de rede",
         description: "Não foi possível conectar ao servidor.",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -362,7 +356,6 @@ const Evolution = () => {
     toast({
       title: "Desconectando",
       description: `Desconectando a instância ${connectionId}...`,
-      variant: "default",
     });
   };
 

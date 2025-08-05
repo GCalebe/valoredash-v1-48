@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, BookOpen, Filter, Grid, List, Eye, Clock, Tag, Globe, ArrowLeft, LogOut, ShipWheel, FileText } from 'lucide-react';

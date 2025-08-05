@@ -46,7 +46,6 @@ export const useContactsMessages = () => {
       toast({
         title: "Erro ao enviar mensagem",
         description: "Não foi possível enviar a mensagem para o servidor.",
-        variant: "destructive",
       });
     }
   };
