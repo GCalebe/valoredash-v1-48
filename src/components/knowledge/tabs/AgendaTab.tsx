@@ -294,6 +294,12 @@ const AgendaTab = () => {
 
   const handleSave = async (currentAgenda: Omit<LocalAgenda, 'id'>, reminders?: any[], operatingHours?: any, availableDates?: any) => {
     try {
+      // Get current user for created_by
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const agendaData = {
         name: currentAgenda.title,
         description: currentAgenda.description,
@@ -307,7 +313,8 @@ const AgendaTab = () => {
         preparation_notes: null,
         follow_up_notes: null,
         is_active: true,
-        service_types: currentAgenda.serviceTypes
+        service_types: currentAgenda.serviceTypes,
+        created_by: user.id // Add user ID for security
       };
 
       let agendaId: string;
