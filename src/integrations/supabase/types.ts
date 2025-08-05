@@ -3441,6 +3441,50 @@ export type Database = {
         }
         Relationships: []
       }
+      product_objections: {
+        Row: {
+          answer: string
+          created_at: string
+          created_by: string | null
+          id: string
+          product_id: string
+          question: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          product_id: string
+          question: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          product_id?: string
+          question?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_objections_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           benefits: string[] | null
@@ -3463,6 +3507,7 @@ export type Database = {
           price: number | null
           success_cases: string[] | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           benefits?: string[] | null
@@ -3485,6 +3530,7 @@ export type Database = {
           price?: number | null
           success_cases?: string[] | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           benefits?: string[] | null
@@ -3507,6 +3553,7 @@ export type Database = {
           price?: number | null
           success_cases?: string[] | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
