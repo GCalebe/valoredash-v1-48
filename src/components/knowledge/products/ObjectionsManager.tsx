@@ -41,15 +41,37 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
   const [newAnswer, setNewAnswer] = useState('');
 
   useEffect(() => {
-    if (productId && user) {
+    console.log('🔄 ObjectionsManager useEffect triggered');
+    console.log('🎯 ProductId:', productId);
+    console.log('👤 User:', user);
+    console.log('📝 Initial objections length:', initialObjections.length);
+    
+    if (productId && productId.trim() !== '' && user) {
+      console.log('💾 Loading objections from database for existing product');
       loadObjections();
-    } else if (initialObjections.length > 0) {
+    } else if (initialObjections.length > 0 && objections.length === 0) {
+      console.log('📥 Using initial objections for new product');
       setObjections(initialObjections);
+    } else if (!productId || productId.trim() === '') {
+      console.log('🆕 New product mode - starting with empty objections');
+      // For new products, start with empty objections unless initialObjections are provided
+      if (objections.length === 0 && initialObjections.length === 0) {
+        setObjections([]);
+      }
     }
-  }, [productId, initialObjections, user]);
+  }, [productId, user, initialObjections.length]); // Use length to avoid infinite loops
 
   const loadObjections = async () => {
-    if (!user || !productId) return;
+    if (!user || !productId) {
+      console.log('❌ Missing user or productId for loading objections');
+      console.log('👤 User:', user);
+      console.log('🎯 ProductId:', productId);
+      return;
+    }
+    
+    console.log('🔄 Starting to load objections...');
+    console.log('🎯 ProductId:', productId);
+    console.log('👤 User ID:', user.id);
     
     setIsLoading(true);
     try {
@@ -60,7 +82,12 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('📊 Supabase query result:', { data, error });
+
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
 
       const formattedObjections = data?.map(obj => ({
         id: obj.id,
@@ -70,10 +97,11 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
         createdBy: obj.created_by || 'Usuário'
       })) || [];
 
+      console.log('✅ Formatted objections:', formattedObjections);
       setObjections(formattedObjections);
       onObjectionsChange?.(formattedObjections);
     } catch (error) {
-      console.error('Error loading objections:', error);
+      console.error('❌ Error loading objections:', error);
       setObjections([]);
       toast({
         title: "Erro",
@@ -82,6 +110,7 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
       });
     } finally {
       setIsLoading(false);
+      console.log('🏁 Load objections finished');
     }
   };
 
