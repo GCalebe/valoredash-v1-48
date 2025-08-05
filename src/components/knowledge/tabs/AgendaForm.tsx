@@ -39,7 +39,7 @@ const initialAgendaState: Omit<LocalAgenda, 'id'> = {
 interface AgendaFormProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSave: (agenda: Omit<LocalAgenda, 'id'>) => void;
+  onSave: (agenda: Omit<LocalAgenda, 'id'>, reminders?: any[], operatingHours?: any, availableDates?: any) => void;
   editingAgenda: LocalAgenda | null;
   hosts: Host[];
   hostsLoading: boolean;
@@ -205,7 +205,7 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
   };
 
   const handleSaveClick = () => {
-    onSave(currentAgenda);
+    onSave(currentAgenda, reminders, operatingHours, availableDates);
   };
 
   return (

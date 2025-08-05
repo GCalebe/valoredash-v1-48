@@ -292,7 +292,7 @@ const AgendaTab = () => {
 
   
 
-  const handleSave = async (currentAgenda: Omit<LocalAgenda, 'id'>) => {
+  const handleSave = async (currentAgenda: Omit<LocalAgenda, 'id'>, reminders?: any[], operatingHours?: any, availableDates?: any) => {
     try {
       const agendaData = {
         name: currentAgenda.title,
@@ -316,11 +316,13 @@ const AgendaTab = () => {
         await updateAgenda(editingAgenda.id, agendaData);
         agendaId = editingAgenda.id;
         
-        // Remover associações antigas de anfitriões
-        await supabase
-          .from('employee_agendas')
-          .delete()
-          .eq('agenda_id', agendaId);
+        // Remover dados antigos relacionados à agenda
+        await Promise.all([
+          supabase.from('employee_agendas').delete().eq('agenda_id', agendaId),
+          supabase.from('agenda_reminders').delete().eq('agenda_id', agendaId),
+          supabase.from('agenda_operating_hours').delete().eq('agenda_id', agendaId),
+          supabase.from('agenda_available_dates').delete().eq('agenda_id', agendaId)
+        ]);
       } else {
         const { data, error } = await supabase
           .from('agendas')
@@ -344,11 +346,107 @@ const AgendaTab = () => {
           });
         
         if (hostError) {
-          toast({
-            title: "Aviso",
-            description: "Agenda salva, mas houve erro ao associar o anfitrião.",
-            variant: "destructive"
-          });
+          console.error('Erro ao associar anfitrião:', hostError);
+        }
+      }
+
+      // Salvar lembretes se fornecidos
+      if (reminders && reminders.length > 0) {
+        const reminderData = reminders.map(reminder => ({
+          agenda_id: agendaId,
+          reminder_type: reminder.channel || 'whatsapp',
+          trigger_time_minutes: (reminder.days * 24 * 60) + (reminder.hours * 60) + reminder.minutes,
+          message_template: reminder.subject,
+          is_active: true,
+          send_to_client: reminder.sendTo === 'inscrito',
+          send_to_employee: reminder.sendTo === 'anfitriao'
+        }));
+
+        const { error: reminderError } = await supabase
+          .from('agenda_reminders')
+          .insert(reminderData);
+        
+        if (reminderError) {
+          console.error('Erro ao salvar lembretes:', reminderError);
+        }
+      }
+
+      // Salvar horários de funcionamento se fornecidos
+      if (operatingHours) {
+        const operatingHoursData: any[] = [];
+        const dayMapping: { [key: string]: number } = {
+          'Domingo': 0,
+          'Segunda-Feira': 1,
+          'Terça-Feira': 2,
+          'Quarta-Feira': 3,
+          'Quinta-Feira': 4,
+          'Sexta-Feira': 5,
+          'Sábado': 6
+        };
+
+        Object.entries(operatingHours).forEach(([dayName, hours]: [string, any]) => {
+          if (Array.isArray(hours)) {
+            hours.forEach((hour: any) => {
+              operatingHoursData.push({
+                agenda_id: agendaId,
+                day_of_week: dayMapping[dayName],
+                start_time: hour.start,
+                end_time: hour.end,
+                is_active: true
+              });
+            });
+          }
+        });
+
+        if (operatingHoursData.length > 0) {
+          const { error: operatingHoursError } = await supabase
+            .from('agenda_operating_hours')
+            .insert(operatingHoursData);
+          
+          if (operatingHoursError) {
+            console.error('Erro ao salvar horários de funcionamento:', operatingHoursError);
+          }
+        }
+      }
+
+      // Salvar datas disponíveis se fornecidas
+      if (availableDates) {
+        const availableDatesData: any[] = [];
+        const monthMapping: { [key: string]: number } = {
+          'Janeiro': 1, 'Fevereiro': 2, 'Março': 3, 'Abril': 4,
+          'Maio': 5, 'Junho': 6, 'Julho': 7, 'Agosto': 8,
+          'Setembro': 9, 'Outubro': 10, 'Novembro': 11, 'Dezembro': 12
+        };
+
+        const currentYear = new Date().getFullYear();
+        
+        Object.entries(availableDates).forEach(([monthName, dates]: [string, any]) => {
+          if (Array.isArray(dates)) {
+            dates.forEach((dateRange: any) => {
+              for (let day = dateRange.start; day <= dateRange.end; day++) {
+                const date = new Date(currentYear, monthMapping[monthName] - 1, day);
+                availableDatesData.push({
+                  agenda_id: agendaId,
+                  date: date.toISOString().split('T')[0],
+                  is_available: true,
+                  reason: null,
+                  start_time: null,
+                  end_time: null,
+                  max_bookings: null
+                });
+              }
+            });
+          }
+        });
+
+        if (availableDatesData.length > 0) {
+          const { error: availableDatesError } = await supabase
+            .from('agenda_available_dates')
+            .insert(availableDatesData);
+          
+          if (availableDatesError) {
+            console.error('Erro ao salvar datas disponíveis:', availableDatesError);
+          }
         }
       }
 
@@ -358,7 +456,14 @@ const AgendaTab = () => {
       // Recarregar agendas para mostrar as mudanças
       await refetchAgendas();
       
+      toast({
+        title: "Sucesso",
+        description: "Agenda salva com todos os dados configurados.",
+        variant: "default"
+      });
+      
     } catch (error) {
+      console.error('Erro ao salvar agenda:', error);
       toast({
         title: "Erro",
         description: "Não foi possível salvar a agenda.",

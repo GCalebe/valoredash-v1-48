@@ -1,0 +1,710 @@
+{
+  "HARDCODED_DATA": [
+    {
+      "file_path": "arquivosDisparador\\relatorio.js",
+      "line_number": 194,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "phone: \"11999999999\",",
+      "severity": "medium"
+    },
+    {
+      "file_path": "arquivosDisparador\\relatorio.js",
+      "line_number": 201,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "phone: \"11888888888\",",
+      "severity": "medium"
+    },
+    {
+      "file_path": "arquivosDisparador\\original_js\\relatorioOriginal.js",
+      "line_number": 194,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "phone: \"11999999999\",",
+      "severity": "medium"
+    },
+    {
+      "file_path": "arquivosDisparador\\original_js\\relatorioOriginal.js",
+      "line_number": 201,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "phone: \"11888888888\",",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useConversations.ts",
+      "line_number": 86,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "phone: \"+55 11 99999-9999\",",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useUsers.ts",
+      "line_number": 11,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "email: 'admin@example.com',",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useUsers.ts",
+      "line_number": 20,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "email: 'marketing@example.com',",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useUsers.ts",
+      "line_number": 29,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "email: 'sales@example.com',",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useUsers.ts",
+      "line_number": 38,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "email: 'content@example.com',",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useUsers.ts",
+      "line_number": 47,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "email: 'finance@example.com',",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\pages\\Evolution.tsx",
+      "line_number": 227,
+      "description": "Possível dado hardcoded encontrado",
+      "code_snippet": "phone: \"+55 (81) 99999-9999\",",
+      "severity": "medium"
+    }
+  ],
+  "MOCK_DATA": [
+    {
+      "file_path": "arquivosDisparador\\notiflix\\src\\notiflix.js",
+      "line_number": 1601,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "var positionClassForNonStaticRef = 'nx-block-temporary-position';",
+      "severity": "medium"
+    },
+    {
+      "file_path": "arquivosDisparador\\notiflix\\test\\e2e\\notify\\notify.test.ts",
+      "line_number": 320,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: extend the options and check with the extended options",
+      "severity": "medium"
+    },
+    {
+      "file_path": "arquivosDisparador\\notiflix\\test\\_config\\config.ts",
+      "line_number": 35,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "headless: false, // TODO: will be true after dev",
+      "severity": "medium"
+    },
+    {
+      "file_path": "arquivosDisparador\\notiflix\\test\\_config\\config.ts",
+      "line_number": 43,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// '--disable-gl-drawing-for-tests', // TODO: to be activated after dev",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\knowledge\\tabs\\AgendaTab.tsx",
+      "line_number": 94,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock data removed - now using Supabase data",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\knowledge\\tabs\\AgendaTab.tsx",
+      "line_number": 482,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: Implementar importação",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\knowledge\\tabs\\AgendaTab.tsx",
+      "line_number": 486,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: Implementar exportação",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\knowledge\\tabs\\AIPersonalityTab.tsx",
+      "line_number": 100,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: Implementar importação",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\knowledge\\tabs\\AIPersonalityTab.tsx",
+      "line_number": 105,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: Implementar exportação",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\knowledge\\tabs\\FAQTab.tsx",
+      "line_number": 115,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: Implementar importação",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\knowledge\\tabs\\HostsTab.tsx",
+      "line_number": 396,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: Implementar importacao",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\knowledge\\tabs\\HostsTab.tsx",
+      "line_number": 401,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: Implementar exportacao",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\metrics\\enhanced\\AdManagerSection.tsx",
+      "line_number": 23,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock data - replace with real data from your backend",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\profile\\SecurityTab.tsx",
+      "line_number": 85,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "const securityScore = 75; // Mock security score",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\components\\schedule\\NewAppointmentFlow.tsx",
+      "line_number": 101,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock constants and tag functions for now",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useCalendarEvents.tsx",
+      "line_number": 123,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock data and functions for testing",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useConsolidatedMetrics.ts",
+      "line_number": 152,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "const mockData: TimeSeriesData[] = [];",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useConsolidatedMetrics.ts",
+      "line_number": 158,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "mockData.push({",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\useConsolidatedMetrics.ts",
+      "line_number": 168,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "return mockData;",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\usePricingQuery.ts",
+      "line_number": 36,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock data since pricing_plans table doesn't exist in schema",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\usePricingQuery.ts",
+      "line_number": 130,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock implementation since table doesn't exist",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\usePricingQuery.ts",
+      "line_number": 174,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock implementation since table doesn't exist",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\hooks\\usePricingQuery.ts",
+      "line_number": 212,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock implementation since table doesn't exist",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\pages\\Conversations.tsx",
+      "line_number": 141,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: Implementar envio de mensagem",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\pages\\Conversations.tsx",
+      "line_number": 231,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// TODO: Configurar atualizações em tempo real",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\pages\\Pricing.tsx",
+      "line_number": 33,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock data removed - using Supabase integration",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\pages\\Subscription.tsx",
+      "line_number": 33,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "// Mock data removed - using Supabase integration",
+      "severity": "medium"
+    },
+    {
+      "file_path": "src\\types\\suppressions.ts",
+      "line_number": 4,
+      "description": "Possível dado mockado encontrado",
+      "code_snippet": "* This file provides temporary workarounds for the extensive TypeScript errors",
+      "severity": "medium"
+    }
+  ],
+  "UNKNOWN_TABLE": [
+    {
+      "file_path": "src\\hooks\\useClientFiles.ts",
+      "line_number": 49,
+      "description": "Tabela \"client-files\" não encontrada no schema do Supabase",
+      "code_snippet": ".from('client-files')",
+      "severity": "high"
+    },
+    {
+      "file_path": "src\\hooks\\useClientFiles.ts",
+      "line_number": 132,
+      "description": "Tabela \"client-files\" não encontrada no schema do Supabase",
+      "code_snippet": ".from('client-files')",
+      "severity": "high"
+    },
+    {
+      "file_path": "src\\hooks\\useClientFiles.ts",
+      "line_number": 190,
+      "description": "Tabela \"client-files\" não encontrada no schema do Supabase",
+      "code_snippet": ".from('client-files')",
+      "severity": "high"
+    },
+    {
+      "file_path": "src\\hooks\\useClientFiles.ts",
+      "line_number": 229,
+      "description": "Tabela \"client-files\" não encontrada no schema do Supabase",
+      "code_snippet": ".from('client-files')",
+      "severity": "high"
+    },
+    {
+      "file_path": "src\\hooks\\useProducts.ts",
+      "line_number": 97,
+      "description": "Tabela \"product_promotions\" não encontrada no schema do Supabase",
+      "code_snippet": ".from('product_promotions')",
+      "severity": "high"
+    },
+    {
+      "file_path": "src\\hooks\\useProducts.ts",
+      "line_number": 149,
+      "description": "Tabela \"product_upgrades\" não encontrada no schema do Supabase",
+      "code_snippet": ".from('product_upgrades')",
+      "severity": "high"
+    }
+  ],
+  "UNUSED_TABLE": [
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"dashboard_fase3\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: dashboard_fase3",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"audit_log\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: audit_log",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"contact_stage_history\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: contact_stage_history",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"knowledge_tags\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: knowledge_tags",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"leads_over_time\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: leads_over_time",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"ai_stages\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: ai_stages",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"ai_products\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: ai_products",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"system_alerts\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: system_alerts",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"utm_metrics\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: utm_metrics",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"tokens\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: tokens",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"v_kanban_stages_optimized\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: v_kanban_stages_optimized",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"user_ai_access\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: user_ai_access",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"contact_stage_history_backup\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: contact_stage_history_backup",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"mv_kanban_stages_cache\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: mv_kanban_stages_cache",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"user_activity_log\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: user_activity_log",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"metrics_cache\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: metrics_cache",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"invoice_items\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: invoice_items",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"employee_services\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: employee_services",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"stage_name_mapping\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: stage_name_mapping",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"test_connection\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: test_connection",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"mv_faq_items_cache\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: mv_faq_items_cache",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"discount_coupons\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: discount_coupons",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"campaign_recipients\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: campaign_recipients",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"custom_field_definitions\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: custom_field_definitions",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"documents\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: documents",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"funnel_data\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: funnel_data",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"payment_history\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: payment_history",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"conversion_funnel_view\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: conversion_funnel_view",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"knowledge_analytics\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: knowledge_analytics",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"chat_messages_backup\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: chat_messages_backup",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"user_sessions\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: user_sessions",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"knowledge_ratings\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: knowledge_ratings",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"appointments\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: appointments",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"system_reports\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: system_reports",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"campaigns\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: campaigns",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"pricing_plans\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: pricing_plans",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"contacts_backup\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: contacts_backup",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"agenda_booking_history\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: agenda_booking_history",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"user_usage_metrics\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: user_usage_metrics",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"coupon_redemptions\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: coupon_redemptions",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"invoices\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: invoices",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"email_templates\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: email_templates",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"knowledge_categories\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: knowledge_categories",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"knowledge_comments\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: knowledge_comments",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"performance_metrics\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: performance_metrics",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"imagens_drive\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: imagens_drive",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"calendar_attendees\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: calendar_attendees",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"leads_by_source\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: leads_by_source",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"knowledge_article_tags\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: knowledge_article_tags",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"agenda_recurring_bookings\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: agenda_recurring_bookings",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"user_subscriptions\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: user_subscriptions",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"campaign_data\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: campaign_data",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"monthly_growth\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: monthly_growth",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"payment_methods\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: payment_methods",
+      "severity": "low"
+    },
+    {
+      "file_path": "supabase/types.ts",
+      "line_number": 0,
+      "description": "Tabela \"conversion_by_time\" definida no Supabase mas não utilizada no código",
+      "code_snippet": "Table: conversion_by_time",
+      "severity": "low"
+    }
+  ]
+}
