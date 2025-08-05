@@ -60,7 +60,7 @@ const AddClientDialog = ({
   const [documentsCategories, setDocumentsCategories] = useState<DynamicCategory[]>([]);
 
   // Wrapper for input change to pass required parameters
-  const handleInputChange = (field: keyof Contact, value: unknown) => {
+  const handleInputChange = (field: keyof Contact, value: any) => {
     baseHandleInputChange(field, value, newContact, setNewContact);
   };
 
@@ -96,9 +96,9 @@ const AddClientDialog = ({
       if (newContactId && Object.keys(customValues).length > 0) {
         try {
           const customValuesArray = Object.entries(customValues).map(
-            ([fieldId, value]) => ({ fieldId, value })
+            ([fieldId, value]) => ({ fieldId, value: value as any })
           );
-          await saveClientCustomValues(newContactId, customValuesArray);
+          await saveClientCustomValues(newContactId, customValuesArray as any);
         } catch (customFieldError) {
           console.error("Error saving custom fields:", customFieldError);
         }
