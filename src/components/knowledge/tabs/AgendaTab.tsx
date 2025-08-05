@@ -366,7 +366,8 @@ const AgendaTab = () => {
           message_template: reminder.subject,
           is_active: true,
           send_to_client: reminder.sendTo === 'inscrito',
-          send_to_employee: reminder.sendTo === 'anfitriao'
+          send_to_employee: reminder.sendTo === 'anfitriao',
+          created_by: user.id
         }));
 
         const { error: reminderError } = await supabase
@@ -399,7 +400,8 @@ const AgendaTab = () => {
                 day_of_week: dayMapping[dayName],
                 start_time: hour.start,
                 end_time: hour.end,
-                is_active: true
+                is_active: true,
+                created_by: user.id
               });
             });
           }
@@ -439,7 +441,8 @@ const AgendaTab = () => {
                   reason: null,
                   start_time: null,
                   end_time: null,
-                  max_bookings: null
+                  max_bookings: null,
+                  created_by: user.id
                 });
               }
             });
