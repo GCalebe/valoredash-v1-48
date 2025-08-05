@@ -4202,35 +4202,17 @@ export type Database = {
       }
       dashboard_fase3: {
         Row: {
-          active_tables: number | null
-          chat_histories_count: number | null
-          chat_memory_count: number | null
-          contacts_count: number | null
-          foreign_keys: number | null
-          functionality_percentage: number | null
-          integrity_alerts: number | null
           last_updated: string | null
-          performance_alerts: number | null
-          profiles_count: number | null
-          security_alerts: number | null
-          system_health: string | null
-          total_indexes: number | null
-          user_sessions_count: number | null
-          user_settings_count: number | null
+          total_records: number | null
+          view_name: string | null
         }
         Relationships: []
       }
       dashboard_metrics: {
         Row: {
-          conversion_rate: number | null
-          negotiated_value: number | null
-          new_clients_this_month: number | null
-          response_rate: number | null
-          total_campaigns: number | null
-          total_chats: number | null
-          total_clients: number | null
-          total_conversations: number | null
-          total_leads: number | null
+          last_updated: string | null
+          total_records: number | null
+          view_name: string | null
         }
         Relationships: []
       }
