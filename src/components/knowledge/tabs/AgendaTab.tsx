@@ -178,7 +178,21 @@ export const FormField = ({ label, tooltipText, children }: { label: string, too
 
 const AgendaTab = () => {
   const { hosts, loading: hostsLoading } = useHosts();
-  const { agendas: supabaseAgendas, agendasLoading, refetchAgendas, createAgenda, updateAgenda, deleteAgenda } = useAgendas();
+  // Get current user ID for filtering agendas
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  
+  // Get current user on component mount
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
+  
+  const { agendas: supabaseAgendas, agendasLoading, refetchAgendas, createAgenda, updateAgenda, deleteAgenda } = useAgendas(currentUserId || undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAgenda, setEditingAgenda] = useState<LocalAgenda | null>(null);
   
