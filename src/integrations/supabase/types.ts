@@ -1395,6 +1395,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "contacts_kanban_stage_fk"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "v_kanban_stages_optimized"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "contacts_responsible_user_fk"
             columns: ["responsible_user"]
             isOneToOne: false
@@ -1413,6 +1420,13 @@ export type Database = {
             columns: ["kanban_stage_id"]
             isOneToOne: false
             referencedRelation: "mv_kanban_stages_cache"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contacts_kanban_stage"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "v_kanban_stages_optimized"
             referencedColumns: ["id"]
           },
           {
@@ -4263,18 +4277,24 @@ export type Database = {
       }
       v_kanban_stages_optimized: {
         Row: {
-          contacts_count: number | null
+          contact_count: number | null
           created_at: string | null
-          data_source: string | null
           id: string | null
           ordering: number | null
           settings: Json | null
-          stage_group: string | null
           title: string | null
           updated_at: string | null
           user_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_kanban_stages_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
