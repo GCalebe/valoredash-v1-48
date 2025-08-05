@@ -36,7 +36,11 @@ import {
 
 const productSchema = z.object({
   name: z.string().nullable().optional(),
-  price: z.number().min(0, "Preço deve ser positivo").nullable().optional(),
+  price: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0, "Preço deve ser positivo").nullable().optional()),
   description: z.string().nullable().optional(),
   category: z.string().nullable().optional(),
   benefits: z.array(z.string()).nullable().optional(),
@@ -54,8 +58,16 @@ const productSchema = z.object({
   promotion_name: z.string().nullable().optional(),
   promotion_description: z.string().nullable().optional(),
   discount_type: z.enum(["percentage", "fixed"]).nullable().optional(),
-  discount_percentage: z.number().min(0).max(100).nullable().optional(),
-  discount_amount: z.number().min(0).nullable().optional(),
+  discount_percentage: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0).max(100).nullable().optional()),
+  discount_amount: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0).nullable().optional()),
   promotion_start_date: z.string().nullable().optional(),
   promotion_end_date: z.string().nullable().optional(),
   // Campos condicionais para combo
@@ -63,11 +75,19 @@ const productSchema = z.object({
   combo_description: z.string().nullable().optional(),
   combo_products: z.array(z.string()).nullable().optional(),
   combo_benefit: z.string().nullable().optional(),
-  combo_discount_percentage: z.number().min(0).max(100).nullable().optional(),
+  combo_discount_percentage: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0).max(100).nullable().optional()),
   // Campos condicionais para upgrade
   upgrade_name: z.string().nullable().optional(),
   upgrade_description: z.string().nullable().optional(),
-  upgrade_price: z.number().min(0).nullable().optional(),
+  upgrade_price: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0).nullable().optional()),
   upgrade_benefits: z.array(z.string()).nullable().optional(),
   upgrade_target_product: z.string().nullable().optional(),
   // Campos para recorrência
