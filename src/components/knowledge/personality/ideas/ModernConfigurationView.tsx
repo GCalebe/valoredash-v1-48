@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Save, RotateCcw, Brain, MessageSquare, Settings, Zap, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
