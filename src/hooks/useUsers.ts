@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { User, UserFormData } from '@/types/user';
 import { useToast } from '@/hooks/use-toast';

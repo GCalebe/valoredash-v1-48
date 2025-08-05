@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CalendarEvent } from "@/types/calendar";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";

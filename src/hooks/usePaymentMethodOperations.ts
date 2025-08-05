@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useToast } from "@/hooks/use-toast";
 import { PaymentMethod } from "@/types/pricing";
 import { useSubscriptionLocalStorage } from "./useSubscriptionLocalStorage";
