@@ -401,7 +401,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
     
     try {
       // Include objections from ObjectionsManager in the form data
-      // Ensure all fields have appropriate default values, handling null values
+      // For new products, we keep the objections in the array format for backward compatibility
+      // For existing products, objections are managed separately in the database
       const formDataWithObjections = {
         ...data,
         name: data.name || undefined,
@@ -409,7 +410,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
         description: data.description || undefined,
         category: data.category || undefined,
         benefits: data.benefits || [],
-        objections: objections.length > 0 ? objections.map(obj => obj.question) : (data.objections || []),
+        // Keep legacy objections field for backward compatibility, but note they're managed separately now
+        objections: mode === 'edit' ? (data.objections || []) : objections.map(obj => obj.question),
         differentials: data.differentials || [],
         success_cases: data.success_cases || [],
         icon: data.icon || undefined,
@@ -556,15 +558,15 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </CardHeader>
             <CardContent className="space-y-6">
               <ObjectionsManager
-                productId={(initialData as any)?.id || 'new'}
+                productId={mode === 'edit' ? (initialData as any)?.id : ''}
                 onObjectionsChange={setObjections}
-                initialObjections={initialData?.objections?.map((question, index) => ({
+                initialObjections={mode === 'create' ? initialData?.objections?.map((question, index) => ({
                   id: `initial-${index}`,
                   question,
                   answer: 'Resposta não definida',
                   createdAt: new Date().toLocaleDateString(),
                   createdBy: 'Sistema'
-                })) || []}
+                })) || [] : []}
               />
               
               <ArrayInputField

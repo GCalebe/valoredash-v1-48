@@ -10,6 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, Edit, Trash2, MessageSquare, CheckCircle, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 interface Objection {
   id: string;
@@ -30,6 +32,7 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
   onObjectionsChange,
   initialObjections = []
 }) => {
+  const { user } = useAuth();
   const [objections, setObjections] = useState<Objection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -38,55 +41,77 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
   const [newAnswer, setNewAnswer] = useState('');
 
   useEffect(() => {
-    if (productId) {
+    if (productId && user) {
       loadObjections();
     } else if (initialObjections.length > 0) {
       setObjections(initialObjections);
     }
-  }, [productId, initialObjections]);
+  }, [productId, initialObjections, user]);
 
   const loadObjections = async () => {
+    if (!user || !productId) return;
+    
     setIsLoading(true);
     try {
-      // Since product_objections table doesn't exist, we'll use placeholder data
-      // You can create this table later if needed
-      setObjections([
-        {
-          id: '1',
-          question: 'O preço está muito alto',
-          answer: 'Entendo sua preocupação com o investimento. Nosso produto oferece um ROI comprovado de 300% em 6 meses...',
-          createdAt: new Date().toLocaleDateString(),
-          createdBy: 'Sistema'
-        },
-        {
-          id: '2',
-          question: 'Não tenho tempo para implementar',
-          answer: 'Oferecemos suporte completo na implementação, com nossa equipe dedicada que cuida de todo o processo...',
-          createdAt: new Date().toLocaleDateString(),
-          createdBy: 'Sistema'
-        }
-      ]);
+      const { data, error } = await supabase
+        .from('product_objections')
+        .select('*')
+        .eq('product_id', productId)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedObjections = data?.map(obj => ({
+        id: obj.id,
+        question: obj.question,
+        answer: obj.answer,
+        createdAt: new Date(obj.created_at).toLocaleDateString(),
+        createdBy: obj.created_by || 'Usuário'
+      })) || [];
+
+      setObjections(formattedObjections);
+      onObjectionsChange?.(formattedObjections);
     } catch (error) {
       console.error('Error loading objections:', error);
       setObjections([]);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as objeções.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleAddObjection = async () => {
-    if (!newQuestion.trim() || !newAnswer.trim()) return;
+    if (!newQuestion.trim() || !newAnswer.trim() || !user || !productId) return;
 
     try {
+      const { data, error } = await supabase
+        .from('product_objections')
+        .insert({
+          product_id: productId,
+          user_id: user.id,
+          question: newQuestion.trim(),
+          answer: newAnswer.trim(),
+          created_by: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
       const newObjection: Objection = {
-        id: Date.now().toString(),
-        question: newQuestion.trim(),
-        answer: newAnswer.trim(),
-        createdAt: new Date().toLocaleDateString(),
+        id: data.id,
+        question: data.question,
+        answer: data.answer,
+        createdAt: new Date(data.created_at).toLocaleDateString(),
         createdBy: 'Usuário'
       };
 
-      const updatedObjections = [...objections, newObjection];
+      const updatedObjections = [newObjection, ...objections];
       setObjections(updatedObjections);
       onObjectionsChange?.(updatedObjections);
       setNewQuestion('');
@@ -117,9 +142,21 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
   };
 
   const handleUpdateObjection = async () => {
-    if (!editingObjection || !newQuestion.trim() || !newAnswer.trim()) return;
+    if (!editingObjection || !newQuestion.trim() || !newAnswer.trim() || !user) return;
 
     try {
+      const { error } = await supabase
+        .from('product_objections')
+        .update({
+          question: newQuestion.trim(),
+          answer: newAnswer.trim(),
+          updated_by: user.id
+        })
+        .eq('id', editingObjection.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
       const updatedObjections = objections.map(obj => 
         obj.id === editingObjection.id 
           ? { ...obj, question: newQuestion.trim(), answer: newAnswer.trim() }
@@ -138,11 +175,26 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
       });
     } catch (error) {
       console.error('Error updating objection:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a objeção.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleDeleteObjection = async (objectionId: string) => {
+    if (!user) return;
+
     try {
+      const { error } = await supabase
+        .from('product_objections')
+        .delete()
+        .eq('id', objectionId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
       const updatedObjections = objections.filter(obj => obj.id !== objectionId);
       setObjections(updatedObjections);
       onObjectionsChange?.(updatedObjections);
@@ -153,6 +205,11 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
       });
     } catch (error) {
       console.error('Error deleting objection:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover a objeção.",
+        variant: "destructive",
+      });
     }
   };
 

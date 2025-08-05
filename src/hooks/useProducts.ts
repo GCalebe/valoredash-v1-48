@@ -12,7 +12,7 @@ export const productsKeys = {
   byCategory: (category: string) => ['products', 'category', category] as const,
 };
 
-// Fetch products - now filters by created_by for security
+// Fetch products - now filters by user_id for security
 const fetchProducts = async (): Promise<Product[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
@@ -20,7 +20,7 @@ const fetchProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase
     .from('products')
     .select('*')
-    .eq('created_by', user.id)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -31,7 +31,7 @@ const fetchProducts = async (): Promise<Product[]> => {
   return (data as Product[]) || [];
 };
 
-// Fetch products by category - now filters by created_by for security
+// Fetch products by category - now filters by user_id for security
 const fetchProductsByCategory = async (category: string): Promise<Product[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
@@ -40,7 +40,7 @@ const fetchProductsByCategory = async (category: string): Promise<Product[]> => 
     .from('products')
     .select('*')
     .eq('category', category)
-    .eq('created_by', user.id)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -51,7 +51,7 @@ const fetchProductsByCategory = async (category: string): Promise<Product[]> => 
   return (data as Product[]) || [];
 };
 
-// Create product - now includes created_by for security
+// Create product - now includes user_id for security
 const createProduct = async (productData: ProductFormData): Promise<Product> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
@@ -74,6 +74,7 @@ const createProduct = async (productData: ProductFormData): Promise<Product> => 
     has_promotion: productData.has_promotion || false,
     new: productData.new || false,
     popular: productData.popular || false,
+    user_id: user.id,
     created_by: user.id,
   };
 
@@ -179,6 +180,9 @@ const updateProduct = async ({ id, ...updates }: ProductFormData & { id: string 
   console.log('📝 Product ID:', id);
   console.log('📦 Raw updates:', updates);
   
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+  
   // Remove undefined values
   const cleanUpdates = Object.fromEntries(
     Object.entries(updates).filter(([_, value]) => value !== undefined)
@@ -191,6 +195,7 @@ const updateProduct = async ({ id, ...updates }: ProductFormData & { id: string 
     .from('products')
     .update(cleanUpdates)
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single();
 
@@ -211,10 +216,14 @@ const updateProduct = async ({ id, ...updates }: ProductFormData & { id: string 
 
 // Delete product
 const deleteProduct = async (id: string): Promise<void> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   const { error } = await supabase
     .from('products')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('user_id', user.id);
 
   if (error) {
     console.error('Error deleting product:', error);
