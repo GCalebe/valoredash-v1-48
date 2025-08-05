@@ -3507,7 +3507,7 @@ export type Database = {
           price: number | null
           success_cases: string[] | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           benefits?: string[] | null
@@ -3530,7 +3530,7 @@ export type Database = {
           price?: number | null
           success_cases?: string[] | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           benefits?: string[] | null
@@ -3553,7 +3553,7 @@ export type Database = {
           price?: number | null
           success_cases?: string[] | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
