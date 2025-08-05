@@ -48,10 +48,9 @@ export function useAgendas(userId?: string) {
         .select('*')
         .eq('is_active', true);
       
-      // Se há um usuário autenticado, filtrar por created_by
-      // Caso contrário, mostrar todas as agendas ativas
+      // Filtrar apenas agendas do usuário específico
       if (idToFetch) {
-        query = query.or(`created_by.eq.${idToFetch},created_by.is.null`);
+        query = query.eq('created_by', idToFetch);
       }
       
       const { data, error } = await query.order('created_at', { ascending: false });

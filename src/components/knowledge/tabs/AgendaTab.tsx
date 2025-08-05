@@ -511,12 +511,6 @@ const AgendaTab = () => {
        
        if (supabaseAgenda) {
          await deleteAgenda(supabaseAgenda.id);
-         // Forçar múltiplas atualizações para garantir sincronização
-         await refetchAgendas();
-         // Forçar um segundo refetch após um pequeno delay
-         setTimeout(async () => {
-           await refetchAgendas();
-         }, 100);
        }
      } catch (error) {
        console.error('Erro na exclusão:', error);
