@@ -152,7 +152,7 @@ export function useCustomFields() {
 
   const updateCustomField = async (id: string, field: Partial<CustomField>) => {
     try {
-      const updateData: any = {};
+      const updateData: Partial<CustomField> = {};
       
       if (field.field_name !== undefined) updateData.field_name = field.field_name;
       if (field.field_type !== undefined) updateData.field_type = field.field_type;
@@ -276,7 +276,7 @@ export function useCustomFields() {
 
   const saveClientCustomValues = async (
     clientId: string,
-    values: { fieldId: string; value: any }[],
+    values: { fieldId: string; value: string | number | boolean | null }[],
   ) => {
     try {
       const upsertPromises = values.map(({ fieldId, value }) =>

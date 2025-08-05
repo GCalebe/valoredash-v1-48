@@ -5,7 +5,7 @@ import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 
 interface RealtimeMetricsUpdate {
   type: 'contact_added' | 'conversation_updated' | 'metrics_updated';
-  data: any;
+  data: Record<string, unknown>;
   timestamp: string;
 }
 

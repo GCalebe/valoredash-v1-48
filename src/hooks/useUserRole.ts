@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const useUserRole = () => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<{ role?: string; [key: string]: unknown } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

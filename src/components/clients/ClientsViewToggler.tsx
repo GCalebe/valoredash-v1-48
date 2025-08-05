@@ -39,7 +39,7 @@ const ClientsViewToggler: React.FC<ClientsViewTogglerProps> = ({
                 <Button
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setViewMode(view.id as any)}
+                  onClick={() => setViewMode(view.id as "table" | "kanban" | "tree-sales" | "tree-marketing")}
                   className={`${
                     isFirst ? "rounded-r-none" : isLast ? "rounded-l-none" : "rounded-none"
                   } ${

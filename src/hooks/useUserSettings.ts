@@ -7,14 +7,14 @@ interface UserSetting {
   id: string;
   user_id: string;
   setting_key: string;
-  setting_value: any;
+  setting_value: string | number | boolean | object | null;
   created_at: string;
   updated_at: string;
 }
 
 interface SettingUpdate {
   key: string;
-  value: any;
+  value: string | number | boolean | object | null;
 }
 
 // Tipos de configurações comuns
@@ -42,7 +42,7 @@ export interface UserPreferences {
 }
 
 export function useUserSettings() {
-  const [settings, setSettings] = useState<Record<string, any>>({});
+  const [settings, setSettings] = useState<Record<string, string | number | boolean | object | null>>({});
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const { toast } = useToast();
@@ -71,7 +71,7 @@ export function useUserSettings() {
       const settingsObject = (data || []).reduce((acc, setting) => {
         acc[setting.setting_key] = setting.setting_value;
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, string | number | boolean | object | null>);
 
       setSettings(settingsObject);
       setInitialized(true);
@@ -84,7 +84,7 @@ export function useUserSettings() {
   }, []);
 
   // Salvar uma configuração específica
-  const saveSetting = useCallback(async (key: string, value: any) => {
+  const saveSetting = useCallback(async (key: string, value: string | number | boolean | object | null) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -148,7 +148,7 @@ export function useUserSettings() {
       const updatesObject = updates.reduce((acc, update) => {
         acc[update.key] = update.value;
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, string | number | boolean | object | null>);
       
       setSettings(prev => ({ ...prev, ...updatesObject }));
       console.log(`✅ ${updates.length} configurações salvas`);
@@ -171,7 +171,7 @@ export function useUserSettings() {
   }, [toast]);
 
   // Obter uma configuração específica
-  const getSetting = useCallback((key: string, defaultValue?: any) => {
+  const getSetting = useCallback((key: string, defaultValue?: string | number | boolean | object | null) => {
     return settings[key] ?? defaultValue;
   }, [settings]);
 
@@ -270,7 +270,7 @@ export function useUserSettings() {
       push: true,
       sms: false
     });
-    const setNotifications = (newNotifications: any) => {
+    const setNotifications = (newNotifications: { email: boolean; push: boolean; sms: boolean }) => {
       saveSetting('notifications', newNotifications);
     };
     return { notifications, setNotifications };
@@ -282,7 +282,7 @@ export function useUserSettings() {
       show_timestamps: true,
       message_preview: true
     });
-    const setChatSettings = (newChatSettings: any) => {
+    const setChatSettings = (newChatSettings: { auto_save: boolean; show_timestamps: boolean; message_preview: boolean }) => {
       saveSetting('chat', newChatSettings);
     };
     return { chatSettings, setChatSettings };

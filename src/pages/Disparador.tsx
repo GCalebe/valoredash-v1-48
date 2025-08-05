@@ -123,7 +123,7 @@ const Disparador: React.FC = () => {
     if (savedSchedules) {
       try {
         const parsed = JSON.parse(savedSchedules);
-        const schedules = parsed.map((s: any) => ({
+        const schedules = parsed.map((s: { scheduledDateTime: string; createdAt: string; [key: string]: unknown }) => ({
           ...s,
           scheduledDateTime: new Date(s.scheduledDateTime),
           createdAt: new Date(s.createdAt)

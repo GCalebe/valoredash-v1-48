@@ -302,20 +302,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
       // Valores padrão para downsell
       has_downsell: false,
       downsell_product: "",
-      promotion_description: "",
-      discount_percentage: undefined,
-      discount_amount: undefined,
-      promotion_start_date: "",
-      promotion_end_date: "",
-      combo_name: "",
-      combo_description: "",
-      combo_discount_percentage: undefined,
-      combo_products: [],
-      upgrade_name: "",
-      upgrade_description: "",
-      upgrade_price: undefined,
-      upgrade_benefits: [],
-      upgrade_target_product: "",
+
+
       ...initialData,
     },
   });
@@ -450,7 +438,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     return handleFormSubmit(data);
   };
 
-  const onFormError = (errors: any) => {
+  const onFormError = (errors: Record<string, { message?: string; type?: string }>) => {
     console.log('❌ react-hook-form validation failed');
     console.log('🚨 Form errors:', errors);
   };

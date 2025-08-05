@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 export interface CustomFieldFilter {
   fieldId: string;
   fieldName: string;
-  value: any;
+  value: string | number | boolean | null;
 }
 
 export interface ClientsFilters {

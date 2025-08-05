@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { LocalAgenda, categoryDetails } from "../tabs/AgendaTab";
+import { Agenda } from "@/hooks/useAgendas";
 import {
   Accordion,
   AccordionItem,
@@ -32,7 +33,7 @@ interface AgendaHierarchicalViewProps {
   onDelete: (id: string) => void;
   isDeleting?: boolean;
   searchTerm?: string;
-  supabaseAgendas?: any[];
+  supabaseAgendas?: Agenda[];
 }
 
 // Mapeamento de categorias para labels amigáveis e ícones

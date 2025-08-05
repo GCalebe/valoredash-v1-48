@@ -1,0 +1,59 @@
+================================================================================
+ESLint Analysis Report
+Generated: 2025-08-04 20:50:46
+================================================================================
+
+📊 SUMMARY
+----------------------------------------
+Total Issues: 65
+Errors: 23 (High Risk)
+Warnings: 42 (Medium Risk)
+Files with Issues: 51
+
+Risk Level: 🟡 MEDIUM RISK
+
+🔍 TOP ISSUES BY RULE
+----------------------------------------
+react-hooks/exhaustive-deps: 31 issues
+@typescript-eslint/no-explicit-any: 14 issues
+react-refresh/only-export-components: 11 issues
+@typescript-eslint/no-empty-object-type: 5 issues
+no-case-declarations: 2 issues
+prefer-const: 2 issues
+
+📂 ISSUES BY CATEGORY
+----------------------------------------
+React: 42 total (0 errors, 42 warnings)
+TypeScript: 19 total (19 errors, 0 warnings)
+Other: 4 total (4 errors, 0 warnings)
+
+📁 MOST PROBLEMATIC FILES
+----------------------------------------
+D:\DEV\docker n8n\valoredash-v1-48\src\hooks\useSubscription.ts: 3 issues (0 errors, 3 warnings)
+D:\DEV\docker n8n\valoredash-v1-48\src\components\knowledge\KnowledgeBaseSearch.tsx: 2 issues (2 errors, 0 warnings)
+D:\DEV\docker n8n\valoredash-v1-48\src\components\knowledge\personality\ideas\CardBasedConfigurationView.tsx: 2 issues (2 errors, 0 warnings)
+D:\DEV\docker n8n\valoredash-v1-48\src\components\knowledge\personality\ideas\ModernConfigurationView.tsx: 2 issues (2 errors, 0 warnings)
+D:\DEV\docker n8n\valoredash-v1-48\src\components\knowledge\personality\ideas\SidebarConfigurationView.tsx: 2 issues (2 errors, 0 warnings)
+D:\DEV\docker n8n\valoredash-v1-48\src\components\knowledge\personality\ideas\SplitScreenConfigurationView.tsx: 2 issues (2 errors, 0 warnings)
+D:\DEV\docker n8n\valoredash-v1-48\src\components\knowledge\personality\ideas\WizardConfigurationView.tsx: 2 issues (2 errors, 0 warnings)
+D:\DEV\docker n8n\valoredash-v1-48\src\components\knowledge\tabs\AgendaTab.tsx: 2 issues (0 errors, 2 warnings)
+D:\DEV\docker n8n\valoredash-v1-48\src\components\knowledge\tabs\HostsTab.tsx: 2 issues (2 errors, 0 warnings)
+D:\DEV\docker n8n\valoredash-v1-48\src\hooks\useAgendaAvailability.ts: 2 issues (0 errors, 2 warnings)
+
+🔧 TYPESCRIPT ISSUES
+----------------------------------------
+@typescript-eslint/no-explicit-any: 14 issues
+@typescript-eslint/no-empty-object-type: 5 issues
+
+⚛️ REACT ISSUES
+----------------------------------------
+react-hooks/exhaustive-deps: 31 issues
+react-refresh/only-export-components: 11 issues
+
+💡 RECOMMENDATIONS
+----------------------------------------
+1. 🚨 Fix all ERROR level issues first (these can break builds)
+2. 🔄 Review useEffect dependencies to prevent infinite re-renders
+3. 📝 Address TypeScript-specific issues for better type safety
+
+================================================================================

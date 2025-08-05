@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOptimizedHosts } from "@/hooks/useOptimizedHosts";
 import { useProducts } from "@/hooks/useProducts";
+import { EventFormState } from "@/types/eventForm";
 
 interface ServiceSelectionTabProps {
-  state: any;
-  updateState: (updates: any) => void;
-  constants: any;
+  state: EventFormState;
+  updateState: (updates: Partial<EventFormState>) => void;
+  constants: Record<string, unknown>;
   onNext: () => void;
   onPrevious: () => void;
 }
@@ -91,7 +92,7 @@ export function ServiceSelectionTab({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {(constants.DURATIONS || []).map((duration: any) => (
+            {(constants.DURATIONS || []).map((duration: { label: string; value: number }) => (
               <SelectItem key={duration.value} value={duration.value.toString()}>
                 {duration.label}
               </SelectItem>

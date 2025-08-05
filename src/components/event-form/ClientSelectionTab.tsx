@@ -3,10 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Contact } from "@/types/client";
+import { EventFormState } from "@/types/eventForm";
 
 interface ClientSelectionTabProps {
-  state: any;
-  updateState: (updates: any) => void;
+  state: EventFormState;
+  updateState: (updates: Partial<EventFormState>) => void;
   filteredContacts: Contact[];
   onSelectClient: (contact: Contact) => void;
   onNewClient: () => void;

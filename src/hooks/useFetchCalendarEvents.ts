@@ -42,7 +42,7 @@ export async function fetchCalendarEvents(
     console.log('[fetchCalendarEvents] Eventos encontrados:', data?.length || 0);
 
     // Mapear dados do Supabase para CalendarEvent
-    return (data || []).map((event: any) => ({
+    return (data || []).map((event: Record<string, unknown>) => ({
       id: event.id,
       summary: event.summary || event.title || "Evento sem título",
       description: event.description || "",

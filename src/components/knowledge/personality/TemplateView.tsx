@@ -5,7 +5,7 @@ import PersonalityCards from './PersonalityCards';
 import PersonalityPreviewDialog from './PersonalityPreviewDialog';
 import { type AIPersonalityTemplate } from '@/data/aiPersonalityTemplates';
 // PersonalityConfigDemo was removed - using empty array as fallback
-const predefinedPersonalities: any[] = [];
+const predefinedPersonalities: AIPersonalityTemplate[] = [];
 import { PersonalityConfig } from './ideas';
 
 interface DatabaseTemplate {

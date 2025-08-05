@@ -194,7 +194,7 @@ export function useChatMessages(selectedChat: string | null) {
   }, []);
 
   // Função para salvar/atualizar memória contextual
-  const saveToMemory = useCallback(async (sessionId: string, memoryData: any) => {
+  const saveToMemory = useCallback(async (sessionId: string, memoryData: Record<string, unknown>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;

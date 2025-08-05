@@ -36,11 +36,11 @@ interface ContactInfoProps {
 }
 
 export default function ContactInfo({ contact, getStatusColor, width }: ContactInfoProps) {
-  const [customFields, setCustomFields] = useState<{[key: string]: any}>({});
+  const [customFields, setCustomFields] = useState<{[key: string]: string | number | boolean | string[]}>({});
   const [addFieldDialogOpen, setAddFieldDialogOpen] = useState(false);
   const [editFieldDialogOpen, setEditFieldDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"basico" | "comercial" | "utm" | "midia">("basico");
-  const [editingField, setEditingField] = useState<any>(null);
+  const [editingField, setEditingField] = useState<CustomField | null>(null);
   const [tags, setTags] = useState<{id: string; label: string; color: string}[]>([
     { id: "1", label: "VIP", color: "bg-purple-500" },
     { id: "2", label: "Cliente", color: "bg-green-500" }

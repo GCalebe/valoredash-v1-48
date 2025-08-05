@@ -343,7 +343,7 @@ export const KnowledgeBaseSearch: React.FC<KnowledgeBaseSearchProps> = ({
                 {language === 'en' && 'Sort by:'}
                 {language === 'es' && 'Ordenar por:'}
               </Label>
-              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <Select value={sortBy} onValueChange={(value: 'relevance' | 'date' | 'views' | 'title') => setSortBy(value)}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -371,7 +371,7 @@ export const KnowledgeBaseSearch: React.FC<KnowledgeBaseSearchProps> = ({
                 </SelectContent>
               </Select>
               
-              <Select value={sortOrder} onValueChange={(value: any) => setSortOrder(value)}>
+              <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
                 <SelectTrigger className="w-24">
                   <SelectValue />
                 </SelectTrigger>

@@ -20,7 +20,7 @@ const WizardConfigurationView: React.FC<WizardConfigurationViewProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
-  const handleInputChange = (field: keyof PersonalityConfig, value: any) => {
+  const handleInputChange = (field: keyof PersonalityConfig, value: string | number | boolean | number[] | 'immediate' | 'thoughtful' | 'detailed' | 'concise' | 'moderate') => {
     onConfigChange({ ...config, [field]: value });
   };
 

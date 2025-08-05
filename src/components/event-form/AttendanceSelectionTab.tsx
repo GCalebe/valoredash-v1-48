@@ -7,11 +7,21 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Plus } from "lucide-react";
 import { useAgendaServiceTypes } from "@/hooks/useAgendaServiceTypes";
+import { Tag } from "@/types/eventForm";
+
+interface EventFormState {
+  tags: Tag[];
+  [key: string]: unknown;
+}
+
+interface EventFormConstants {
+  [key: string]: unknown;
+}
 
 interface AttendanceSelectionTabProps {
-  state: any;
-  updateState: (updates: any) => void;
-  constants: any;
+  state: EventFormState;
+  updateState: (updates: Partial<EventFormState>) => void;
+  constants: EventFormConstants;
   addTag: () => void;
   removeTag: (id: string) => void;
   onPrevious: () => void;
@@ -92,7 +102,7 @@ export function AttendanceSelectionTab({
       <div className="space-y-2">
         <Label>Tags Personalizadas</Label>
         <div className="flex flex-wrap gap-2 mb-2">
-          {(state.tags || []).map((tag: any) => (
+          {(state.tags || []).map((tag: Tag) => (
             <Badge 
               key={tag.id} 
               style={{backgroundColor: tag.color}}

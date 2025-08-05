@@ -24,7 +24,7 @@ const DEFAULT_STAGES = [
 ];
 
 // Helper function to safely parse settings from database Json
-const parseStageSettings = (settings: any): { color?: string } => {
+const parseStageSettings = (settings: unknown): { color?: string } => {
   if (!settings) return { color: '#6b7280' };
   
   // If settings is already an object with color property

@@ -15,7 +15,7 @@ interface ConfigurationViewProps {
   handleSave: () => void;
   isLoading: boolean;
   settings: PersonalitySettings;
-  handleInputChange: (field: keyof PersonalitySettings, value: any) => void;
+  handleInputChange: (field: keyof PersonalitySettings, value: string | number | boolean | 'immediate' | 'thoughtful' | 'detailed' | 'concise' | 'moderate') => void;
   handleSliderChange: (field: keyof PersonalitySettings, value: number[]) => void;
   getSliderLabel: (value: number) => string;
 }

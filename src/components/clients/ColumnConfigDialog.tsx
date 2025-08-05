@@ -10,13 +10,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { GripVertical, Eye, EyeOff } from "lucide-react";
 import { ColumnConfig, defaultColumnConfig, saveColumnConfig } from "@/config/columnConfig";
 
 interface DraggableColumnItemProps {
   column: ColumnConfig;
-  provided: any;
+  provided: {
+    innerRef: (element: HTMLElement | null) => void;
+    draggableProps: Record<string, unknown>;
+    dragHandleProps: Record<string, unknown>;
+  };
   toggleColumnVisibility: (id: string) => void;
 }
 
@@ -86,7 +90,7 @@ const ColumnConfigDialog: React.FC<ColumnConfigDialogProps> = ({
 }) => {
   const [columns, setColumns] = useState<ColumnConfig[]>(columnConfig);
 
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
     const items = Array.from(columns);

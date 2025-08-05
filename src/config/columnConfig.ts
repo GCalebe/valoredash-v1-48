@@ -113,7 +113,7 @@ export const getColumnConfig = (): ColumnConfig[] => {
   try {
     const savedConfig = localStorage.getItem("clientTableColumnConfig");
     if (savedConfig) {
-      return JSON.parse(savedConfig);
+      return JSON.parse(savedConfig) as ColumnConfig[];
     }
   } catch (error) {
     console.error("Erro ao carregar configuração de colunas:", error);

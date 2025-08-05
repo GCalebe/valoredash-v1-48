@@ -32,7 +32,7 @@ interface Step6RemindersSettingsProps {
   reminders: ReminderType[];
   addReminder: () => void;
   removeReminder: (id: number) => void;
-  updateReminder: (id: number, field: string, value: any) => void;
+  updateReminder: (id: number, field: string, value: string | number | File | undefined) => void;
 }
 
 export const Step6RemindersSettings: React.FC<Step6RemindersSettingsProps> = ({

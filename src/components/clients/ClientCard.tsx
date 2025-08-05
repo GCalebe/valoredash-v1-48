@@ -34,10 +34,10 @@ interface ClientCardProps {
     isCompact?: boolean;
   };
   className?: string;
-  dragHandleProps?: any;
-  draggableProps?: any;
+  dragHandleProps?: Record<string, unknown>;
+  draggableProps?: Record<string, unknown>;
   innerRef?: (element: HTMLElement | null) => void;
-  snapshot?: any;
+  snapshot?: { isDragging: boolean; [key: string]: unknown };
 }
 
 // Mapeamento de cores para os estágios do kanban

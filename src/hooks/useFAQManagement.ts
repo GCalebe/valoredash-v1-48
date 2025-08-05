@@ -102,7 +102,7 @@ const useFAQManagement = () => {
     }
   };
 
-  const editFAQ = (item: any) => { // Usando 'any' para compatibilidade com o que vem do banco
+  const editFAQ = (item: Record<string, unknown>) => { // Usando Record para compatibilidade com o que vem do banco
     setEditingFAQ({
       ...item,
       tags: Array.isArray(item.tags) ? item.tags.join(", ") : "",

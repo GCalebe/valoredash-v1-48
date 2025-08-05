@@ -9,10 +9,10 @@ interface KanbanClientCardProps {
   onEditClick: (contact: Contact) => void;
   index: number;
   isCompact: boolean;
-  dragHandleProps?: any;
-  draggableProps?: any;
+  dragHandleProps?: Record<string, unknown>;
+  draggableProps?: Record<string, unknown>;
   innerRef?: (element: HTMLElement | null) => void;
-  snapshot?: any;
+  snapshot?: { isDragging?: boolean; [key: string]: unknown };
 }
 
 export const KanbanClientCard: React.FC<KanbanClientCardProps> = ({

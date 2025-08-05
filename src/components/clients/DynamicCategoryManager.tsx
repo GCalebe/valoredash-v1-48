@@ -19,7 +19,7 @@ export interface DynamicCategory {
   name: string;
   type: "text" | "single_select" | "multi_select";
   options?: string[];
-  value?: any;
+  value?: string | string[];
 }
 
 interface DynamicCategoryManagerProps {
@@ -100,7 +100,7 @@ const DynamicCategoryManager = ({
     });
   };
 
-  const updateCategoryValue = (categoryId: string, value: any) => {
+  const updateCategoryValue = (categoryId: string, value: string | string[]) => {
     onCategoriesChange(
       categories.map((cat) =>
         cat.id === categoryId ? { ...cat, value } : cat,

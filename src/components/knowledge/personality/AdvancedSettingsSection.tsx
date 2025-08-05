@@ -8,7 +8,7 @@ import type { PersonalitySettings } from "@/hooks/useAIPersonalityForm";
 
 interface AdvancedSettingsSectionProps {
   settings: PersonalitySettings;
-  onInputChange: (field: keyof PersonalitySettings, value: any) => void;
+  onInputChange: (field: keyof PersonalitySettings, value: string | number | boolean | number[] | 'immediate' | 'thoughtful' | 'detailed' | 'concise' | 'moderate') => void;
 }
 
 const AdvancedSettingsSection = ({

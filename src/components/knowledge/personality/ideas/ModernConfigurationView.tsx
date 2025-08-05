@@ -19,7 +19,7 @@ const ModernConfigurationView: React.FC<ModernConfigurationViewProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('basic');
 
-  const handleInputChange = (field: keyof PersonalityConfig, value: any) => {
+  const handleInputChange = (field: keyof PersonalityConfig, value: string | number | boolean | number[] | 'immediate' | 'thoughtful' | 'detailed' | 'concise' | 'moderate') => {
     onConfigChange({ ...config, [field]: value });
   };
 

@@ -23,7 +23,7 @@ const SplitScreenConfigurationView: React.FC<SplitScreenConfigurationViewProps> 
   const [previewInput, setPreviewInput] = useState('Olá! Como você pode me ajudar hoje?');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleInputChange = (field: keyof PersonalityConfig, value: any) => {
+  const handleInputChange = (field: keyof PersonalityConfig, value: string | number | boolean | number[] | 'immediate' | 'thoughtful' | 'detailed' | 'concise' | 'moderate') => {
     onConfigChange({ ...config, [field]: value });
   };
 

@@ -198,7 +198,7 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
     setReminders(prev => prev.filter(reminder => reminder.id !== id));
   };
 
-  const updateReminder = (id: number, field: string, value: any) => {
+  const updateReminder = (id: number, field: string, value: string | number | File | undefined) => {
     setReminders(prev => prev.map(reminder => 
       reminder.id === id ? { ...reminder, [field]: value } : reminder
     ));

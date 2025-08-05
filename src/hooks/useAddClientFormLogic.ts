@@ -6,11 +6,11 @@ import { toast } from "@/hooks/use-toast";
 export const useAddClientFormLogic = () => {
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
   const [activeTab, setActiveTab] = useState("basico");
-  const [customValues, setCustomValues] = useState<{ [fieldId: string]: any }>({});
+  const [customValues, setCustomValues] = useState<{ [fieldId: string]: string | string[] | null }>({});
 
   const handleInputChange = useCallback((
     field: keyof Contact,
-    value: any,
+    value: string | number | boolean | string[] | null,
     newContact: Partial<Contact>,
     setNewContact: (contact: Partial<Contact>) => void
   ) => {
@@ -57,7 +57,7 @@ export const useAddClientFormLogic = () => {
     setActiveTab("basico");
   }, []);
 
-  const handleCustomFieldChange = useCallback((fieldId: string, value: any) => {
+  const handleCustomFieldChange = useCallback((fieldId: string, value: string | string[] | null) => {
     setCustomValues((prev) => ({
       ...prev,
       [fieldId]: value,

@@ -17,7 +17,7 @@ const CardBasedConfigurationView: React.FC<CardBasedConfigurationViewProps> = ({
   config,
   onConfigChange,
 }) => {
-  const handleInputChange = (field: keyof PersonalityConfig, value: any) => {
+  const handleInputChange = (field: keyof PersonalityConfig, value: string | number[] | boolean | 'immediate' | 'thoughtful' | 'detailed' | 'concise' | 'moderate') => {
     onConfigChange({ ...config, [field]: value });
   };
 

@@ -4,11 +4,21 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { EventFormState } from "@/types/eventForm";
+
+interface Duration {
+  label: string;
+  value: number;
+}
 
 interface DateTimeSelectionTabProps {
-  state: any;
-  updateState: (updates: any) => void;
-  constants: any;
+  state: EventFormState;
+  updateState: (updates: Partial<EventFormState>) => void;
+  constants: {
+    DURATIONS: Duration[];
+    COLORS: string[];
+    [key: string]: unknown;
+  };
   onNext: () => void;
   onPrevious: () => void;
 }
@@ -57,7 +67,7 @@ export function DateTimeSelectionTab({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {constants.DURATIONS.map((duration: any) => (
+            {constants.DURATIONS.map((duration: Duration) => (
               <SelectItem key={duration.value} value={duration.value.toString()}>
                 {duration.label}
               </SelectItem>
