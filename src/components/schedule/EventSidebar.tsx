@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { isSameDay, parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Edit3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface EventSidebarProps {
   selectedDate: Date | undefined;
@@ -23,6 +24,8 @@ export function EventSidebar({
   events,
   onEventClick,
 }: EventSidebarProps) {
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+
   const eventsForSelectedDay = useMemo(() => {
     if (!selectedDate) return [];
     return events.filter((event) => {
@@ -63,6 +66,15 @@ export function EventSidebar({
   }, [eventsForSelectedDay]);
 
   const handleEventCardClick = (event: CalendarEvent) => {
+    if (expandedEventId === event.id) {
+      setExpandedEventId(null);
+    } else {
+      setExpandedEventId(event.id);
+    }
+  };
+
+  const handleEditClick = (event: CalendarEvent, e: React.MouseEvent) => {
+    e.stopPropagation();
     onEventClick(event);
   };
 
@@ -106,25 +118,60 @@ export function EventSidebar({
                     />
                     {salesperson}
                   </h4>
-                  <div className="space-y-2">
-                    {salespersonEvents.map((event) => (
-                      <div
-                        key={event.id}
-                        className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer border border-gray-200 dark:border-gray-600"
-                        onClick={() => handleEventCardClick(event)}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h5 className="font-medium text-gray-900 dark:text-white">
-                              {(event as any).title}
-                            </h5>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm">
-                              {event.time}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                   <div className="space-y-2">
+                     {salespersonEvents.map((event) => (
+                       <div key={event.id} className="space-y-2">
+                         <div
+                           className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer border border-gray-200 dark:border-gray-600"
+                           onClick={() => handleEventCardClick(event)}
+                         >
+                           <div className="flex justify-between items-start">
+                             <div>
+                               <h5 className="font-medium text-gray-900 dark:text-white">
+                                 {(event as any).title}
+                               </h5>
+                               <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                 {event.time}
+                               </p>
+                             </div>
+                           </div>
+                         </div>
+                         
+                         {expandedEventId === event.id && (
+                           <div className="bg-white dark:bg-gray-800 rounded-md p-3 border border-gray-300 dark:border-gray-600 ml-2">
+                             <div className="space-y-2">
+                               <div className="flex justify-between items-start">
+                                 <div className="flex-1">
+                                   <h6 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                                     Resumo do Agendamento
+                                   </h6>
+                                   {event.description && (
+                                     <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                                       {event.description}
+                                     </p>
+                                   )}
+                                   <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                                     <p><span className="font-medium">Horário:</span> {event.time}</p>
+                                     <p><span className="font-medium">Status:</span> {event.status}</p>
+                                     {event.hostName && (
+                                       <p><span className="font-medium">Anfitrião:</span> {event.hostName}</p>
+                                     )}
+                                   </div>
+                                 </div>
+                                 <Button
+                                   size="sm"
+                                   variant="ghost"
+                                   className="ml-2 p-1 h-8 w-8"
+                                   onClick={(e) => handleEditClick(event, e)}
+                                 >
+                                   <Edit3 className="h-4 w-4" />
+                                 </Button>
+                               </div>
+                             </div>
+                           </div>
+                         )}
+                       </div>
+                     ))}
                   </div>
                 </div>
               ),
