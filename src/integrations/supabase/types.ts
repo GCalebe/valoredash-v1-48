@@ -3520,6 +3520,45 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          error_message: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          resource: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource?: string | null
+          success: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       stage_name_mapping: {
         Row: {
           created_at: string | null
@@ -4247,6 +4286,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      cleanup_expired_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       collect_metrics_fase3: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -4388,6 +4431,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      log_security_event: {
+        Args: {
+          _action: string
+          _resource?: string
+          _success?: boolean
+          _error_message?: string
+          _metadata?: Json
+        }
+        Returns: undefined
+      }
       match_documents: {
         Args: { query_embedding: string; match_count?: number; filter?: Json }
         Returns: {
@@ -4453,6 +4506,10 @@ export type Database = {
           _expenses_increment?: number
         }
         Returns: undefined
+      }
+      validate_password: {
+        Args: { password: string }
+        Returns: boolean
       }
     }
     Enums: {

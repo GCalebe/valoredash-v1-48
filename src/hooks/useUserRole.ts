@@ -18,16 +18,17 @@ export const useUserRole = () => {
 
     const fetchUserProfile = async () => {
       try {
-        // Check if user has admin role
-        const { data: userRoles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id);
+        // Use secure role checking function
+        const { data: hasAdminRole, error: roleError } = await supabase.rpc('has_role', {
+          _user_id: user.id,
+          _role: 'admin'
+        });
 
-        const hasAdminRole = userRoles?.some(r => r.role === 'admin') || false;
-        setIsAdmin(hasAdminRole);
+        if (!roleError) {
+          setIsAdmin(hasAdminRole || false);
+        }
 
-        // Get user profile if exists
+        // Get user profile
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')

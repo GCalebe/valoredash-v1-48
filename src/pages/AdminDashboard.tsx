@@ -6,8 +6,7 @@ import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import { Shield, Bot, LockKeyhole } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useUsers } from "@/hooks/useUsers";
-import { User, UserFormData } from "@/types/user";
+import { useSecureUsers, SecureUser, UserFormData } from "@/hooks/useSecureUsers";
 import { useAIProductsQuery } from "@/hooks/useAIProductsQuery";
 import PermissionsManager from "@/components/admin/PermissionsManager";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -22,20 +21,19 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { users, loading, fetchUsers, addUser, updateUser, deleteUser } =
-    useUsers();
+    useSecureUsers();
   const { data: aiProducts = [] } = useAIProductsQuery();
 
   const [activeTab, setActiveTab] = useState("users");
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<SecureUser | null>(null);
   const [newUser, setNewUser] = useState<UserFormData>({
     email: "",
     password: "",
     full_name: "",
     role: "user",
-    ai_access: [],
   });
 
   // Check if user is admin, redirect if not
@@ -44,7 +42,6 @@ const AdminDashboard = () => {
       toast({
         title: "Acesso restrito",
         description: "Você não tem permissão para acessar esta página.",
-        variant: "destructive",
       });
       navigate("/dashboard");
     }
@@ -55,7 +52,6 @@ const AdminDashboard = () => {
       toast({
         title: "Campos obrigatórios",
         description: "Email, senha e nome são obrigatórios.",
-        variant: "destructive",
       });
       return;
     }
@@ -68,7 +64,6 @@ const AdminDashboard = () => {
         password: "",
         full_name: "",
         role: "user",
-        ai_access: [],
       });
     }
   };
@@ -79,7 +74,6 @@ const AdminDashboard = () => {
     const success = await updateUser(selectedUser.id, {
       full_name: newUser.full_name,
       role: newUser.role,
-      ai_access: newUser.ai_access,
     });
 
     if (success) {
@@ -99,19 +93,18 @@ const AdminDashboard = () => {
   // Handler functions for user management
   const handleAddUserClick = () => setIsAddUserDialogOpen(true);
 
-  const handleEditUserClick = (user: User) => {
+  const handleEditUserClick = (user: SecureUser) => {
     setSelectedUser(user);
     setNewUser({
       email: user.email,
       password: "",
       full_name: user.full_name || "",
       role: user.role,
-      ai_access: user.ai_access,
     });
     setIsEditUserDialogOpen(true);
   };
 
-  const handleDeleteUserClick = (user: User) => {
+  const handleDeleteUserClick = (user: SecureUser) => {
     setSelectedUser(user);
     setIsDeleteUserDialogOpen(true);
   };
