@@ -193,7 +193,7 @@ const FAQTab = () => {
             faq={newFAQ}
             setFaq={setNewFAQ}
             onCancel={() => setIsAddDialogOpen(false)}
-            onSubmit={addFAQ}
+            onSubmit={() => addFAQ('current-user')}
             isLoading={createFAQMutation.isPending}
             submitLabel="Adicionar"
           />
@@ -203,17 +203,17 @@ const FAQTab = () => {
       {/* FAQ Content */}
       {viewMode === "hierarchy" ? (
         <FAQHierarchicalView
-          faqs={sortedFAQs}
-          onEdit={editFAQ}
-          onDelete={deleteFAQ}
+          faqs={sortedFAQs as any}
+          onEdit={editFAQ as any}
+          onDelete={deleteFAQ as any}
           isDeleting={deleteFAQMutation.isPending}
           searchTerm={searchTerm}
         />
       ) : (
         <FAQTreeView
-          faqs={sortedFAQs}
-          onEdit={editFAQ}
-          onDelete={deleteFAQ}
+          faqs={sortedFAQs as any}
+          onEdit={editFAQ as any}
+          onDelete={deleteFAQ as any}
           isDeleting={deleteFAQMutation.isPending}
           expandedCategories={expandedCategories}
           onToggleCategory={toggleCategory}

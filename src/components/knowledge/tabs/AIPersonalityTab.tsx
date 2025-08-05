@@ -64,7 +64,7 @@ const AIPersonalityTab = () => {
   const handleTemplateSelect = (template: AIPersonalityTemplate) => {
     setSelectedTemplate(template);
     if (template.settings) {
-      setSettings(template.settings);
+      setSettings(prev => ({ ...prev, ...template.settings }));
     }
     setCurrentView('configuration');
   };
@@ -92,7 +92,7 @@ const AIPersonalityTab = () => {
   };
 
   const onSave = () => {
-    handleSave(selectedTemplate?.id || null);
+    handleSave();
   };
   
   // Handlers para o header
@@ -152,9 +152,9 @@ const AIPersonalityTab = () => {
         ) : (
           <TemplateView
             templates={filteredTemplates}
-            dbTemplates={dbTemplates || []}
+            dbTemplates={dbTemplates as any || []}
             templatesLoading={templatesLoading}
-            templatesError={templatesError}
+            templatesError={templatesError as any}
             isTemplateActive={isTemplateActive}
             handleTemplateSelect={handleTemplateSelect}
             handleTemplatePreview={handleTemplatePreview}

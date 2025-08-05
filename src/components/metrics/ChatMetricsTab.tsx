@@ -73,13 +73,13 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
   const isLoading = loading || consolidatedLoading;
   
   // Preparar dados dos gráficos usando dados validados
-  const newLeadsData = validatedTimeSeries.data?.map(item => ({
+  const newLeadsData = validatedTimeSeries.data?.map((item: any) => ({
     date: item.date,
     leads: item.leads,
     converted: item.converted,
   })) || [];
 
-  const conversationsDataForChart = validatedTimeSeries.data?.map(item => ({
+  const conversationsDataForChart = validatedTimeSeries.data?.map((item: any) => ({
     date: item.date,
     iniciadas: item.iniciadas,
     respondidas: item.respondidas,
@@ -87,7 +87,7 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
   })) || [];
   
   // Usar dados validados ou fallback
-  const safeMetrics = validatedMetrics.data || {};
+  const safeMetrics = validatedMetrics.data as any || {};
 
   return (
     <div className="space-y-6">

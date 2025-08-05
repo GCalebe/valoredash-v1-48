@@ -555,12 +555,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </CardHeader>
             <CardContent className="space-y-6">
               <ObjectionsManager
-                productId={initialData?.id}
+                productId={(initialData as any)?.id || 'new'}
                 onObjectionsChange={setObjections}
                 initialObjections={initialData?.objections?.map((question, index) => ({
                   id: `initial-${index}`,
                   question,
-                  answer: 'Resposta não definida'
+                  answer: 'Resposta não definida',
+                  createdAt: new Date().toLocaleDateString(),
+                  createdBy: 'Sistema'
                 })) || []}
               />
               
@@ -728,7 +730,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                       selectedProducts={watchedValues.combo_products || []}
                       onSelectionChange={(products) => setValue("combo_products", products)}
                       placeholder="Selecione os produtos do combo..."
-                      excludeCurrentProduct={initialData?.id}
+                      excludeCurrentProduct={(initialData as any)?.id}
                     />
                   </div>
                   
@@ -821,7 +823,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                       selectedProduct={watchedValues.upgrade_target_product || ""}
                       onSelectionChange={(productId) => setValue("upgrade_target_product", productId)}
                       placeholder="Selecione o produto de upgrade..."
-                      excludeCurrentProduct={initialData?.id}
+                      excludeCurrentProduct={(initialData as any)?.id}
                     />
                   </div>
                 </div>
@@ -865,7 +867,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                       selectedProduct={watchedValues.upsell_product || ""}
                       onSelectionChange={(productId) => setValue("upsell_product", productId)}
                       placeholder="Selecione o produto para upsell..."
-                      excludeCurrentProduct={initialData?.id}
+                      excludeCurrentProduct={(initialData as any)?.id}
                     />
                   </div>
                 </div>
@@ -897,7 +899,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                       selectedProduct={watchedValues.downsell_product || ""}
                       onSelectionChange={(productId) => setValue("downsell_product", productId)}
                       placeholder="Selecione o produto para downsell..."
-                      excludeCurrentProduct={initialData?.id}
+                      excludeCurrentProduct={(initialData as any)?.id}
                     />
                   </div>
                   

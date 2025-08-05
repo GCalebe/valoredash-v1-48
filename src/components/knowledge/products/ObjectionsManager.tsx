@@ -20,9 +20,15 @@ interface Objection {
 
 interface ObjectionsManagerProps {
   productId: string;
+  onObjectionsChange?: (objections: Objection[]) => void;
+  initialObjections?: Objection[];
 }
 
-const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({ productId }) => {
+const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({ 
+  productId, 
+  onObjectionsChange,
+  initialObjections = []
+}) => {
   const [objections, setObjections] = useState<Objection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -33,8 +39,10 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({ productId }) => {
   useEffect(() => {
     if (productId) {
       loadObjections();
+    } else if (initialObjections.length > 0) {
+      setObjections(initialObjections);
     }
-  }, [productId]);
+  }, [productId, initialObjections]);
 
   const loadObjections = async () => {
     setIsLoading(true);
@@ -77,7 +85,9 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({ productId }) => {
         createdBy: 'Usuário'
       };
 
-      setObjections([...objections, newObjection]);
+      const updatedObjections = [...objections, newObjection];
+      setObjections(updatedObjections);
+      onObjectionsChange?.(updatedObjections);
       setNewQuestion('');
       setNewAnswer('');
       setIsAddingNew(false);
@@ -116,6 +126,7 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({ productId }) => {
       );
 
       setObjections(updatedObjections);
+      onObjectionsChange?.(updatedObjections);
       setEditingObjection(null);
       setNewQuestion('');
       setNewAnswer('');
@@ -133,6 +144,7 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({ productId }) => {
     try {
       const updatedObjections = objections.filter(obj => obj.id !== objectionId);
       setObjections(updatedObjections);
+      onObjectionsChange?.(updatedObjections);
 
       toast({
         title: "Objeção removida",

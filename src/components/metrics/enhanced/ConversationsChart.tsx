@@ -40,12 +40,12 @@ const ConversationsChart: React.FC<ConversationsChartProps> = ({
     );
   }
 
-  const CustomTooltip = ({ active, payload, label }: unknown) => {
-    if (active && payload && payload.length) {
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if ((active as any) && (payload as any) && (payload as any).length) {
       return (
         <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-          <p className="font-medium">{label}</p>
-          {payload.map((entry: unknown, index: number) => (
+          <p className="font-medium">{label as any}</p>
+          {(payload as any).map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm">
               {entry.name}: {entry.value}
             </p>

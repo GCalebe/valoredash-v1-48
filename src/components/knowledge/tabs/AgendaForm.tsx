@@ -255,9 +255,9 @@ export const AgendaForm: React.FC<AgendaFormProps> = ({ isOpen, onOpenChange, on
               setCurrentAgenda={setCurrentAgenda}
               handleInputChange={handleInputChange}
               availableDates={availableDates}
-              setAvailableDates={setAvailableDates}
+              
               operatingHours={operatingHours}
-              setOperatingHours={setOperatingHours}
+              
               addAvailableDate={addAvailableDate}
               removeAvailableDate={removeAvailableDate}
               updateAvailableDate={updateAvailableDate}

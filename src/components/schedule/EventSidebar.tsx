@@ -116,7 +116,7 @@ export function EventSidebar({
                         <div className="flex justify-between items-start">
                           <div>
                             <h5 className="font-medium text-gray-900 dark:text-white">
-                              {event.title}
+                              {(event as any).title}
                             </h5>
                             <p className="text-gray-600 dark:text-gray-400 text-sm">
                               {event.time}
