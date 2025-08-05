@@ -17,9 +17,17 @@ export async function fetchCalendarEvents(
       } : null
     });
     
+    // Get current user for filtering
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('[fetchCalendarEvents] User not authenticated');
+      return [];
+    }
+
     let query = supabase
       .from('calendar_events')
       .select('*')
+      .eq('user_id', user.id)
       .order('start_time', { ascending: true });
 
     // Filtrar por range de datas

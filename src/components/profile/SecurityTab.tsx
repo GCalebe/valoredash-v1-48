@@ -33,7 +33,6 @@ export function SecurityTab() {
       toast({
         title: "Erro",
         description: "Digite sua senha atual.",
-        variant: "destructive",
       });
       return;
     }
@@ -42,16 +41,29 @@ export function SecurityTab() {
       toast({
         title: "Erro", 
         description: "As senhas não coincidem.",
-        variant: "destructive",
       });
       return;
     }
 
-    if (passwords.new.length < 8) {
+    // Validate password strength using the database function
+    try {
+      const { data: isValid, error: validationError } = await supabase.rpc('validate_password', {
+        password: passwords.new
+      });
+
+      if (validationError) throw validationError;
+
+      if (!isValid) {
+        toast({
+          title: "Senha não atende aos critérios",
+          description: "A senha deve ter pelo menos 12 caracteres, incluindo maiúscula, minúscula, número e caractere especial.",
+        });
+        return;
+      }
+    } catch (error) {
       toast({
-        title: "Erro",
-        description: "A nova senha deve ter pelo menos 8 caracteres.",
-        variant: "destructive",
+        title: "Erro na validação",
+        description: "Não foi possível validar a senha.",
       });
       return;
     }
@@ -64,6 +76,19 @@ export function SecurityTab() {
 
       if (error) throw error;
 
+      // Log security event
+      await supabase.rpc('log_security_event', {
+        _action: 'password_change',
+        _resource: 'user_account',
+        _success: true
+      });
+
+      // Update password_changed_at in profile
+      await supabase
+        .from('profiles')
+        .update({ password_changed_at: new Date().toISOString() })
+        .eq('id', (await supabase.auth.getUser()).data.user?.id);
+
       toast({
         title: "Senha alterada",
         description: "Sua senha foi alterada com sucesso.",
@@ -72,10 +97,18 @@ export function SecurityTab() {
       setPasswords({ current: '', new: '', confirm: '' });
     } catch (error) {
       console.error('Error updating password:', error);
+      
+      // Log failed attempt
+      await supabase.rpc('log_security_event', {
+        _action: 'password_change',
+        _resource: 'user_account',
+        _success: false,
+        _error_message: error instanceof Error ? error.message : 'Unknown error'
+      });
+
       toast({
         title: "Erro",
         description: "Não foi possível alterar a senha.",
-        variant: "destructive",
       });
     } finally {
       setLoading(false);

@@ -45,16 +45,17 @@ const HostsTab = () => {
   
   // Estado para gerenciar multiplos horarios de funcionamento
   const [operatingHours, setOperatingHours] = useState<Record<string, Array<{start: string, end: string}>>>({
+    'Domingo': [{start: '08:00', end: '17:00'}],
     'Segunda-Feira': [{start: '08:00', end: '17:00'}],
-    'Terca-Feira': [{start: '08:00', end: '17:00'}],
+    'Terça-Feira': [{start: '08:00', end: '17:00'}],
     'Quarta-Feira': [{start: '08:00', end: '17:00'}],
     'Quinta-Feira': [{start: '08:00', end: '17:00'}],
     'Sexta-Feira': [{start: '08:00', end: '17:00'}],
-    'Sabado': [{start: '08:00', end: '17:00'}]
+    'Sábado': [{start: '08:00', end: '17:00'}]
   });
   
   // Estado para dias disponiveis
-  const [availableDays, setAvailableDays] = useState<string[]>(['Segunda-Feira', 'Terca-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
+  const [availableDays, setAvailableDays] = useState<string[]>(['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
   
   // Estado para armazenar as agendas associadas a cada anfitrião
   const [hostAgendas, setHostAgendas] = useState<Record<string, string[]>>({});
@@ -168,21 +169,21 @@ const HostsTab = () => {
   const addOperatingHour = (day: string) => {
     setOperatingHours(prev => ({
       ...prev,
-      [day]: [...prev[day], { start: '08:00', end: '17:00' }]
+      [day]: [...(prev[day] || []), { start: '08:00', end: '17:00' }]
     }));
   };
   
   const removeOperatingHour = (day: string, index: number) => {
     setOperatingHours(prev => ({
       ...prev,
-      [day]: prev[day].filter((_, i) => i !== index)
+      [day]: (prev[day] || []).filter((_, i) => i !== index)
     }));
   };
   
   const updateOperatingHour = (day: string, index: number, field: 'start' | 'end', value: string) => {
     setOperatingHours(prev => ({
       ...prev,
-      [day]: prev[day].map((hour, i) => 
+      [day]: (prev[day] || []).map((hour, i) => 
         i === index ? { ...hour, [field]: value } : hour
       )
     }));
@@ -291,18 +292,19 @@ const HostsTab = () => {
     if (host.available_days && Array.isArray(host.available_days)) {
       setAvailableDays(host.available_days);
     } else {
-      setAvailableDays(['Segunda-Feira', 'Terca-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
+      setAvailableDays(['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
     }
     
     // Carregar horarios de funcionamento - usando available_hours como fallback
     // Como operating_hours não existe na tabela employees, vamos usar valores padrão
     setOperatingHours({
+      'Domingo': [{start: '08:00', end: '17:00'}],
       'Segunda-Feira': [{start: '08:00', end: '17:00'}],
-      'Terca-Feira': [{start: '08:00', end: '17:00'}],
+      'Terça-Feira': [{start: '08:00', end: '17:00'}],
       'Quarta-Feira': [{start: '08:00', end: '17:00'}],
       'Quinta-Feira': [{start: '08:00', end: '17:00'}],
       'Sexta-Feira': [{start: '08:00', end: '17:00'}],
-      'Sabado': [{start: '08:00', end: '17:00'}]
+      'Sábado': [{start: '08:00', end: '17:00'}]
     });
     
     // Carregar agendas associadas ao anfitrião
@@ -330,12 +332,13 @@ const HostsTab = () => {
   const resetOperatingHours = () => {
     // Reset para horarios padrao
     setOperatingHours({
+      'Domingo': [{start: '08:00', end: '17:00'}],
       'Segunda-Feira': [{start: '08:00', end: '17:00'}],
-      'Terca-Feira': [{start: '08:00', end: '17:00'}],
+      'Terça-Feira': [{start: '08:00', end: '17:00'}],
       'Quarta-Feira': [{start: '08:00', end: '17:00'}],
       'Quinta-Feira': [{start: '08:00', end: '17:00'}],
       'Sexta-Feira': [{start: '08:00', end: '17:00'}],
-      'Sabado': [{start: '08:00', end: '17:00'}]
+      'Sábado': [{start: '08:00', end: '17:00'}]
     });
   };
   
@@ -360,16 +363,17 @@ const HostsTab = () => {
     
     // Reset horarios de funcionamento para padrao
     setOperatingHours({
+      'Domingo': [{start: '08:00', end: '17:00'}],
       'Segunda-Feira': [{start: '08:00', end: '17:00'}],
-      'Terca-Feira': [{start: '08:00', end: '17:00'}],
+      'Terça-Feira': [{start: '08:00', end: '17:00'}],
       'Quarta-Feira': [{start: '08:00', end: '17:00'}],
       'Quinta-Feira': [{start: '08:00', end: '17:00'}],
       'Sexta-Feira': [{start: '08:00', end: '17:00'}],
-      'Sabado': [{start: '08:00', end: '17:00'}]
+      'Sábado': [{start: '08:00', end: '17:00'}]
     });
     
     // Reset dias disponiveis para padrao
-    setAvailableDays(['Segunda-Feira', 'Terca-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
+    setAvailableDays(['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira']);
   };
   
   const openDialog = () => {
@@ -442,7 +446,7 @@ const HostsTab = () => {
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Dias Disponiveis</Label>
                 <div className="flex flex-wrap gap-2">
-                  {['Domingo', 'Segunda-Feira', 'Terca-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sabado'].map((day) => (
+                  {['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'].map((day) => (
                     <div key={day} className="flex items-center space-x-2">
                       <Checkbox
                         id={day}

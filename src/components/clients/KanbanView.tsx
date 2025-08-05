@@ -7,6 +7,7 @@ import { Contact } from "@/types/client";
 import { KanbanStage } from "@/hooks/useKanbanStages";
 import { useContactsByKanbanStage } from "@/hooks/useContactsByKanbanStage";
 import { toast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 interface KanbanViewProps {
   contacts: Contact[];
@@ -34,9 +35,17 @@ const KanbanView = ({
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [dragStartTime, setDragStartTime] = useState<number | null>(null);
+  const [isUpdatingStage, setIsUpdatingStage] = useState(false);
+  const [draggedContactId, setDraggedContactId] = useState<string | null>(null);
+  const [optimisticContacts, setOptimisticContacts] = useState<Contact[]>(contacts);
 
-  // Filtragem de contatos
-  const filteredContacts = contacts.filter(
+  // Sincronizar contatos otimistas com contatos reais
+  React.useEffect(() => {
+    setOptimisticContacts(contacts);
+  }, [contacts]);
+
+  // Filtragem de contatos usando dados otimistas
+  const filteredContacts = optimisticContacts.filter(
     (contact) =>
       contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (contact.email &&
@@ -62,19 +71,30 @@ const KanbanView = ({
     console.log("[KanbanView] Agrupamento final:", contactsByStage);
   }, [filteredContacts, stages, contactsByStage]);
 
-  const handleDragStart = useCallback(() => {
+  const handleDragStart = useCallback((start: any) => {
     setDragStartTime(Date.now());
-    console.log("[KanbanView] Drag started");
+    setDraggedContactId(start.draggableId);
+    console.log("[KanbanView] Drag started for contact:", start.draggableId);
+    
+    // Adicionar feedback visual global
+    document.body.style.userSelect = 'none';
+    document.body.style.pointerEvents = 'none';
+    document.body.classList.add('dragging');
   }, []);
 
-  const handleDragEnd = useCallback((result: any) => {
+  const handleDragEnd = useCallback(async (result: any) => {
     const dragEndTime = Date.now();
     const dragDuration = dragStartTime ? dragEndTime - dragStartTime : 0;
     
     console.log("[KanbanView] Drag ended:", result);
     console.log("[KanbanView] Drag duration:", dragDuration, "ms");
     
+    // Limpar feedback visual global
     setDragStartTime(null);
+    setDraggedContactId(null);
+    document.body.style.userSelect = '';
+    document.body.style.pointerEvents = '';
+    document.body.classList.remove('dragging');
 
     if (!result?.destination) {
       console.log("[KanbanView] No destination - drag cancelled");
@@ -104,9 +124,41 @@ const KanbanView = ({
 
     console.log(`[KanbanView] Moving contact ${draggableId} from ${sourceStage.title} to ${destinationStage.title}`);
     
-    // Call the stage change handler with the destination stage ID
-    onStageChange(draggableId, destination.droppableId);
-  }, [stages, onStageChange, dragStartTime]);
+    // Otimistic update: Move contact immediately in UI
+    setOptimisticContacts(prevContacts => 
+      prevContacts.map(contact => 
+        contact.id === draggableId 
+          ? { ...contact, kanban_stage_id: destination.droppableId }
+          : contact
+      )
+    );
+    
+    setIsUpdatingStage(true);
+    
+    try {
+      // Call the stage change handler with the destination stage ID
+      await onStageChange(draggableId, destination.droppableId);
+      
+      toast({
+        title: "Cliente movido",
+        description: `Cliente movido para ${destinationStage.title} com sucesso`,
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("[KanbanView] Error updating stage:", error);
+      
+      // Revert optimistic update on error
+      setOptimisticContacts(contacts);
+      
+      toast({
+        title: "Erro ao mover cliente",
+        description: "Não foi possível mover o cliente. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingStage(false);
+    }
+  }, [stages, onStageChange, dragStartTime, contacts]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!scrollContainerRef.current) return;
@@ -148,7 +200,7 @@ const KanbanView = ({
         ref={scrollContainerRef}
         className={`overflow-x-auto overflow-y-hidden h-full select-none transition-all duration-200 ${
           isDragging ? "cursor-grabbing" : "cursor-grab"
-        } [&::-webkit-scrollbar]:hidden`}
+        } [&::-webkit-scrollbar]:hidden relative`}
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -158,6 +210,16 @@ const KanbanView = ({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       >
+        {/* Loading overlay when updating stage */}
+        {isUpdatingStage && (
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg shadow-lg border">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Atualizando estágio...</span>
+            </div>
+          </div>
+        )}
+        
         <div className="flex gap-3 min-w-max p-1 md:p-2 kanban-drag-area h-full">
           {stages.map((stage) => (
             <KanbanStageColumn
@@ -168,6 +230,7 @@ const KanbanView = ({
               onEditClick={onEditClick}
               isCompact={isCompact}
               onStageEdit={onStageEdit}
+              isDraggedOver={draggedContactId !== null}
             />
           ))}
         </div>

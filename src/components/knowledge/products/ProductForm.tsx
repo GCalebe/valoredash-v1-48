@@ -36,7 +36,11 @@ import {
 
 const productSchema = z.object({
   name: z.string().nullable().optional(),
-  price: z.number().min(0, "Preço deve ser positivo").nullable().optional(),
+  price: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0, "Preço deve ser positivo").nullable().optional()),
   description: z.string().nullable().optional(),
   category: z.string().nullable().optional(),
   benefits: z.array(z.string()).nullable().optional(),
@@ -54,8 +58,16 @@ const productSchema = z.object({
   promotion_name: z.string().nullable().optional(),
   promotion_description: z.string().nullable().optional(),
   discount_type: z.enum(["percentage", "fixed"]).nullable().optional(),
-  discount_percentage: z.number().min(0).max(100).nullable().optional(),
-  discount_amount: z.number().min(0).nullable().optional(),
+  discount_percentage: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0).max(100).nullable().optional()),
+  discount_amount: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0).nullable().optional()),
   promotion_start_date: z.string().nullable().optional(),
   promotion_end_date: z.string().nullable().optional(),
   // Campos condicionais para combo
@@ -63,11 +75,19 @@ const productSchema = z.object({
   combo_description: z.string().nullable().optional(),
   combo_products: z.array(z.string()).nullable().optional(),
   combo_benefit: z.string().nullable().optional(),
-  combo_discount_percentage: z.number().min(0).max(100).nullable().optional(),
+  combo_discount_percentage: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0).max(100).nullable().optional()),
   // Campos condicionais para upgrade
   upgrade_name: z.string().nullable().optional(),
   upgrade_description: z.string().nullable().optional(),
-  upgrade_price: z.number().min(0).nullable().optional(),
+  upgrade_price: z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }, z.number().min(0).nullable().optional()),
   upgrade_benefits: z.array(z.string()).nullable().optional(),
   upgrade_target_product: z.string().nullable().optional(),
   // Campos para recorrência
@@ -401,7 +421,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
     
     try {
       // Include objections from ObjectionsManager in the form data
-      // Ensure all fields have appropriate default values, handling null values
+      // For new products, we keep the objections in the array format for backward compatibility
+      // For existing products, objections are managed separately in the database
       const formDataWithObjections = {
         ...data,
         name: data.name || undefined,
@@ -409,7 +430,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
         description: data.description || undefined,
         category: data.category || undefined,
         benefits: data.benefits || [],
-        objections: objections.length > 0 ? objections.map(obj => obj.question) : (data.objections || []),
+        // Keep legacy objections field for backward compatibility, but note they're managed separately now
+        objections: mode === 'edit' ? (data.objections || []) : objections.map(obj => obj.question),
         differentials: data.differentials || [],
         success_cases: data.success_cases || [],
         icon: data.icon || undefined,
@@ -418,7 +440,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
         has_upgrade: data.has_upgrade ?? false,
         has_promotion: data.has_promotion ?? false,
         new: data.new ?? false,
-        popular: data.popular ?? false
+        popular: data.popular ?? false,
+        // Pass local objections for new products to be saved to database
+        localObjections: mode === 'create' ? objections : undefined
       };
       
       console.log('📦 Final form data with objections:', formDataWithObjections);
@@ -556,15 +580,15 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </CardHeader>
             <CardContent className="space-y-6">
               <ObjectionsManager
-                productId={(initialData as any)?.id || 'new'}
+                productId={mode === 'edit' ? (initialData as any)?.id : ''}
                 onObjectionsChange={setObjections}
-                initialObjections={initialData?.objections?.map((question, index) => ({
+                initialObjections={mode === 'create' ? initialData?.objections?.map((question, index) => ({
                   id: `initial-${index}`,
                   question,
                   answer: 'Resposta não definida',
                   createdAt: new Date().toLocaleDateString(),
                   createdBy: 'Sistema'
-                })) || []}
+                })) || [] : []}
               />
               
               <ArrayInputField

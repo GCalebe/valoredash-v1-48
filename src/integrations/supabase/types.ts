@@ -1179,6 +1179,7 @@ export type Database = {
           new_clients_this_month: number | null
           total_chats: number | null
           total_clients: number | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -1186,6 +1187,7 @@ export type Database = {
           new_clients_this_month?: number | null
           total_chats?: number | null
           total_clients?: number | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -1193,6 +1195,7 @@ export type Database = {
           new_clients_this_month?: number | null
           total_chats?: number | null
           total_clients?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1395,6 +1398,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "contacts_kanban_stage_fk"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "v_kanban_stages_optimized"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "contacts_responsible_user_fk"
             columns: ["responsible_user"]
             isOneToOne: false
@@ -1413,6 +1423,13 @@ export type Database = {
             columns: ["kanban_stage_id"]
             isOneToOne: false
             referencedRelation: "mv_kanban_stages_cache"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contacts_kanban_stage"
+            columns: ["kanban_stage_id"]
+            isOneToOne: false
+            referencedRelation: "v_kanban_stages_optimized"
             referencedColumns: ["id"]
           },
           {
@@ -1550,6 +1567,7 @@ export type Database = {
           satisfaction_score: number | null
           total_conversations: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           avg_resolution_time?: unknown | null
@@ -1562,6 +1580,7 @@ export type Database = {
           satisfaction_score?: number | null
           total_conversations?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           avg_resolution_time?: unknown | null
@@ -1574,6 +1593,7 @@ export type Database = {
           satisfaction_score?: number | null
           total_conversations?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1595,6 +1615,7 @@ export type Database = {
           total_negotiating_value: number | null
           total_respondidas: number | null
           total_secondary_responses: number | null
+          user_id: string | null
         }
         Insert: {
           average_negotiated_value?: number | null
@@ -1613,6 +1634,7 @@ export type Database = {
           total_negotiating_value?: number | null
           total_respondidas?: number | null
           total_secondary_responses?: number | null
+          user_id?: string | null
         }
         Update: {
           average_negotiated_value?: number | null
@@ -1631,6 +1653,7 @@ export type Database = {
           total_negotiating_value?: number | null
           total_respondidas?: number | null
           total_secondary_responses?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1701,6 +1724,7 @@ export type Database = {
           time_period: string
           total_leads: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           conversion_rate?: number | null
@@ -1712,6 +1736,7 @@ export type Database = {
           time_period: string
           total_leads?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           conversion_rate?: number | null
@@ -1723,6 +1748,7 @@ export type Database = {
           time_period?: string
           total_leads?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -3415,6 +3441,50 @@ export type Database = {
         }
         Relationships: []
       }
+      product_objections: {
+        Row: {
+          answer: string
+          created_at: string
+          created_by: string | null
+          id: string
+          product_id: string
+          question: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          product_id: string
+          question: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          product_id?: string
+          question?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_objections_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           benefits: string[] | null
@@ -3437,6 +3507,7 @@ export type Database = {
           price: number | null
           success_cases: string[] | null
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           benefits?: string[] | null
@@ -3459,6 +3530,7 @@ export type Database = {
           price?: number | null
           success_cases?: string[] | null
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           benefits?: string[] | null
@@ -3481,6 +3553,7 @@ export type Database = {
           price?: number | null
           success_cases?: string[] | null
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -3517,6 +3590,45 @@ export type Database = {
           last_login_at?: string | null
           role?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          error_message: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          resource: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource?: string | null
+          success: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -4149,35 +4261,17 @@ export type Database = {
       }
       dashboard_fase3: {
         Row: {
-          active_tables: number | null
-          chat_histories_count: number | null
-          chat_memory_count: number | null
-          contacts_count: number | null
-          foreign_keys: number | null
-          functionality_percentage: number | null
-          integrity_alerts: number | null
           last_updated: string | null
-          performance_alerts: number | null
-          profiles_count: number | null
-          security_alerts: number | null
-          system_health: string | null
-          total_indexes: number | null
-          user_sessions_count: number | null
-          user_settings_count: number | null
+          total_records: number | null
+          view_name: string | null
         }
         Relationships: []
       }
       dashboard_metrics: {
         Row: {
-          conversion_rate: number | null
-          negotiated_value: number | null
-          new_clients_this_month: number | null
-          response_rate: number | null
-          total_campaigns: number | null
-          total_chats: number | null
-          total_clients: number | null
-          total_conversations: number | null
-          total_leads: number | null
+          last_updated: string | null
+          total_records: number | null
+          view_name: string | null
         }
         Relationships: []
       }
@@ -4224,18 +4318,24 @@ export type Database = {
       }
       v_kanban_stages_optimized: {
         Row: {
-          contacts_count: number | null
+          contact_count: number | null
           created_at: string | null
-          data_source: string | null
           id: string | null
           ordering: number | null
           settings: Json | null
-          stage_group: string | null
           title: string | null
           updated_at: string | null
           user_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_kanban_stages_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -4246,6 +4346,10 @@ export type Database = {
       check_alerts_fase3: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      cleanup_expired_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       collect_metrics_fase3: {
         Args: Record<PropertyKey, never>
@@ -4341,8 +4445,9 @@ export type Database = {
       get_table_sizes: {
         Args: Record<PropertyKey, never>
         Returns: {
-          table: string
-          total_size: string
+          table_name: string
+          size_bytes: number
+          size_pretty: string
         }[]
       }
       get_utm_metrics: {
@@ -4387,6 +4492,16 @@ export type Database = {
       is_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          _action: string
+          _resource?: string
+          _success?: boolean
+          _error_message?: string
+          _metadata?: Json
+        }
+        Returns: undefined
       }
       match_documents: {
         Args: { query_embedding: string; match_count?: number; filter?: Json }
@@ -4453,6 +4568,19 @@ export type Database = {
           _expenses_increment?: number
         }
         Returns: undefined
+      }
+      validate_password: {
+        Args: { password: string }
+        Returns: boolean
+      }
+      validate_rls_policies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          table_name: string
+          has_rls: boolean
+          policy_count: number
+          status: string
+        }[]
       }
     }
     Enums: {

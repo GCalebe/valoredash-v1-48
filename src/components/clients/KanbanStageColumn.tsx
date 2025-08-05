@@ -16,6 +16,7 @@ interface KanbanStageColumnProps {
   onEditClick: (contact: Contact) => void;
   isCompact: boolean;
   onStageEdit?: (stage: KanbanStage) => void;
+  isDraggedOver?: boolean;
 }
 
 const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
@@ -25,6 +26,7 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
   onEditClick,
   isCompact,
   onStageEdit,
+  isDraggedOver,
 }) => {
   const stageColor = stage.settings?.color || "#6b7280";
   const headerStyle = {
@@ -32,24 +34,26 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
   };
 
   return (
-    <div className="w-[280px] md:w-[320px] flex-shrink-0">
-      <Card className="h-full flex flex-col border">
+    <div className={`w-[280px] md:w-[320px] flex-shrink-0 transition-all duration-200 ${
+      isDraggedOver ? 'scale-[1.02]' : ''
+    }`}>
+      <Card className="h-full flex flex-col border transition-all duration-200">
         <CardHeader className="p-2 border-b">
           <CardTitle className="text-sm font-semibold flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span style={headerStyle}>
+              <span style={headerStyle} className="transition-all duration-200">
                 {stage.title}
               </span>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-4 w-4 p-0 hover:bg-muted/50"
+                className="h-4 w-4 p-0 hover:bg-muted/50 transition-colors"
                 onClick={() => onStageEdit?.(stage)}
               >
                 <Edit3 className="h-3 w-3" />
               </Button>
             </div>
-            <Badge variant="secondary" className="text-xs h-5">
+            <Badge variant="secondary" className="text-xs h-5 transition-all duration-200">
               {contacts.length}
             </Badge>
           </CardTitle>
@@ -60,8 +64,10 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className={`min-h-[200px] transition-colors duration-200 rounded-lg ${
-                  snapshot.isDraggingOver ? "bg-blue-50 dark:bg-blue-950/20 ring-2 ring-blue-200 dark:ring-blue-800" : ""
+                className={`min-h-[200px] transition-all duration-300 rounded-lg p-2 ${
+                  snapshot.isDraggingOver 
+                    ? "bg-primary/10 ring-2 ring-primary/30 shadow-lg transform scale-[1.02]" 
+                    : "hover:bg-muted/30"
                 }`}
               >
                 {contacts.map((contact, index) => (
@@ -71,14 +77,19 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        className={`mb-2 ${
-                          snapshot.isDragging ? "opacity-50 rotate-2 scale-105 shadow-2xl z-50" : ""
+                        className={`mb-2 transition-all duration-200 ${
+                          snapshot.isDragging 
+                            ? "opacity-80 rotate-3 scale-110 shadow-2xl z-50 cursor-grabbing" 
+                            : "hover:scale-[1.02] hover:shadow-md cursor-grab"
                         }`}
                         style={{
                           ...provided.draggableProps.style,
                           ...(snapshot.isDragging && {
-                            background: "white",
-                            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                            background: "hsl(var(--card))",
+                            borderRadius: "8px",
+                            border: "2px solid hsl(var(--primary))",
+                            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px hsl(var(--primary))",
+                            transform: `${provided.draggableProps.style?.transform} rotate(3deg) scale(1.1)`,
                           }),
                         }}
                       >
@@ -99,13 +110,14 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
                 ))}
                 {provided.placeholder}
                 {contacts.length === 0 && !snapshot.isDraggingOver && (
-                  <div className="text-center text-gray-400 text-sm py-8">
+                  <div className="text-center text-muted-foreground text-sm py-8 transition-all duration-200">
                     Arraste um cliente para cá
                   </div>
                 )}
                 {snapshot.isDraggingOver && contacts.length === 0 && (
-                  <div className="text-center text-blue-500 text-sm py-8 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 dark:bg-blue-950/20">
-                    Solte o cliente aqui
+                  <div className="text-center text-primary text-sm py-8 border-2 border-dashed border-primary/40 rounded-lg bg-primary/5 animate-pulse transition-all duration-300">
+                    <div className="animate-bounce">📥</div>
+                    <div className="mt-1">Solte o cliente aqui</div>
                   </div>
                 )}
               </div>

@@ -21,6 +21,8 @@ export interface Product {
   has_combo: boolean;
   has_upgrade: boolean;
   has_promotion: boolean;
+  has_upsell?: boolean;
+  has_downsell?: boolean;
   new?: boolean;
   popular?: boolean;
   created_at: string;
@@ -82,4 +84,6 @@ export interface ProductFormData {
   // Campos para downsell
   has_downsell?: boolean;
   downsell_product?: string;
+  // Local objections for new products
+  localObjections?: ProductObjection[];
 }
