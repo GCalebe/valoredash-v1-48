@@ -87,6 +87,11 @@ export const useAIPersonalityForm = () => {
         responseTime: defaultSettings.responseTime,
         audioResponse: defaultSettings.audioResponse,
         responseCreativity: defaultSettings.responseCreativity,
+        useEmojis: defaultSettings.useEmojis,
+        responseSpeed: defaultSettings.responseSpeed,
+        contextAware: defaultSettings.contextAware,
+        continuousLearning: defaultSettings.continuousLearning,
+        responseLength: defaultSettings.responseLength,
       });
     }
   }, [personalityData]);

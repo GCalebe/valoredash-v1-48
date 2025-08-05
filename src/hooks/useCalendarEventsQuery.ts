@@ -68,16 +68,16 @@ const priorityColors = {
 
 // Função para transformar dados do Supabase para o formato do componente
 const transformEventData = (event: Record<string, unknown>): CalendarEvent => {
-  const startDate = new Date(event.start_time);
+  const startDate = new Date(event.start_time as string);
   const color = priorityColors[event.priority as keyof typeof priorityColors] || eventTypeColors[event.event_type as keyof typeof eventTypeColors] || '#6b7280';
   
   return {
     ...event,
     date: startDate,
     time: format(startDate, 'HH:mm'),
-    salesperson: event.contact_name || 'Sistema',
+    salesperson: (event.contact_name as string) || 'Sistema',
     color: color
-  };
+  } as CalendarEvent;
 };
 
 // Buscar eventos por período
@@ -117,9 +117,25 @@ const createCalendarEvent = async (eventData: Omit<CalendarEvent, 'id' | 'create
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
+  const cleanEventData = {
+    title: eventData.title,
+    description: eventData.description,
+    start_time: eventData.start_time,
+    end_time: eventData.end_time,
+    all_day: eventData.all_day,
+    location: eventData.location,
+    event_type: eventData.event_type,
+    status: eventData.status,
+    priority: eventData.priority,
+    recurrence_rule: eventData.recurrence_rule,
+    contact_id: eventData.contact_id,
+    metadata: eventData.metadata as any,
+    user_id: user.id
+  };
+
   const { data, error } = await supabase
     .from('calendar_events')
-    .insert([{ ...eventData, user_id: user.id }])
+    .insert([cleanEventData])
     .select(`
       *,
       contacts!calendar_events_contact_id_fkey(name)
@@ -139,9 +155,14 @@ const createCalendarEvent = async (eventData: Omit<CalendarEvent, 'id' | 'create
 
 // Atualizar evento
 const updateCalendarEvent = async ({ id, ...updates }: Partial<CalendarEvent> & { id: string }): Promise<CalendarEvent> => {
+  const cleanUpdates = {
+    ...updates,
+    metadata: updates.metadata as any
+  };
+  
   const { data, error } = await supabase
     .from('calendar_events')
-    .update(updates)
+    .update(cleanUpdates)
     .eq('id', id)
     .select(`
       *,

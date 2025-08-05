@@ -72,7 +72,7 @@ export function ThemeSettingsProvider({
       if (isAuthenticated) {
         // Usuário autenticado: buscar do banco
         const savedSettings = getSetting(THEME_SETTINGS_KEY);
-        if (savedSettings) {
+        if (savedSettings && typeof savedSettings === 'object') {
           setSettings({ ...defaultSettings, ...savedSettings });
         } else {
           // Migrar do localStorage se existir

@@ -56,7 +56,7 @@ export function useCalendarEvents({ currentMonth, calendarViewType }: UseCalenda
         toast.success("Agenda atualizada com sucesso!");
       }
     } catch (err: unknown) {
-      const error = err instanceof Error ? err : new Error(err?.message || "Erro desconhecido");
+      const error = err instanceof Error ? err : new Error((err as any)?.message || "Erro desconhecido");
       setError(error);
       toast.error(`Erro ao buscar eventos: ${error.message}`);
     } finally {
