@@ -511,11 +511,15 @@ const AgendaTab = () => {
        
        if (supabaseAgenda) {
          await deleteAgenda(supabaseAgenda.id);
-         // Forçar atualização da lista após exclusão
+         // Forçar múltiplas atualizações para garantir sincronização
          await refetchAgendas();
+         // Forçar um segundo refetch após um pequeno delay
+         setTimeout(async () => {
+           await refetchAgendas();
+         }, 100);
        }
      } catch (error) {
-       // Error handling pode ser adicionado aqui se necessário
+       console.error('Erro na exclusão:', error);
      } finally {
        setIsDeleteDialogOpen(false);
        setAgendaToDelete(null);
