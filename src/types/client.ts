@@ -5,6 +5,7 @@ export interface Contact {
   email?: string | null;
   phone?: string | null;
   address?: string;
+  avatar?: string; // Add missing avatar property
   
   // Cliente info
   clientName?: string | null;

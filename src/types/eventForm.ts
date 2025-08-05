@@ -42,4 +42,5 @@ export interface EventFormState {
   initialStatus: "confirmado" | "pendente";
   isDeleteDialogOpen: boolean;
   errors: Record<string, string>;
+  [key: string]: any; // Add index signature for dynamic properties
 }

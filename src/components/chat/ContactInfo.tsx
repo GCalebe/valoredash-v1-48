@@ -29,6 +29,13 @@ interface Contact {
   sessionId?: string;
 }
 
+interface EditingField {
+  id: string;
+  name: string;
+  type: string;
+  options: string[];
+}
+
 interface ContactInfoProps {
   contact: Contact;
   getStatusColor: (status?: string) => string;
@@ -40,7 +47,7 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
   const [addFieldDialogOpen, setAddFieldDialogOpen] = useState(false);
   const [editFieldDialogOpen, setEditFieldDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"basico" | "comercial" | "utm" | "midia">("basico");
-  const [editingField, setEditingField] = useState<CustomField | null>(null);
+  const [editingField, setEditingField] = useState<EditingField | null>(null);
   const [tags, setTags] = useState<{id: string; label: string; color: string}[]>([
     { id: "1", label: "VIP", color: "bg-purple-500" },
     { id: "2", label: "Cliente", color: "bg-green-500" }
@@ -290,8 +297,8 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                           created_at: "",
                           updated_at: ""
                         }}
-                        value={field.value}
-                        onChange={(value) => updateField(field.id, value)}
+                        value={field.value as string | string[] | null}
+                        onChange={(value) => updateField(field.id, value as any)}
                       />
                     </div>
                   ))}
@@ -380,8 +387,8 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                            created_at: "",
                            updated_at: ""
                          }}
-                         value={field.value}
-                         onChange={(value) => updateField(field.id, value)}
+                          value={field.value as string | string[] | null}
+                          onChange={(value) => updateField(field.id, value as any)}
                        />
                      </div>
                    ))}
@@ -468,8 +475,8 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                            created_at: "",
                            updated_at: ""
                          }}
-                         value={field.value}
-                         onChange={(value) => updateField(field.id, value)}
+                          value={field.value as string | string[] | null}
+                          onChange={(value) => updateField(field.id, value as any)}
                        />
                      </div>
                    ))}
@@ -546,8 +553,8 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                          created_at: "",
                          updated_at: ""
                        }}
-                       value={field.value}
-                       onChange={(value) => updateField(field.id, value)}
+                        value={field.value as string | string[] | null}
+                        onChange={(value) => updateField(field.id, value as any)}
                      />
                    </div>
                    ))}

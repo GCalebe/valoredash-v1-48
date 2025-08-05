@@ -100,7 +100,7 @@ export function useDynamicFields(clientId: string | null) {
     }
   }, [clientId, fetchDynamicFields]);
 
-  const handleValidation = (fieldId: string, newValue: string | number | boolean | null) => {
+  const handleValidation = (fieldId: string, newValue: any) => {
     const validationError = validateCustomField(fieldId, newValue, validationRules);
     if (validationError) {
       setValidationErrors(prev => ({ ...prev, [fieldId]: validationError.message }));
@@ -115,7 +115,7 @@ export function useDynamicFields(clientId: string | null) {
     return true;
   };
 
-  const updateState = (fieldId: string, newValue: unknown, oldValue?: string | number | boolean | null) => {
+  const updateState = (fieldId: string, newValue: any, oldValue?: any) => {
     const valueToSet = oldValue !== undefined ? oldValue : newValue;
     const updateFn = (prevFields: typeof dynamicFields) => {
       const updated = { ...prevFields };
@@ -132,7 +132,7 @@ export function useDynamicFields(clientId: string | null) {
     setDynamicFields(updateFn);
   };
 
-  const saveToDatabase = async (clientId: string, fieldId: string, newValue: string | number | boolean | null) => {
+  const saveToDatabase = async (clientId: string, fieldId: string, newValue: any) => {
     const { error } = await supabase.from("client_custom_values").upsert(
       { client_id: clientId, field_id: fieldId, field_value: newValue },
       { onConflict: "client_id,field_id" }
@@ -144,7 +144,7 @@ export function useDynamicFields(clientId: string | null) {
     }
   };
 
-  const updateField = useCallback(async (fieldId: string, newValue: string | number | boolean | null) => {
+  const updateField = useCallback(async (fieldId: string, newValue: any) => {
     if (!clientId) return;
 
     if (!handleValidation(fieldId, newValue)) return;
