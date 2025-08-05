@@ -13,7 +13,7 @@ export interface ScheduleEvent {
   clientName?: string;
   client_name?: string;
   description?: string;
-  status?: "scheduled" | "completed" | "cancelled" | "rescheduled";
+  status?: "scheduled" | "completed" | "cancelled" | "rescheduled" | "confirmed" | "pending" | "no_show";
   phone?: string;
   service?: string;
   notes?: string;
@@ -37,10 +37,9 @@ export function useScheduleData() {
       const endDateTime = `${date}T23:59:59.999Z`;
 
       const { data, error } = await supabase
-        .from('calendar_events')
+        .from('agenda_bookings')
         .select('*')
-        .gte('start_time', startDateTime)
-        .lte('start_time', endDateTime)
+        .eq('booking_date', date)
         .order('start_time', { ascending: true });
 
       if (error) {
@@ -51,21 +50,18 @@ export function useScheduleData() {
 
       const mappedEvents = (data || []).map(event => ({
         id: event.id,
-        title: event.title || event.summary || 'Evento',
-        date: event.start_time?.split('T')[0], // Formato YYYY-MM-DD
-        start_time: event.start_time,
-        end_time: event.end_time,
-        status: (event.status === 'scheduled' || event.status === 'completed' || 
-                event.status === 'cancelled' || event.status === 'rescheduled') 
-                ? event.status as "scheduled" | "completed" | "cancelled" | "rescheduled"
-                : 'scheduled' as const,
-        clientName: event.host_name || 'Cliente',
-        client_name: event.host_name || 'Cliente',
-        phone: '', // Pode ser adicionado se necessário
-        service: event.event_type || 'Serviço',
-        notes: event.description,
-        description: event.description,
-        host_name: event.host_name,
+        title: event.agenda_name || 'Agendamento',
+        date: event.booking_date, // Formato YYYY-MM-DD
+        start_time: `${event.booking_date}T${event.start_time}`,
+        end_time: `${event.booking_date}T${event.end_time}`,
+        status: (event.status as "scheduled" | "completed" | "cancelled" | "rescheduled" | "confirmed" | "pending" | "no_show") || 'confirmed',
+        clientName: event.client_name,
+        client_name: event.client_name,
+        phone: event.client_phone || '',
+        service: event.agenda_name,
+        notes: event.notes,
+        description: event.notes,
+        host_name: event.employee_name,
       }));
 
       setEvents(mappedEvents);
@@ -86,10 +82,11 @@ export function useScheduleData() {
       const endDateTime = `${endDate}T23:59:59.999Z`;
 
       const { data, error } = await supabase
-        .from('calendar_events')
+        .from('agenda_bookings')
         .select('*')
-        .gte('start_time', startDateTime)
-        .lte('start_time', endDateTime)
+        .gte('booking_date', startDate)
+        .lte('booking_date', endDate)
+        .order('booking_date', { ascending: true })
         .order('start_time', { ascending: true });
 
       if (error) {
@@ -99,21 +96,18 @@ export function useScheduleData() {
 
       return (data || []).map(event => ({
         id: event.id,
-        title: event.title || event.summary || 'Evento',
-        date: event.start_time?.split('T')[0], // Formato YYYY-MM-DD
-        start_time: event.start_time,
-        end_time: event.end_time,
-        status: (event.status === 'scheduled' || event.status === 'completed' || 
-                event.status === 'cancelled' || event.status === 'rescheduled') 
-                ? event.status as "scheduled" | "completed" | "cancelled" | "rescheduled"
-                : 'scheduled' as const,
-        clientName: event.host_name || 'Cliente',
-        client_name: event.host_name || 'Cliente',
-        phone: '',
-        service: event.event_type || 'Serviço',
-        notes: event.description,
-        description: event.description,
-        host_name: event.host_name,
+        title: event.agenda_name || 'Agendamento',
+        date: event.booking_date, // Formato YYYY-MM-DD
+        start_time: `${event.booking_date}T${event.start_time}`,
+        end_time: `${event.booking_date}T${event.end_time}`,
+        status: (event.status as "scheduled" | "completed" | "cancelled" | "rescheduled" | "confirmed" | "pending" | "no_show") || 'confirmed',
+        clientName: event.client_name,
+        client_name: event.client_name,
+        phone: event.client_phone || '',
+        service: event.agenda_name,
+        notes: event.notes,
+        description: event.notes,
+        host_name: event.employee_name,
       }));
     } catch (error) {
       console.error('Erro ao buscar eventos em range:', error);
