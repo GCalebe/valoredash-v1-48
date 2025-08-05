@@ -1,0 +1,156 @@
+/* Drag and Drop Global Styles */
+
+/* Global dragging state */
+body.dragging {
+  cursor: grabbing !important;
+}
+
+body.dragging * {
+  cursor: grabbing !important;
+  pointer-events: none;
+}
+
+/* Draggable items shouldn't have pointer events disabled */
+body.dragging [data-rbd-draggable-context-id] {
+  pointer-events: auto;
+}
+
+/* Custom drag preview styling */
+.react-beautiful-dnd-dragging {
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px hsl(var(--primary)),
+    0 0 20px hsl(var(--primary) / 0.3) !important;
+  transform: rotate(3deg) scale(1.1) !important;
+  border-radius: 8px !important;
+  background: hsl(var(--card)) !important;
+  border: 2px solid hsl(var(--primary)) !important;
+}
+
+/* Smooth transitions for drag interactions */
+.kanban-stage-column {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kanban-stage-column:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhance droppable areas */
+.kanban-droppable {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kanban-droppable.is-dragging-over {
+  background: hsl(var(--primary) / 0.1);
+  border: 2px dashed hsl(var(--primary) / 0.3);
+  border-radius: 8px;
+  transform: scale(1.02);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px hsl(var(--primary) / 0.2);
+}
+
+/* Animation for empty drop zones */
+.empty-drop-zone {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes gentle-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+/* Dragging item animations */
+.dragging-item {
+  animation: subtle-float 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes subtle-float {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+}
+
+/* Loading state for stage updates */
+.stage-updating {
+  position: relative;
+  overflow: hidden;
+}
+
+.stage-updating::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--primary) / 0.1),
+    transparent
+  );
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Better visual feedback for different drag states */
+.drag-handle {
+  cursor: grab;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle:hover {
+  opacity: 0.7;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Responsive drag behavior */
+@media (max-width: 768px) {
+  .react-beautiful-dnd-dragging {
+    transform: rotate(1deg) scale(1.05) !important;
+  }
+  
+  .kanban-droppable.is-dragging-over {
+    transform: scale(1.01);
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .react-beautiful-dnd-dragging {
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px hsl(var(--primary)),
+      0 0 20px hsl(var(--primary) / 0.4) !important;
+  }
+  
+  .kanban-droppable.is-dragging-over {
+    background: hsl(var(--primary) / 0.15);
+    box-shadow: 
+      0 8px 25px rgba(0, 0, 0, 0.3),
+      inset 0 0 0 1px hsl(var(--primary) / 0.3);
+  }
+}
