@@ -41,23 +41,31 @@ export const faqKeys = {
   byCategory: (category: string) => [...faqKeys.all, 'category', category] as const,
 };
 
-// Fetch FAQ items
+// Fetch FAQ items - now filters by user_id for security
 const fetchFAQItems = async (): Promise<FAQItem[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   const { data, error } = await supabase
     .from('faq_items')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
   return data || [];
 };
 
-// Fetch FAQ items by category
+// Fetch FAQ items by category - now filters by user_id for security
 const fetchFAQItemsByCategory = async (category: string): Promise<FAQItem[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   const { data, error } = await supabase
     .from('faq_items')
     .select('*')
     .eq('category', category)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) throw error;

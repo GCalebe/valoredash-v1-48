@@ -4398,8 +4398,9 @@ export type Database = {
       get_table_sizes: {
         Args: Record<PropertyKey, never>
         Returns: {
-          table: string
-          total_size: string
+          table_name: string
+          size_bytes: number
+          size_pretty: string
         }[]
       }
       get_utm_metrics: {

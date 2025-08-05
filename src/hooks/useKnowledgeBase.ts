@@ -18,11 +18,19 @@ export const useKnowledgeBase = (filters: KnowledgeBaseFilters = {}) => {
   return useQuery({
     queryKey: ['knowledge_base', filters],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       let query = supabase
         .from('knowledge_base')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false });
+
+      // Filter by user unless specifically looking for public content only
+      if (filters.is_public !== true) {
+        query = query.eq('created_by', user.id);
+      }
 
       if (filters.category) {
         query = query.eq('category', filters.category);

@@ -12,11 +12,15 @@ export const productsKeys = {
   byCategory: (category: string) => ['products', 'category', category] as const,
 };
 
-// Fetch products
+// Fetch products - now filters by created_by for security
 const fetchProducts = async (): Promise<Product[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   const { data, error } = await supabase
     .from('products')
     .select('*')
+    .eq('created_by', user.id)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -27,12 +31,16 @@ const fetchProducts = async (): Promise<Product[]> => {
   return (data as Product[]) || [];
 };
 
-// Fetch products by category
+// Fetch products by category - now filters by created_by for security
 const fetchProductsByCategory = async (category: string): Promise<Product[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   const { data, error } = await supabase
     .from('products')
     .select('*')
     .eq('category', category)
+    .eq('created_by', user.id)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -43,8 +51,11 @@ const fetchProductsByCategory = async (category: string): Promise<Product[]> => 
   return (data as Product[]) || [];
 };
 
-// Create product
+// Create product - now includes created_by for security
 const createProduct = async (productData: ProductFormData): Promise<Product> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   // Set default values for required fields
   const product = {
     name: productData.name,
@@ -63,6 +74,7 @@ const createProduct = async (productData: ProductFormData): Promise<Product> => 
     has_promotion: productData.has_promotion || false,
     new: productData.new || false,
     popular: productData.popular || false,
+    created_by: user.id,
   };
 
   const { data, error } = await supabase
