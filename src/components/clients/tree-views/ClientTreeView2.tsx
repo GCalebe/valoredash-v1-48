@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { Contact } from '@/types/client';
-import { ChevronDown, ChevronRight, TrendingUp, DollarSign, User, Calendar, Target } from 'lucide-react';
+import { ChevronDown, ChevronRight, TrendingUp, CalendarCheck, User, Calendar, Target } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { useKanbanStagesSupabase } from '@/hooks/useKanbanStagesSupabase';
 
 interface ClientTreeView2Props {
   contacts: Contact[];
@@ -14,10 +15,10 @@ interface ClientTreeView2Props {
 }
 
 /**
- * IDEIA 2: Árvore de Funil de Vendas por Estágio de Consulta → Valor do Lead
+ * IDEIA 2: Árvore de Funil de Vendas por Estágio Kanban → Agenda
  * Organiza os clientes em uma estrutura de funil de vendas:
- * - Nível 1: Estágio de Consulta (Nova consulta, Qualificado, etc.)
- * - Nível 2: Faixas de Valor do Lead (Alto, Médio, Baixo)
+ * - Nível 1: Estágio Kanban (Entraram, Conversaram, etc.)
+ * - Nível 2: Status de Agendamento (Com agendamento, Sem agendamento)
  * - Nível 3: Clientes individuais com métricas de conversão
  */
 const ClientTreeView2: React.FC<ClientTreeView2Props> = ({
@@ -26,45 +27,31 @@ const ClientTreeView2: React.FC<ClientTreeView2Props> = ({
   onEditClick,
 }) => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-
-  // Define a ordem dos estágios do funil
-  const stageOrder = [
-    'Nova consulta',
-    'Qualificado',
-    'Chamada agendada',
-    'Preparando proposta',
-    'Proposta enviada',
-    'Acompanhamento',
-    'Negociação',
-    'Fatura enviada',
-    'Fatura paga – ganho',
-    'Projeto cancelado – perdido'
-  ];
+  const { stages: kanbanStages } = useKanbanStagesSupabase();
 
   // Organiza os dados em estrutura hierárquica
   const treeData = useMemo(() => {
     const tree: Record<string, Record<string, Contact[]>> = {};
     
     contacts.forEach(contact => {
-      const stage = contact.consultationStage || 'Não Definido';
-      const leadValue = contact.lead_value || 0;
+      // Find the stage name by matching kanban_stage_id with stages
+      const kanbanStage = kanbanStages.find(stage => stage.id === contact.kanban_stage_id);
+      const stageName = kanbanStage?.title || 'Não Definido';
       
-      // Categoriza por valor do lead
-      let valueCategory = 'Baixo (< R$ 5.000)';
-      if (leadValue >= 20000) {
-        valueCategory = 'Alto (≥ R$ 20.000)';
-      } else if (leadValue >= 5000) {
-        valueCategory = 'Médio (R$ 5.000 - R$ 19.999)';
-      }
+      // Categoriza por status de agendamento
+      // Verifica se o contato tem interações recentes (pode indicar agendamento)
+      const hasRecentInteraction = contact.last_interaction && 
+        new Date(contact.last_interaction) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // últimos 30 dias
+      const scheduleCategory = hasRecentInteraction ? 'Com Agendamento' : 'Sem Agendamento';
       
-      if (!tree[stage]) tree[stage] = {};
-      if (!tree[stage][valueCategory]) tree[stage][valueCategory] = [];
+      if (!tree[stageName]) tree[stageName] = {};
+      if (!tree[stageName][scheduleCategory]) tree[stageName][scheduleCategory] = [];
       
-      tree[stage][valueCategory].push(contact);
+      tree[stageName][scheduleCategory].push(contact);
     });
     
     return tree;
-  }, [contacts]);
+  }, [contacts, kanbanStages]);
 
   const toggleNode = (nodeId: string) => {
     const newExpanded = new Set(expandedNodes);
@@ -76,36 +63,35 @@ const ClientTreeView2: React.FC<ClientTreeView2Props> = ({
     setExpandedNodes(newExpanded);
   };
 
-  const getStageColor = (stage: string) => {
-    const stageIndex = stageOrder.indexOf(stage);
-    if (stageIndex === -1) return 'bg-gray-100 text-gray-800';
+  const getStageColor = (stageName: string) => {
+    const kanbanStage = kanbanStages.find(stage => stage.title === stageName);
+    if (kanbanStage?.settings?.color) {
+      return `bg-[${kanbanStage.settings.color}] text-white`;
+    }
     
-    const colors = [
-      'bg-blue-100 text-blue-800',     // Nova consulta
-      'bg-indigo-100 text-indigo-800', // Qualificado
-      'bg-purple-100 text-purple-800', // Chamada agendada
-      'bg-pink-100 text-pink-800',     // Preparando proposta
-      'bg-orange-100 text-orange-800', // Proposta enviada
-      'bg-yellow-100 text-yellow-800', // Acompanhamento
-      'bg-amber-100 text-amber-800',   // Negociação
-      'bg-lime-100 text-lime-800',     // Fatura enviada
-      'bg-green-100 text-green-800',   // Fatura paga – ganho
-      'bg-red-100 text-red-800'        // Projeto cancelado – perdido
-    ];
+    // Fallback colors based on stage name
+    const colors: Record<string, string> = {
+      'Entraram': 'bg-blue-100 text-blue-800',
+      'Conversaram': 'bg-indigo-100 text-indigo-800',
+      'Agendaram': 'bg-purple-100 text-purple-800',
+      'Compareceram': 'bg-pink-100 text-pink-800',
+      'Negociaram': 'bg-orange-100 text-orange-800',
+      'Postergaram': 'bg-yellow-100 text-yellow-800',
+      'Converteram': 'bg-green-100 text-green-800',
+    };
     
-    return colors[stageIndex] || 'bg-gray-100 text-gray-800';
+    return colors[stageName] || 'bg-gray-100 text-gray-800';
   };
 
-  const getValueColor = (category: string) => {
-    if (category.includes('Alto')) return 'bg-green-100 text-green-800';
-    if (category.includes('Médio')) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-blue-100 text-blue-800';
+  const getScheduleColor = (category: string) => {
+    if (category === 'Com Agendamento') return 'bg-green-100 text-green-800';
+    return 'bg-orange-100 text-orange-800';
   };
 
-  const getStageProgress = (stage: string) => {
-    const stageIndex = stageOrder.indexOf(stage);
-    if (stageIndex === -1) return 0;
-    return ((stageIndex + 1) / stageOrder.length) * 100;
+  const getStageProgress = (stageName: string) => {
+    const kanbanStage = kanbanStages.find(stage => stage.title === stageName);
+    if (!kanbanStage) return 0;
+    return ((kanbanStage.ordering + 1) / kanbanStages.length) * 100;
   };
 
   const formatCurrency = (value: number) => {
@@ -119,13 +105,16 @@ const ClientTreeView2: React.FC<ClientTreeView2Props> = ({
     return contacts.reduce((sum, contact) => sum + (contact.lead_value || 0), 0);
   };
 
-  // Ordena os estágios conforme a ordem do funil
+  // Ordena os estágios conforme a ordem do kanban
   const sortedStages = Object.keys(treeData).sort((a, b) => {
-    const indexA = stageOrder.indexOf(a);
-    const indexB = stageOrder.indexOf(b);
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
-    return indexA - indexB;
+    const stageA = kanbanStages.find(stage => stage.title === a);
+    const stageB = kanbanStages.find(stage => stage.title === b);
+    
+    if (!stageA && !stageB) return 0;
+    if (!stageA) return 1;
+    if (!stageB) return -1;
+    
+    return stageA.ordering - stageB.ordering;
   });
 
   return (
@@ -133,16 +122,16 @@ const ClientTreeView2: React.FC<ClientTreeView2Props> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          Funil de Vendas - Estágio → Valor do Lead
+          Funil de Vendas - Estágio Kanban → Agenda
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
           {sortedStages.map((stage) => {
-            const valueGroups = treeData[stage];
+            const scheduleGroups = treeData[stage];
             const stageId = `stage-${stage}`;
             const isStageExpanded = expandedNodes.has(stageId);
-            const stageContacts = Object.values(valueGroups).flat();
+            const stageContacts = Object.values(scheduleGroups).flat();
             const totalValue = calculateTotalValue(stageContacts);
             const progress = getStageProgress(stage);
 
@@ -163,8 +152,8 @@ const ClientTreeView2: React.FC<ClientTreeView2Props> = ({
                     </div>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-1">
-                        <DollarSign className="h-3 w-3" />
-                        <span>{formatCurrency(totalValue)}</span>
+                        <CalendarCheck className="h-3 w-3" />
+                        <span>{scheduleGroups['Com Agendamento']?.length || 0} agendados</span>
                       </div>
                       <div className="flex-1 max-w-32">
                         <Progress value={progress} className="h-2" />
@@ -176,29 +165,27 @@ const ClientTreeView2: React.FC<ClientTreeView2Props> = ({
 
                 {isStageExpanded && (
                   <div className="bg-gray-50 p-4">
-                    {Object.entries(valueGroups)
+                    {Object.entries(scheduleGroups)
                       .sort(([a], [b]) => {
-                        // Ordena por valor: Alto, Médio, Baixo
-                        const order = ['Alto', 'Médio', 'Baixo'];
-                        const indexA = order.findIndex(o => a.includes(o));
-                        const indexB = order.findIndex(o => b.includes(o));
-                        return indexA - indexB;
+                        // Ordena por agendamento: Com agendamento primeiro
+                        const order = ['Com Agendamento', 'Sem Agendamento'];
+                        return order.indexOf(a) - order.indexOf(b);
                       })
-                      .map(([valueCategory, contactList]) => {
-                        const valueId = `value-${stage}-${valueCategory}`;
-                        const isValueExpanded = expandedNodes.has(valueId);
+                      .map(([scheduleCategory, contactList]) => {
+                        const scheduleId = `schedule-${stage}-${scheduleCategory}`;
+                        const isScheduleExpanded = expandedNodes.has(scheduleId);
                         const categoryTotal = calculateTotalValue(contactList);
 
                         return (
-                          <div key={valueCategory} className="mb-3 last:mb-0">
+                          <div key={scheduleCategory} className="mb-3 last:mb-0">
                             <div
                               className="flex items-center gap-2 p-3 bg-white rounded cursor-pointer hover:shadow-sm transition-shadow"
-                              onClick={() => toggleNode(valueId)}
+                              onClick={() => toggleNode(scheduleId)}
                             >
-                              {isValueExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                              <DollarSign className="h-4 w-4" />
-                              <Badge className={getValueColor(valueCategory)}>
-                                {valueCategory}
+                              {isScheduleExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                              <CalendarCheck className="h-4 w-4" />
+                              <Badge className={getScheduleColor(scheduleCategory)}>
+                                {scheduleCategory}
                               </Badge>
                               <div className="ml-auto flex items-center gap-2 text-sm text-gray-600">
                                 <span>{contactList.length} cliente{contactList.length !== 1 ? 's' : ''}</span>
@@ -207,7 +194,7 @@ const ClientTreeView2: React.FC<ClientTreeView2Props> = ({
                               </div>
                             </div>
 
-                            {isValueExpanded && (
+                            {isScheduleExpanded && (
                               <div className="mt-2 space-y-2">
                                 {contactList
                                   .sort((a, b) => (b.lead_value || 0) - (a.lead_value || 0))
