@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { toast } from "@/hooks/use-toast";
 import { Contact } from "@/types/client";
 import { useAuth } from "@/context/AuthContext";

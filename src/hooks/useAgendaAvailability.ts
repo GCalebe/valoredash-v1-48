@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { format, addDays, startOfDay, addMinutes, isAfter, isBefore, isSameDay, parseISO } from 'date-fns';

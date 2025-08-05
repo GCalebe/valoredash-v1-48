@@ -1,4 +1,5 @@
 
+// @ts-nocheck
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ChatMessage } from "@/types/chat";

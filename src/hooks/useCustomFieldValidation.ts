@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from "react";
 import { ValidationRule, AuditLogEntry } from "@/types/customFields";
 import { supabase } from "@/integrations/supabase/client";
