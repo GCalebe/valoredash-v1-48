@@ -95,8 +95,8 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
   };
 
   // Helper function to get the currently selected tab for a field
-  const getSelectedTab = (field: unknown) => {
-    const tabSettings = field.visibility_settings?.visible_in_tabs || {};
+  const getSelectedTab = (field: any) => {
+    const tabSettings = field?.visibility_settings?.visible_in_tabs || {};
     if (tabSettings.basic) return 'basic';
     if (tabSettings.commercial) return 'commercial';
     if (tabSettings.utm) return 'utm';
@@ -153,7 +153,7 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
                   <CustomFieldRenderer
                     field={field}
                     value={customFieldsWithValues.find(f => f.id === field.id)?.value}
-                    onChange={(value) => handleFieldChange(field.id, value)}
+                    onChange={(value) => handleFieldChange(field.id, value as string | string[] | null)}
                   />
                 </div>
 

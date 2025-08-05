@@ -12,7 +12,7 @@ interface KanbanClientCardProps {
   dragHandleProps?: Record<string, unknown>;
   draggableProps?: Record<string, unknown>;
   innerRef?: (element: HTMLElement | null) => void;
-  snapshot?: { isDragging?: boolean; [key: string]: unknown };
+  snapshot?: { isDragging: boolean; [key: string]: unknown };
 }
 
 export const KanbanClientCard: React.FC<KanbanClientCardProps> = ({

@@ -117,40 +117,40 @@ const ModernConfigurationView: React.FC<ModernConfigurationViewProps> = ({
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Criatividade: {config.creativity[0]}%</Label>
+                  <Label>Criatividade: {(config as any).creativity?.[0] ?? 50}%</Label>
                   <Slider
-                    value={config.creativity}
-                    onValueChange={(value) => handleSliderChange('creativity', value)}
+                    value={(config as any).creativity || [50]}
+                    onValueChange={(value) => handleSliderChange('creativity' as any, value)}
                     max={100}
                     step={1}
                     className="w-full"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Formalidade: {config.formality[0]}%</Label>
+                  <Label>Formalidade: {(config as any).formality?.[0] ?? 50}%</Label>
                   <Slider
-                    value={config.formality}
-                    onValueChange={(value) => handleSliderChange('formality', value)}
+                    value={(config as any).formality || [50]}
+                    onValueChange={(value) => handleSliderChange('formality' as any, value)}
                     max={100}
                     step={1}
                     className="w-full"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Empatia: {config.empathy[0]}%</Label>
+                  <Label>Empatia: {(config as any).empathy?.[0] ?? 50}%</Label>
                   <Slider
-                    value={config.empathy}
-                    onValueChange={(value) => handleSliderChange('empathy', value)}
+                    value={(config as any).empathy || [50]}
+                    onValueChange={(value) => handleSliderChange('empathy' as any, value)}
                     max={100}
                     step={1}
                     className="w-full"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Assertividade: {config.assertiveness[0]}%</Label>
+                  <Label>Assertividade: {(config as any).assertiveness?.[0] ?? 50}%</Label>
                   <Slider
-                    value={config.assertiveness}
-                    onValueChange={(value) => handleSliderChange('assertiveness', value)}
+                    value={(config as any).assertiveness || [50]}
+                    onValueChange={(value) => handleSliderChange('assertiveness' as any, value)}
                     max={100}
                     step={1}
                     className="w-full"

@@ -43,7 +43,7 @@ export function AttendanceSelectionTab({
       <div className="space-y-2">
         <Label htmlFor="attendanceType">Tipo de Atendimento</Label>
         <Select 
-          value={state.attendanceType} 
+          value={String(state.attendanceType || "")} 
           onValueChange={(value) => updateState({ attendanceType: value })}
         >
           <SelectTrigger id="attendanceType">
@@ -74,13 +74,13 @@ export function AttendanceSelectionTab({
           <Label htmlFor="location">Local do Atendimento *</Label>
           <Input
             id="location"
-            value={state.location}
+            value={String(state.location || "")}
             onChange={(e) => updateState({ location: e.target.value })}
             placeholder="Endereço ou local do atendimento"
-            className={state.errors.location ? "border-destructive" : ""}
+            className={(state as any).errors?.location ? "border-destructive" : ""}
           />
-          {state.errors.location && (
-            <p className="text-sm text-destructive">{state.errors.location}</p>
+          {(state as any).errors?.location && (
+            <p className="text-sm text-destructive">{(state as any).errors.location}</p>
           )}
         </div>
       ) : (
@@ -88,13 +88,13 @@ export function AttendanceSelectionTab({
           <Label htmlFor="meetingLink">Link da Reunião *</Label>
           <Input
             id="meetingLink"
-            value={state.meetingLink}
+            value={String(state.meetingLink || "")}
             onChange={(e) => updateState({ meetingLink: e.target.value })}
             placeholder="https://meet.google.com/abc-def-ghi"
-            className={state.errors.meetingLink ? "border-destructive" : ""}
+            className={(state as any).errors?.meetingLink ? "border-destructive" : ""}
           />
-          {state.errors.meetingLink && (
-            <p className="text-sm text-destructive">{state.errors.meetingLink}</p>
+          {(state as any).errors?.meetingLink && (
+            <p className="text-sm text-destructive">{(state as any).errors.meetingLink}</p>
           )}
         </div>
       )}
@@ -129,7 +129,7 @@ export function AttendanceSelectionTab({
             />
             <input
               type="color"
-              value={state.newTagColor}
+              value={String(state.newTagColor || "#000000")}
               onChange={(e) => updateState({ newTagColor: e.target.value })}
               className="w-10 h-10 rounded border cursor-pointer"
             />

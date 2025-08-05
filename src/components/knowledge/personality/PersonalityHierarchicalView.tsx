@@ -239,8 +239,8 @@ const PersonalityHierarchicalView: React.FC<PersonalityHierarchicalViewProps> = 
                             <div className="flex-1">
                               <h4 className="font-medium text-base">{template.name}</h4>
                               <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className={getStatusColor(template.status)}>
-                                  {template.status}
+                                <Badge variant="outline" className={getStatusColor((template as any).status)}>
+                                  {(template as any).status}
                                 </Badge>
                                 {template.industry && (
                                   <Badge variant="secondary" className="text-xs">
@@ -258,15 +258,15 @@ const PersonalityHierarchicalView: React.FC<PersonalityHierarchicalViewProps> = 
                           <div className="grid grid-cols-3 gap-4 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1">
                               <Star className="h-3 w-3" />
-                              <span>Eficácia: {template.metrics.effectiveness}%</span>
+                              <span>Eficácia: {(template.metrics as any)?.effectiveness || 0}%</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Users className="h-3 w-3" />
-                              <span>Satisfação: {template.metrics.satisfaction}%</span>
+                              <span>Satisfação: {(template.metrics as any)?.satisfaction || 0}%</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <TrendingUp className="h-3 w-3" />
-                              <span>Conversão: {template.metrics.conversionRate}%</span>
+                              <span>Conversão: {(template.metrics as any)?.conversionRate || 0}%</span>
                             </div>
                           </div>
                         </div>

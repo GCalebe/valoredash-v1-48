@@ -98,8 +98,8 @@ export function DateTimeSelectionTab({
       <div className="space-y-2">
         <Label htmlFor="initialStatus">Status Inicial</Label>
         <Select 
-          value={state.initialStatus} 
-          onValueChange={(value) => updateState({ initialStatus: value })}
+          value={state.initialStatus as string} 
+          onValueChange={(value: "confirmado" | "pendente") => updateState({ initialStatus: value })}
         >
           <SelectTrigger id="initialStatus">
             <SelectValue />

@@ -66,7 +66,7 @@ const KanbanView = ({
     console.log("[KanbanView] Drag started");
   }, []);
 
-  const handleDragEnd = useCallback((result: unknown) => {
+  const handleDragEnd = useCallback((result: any) => {
     const dragEndTime = Date.now();
     const dragDuration = dragStartTime ? dragEndTime - dragStartTime : 0;
     
@@ -75,7 +75,7 @@ const KanbanView = ({
     
     setDragStartTime(null);
 
-    if (!result.destination) {
+    if (!result?.destination) {
       console.log("[KanbanView] No destination - drag cancelled");
       return;
     }

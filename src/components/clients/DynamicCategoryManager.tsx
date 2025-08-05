@@ -122,7 +122,7 @@ const DynamicCategoryManager = ({
       case "single_select":
         return (
           <Select
-            value={category.value || "none"}
+            value={(typeof category.value === 'string' ? category.value : "") || "none"}
             onValueChange={(val) =>
               updateCategoryValue(category.id, val === "none" ? null : val)
             }

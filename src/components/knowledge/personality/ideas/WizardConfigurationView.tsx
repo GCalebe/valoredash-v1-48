@@ -144,11 +144,11 @@ const WizardConfigurationView: React.FC<WizardConfigurationViewProps> = ({
                     <Label className="text-base font-medium">Criatividade</Label>
                     <p className="text-sm text-muted-foreground">Controla o quão criativa e inovadora a IA será</p>
                   </div>
-                  <Badge variant="outline" className="text-lg px-3 py-1">{config.creativity[0]}%</Badge>
+                  <Badge variant="outline" className="text-lg px-3 py-1">{(config as any).creativity?.[0] ?? 50}%</Badge>
                 </div>
                 <Slider
-                  value={config.creativity}
-                  onValueChange={(value) => handleSliderChange('creativity', value)}
+                  value={(config as any).creativity || [50]}
+                  onValueChange={(value) => handleSliderChange('creativity' as any, value)}
                   max={100}
                   step={1}
                   className="w-full"
@@ -160,11 +160,11 @@ const WizardConfigurationView: React.FC<WizardConfigurationViewProps> = ({
                     <Label className="text-base font-medium">Formalidade</Label>
                     <p className="text-sm text-muted-foreground">Define o nível de formalidade na comunicação</p>
                   </div>
-                  <Badge variant="outline" className="text-lg px-3 py-1">{config.formality[0]}%</Badge>
+                  <Badge variant="outline" className="text-lg px-3 py-1">{(config as any).formality?.[0] ?? 50}%</Badge>
                 </div>
                 <Slider
-                  value={config.formality}
-                  onValueChange={(value) => handleSliderChange('formality', value)}
+                  value={(config as any).formality || [50]}
+                  onValueChange={(value) => handleSliderChange('formality' as any, value)}
                   max={100}
                   step={1}
                   className="w-full"
@@ -176,11 +176,11 @@ const WizardConfigurationView: React.FC<WizardConfigurationViewProps> = ({
                     <Label className="text-base font-medium">Empatia</Label>
                     <p className="text-sm text-muted-foreground">Capacidade de compreender e responder às emoções</p>
                   </div>
-                  <Badge variant="outline" className="text-lg px-3 py-1">{config.empathy[0]}%</Badge>
+                  <Badge variant="outline" className="text-lg px-3 py-1">{(config as any).empathy?.[0] ?? 50}%</Badge>
                 </div>
                 <Slider
-                  value={config.empathy}
-                  onValueChange={(value) => handleSliderChange('empathy', value)}
+                  value={(config as any).empathy || [50]}
+                  onValueChange={(value) => handleSliderChange('empathy' as any, value)}
                   max={100}
                   step={1}
                   className="w-full"
@@ -192,11 +192,11 @@ const WizardConfigurationView: React.FC<WizardConfigurationViewProps> = ({
                     <Label className="text-base font-medium">Assertividade</Label>
                     <p className="text-sm text-muted-foreground">Define o quão direta e confiante a IA será</p>
                   </div>
-                  <Badge variant="outline" className="text-lg px-3 py-1">{config.assertiveness[0]}%</Badge>
+                  <Badge variant="outline" className="text-lg px-3 py-1">{(config as any).assertiveness?.[0] ?? 50}%</Badge>
                 </div>
                 <Slider
-                  value={config.assertiveness}
-                  onValueChange={(value) => handleSliderChange('assertiveness', value)}
+                  value={(config as any).assertiveness || [50]}
+                  onValueChange={(value) => handleSliderChange('assertiveness' as any, value)}
                   max={100}
                   step={1}
                   className="w-full"

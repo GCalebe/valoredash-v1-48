@@ -120,11 +120,11 @@ const SidebarConfigurationView: React.FC<SidebarConfigurationViewProps> = ({
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <Label>Criatividade</Label>
-                  <Badge variant="outline">{config.creativity[0]}%</Badge>
+                  <Badge variant="outline">{(config as any).creativity?.[0] ?? 50}%</Badge>
                 </div>
                 <Slider
-                  value={config.creativity}
-                  onValueChange={(value) => handleSliderChange('creativity', value)}
+                  value={(config as any).creativity || [50]}
+                  onValueChange={(value) => handleSliderChange('creativity' as any, value)}
                   max={100}
                   step={1}
                   className="w-full"
@@ -134,11 +134,11 @@ const SidebarConfigurationView: React.FC<SidebarConfigurationViewProps> = ({
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <Label>Formalidade</Label>
-                  <Badge variant="outline">{config.formality[0]}%</Badge>
+                  <Badge variant="outline">{(config as any).formality?.[0] ?? 50}%</Badge>
                 </div>
                 <Slider
-                  value={config.formality}
-                  onValueChange={(value) => handleSliderChange('formality', value)}
+                  value={(config as any).formality || [50]}
+                  onValueChange={(value) => handleSliderChange('formality' as any, value)}
                   max={100}
                   step={1}
                   className="w-full"
@@ -148,11 +148,11 @@ const SidebarConfigurationView: React.FC<SidebarConfigurationViewProps> = ({
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <Label>Empatia</Label>
-                  <Badge variant="outline">{config.empathy[0]}%</Badge>
+                  <Badge variant="outline">{(config as any).empathy?.[0] ?? 50}%</Badge>
                 </div>
                 <Slider
-                  value={config.empathy}
-                  onValueChange={(value) => handleSliderChange('empathy', value)}
+                  value={(config as any).empathy || [50]}
+                  onValueChange={(value) => handleSliderChange('empathy' as any, value)}
                   max={100}
                   step={1}
                   className="w-full"
@@ -162,11 +162,11 @@ const SidebarConfigurationView: React.FC<SidebarConfigurationViewProps> = ({
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <Label>Assertividade</Label>
-                  <Badge variant="outline">{config.assertiveness[0]}%</Badge>
+                  <Badge variant="outline">{(config as any).assertiveness?.[0] ?? 50}%</Badge>
                 </div>
                 <Slider
-                  value={config.assertiveness}
-                  onValueChange={(value) => handleSliderChange('assertiveness', value)}
+                  value={(config as any).assertiveness || [50]}
+                  onValueChange={(value) => handleSliderChange('assertiveness' as any, value)}
                   max={100}
                   step={1}
                   className="w-full"

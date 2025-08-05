@@ -37,15 +37,25 @@ export interface AIPersonalityTemplate {
     effectiveness?: number;
     satisfaction?: number;
     conversionRate?: number;
-  };
+  } | string;
   [key: string]: any;
 }
 
 export interface PersonalityConfig {
-  creativity?: number;
-  formality?: number;
-  empathy?: number;
-  assertiveness?: number;
+  creativity: number[];
+  formality: number[];
+  empathy: number[];
+  assertiveness: number[];
+  name?: string;
+  description?: string;
+  category?: string;
+  useEmojis?: boolean;
+  contextAware?: boolean;
+  continuousLearning?: boolean;
+  responseLength?: 'detailed' | 'concise' | 'moderate';
+  greetingMessage?: string;
+  errorMessage?: string;
+  systemPrompt?: string;
   [key: string]: any;
 }
 

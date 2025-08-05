@@ -85,7 +85,7 @@ const NotificationIcon = React.memo(() => {
     markAsRead(notification.id);
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n: any) => !n.read).length;
 
   return (
     <>

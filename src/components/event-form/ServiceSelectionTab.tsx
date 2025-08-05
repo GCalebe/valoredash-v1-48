@@ -92,7 +92,7 @@ export function ServiceSelectionTab({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {(constants.DURATIONS || []).map((duration: { label: string; value: number }) => (
+            {(((constants as any).DURATIONS || []) as { label: string; value: number }[]).map((duration: { label: string; value: number }) => (
               <SelectItem key={duration.value} value={duration.value.toString()}>
                 {duration.label}
               </SelectItem>

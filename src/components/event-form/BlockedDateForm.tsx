@@ -66,7 +66,7 @@ export function BlockedDateForm({
       <div className="space-y-2">
         <Label>Cor do Evento</Label>
         <div className="flex flex-wrap gap-2">
-          {constants.COLORS.map((color: string) => (
+          {((constants as any).COLORS || []).map((color: string) => (
             <button
               type="button"
               key={color}

@@ -36,9 +36,9 @@ const SplitScreenConfigurationView: React.FC<SplitScreenConfigurationViewProps> 
     // Simular geração de resposta baseada na configuração
     setTimeout(() => {
       const responses = [
-        `${config.useEmojis ? '😊 ' : ''}Olá! Fico feliz em ajudá-lo. Como ${config.name || 'assistente'}, estou aqui para fornecer ${config.responseLength === 'short' ? 'respostas diretas' : 'informações detalhadas'} sobre qualquer assunto que você precisar.`,
-        `${config.useEmojis ? '🤝 ' : ''}Saudações! Sou ${config.name || 'seu assistente'} e estou configurado para ser ${config.formality[0] > 70 ? 'formal e profissional' : 'casual e amigável'} em nossas interações.`,
-        `${config.useEmojis ? '✨ ' : ''}Oi! Com minha criatividade em ${config.creativity[0]}% e empatia em ${config.empathy[0]}%, estou pronto para uma conversa ${config.assertiveness[0] > 70 ? 'direta e assertiva' : 'colaborativa e compreensiva'}.`
+        `${(config as any).useEmojis ? '😊 ' : ''}Olá! Fico feliz em ajudá-lo. Como ${(config as any).name || 'assistente'}, estou aqui para fornecer ${(config as any).responseLength === 'detailed' ? 'informações detalhadas' : 'respostas diretas'} sobre qualquer assunto que você precisar.`,
+        `${(config as any).useEmojis ? '🤝 ' : ''}Saudações! Sou ${(config as any).name || 'seu assistente'} e estou configurado para ser ${((config as any).formality?.[0] ?? 50) > 70 ? 'formal e profissional' : 'casual e amigável'} em nossas interações.`,
+        `${(config as any).useEmojis ? '✨ ' : ''}Oi! Com minha criatividade em ${((config as any).creativity?.[0] ?? 50)}% e empatia em ${((config as any).empathy?.[0] ?? 50)}%, estou pronto para uma conversa ${((config as any).assertiveness?.[0] ?? 50) > 70 ? 'direta e assertiva' : 'colaborativa e compreensiva'}.`
       ];
       setPreviewResponse(responses[Math.floor(Math.random() * responses.length)]);
       setIsGenerating(false);
@@ -137,11 +137,11 @@ const SplitScreenConfigurationView: React.FC<SplitScreenConfigurationViewProps> 
                         <Label className="font-medium">Criatividade</Label>
                         <p className="text-sm text-muted-foreground">Controla o quão criativa e inovadora a IA será</p>
                       </div>
-                      <Badge variant="outline">{config.creativity[0]}%</Badge>
+                      <Badge variant="outline">{(config as any).creativity?.[0] ?? 50}%</Badge>
                     </div>
                     <Slider
-                      value={config.creativity}
-                      onValueChange={(value) => handleSliderChange('creativity', value)}
+                      value={(config as any).creativity || [50]}
+                      onValueChange={(value) => handleSliderChange('creativity' as any, value)}
                       max={100}
                       step={1}
                       className="w-full"
@@ -153,11 +153,11 @@ const SplitScreenConfigurationView: React.FC<SplitScreenConfigurationViewProps> 
                         <Label className="font-medium">Formalidade</Label>
                         <p className="text-sm text-muted-foreground">Define o nível de formalidade na comunicação</p>
                       </div>
-                      <Badge variant="outline">{config.formality[0]}%</Badge>
+                      <Badge variant="outline">{(config as any).formality?.[0] ?? 50}%</Badge>
                     </div>
                     <Slider
-                      value={config.formality}
-                      onValueChange={(value) => handleSliderChange('formality', value)}
+                      value={(config as any).formality || [50]}
+                      onValueChange={(value) => handleSliderChange('formality' as any, value)}
                       max={100}
                       step={1}
                       className="w-full"
@@ -169,11 +169,11 @@ const SplitScreenConfigurationView: React.FC<SplitScreenConfigurationViewProps> 
                         <Label className="font-medium">Empatia</Label>
                         <p className="text-sm text-muted-foreground">Capacidade de compreender e responder às emoções</p>
                       </div>
-                      <Badge variant="outline">{config.empathy[0]}%</Badge>
+                      <Badge variant="outline">{(config as any).empathy?.[0] ?? 50}%</Badge>
                     </div>
                     <Slider
-                      value={config.empathy}
-                      onValueChange={(value) => handleSliderChange('empathy', value)}
+                      value={(config as any).empathy || [50]}
+                      onValueChange={(value) => handleSliderChange('empathy' as any, value)}
                       max={100}
                       step={1}
                       className="w-full"
@@ -185,11 +185,11 @@ const SplitScreenConfigurationView: React.FC<SplitScreenConfigurationViewProps> 
                         <Label className="font-medium">Assertividade</Label>
                         <p className="text-sm text-muted-foreground">Define o quão direta e confiante a IA será</p>
                       </div>
-                      <Badge variant="outline">{config.assertiveness[0]}%</Badge>
+                      <Badge variant="outline">{(config as any).assertiveness?.[0] ?? 50}%</Badge>
                     </div>
                     <Slider
-                      value={config.assertiveness}
-                      onValueChange={(value) => handleSliderChange('assertiveness', value)}
+                      value={(config as any).assertiveness || [50]}
+                      onValueChange={(value) => handleSliderChange('assertiveness' as any, value)}
                       max={100}
                       step={1}
                       className="w-full"
@@ -441,21 +441,21 @@ const SplitScreenConfigurationView: React.FC<SplitScreenConfigurationViewProps> 
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Criatividade:</span>
-                <Badge variant="outline" className="text-xs">{config.creativity[0]}%</Badge>
+                <Badge variant="outline" className="text-xs">{(config as any).creativity?.[0] ?? 50}%</Badge>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Formalidade:</span>
-                <Badge variant="outline" className="text-xs">{config.formality[0]}%</Badge>
+                <Badge variant="outline" className="text-xs">{(config as any).formality?.[0] ?? 50}%</Badge>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Empatia:</span>
-                <Badge variant="outline" className="text-xs">{config.empathy[0]}%</Badge>
+                <Badge variant="outline" className="text-xs">{(config as any).empathy?.[0] ?? 50}%</Badge>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Assertividade:</span>
-                <Badge variant="outline" className="text-xs">{config.assertiveness[0]}%</Badge>
+                <Badge variant="outline" className="text-xs">{(config as any).assertiveness?.[0] ?? 50}%</Badge>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Emojis:</span>
