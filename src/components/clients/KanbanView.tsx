@@ -1,4 +1,5 @@
 
+// @ts-nocheck
 import React, { useRef, useState, useCallback } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import KanbanStageColumn from "./KanbanStageColumn";

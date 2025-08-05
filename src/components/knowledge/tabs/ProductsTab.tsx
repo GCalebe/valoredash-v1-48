@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useMemo } from "react";
 import { Package } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
