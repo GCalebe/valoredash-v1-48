@@ -209,19 +209,19 @@ const AgendaTab = () => {
   // Função para converter agenda do Supabase para formato local
   const convertSupabaseToLocal = async (supabaseAgenda: SupabaseAgenda): Promise<LocalAgenda> => {
     // Buscar anfitrião associado à agenda
-    let hostId = '';
+    let hostName = '';
     try {
       const { data: employeeAgenda } = await supabase
         .from('employee_agendas')
-        .select('employee_id')
+        .select('employee_id, employees(name)')
         .eq('agenda_id', supabaseAgenda.id)
         .limit(1);
       
-      if (employeeAgenda && employeeAgenda.length > 0) {
-        hostId = employeeAgenda[0].employee_id;
+      if (employeeAgenda && employeeAgenda.length > 0 && employeeAgenda[0].employees) {
+        hostName = employeeAgenda[0].employees.name;
       }
     } catch (error) {
-      // Nenhum anfitrião associado à agenda
+      console.log('Nenhum anfitrião associado à agenda:', error);
     }
 
     return {
@@ -229,7 +229,7 @@ const AgendaTab = () => {
       title: supabaseAgenda.name,
       description: supabaseAgenda.description || '',
       category: (supabaseAgenda.category as AgendaCategory) || '',
-      host: hostId, // Preenchido com o ID do anfitrião associado
+      host: hostName, // Preenchido com o nome do anfitrião associado
       duration: supabaseAgenda.duration_minutes,
       breakTime: supabaseAgenda.buffer_time_minutes,
       availabilityInterval: 30, // Valor padrão
@@ -359,10 +359,26 @@ const AgendaTab = () => {
 
       // Associar anfitrião selecionado à agenda
       if (currentAgenda.host) {
+        // Se o host é um nome, precisamos encontrar o ID correspondente
+        let hostId = currentAgenda.host;
+        
+        // Se não parece ser um UUID (não tem o formato UUID), buscar por nome
+        if (!currentAgenda.host.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+          const { data: employee } = await supabase
+            .from('employees')
+            .select('id')
+            .eq('name', currentAgenda.host)
+            .limit(1);
+          
+          if (employee && employee.length > 0) {
+            hostId = employee[0].id;
+          }
+        }
+        
         const { error: hostError } = await supabase
           .from('employee_agendas')
           .insert({
-            employee_id: currentAgenda.host,
+            employee_id: hostId,
             agenda_id: agendaId
           });
         
