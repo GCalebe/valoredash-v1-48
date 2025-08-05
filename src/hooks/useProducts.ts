@@ -209,12 +209,20 @@ const updateProduct = async ({ id, ...updates }: ProductFormData & { id: string 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
   
-  // Remove undefined values
+  // Only include fields that exist in the products table
+  const allowedFields = [
+    'name', 'price', 'description', 'category', 'benefits', 'objections', 
+    'differentials', 'success_cases', 'features', 'icon', 'image', 
+    'has_combo', 'has_upgrade', 'has_promotion', 'new', 'popular'
+  ];
+  
+  // Filter updates to only include allowed fields and remove undefined values
   const cleanUpdates = Object.fromEntries(
-    Object.entries(updates).filter(([_, value]) => value !== undefined)
+    Object.entries(updates)
+      .filter(([key, value]) => allowedFields.includes(key) && value !== undefined)
   );
   
-  console.log('🧹 Clean updates:', cleanUpdates);
+  console.log('🧹 Clean updates (only allowed fields):', cleanUpdates);
   console.log('🚀 Calling Supabase update...');
 
   const { data, error } = await supabase
