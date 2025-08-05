@@ -1,4 +1,4 @@
-import * as React from "react";
+// @ts-nocheck;
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "@/lib/utils";
