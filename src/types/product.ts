@@ -82,4 +82,6 @@ export interface ProductFormData {
   // Campos para downsell
   has_downsell?: boolean;
   downsell_product?: string;
+  // Local objections for new products
+  localObjections?: ProductObjection[];
 }

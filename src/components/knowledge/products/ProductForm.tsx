@@ -420,7 +420,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
         has_upgrade: data.has_upgrade ?? false,
         has_promotion: data.has_promotion ?? false,
         new: data.new ?? false,
-        popular: data.popular ?? false
+        popular: data.popular ?? false,
+        // Pass local objections for new products to be saved to database
+        localObjections: mode === 'create' ? objections : undefined
       };
       
       console.log('📦 Final form data with objections:', formDataWithObjections);

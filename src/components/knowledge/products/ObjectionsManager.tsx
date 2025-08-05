@@ -86,9 +86,65 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
   };
 
   const handleAddObjection = async () => {
-    if (!newQuestion.trim() || !newAnswer.trim() || !user || !productId) return;
+    console.log('🔍 handleAddObjection called');
+    console.log('📝 Question:', newQuestion.trim());
+    console.log('📝 Answer:', newAnswer.trim());
+    console.log('👤 User:', user);
+    console.log('🎯 ProductId:', productId);
 
+    // Validate required fields
+    if (!newQuestion.trim() || !newAnswer.trim()) {
+      console.log('❌ Missing question or answer');
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha tanto a objeção quanto a resposta.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user) {
+      console.log('❌ No user found');
+      toast({
+        title: "Erro de autenticação",
+        description: "Usuário não encontrado. Faça login novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // For new products (empty productId), manage objections locally
+    if (!productId || productId.trim() === '') {
+      console.log('🔄 Managing objection locally for new product');
+      
+      const localObjection: Objection = {
+        id: `temp-${Date.now()}`, // Temporary ID for local management
+        question: newQuestion.trim(),
+        answer: newAnswer.trim(),
+        createdAt: new Date().toLocaleDateString(),
+        createdBy: 'Usuário'
+      };
+
+      const updatedObjections = [localObjection, ...objections];
+      setObjections(updatedObjections);
+      onObjectionsChange?.(updatedObjections);
+      setNewQuestion('');
+      setNewAnswer('');
+      setIsAddingNew(false);
+
+      toast({
+        title: "Objeção adicionada",
+        description: "A objeção será salva quando o produto for criado.",
+      });
+      
+      console.log('✅ Local objection added successfully');
+      return;
+    }
+
+    // For existing products, save to database
     try {
+      console.log('💾 Saving objection to database');
+      
       const { data, error } = await supabase
         .from('product_objections')
         .insert({
@@ -122,8 +178,10 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
         title: "Objeção adicionada",
         description: "A objeção foi adicionada com sucesso.",
       });
+      
+      console.log('✅ Database objection added successfully');
     } catch (error) {
-      console.error('Error adding objection:', error);
+      console.error('❌ Error adding objection:', error);
       toast({
         title: "Erro",
         description: "Não foi possível adicionar a objeção.",
@@ -144,6 +202,30 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
   const handleUpdateObjection = async () => {
     if (!editingObjection || !newQuestion.trim() || !newAnswer.trim() || !user) return;
 
+    // For local objections (temporary IDs), update locally
+    if (editingObjection.id.startsWith('temp-')) {
+      console.log('🔄 Updating local objection');
+      
+      const updatedObjections = objections.map(obj => 
+        obj.id === editingObjection.id 
+          ? { ...obj, question: newQuestion.trim(), answer: newAnswer.trim() }
+          : obj
+      );
+
+      setObjections(updatedObjections);
+      onObjectionsChange?.(updatedObjections);
+      setEditingObjection(null);
+      setNewQuestion('');
+      setNewAnswer('');
+
+      toast({
+        title: "Objeção atualizada",
+        description: "A objeção foi atualizada localmente.",
+      });
+      return;
+    }
+
+    // For database objections, update in database
     try {
       const { error } = await supabase
         .from('product_objections')
@@ -186,6 +268,22 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
   const handleDeleteObjection = async (objectionId: string) => {
     if (!user) return;
 
+    // For local objections (temporary IDs), delete locally
+    if (objectionId.startsWith('temp-')) {
+      console.log('🔄 Deleting local objection');
+      
+      const updatedObjections = objections.filter(obj => obj.id !== objectionId);
+      setObjections(updatedObjections);
+      onObjectionsChange?.(updatedObjections);
+
+      toast({
+        title: "Objeção removida",
+        description: "A objeção foi removida localmente.",
+      });
+      return;
+    }
+
+    // For database objections, delete from database
     try {
       const { error } = await supabase
         .from('product_objections')

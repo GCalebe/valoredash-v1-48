@@ -166,6 +166,32 @@ const createProduct = async (productData: ProductFormData): Promise<Product> => 
         console.warn('Warning: Failed to save upgrade data:', upgradeError);
       }
     }
+    // Save objections if provided in productData
+    if (productData.localObjections && Array.isArray(productData.localObjections) && productData.localObjections.length > 0) {
+      console.log('💾 Saving local objections to database for new product:', createdProduct.id);
+      
+      const objectionsToSave = productData.localObjections
+        .filter(objection => objection.question && objection.answer) // Only save complete objections
+        .map(objection => ({
+          product_id: createdProduct.id,
+          user_id: user.id,
+          question: objection.question,
+          answer: objection.answer,
+          created_by: user.id
+        }));
+
+      if (objectionsToSave.length > 0) {
+        const { error: objectionsError } = await supabase
+          .from('product_objections')
+          .insert(objectionsToSave);
+
+        if (objectionsError) {
+          console.warn('Warning: Failed to save objections data:', objectionsError);
+        } else {
+          console.log('✅ Successfully saved', objectionsToSave.length, 'objections for new product');
+        }
+      }
+    }
   } catch (relatedDataError) {
     console.warn('Warning: Some related data could not be saved:', relatedDataError);
     // Não falha a criação do produto principal por causa de dados relacionados
