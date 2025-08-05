@@ -1179,6 +1179,7 @@ export type Database = {
           new_clients_this_month: number | null
           total_chats: number | null
           total_clients: number | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -1186,6 +1187,7 @@ export type Database = {
           new_clients_this_month?: number | null
           total_chats?: number | null
           total_clients?: number | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -1193,6 +1195,7 @@ export type Database = {
           new_clients_this_month?: number | null
           total_chats?: number | null
           total_clients?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1564,6 +1567,7 @@ export type Database = {
           satisfaction_score: number | null
           total_conversations: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           avg_resolution_time?: unknown | null
@@ -1576,6 +1580,7 @@ export type Database = {
           satisfaction_score?: number | null
           total_conversations?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           avg_resolution_time?: unknown | null
@@ -1588,6 +1593,7 @@ export type Database = {
           satisfaction_score?: number | null
           total_conversations?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1609,6 +1615,7 @@ export type Database = {
           total_negotiating_value: number | null
           total_respondidas: number | null
           total_secondary_responses: number | null
+          user_id: string | null
         }
         Insert: {
           average_negotiated_value?: number | null
@@ -1627,6 +1634,7 @@ export type Database = {
           total_negotiating_value?: number | null
           total_respondidas?: number | null
           total_secondary_responses?: number | null
+          user_id?: string | null
         }
         Update: {
           average_negotiated_value?: number | null
@@ -1645,6 +1653,7 @@ export type Database = {
           total_negotiating_value?: number | null
           total_respondidas?: number | null
           total_secondary_responses?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1715,6 +1724,7 @@ export type Database = {
           time_period: string
           total_leads: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           conversion_rate?: number | null
@@ -1726,6 +1736,7 @@ export type Database = {
           time_period: string
           total_leads?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           conversion_rate?: number | null
@@ -1737,6 +1748,7 @@ export type Database = {
           time_period?: string
           total_leads?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -4512,6 +4524,15 @@ export type Database = {
       validate_password: {
         Args: { password: string }
         Returns: boolean
+      }
+      validate_rls_policies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          table_name: string
+          has_rls: boolean
+          policy_count: number
+          status: string
+        }[]
       }
     }
     Enums: {
