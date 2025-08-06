@@ -19,6 +19,8 @@ export function useCustomFields() {
       const { data, error } = await supabase
         .from("custom_fields")
         .select("*")
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
+        .is("deleted_at", null)
         .order("created_at", { ascending: true });
 
       if (error) {
@@ -40,19 +42,17 @@ export function useCustomFields() {
           | "text"
           | "single_select"
           | "multi_select",
-        field_options: field.field_options
-          ? JSON.parse(JSON.stringify(field.field_options))
-          : null,
-        is_required: field.is_required,
+        field_options: field.field_options || null,
+        is_required: field.is_required || false,
         created_at: field.created_at,
         updated_at: field.updated_at,
         visibility_settings: {
           visible_in_client_info: true,
           visible_in_tabs: {
-            basic: true,
-            commercial: false,
-            utm: false,
-            docs: false,
+            basic: field.category === "basic",
+            commercial: field.category === "commercial", 
+            utm: field.category === "utm",
+            docs: field.category === "documents",
           },
         },
       }));
@@ -153,12 +153,21 @@ export function useCustomFields() {
 
   const updateCustomField = async (id: string, field: Partial<CustomField>) => {
     try {
-      const updateData: Partial<CustomField> = {};
+      const updateData: any = {};
       
       if (field.field_name !== undefined) updateData.field_name = field.field_name;
       if (field.field_type !== undefined) updateData.field_type = field.field_type;
       if (field.field_options !== undefined) updateData.field_options = field.field_options;
       if (field.is_required !== undefined) updateData.is_required = field.is_required;
+      
+      // Handle visibility settings by updating category
+      if (field.visibility_settings?.visible_in_tabs) {
+        const tabs = field.visibility_settings.visible_in_tabs;
+        if (tabs.basic) updateData.category = "basic";
+        else if (tabs.commercial) updateData.category = "commercial";
+        else if (tabs.utm) updateData.category = "utm";
+        else if (tabs.docs) updateData.category = "documents";
+      }
       
       const { error } = await supabase
         .from("custom_fields")
