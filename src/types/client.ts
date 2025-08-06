@@ -40,7 +40,8 @@ export interface Contact {
   
   // Tags e categorização
   tags?: string[];
-  responsibleUser?: string;
+  responsibleHosts?: string[]; // Mudança para array de hosts
+  responsibleUser?: string; // Manter temporariamente para compatibilidade
   clientSector?: string;
   clientObjective?: string;
   lossReason?: string;

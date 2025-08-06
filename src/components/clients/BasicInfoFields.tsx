@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Contact } from "@/types/client";
+import ResponsibleHostsField from "./ResponsibleHostsField";
 
 interface BasicInfoFieldsProps {
   newContact: Partial<Contact>;
@@ -81,15 +82,10 @@ const BasicInfoFields = React.memo(({ newContact, validationErrors, onInputChang
         />
       </div>
 
-      <div>
-        <Label htmlFor="responsible-user">Usuário responsável</Label>
-        <Input
-          id="responsible-user"
-          value={newContact.responsibleUser || ""}
-          onChange={(e) => onInputChange("responsibleUser", e.target.value)}
-          placeholder="Gabriel Calebe"
-        />
-      </div>
+      <ResponsibleHostsField 
+        newContact={newContact}
+        onInputChange={onInputChange}
+      />
 
       <div>
         <Label htmlFor="notes" className="text-gray-700 dark:text-gray-300">
