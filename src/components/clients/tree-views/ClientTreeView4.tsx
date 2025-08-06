@@ -75,19 +75,19 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
   };
 
   const getTagColor = (tag: string) => {
-    if (tag === 'Sem Tags') return 'bg-gray-100 text-gray-800';
+    if (tag === 'Sem Tags') return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
     
     const colors = [
-      'bg-blue-100 text-blue-800',
-      'bg-green-100 text-green-800',
-      'bg-purple-100 text-purple-800',
-      'bg-orange-100 text-orange-800',
-      'bg-pink-100 text-pink-800',
-      'bg-indigo-100 text-indigo-800',
-      'bg-yellow-100 text-yellow-800',
-      'bg-red-100 text-red-800',
-      'bg-teal-100 text-teal-800',
-      'bg-cyan-100 text-cyan-800'
+      'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
+      'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
+      'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200',
+      'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200',
+      'bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200',
+      'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200',
+      'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
+      'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
+      'bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200',
+      'bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200'
     ];
     
     // Usa hash para consistência de cores
@@ -116,23 +116,23 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
 
   const getSourceColor = (source: string) => {
     const sourceLower = source.toLowerCase();
-    if (sourceLower.includes('google')) return 'bg-red-100 text-red-800';
-    if (sourceLower.includes('facebook')) return 'bg-blue-100 text-blue-800';
-    if (sourceLower.includes('instagram')) return 'bg-pink-100 text-pink-800';
-    if (sourceLower.includes('linkedin')) return 'bg-indigo-100 text-indigo-800';
-    if (sourceLower.includes('whatsapp')) return 'bg-green-100 text-green-800';
-    if (sourceLower.includes('email')) return 'bg-gray-100 text-gray-800';
-    if (sourceLower.includes('referral')) return 'bg-purple-100 text-purple-800';
-    if (sourceLower.includes('website')) return 'bg-cyan-100 text-cyan-800';
-    return 'bg-orange-100 text-orange-800';
+    if (sourceLower.includes('google')) return 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200';
+    if (sourceLower.includes('facebook')) return 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
+    if (sourceLower.includes('instagram')) return 'bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200';
+    if (sourceLower.includes('linkedin')) return 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200';
+    if (sourceLower.includes('whatsapp')) return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
+    if (sourceLower.includes('email')) return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+    if (sourceLower.includes('referral')) return 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200';
+    if (sourceLower.includes('website')) return 'bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200';
+    return 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200';
   };
 
   const getProbabilityColor = (category: string) => {
-    if (category.includes('Muito Alta')) return 'bg-green-100 text-green-800';
-    if (category.includes('Alta')) return 'bg-lime-100 text-lime-800';
-    if (category.includes('Média')) return 'bg-yellow-100 text-yellow-800';
-    if (category.includes('Baixa')) return 'bg-orange-100 text-orange-800';
-    return 'bg-gray-100 text-gray-800';
+    if (category.includes('Muito Alta')) return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
+    if (category.includes('Alta')) return 'bg-lime-100 dark:bg-lime-900 text-lime-800 dark:text-lime-200';
+    if (category.includes('Média')) return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200';
+    if (category.includes('Baixa')) return 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200';
+    return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
   };
 
   const calculateAverageConversion = (contacts: Contact[]) => {
@@ -181,9 +181,9 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
               const avgConversion = calculateAverageConversion(tagContacts);
 
               return (
-                <div key={tag} className="border rounded-lg overflow-hidden">
+                <div key={tag} className="border dark:border-gray-700 rounded-lg overflow-hidden">
                   <div
-                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     onClick={() => toggleNode(tagId)}
                   >
                     {isTagExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -193,11 +193,11 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
                         <Badge className={getTagColor(tag)}>
                           {tag}
                         </Badge>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
                           {tagContacts.length} cliente{tagContacts.length !== 1 ? 's' : ''}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
                         <div className="flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
                           <span>Conversão média: {avgConversion}%</span>
@@ -210,7 +210,7 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
                   </div>
 
                   {isTagExpanded && (
-                    <div className="bg-gray-50 p-4">
+                    <div className="bg-gray-50 dark:bg-gray-900 p-4">
                       {Object.entries(sourceGroups)
                         .sort(([a], [b]) => a.localeCompare(b))
                         .map(([source, probabilityGroups]) => {
@@ -222,7 +222,7 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
                           return (
                             <div key={source} className="mb-3 last:mb-0">
                               <div
-                                className="flex items-center gap-3 p-3 bg-white rounded cursor-pointer hover:shadow-sm transition-shadow"
+                                className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded cursor-pointer hover:shadow-sm transition-shadow"
                                 onClick={() => toggleNode(sourceId)}
                               >
                                 {isSourceExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -232,16 +232,16 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
                                     <Badge className={getSourceColor(source)}>
                                       {source}
                                     </Badge>
-                                    <span className="text-sm text-gray-600">
+                                    <span className="text-sm text-gray-600 dark:text-gray-300">
                                       {sourceContacts.length} cliente{sourceContacts.length !== 1 ? 's' : ''}
                                     </span>
                                   </div>
-                                  <div className="text-sm text-gray-600 mt-1">
+                                  <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                                     Conversão média: {sourceAvgConversion}% • 
                                     {Object.keys(probabilityGroups).length} faixa{Object.keys(probabilityGroups).length !== 1 ? 's' : ''}
                                   </div>
                                 </div>
-                                <ExternalLink className="h-4 w-4 text-gray-400" />
+                                <ExternalLink className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                               </div>
 
                               {isSourceExpanded && (
@@ -262,7 +262,7 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
                                       return (
                                         <div key={probability}>
                                           <div
-                                            className="flex items-center gap-2 p-2 bg-white border rounded cursor-pointer hover:shadow-sm transition-shadow"
+                                            className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded cursor-pointer hover:shadow-sm transition-shadow"
                                             onClick={() => toggleNode(probabilityId)}
                                           >
                                             {isProbabilityExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
@@ -270,7 +270,7 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
                                             <Badge className={getProbabilityColor(probability)} variant="outline">
                                               {probability}
                                             </Badge>
-                                            <span className="text-sm text-gray-600 ml-auto">
+                                            <span className="text-sm text-gray-600 dark:text-gray-300 ml-auto">
                                               {uniqueContacts.length} cliente{uniqueContacts.length !== 1 ? 's' : ''}
                                             </span>
                                           </div>
@@ -282,14 +282,14 @@ const ClientTreeView4: React.FC<ClientTreeView4Props> = ({
                                                 .map(contact => (
                                                   <div
                                                     key={contact.id}
-                                                    className="flex items-center justify-between p-2 bg-white border rounded hover:shadow-sm transition-shadow cursor-pointer"
+                                                    className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded hover:shadow-sm transition-shadow cursor-pointer"
                                                     onClick={() => onContactClick?.(contact)}
                                                   >
                                                     <div className="flex items-center gap-2">
-                                                      <User className="h-3 w-3 text-gray-400" />
+                                                      <User className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                                                       <div>
-                                                        <div className="text-sm font-medium">{contact.name}</div>
-                                                        <div className="text-xs text-gray-500 flex items-center gap-2">
+                                                        <div className="text-sm font-medium dark:text-gray-200">{contact.name}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
                                                           {contact.company && (
                                                             <span>{contact.company}</span>
                                                           )}
