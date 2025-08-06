@@ -118,10 +118,6 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
         <div className="space-y-4">
           {customFieldsWithValues.map((field) => (
             <div key={field.id} className="space-y-2">
-              <label className="text-xs text-muted-foreground font-medium">
-                {field.field_name}
-                {field.is_required && <span className="text-destructive ml-1">*</span>}
-              </label>
               <CustomFieldRenderer
                 field={field}
                 value={field.value}

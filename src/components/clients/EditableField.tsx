@@ -102,14 +102,14 @@ const EditableField: React.FC<EditableFieldProps> = ({
             value={localValue}
             onChange={(e) => handleChange(e.target.value)}
             className="min-h-[60px] resize-none max-w-full"
-            placeholder={`Digite ${label.toLowerCase()}`}
+            placeholder=""
           />
         );
       case "select":
         return (
           <Select value={localValue as string} onValueChange={handleChange}>
             <SelectTrigger>
-              <SelectValue placeholder={`Selecione ${label.toLowerCase()}`} />
+              <SelectValue placeholder="" />
             </SelectTrigger>
             <SelectContent>
               {options.map((option) => (

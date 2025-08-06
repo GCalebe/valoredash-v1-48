@@ -31,7 +31,7 @@ const CustomFieldRenderer = ({
           <Input
             value={(value as string) || ""}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={`Digite ${field.field_name.toLowerCase()}`}
+            placeholder=""
             className={`bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 ${
               validationError ? "border-red-500 focus:border-red-500" : ""
             }`}
@@ -50,7 +50,7 @@ const CustomFieldRenderer = ({
               }`}
             >
               <SelectValue
-                placeholder={`Selecione ${field.field_name.toLowerCase()}`}
+                placeholder=""
               />
             </SelectTrigger>
             <SelectContent className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">

@@ -52,10 +52,6 @@ const AddClientCustomFields: React.FC<AddClientCustomFieldsProps> = ({
       <div className="space-y-4">
         {visibleFields.map((field) => (
           <div key={field.id} className="space-y-2">
-            <Label className="text-sm font-medium">
-              {field.field_name}
-              {field.is_required && <span className="text-red-500 ml-1">*</span>}
-            </Label>
             <CustomFieldRenderer
               field={field}
               value={customValues[field.id] || null}

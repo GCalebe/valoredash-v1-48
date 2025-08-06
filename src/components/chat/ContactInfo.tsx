@@ -263,7 +263,7 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
                   {getFieldsForTab("basico").map((field) => (
                     <div key={field.id} className="relative group">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs text-muted-foreground">{field.name}</label>
+                        <div className="flex-1"></div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             size="sm"
@@ -353,7 +353,7 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
                    {getFieldsForTab("comercial").map((field) => (
                      <div key={field.id} className="relative group">
                        <div className="flex items-center justify-between">
-                         <label className="text-xs text-muted-foreground">{field.name}</label>
+                         <div className="flex-1"></div>
                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                            <Button
                              size="sm"
@@ -441,7 +441,7 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
                    {getFieldsForTab("utm").map((field) => (
                      <div key={field.id} className="relative group">
                        <div className="flex items-center justify-between">
-                         <label className="text-xs text-muted-foreground">{field.name}</label>
+                         <div className="flex-1"></div>
                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                            <Button
                              size="sm"
@@ -519,7 +519,7 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
                  {getFieldsForTab("midia").map((field) => (
                    <div key={field.id} className="relative group">
                      <div className="flex items-center justify-between">
-                       <label className="text-xs text-muted-foreground">{field.name}</label>
+                       <div className="flex-1"></div>
                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                          <Button
                            size="sm"
