@@ -277,20 +277,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                 </div>
               </div>
 
-              {/* Action to view full details */}
-              <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDetailsClick();
-                  }}
-                  className="w-full text-xs"
-                >
-                  Ver Detalhes Completos
-                </Button>
-              </div>
+              {/* Botão de detalhes completos removido */}
             </>
           )}
         </CardContent>
