@@ -11,7 +11,7 @@ import { Contact } from "@/types/client";
 
 import ContactInfo from "@/components/chat/ContactInfo";
 import NotesFieldEdit from "./NotesFieldEdit";
-
+import CustomFieldsSection from "./CustomFieldsSection";
 import LoadingClientState from "@/components/chat/LoadingClientState";
 
 interface EditClientPanelProps {
@@ -127,6 +127,11 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
                     }}
                   />
                )}
+
+              {/* Custom Fields Section */}
+              <div className="mt-6">
+                <CustomFieldsSection contactId={selectedContact?.id || null} />
+              </div>
 
               {/* Notes Field */}
               <div className="mt-6">
