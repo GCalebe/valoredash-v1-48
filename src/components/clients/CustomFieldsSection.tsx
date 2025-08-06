@@ -66,18 +66,21 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
     );
   }
 
-  if (isLoading) {
+  if (isLoading && customFieldsWithValues.length === 0) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Campos Personalizados</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            Campos Personalizados
+            <div className="w-3 h-3 border border-muted-foreground rounded-full border-t-transparent animate-spin" />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
+            {[1, 2].map((i) => (
               <div key={i} className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-7 w-full" />
               </div>
             ))}
           </div>
@@ -103,8 +106,13 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-sm">Campos Personalizados</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          Campos Personalizados
+          {isLoading && (
+            <div className="w-3 h-3 border border-muted-foreground rounded-full border-t-transparent animate-spin opacity-60" />
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

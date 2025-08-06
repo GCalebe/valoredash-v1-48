@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { CustomFieldWithValue } from "@/types/customFields";
 import { useCustomFields } from "./useCustomFields";
+import { useInvalidateCustomFieldsCache } from "./useInvalidateCustomFieldsCache";
 import { toast } from "@/hooks/use-toast";
 
 export const useOptimizedCustomFields = () => {
@@ -10,15 +11,33 @@ export const useOptimizedCustomFields = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Cache para evitar requests duplicados
+  // Cache para evitar requests duplicados e armazenar dados
   const loadingRef = useRef<Map<string, Promise<CustomFieldWithValue[]>>>(new Map());
+  const dataCache = useRef<Map<string, CustomFieldWithValue[]>>(new Map());
   
   const { getCustomFieldsWithValues, saveClientCustomValues } = useCustomFields();
+  
+  const clearCache = useCallback(() => {
+    loadingRef.current.clear();
+    dataCache.current.clear();
+    setCustomFieldsWithValues([]);
+    setError(null);
+  }, []);
+  
+  // Auto-invalidar cache quando houver mudanças no banco
+  useInvalidateCustomFieldsCache(clearCache);
 
   const loadCustomFieldsForContact = useCallback(async (contactId: string) => {
     if (!contactId) {
       setCustomFieldsWithValues([]);
       return;
+    }
+
+    // Verificar cache primeiro
+    if (dataCache.current.has(contactId)) {
+      const cachedData = dataCache.current.get(contactId)!;
+      setCustomFieldsWithValues(cachedData);
+      return cachedData;
     }
 
     // Verificar se já está carregando para evitar requests duplicados
@@ -46,6 +65,8 @@ export const useOptimizedCustomFields = () => {
           field && field.id && field.field_name
         );
         
+        // Armazenar no cache
+        dataCache.current.set(contactId, validatedFields);
         setCustomFieldsWithValues(validatedFields);
         return validatedFields;
       } catch (error) {
@@ -94,7 +115,8 @@ export const useOptimizedCustomFields = () => {
 
       await saveClientCustomValues(contactId, validatedValues);
       
-      // Recarregar dados após salvar com sucesso
+      // Invalidar cache e recarregar dados após salvar com sucesso
+      dataCache.current.delete(contactId);
       await loadCustomFieldsForContact(contactId);
       
       return true;
@@ -113,11 +135,22 @@ export const useOptimizedCustomFields = () => {
     }
   }, [saveClientCustomValues, loadCustomFieldsForContact]);
 
-  const clearCache = useCallback(() => {
-    loadingRef.current.clear();
-    setCustomFieldsWithValues([]);
-    setError(null);
-  }, []);
+
+  const preloadCustomFields = useCallback(async (contactId: string) => {
+    if (!contactId || dataCache.current.has(contactId) || loadingRef.current.has(contactId)) {
+      return;
+    }
+
+    try {
+      const fieldsWithValues = await getCustomFieldsWithValues(contactId);
+      const validatedFields = fieldsWithValues.filter(field => 
+        field && field.id && field.field_name
+      );
+      dataCache.current.set(contactId, validatedFields);
+    } catch (error) {
+      console.error("Erro no pré-carregamento de campos personalizados:", error);
+    }
+  }, [getCustomFieldsWithValues]);
 
   const retry = useCallback((contactId: string) => {
     clearCache();
@@ -132,5 +165,6 @@ export const useOptimizedCustomFields = () => {
     saveCustomFields,
     clearCache,
     retry,
+    preloadCustomFields,
   };
 };

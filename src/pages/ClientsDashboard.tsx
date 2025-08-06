@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useClientManagement } from "@/hooks/useClientManagement";
 import { useClientsFilters } from "@/hooks/useClientsFilters";
 import { useKanbanStagesSupabase, KanbanStage } from "@/hooks/useKanbanStagesSupabase";
+import { useCustomFieldsPreloader } from "@/hooks/useCustomFieldsPreloader";
 import ClientsDashboardLayout from "@/components/clients/ClientsDashboardLayout";
 import ClientsTable from "@/components/clients/ClientsTable";
 import KanbanView from "@/components/clients/KanbanView";
@@ -63,6 +64,9 @@ const ClientsDashboard = () => {
     handlePauseDurationConfirm,
     handleKanbanStageChange,
   } = useClientManagement();
+
+  // Pré-carregar campos personalizados em background
+  useCustomFieldsPreloader(contacts);
 
   // Handle stage editing
   const handleStageEdit = (stage: KanbanStage) => {
