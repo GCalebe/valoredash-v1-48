@@ -24,6 +24,7 @@ import ValidationErrorAlert from "./ValidationErrorAlert";
 import BasicInfoFields from "./BasicInfoFields";
 import CompanyInfoFields from "./CompanyInfoFields";
 import DialogTabsContent from "./DialogTabsContent";
+import AddClientCustomFields from "./AddClientCustomFields";
 
 interface AddClientDialogProps {
   isOpen: boolean;
@@ -199,6 +200,16 @@ const AddClientDialog = ({
                 newContact={newContact}
                 validationErrors={validationErrors}
                 onInputChange={handleInputChange}
+              />
+            </div>
+            
+            {/* Custom Fields Section */}
+            <div className="mt-6">
+              <AddClientCustomFields
+                customFields={customFields}
+                customValues={customValues}
+                onCustomFieldChange={handleCustomFieldChange}
+                loading={loading}
               />
             </div>
           </TabsContent>
