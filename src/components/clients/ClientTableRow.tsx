@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ClientInfo from "./ClientInfo";
+import ResponsibleHostsDisplay from "./ResponsibleHostsDisplay";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -154,7 +155,12 @@ const ClientTableRow: React.FC<ClientTableRowProps> = ({
         )}
 
         {columns.includes("responsibleUser") && (
-          <TableCell>{contact.responsibleUser || "Não atribuído"}</TableCell>
+          <TableCell>
+            <ResponsibleHostsDisplay 
+              hostIds={contact.responsibleHosts} 
+              maxDisplay={2}
+            />
+          </TableCell>
         )}
 
         {/* Ações (sempre visível) */}

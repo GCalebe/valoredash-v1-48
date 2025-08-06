@@ -5,7 +5,8 @@ interface DisplayConfig {
   showConsultationStage: boolean;
   showCommercialInfo: boolean;
   showCustomFields: boolean;
-  showResponsibleUser: boolean;
+  showResponsibleHosts: boolean;
+  showResponsibleUser: boolean; // Manter para compatibilidade
   columnPreferences: Array<{
     field: string;
     visible: boolean;
@@ -19,7 +20,8 @@ export const useClientDisplayConfig = () => {
     showConsultationStage: true,
     showCommercialInfo: true,
     showCustomFields: true,
-    showResponsibleUser: true,
+    showResponsibleHosts: true,
+    showResponsibleUser: true, // Manter para compatibilidade
     columnPreferences: [
       { field: "name", visible: true, order: 1 },
       { field: "phone", visible: true, order: 2 },
@@ -27,8 +29,9 @@ export const useClientDisplayConfig = () => {
       { field: "tags", visible: true, order: 4 },
       { field: "consultationStage", visible: true, order: 5 },
       { field: "clientName", visible: false, order: 6 },
-      { field: "responsibleUser", visible: false, order: 7 },
-      { field: "clientSector", visible: false, order: 8 },
+      { field: "responsibleHosts", visible: false, order: 7 },
+      { field: "responsibleUser", visible: false, order: 8 },
+      { field: "clientSector", visible: false, order: 9 },
       { field: "budget", visible: false, order: 9 },
     ],
   });

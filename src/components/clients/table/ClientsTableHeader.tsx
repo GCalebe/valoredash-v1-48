@@ -45,7 +45,7 @@ export const ClientsTableHeader: React.FC<ClientsTableHeaderProps> = ({
           <TableHead>Objetivo</TableHead>
         )}
         {visibleColumns.includes("responsibleUser") && (
-          <TableHead>Responsável</TableHead>
+          <TableHead>Anfitrião Responsável</TableHead>
         )}
 
         {/* Coluna de ações com botão configurar colunas */}

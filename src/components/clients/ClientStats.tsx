@@ -95,13 +95,13 @@ const ClientStats: React.FC<ClientStatsProps> = ({
         showVisibilityControl={!readOnly}
       />
       <EditableField
-        label="Usuário Responsável"
-        value={clientData?.responsibleUser}
-        fieldId="responsibleUser"
-        readOnly={readOnly}
+        label="Anfitrião Responsável"
+        value={clientData?.responsibleHosts?.join(', ') || ''}
+        fieldId="responsibleHosts"
+        readOnly={true} // Por enquanto readonly, pode ser editável futuramente
         onChange={onFieldUpdate}
         onVisibilityChange={onVisibilityChange}
-        isVisible={fieldVisibility.responsibleUser !== false}
+        isVisible={fieldVisibility.responsibleHosts !== false}
         showVisibilityControl={!readOnly}
       />
       <EditableField

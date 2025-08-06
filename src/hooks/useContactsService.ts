@@ -46,6 +46,7 @@ export const useContactsService = () => {
         sessionId: contact.session_id,
         tags: contact.tags || [],
         responsibleUser: contact.responsible_user,
+        responsibleHosts: contact.responsible_hosts || [],
         sales: contact.sales,
         clientSector: contact.client_sector,
         budget: contact.budget,

@@ -1296,6 +1296,7 @@ export type Database = {
           payment: string | null
           payment_method: string | null
           phone: string | null
+          responsible_hosts: string[] | null
           responsible_user: string | null
           sales: number | null
           session_id: string | null
@@ -1334,6 +1335,7 @@ export type Database = {
           payment?: string | null
           payment_method?: string | null
           phone?: string | null
+          responsible_hosts?: string[] | null
           responsible_user?: string | null
           sales?: number | null
           session_id?: string | null
@@ -1372,6 +1374,7 @@ export type Database = {
           payment?: string | null
           payment_method?: string | null
           phone?: string | null
+          responsible_hosts?: string[] | null
           responsible_user?: string | null
           sales?: number | null
           session_id?: string | null
@@ -3419,25 +3422,67 @@ export type Database = {
       }
       product_combos: {
         Row: {
+          benefit: string | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           discount_percentage: number | null
           id: string
           name: string
+          updated_by: string | null
         }
         Insert: {
+          benefit?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           discount_percentage?: number | null
           id?: string
           name: string
+          updated_by?: string | null
         }
         Update: {
+          benefit?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           discount_percentage?: number | null
           id?: string
           name?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      product_downsells: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          downsell_product_id: string
+          id: string
+          is_active: boolean | null
+          product_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          downsell_product_id: string
+          id?: string
+          is_active?: boolean | null
+          product_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          downsell_product_id?: string
+          id?: string
+          is_active?: boolean | null
+          product_id?: string
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -3484,6 +3529,135 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      product_promotions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_amount: number | null
+          discount_percentage: number | null
+          discount_type: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          product_id: string
+          start_date: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          discount_type?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          product_id: string
+          start_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          discount_type?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          product_id?: string
+          start_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      product_upgrades: {
+        Row: {
+          benefits: string[] | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number | null
+          product_id: string
+          target_product_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          benefits?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price?: number | null
+          product_id: string
+          target_product_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          benefits?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number | null
+          product_id?: string
+          target_product_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      product_upsells: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          product_id: string
+          updated_at: string
+          updated_by: string | null
+          upsell_product_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          product_id: string
+          updated_at?: string
+          updated_by?: string | null
+          upsell_product_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          product_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          upsell_product_id?: string
+        }
+        Relationships: []
       }
       products: {
         Row: {

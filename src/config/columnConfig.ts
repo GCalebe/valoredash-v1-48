@@ -100,8 +100,8 @@ export const defaultColumnConfig: ColumnConfig[] = [
   },
   {
     id: "responsibleUser",
-    label: "Responsável",
-    accessor: "responsibleUser",
+    label: "Anfitrião Responsável",
+    accessor: "responsibleHosts",
     isVisible: false,
     priority: 7,
     minWidth: 120,
