@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserPlus } from "lucide-react";
 import { Contact } from "@/types/client";
 import { useCustomFields } from "@/hooks/useCustomFields";
+import { useOptimizedCustomFields } from "@/hooks/useOptimizedCustomFields";
 import { useAddClientFormLogic } from "@/hooks/useAddClientFormLogic";
 import { DynamicCategory } from "./DynamicCategoryManager";
 import TagsManager from "./TagsManager";
@@ -42,6 +43,7 @@ const AddClientDialog = ({
   handleAddContact,
 }: AddClientDialogProps) => {
   const { customFields, fetchCustomFields, saveClientCustomValues } = useCustomFields();
+  const { preloadCustomFields } = useOptimizedCustomFields();
   const [loading, setLoading] = useState(false);
   
   // Use custom hook for form logic

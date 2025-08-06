@@ -56,6 +56,10 @@ export const useOptimizedCustomFields = () => {
     setIsLoading(true);
     setError(null);
 
+    // Iniciar com um array vazio para permitir renderização imediata da UI
+    // enquanto os valores reais estão carregando
+    setCustomFieldsWithValues([]);
+
     const loadPromise = (async () => {
       try {
         const fieldsWithValues = await getCustomFieldsWithValues(contactId);
@@ -136,19 +140,55 @@ export const useOptimizedCustomFields = () => {
   }, [saveClientCustomValues, loadCustomFieldsForContact]);
 
 
-  const preloadCustomFields = useCallback(async (contactId: string) => {
-    if (!contactId || dataCache.current.has(contactId) || loadingRef.current.has(contactId)) {
-      return;
-    }
-
-    try {
-      const fieldsWithValues = await getCustomFieldsWithValues(contactId);
-      const validatedFields = fieldsWithValues.filter(field => 
-        field && field.id && field.field_name
+  const preloadCustomFields = useCallback(async (contactIds: string | string[]) => {
+    // Converter para array se for uma string única
+    const ids = Array.isArray(contactIds) ? contactIds : [contactIds];
+    
+    // Filtrar apenas IDs que não estão em cache ou carregando
+    const idsToLoad = ids.filter(id => 
+      id && !dataCache.current.has(id) && !loadingRef.current.has(id)
+    );
+    
+    if (idsToLoad.length === 0) return;
+    
+    // Carregar em paralelo com limite de concorrência
+    const loadBatch = async (batch: string[]) => {
+      return Promise.all(
+        batch.map(async (contactId) => {
+          try {
+            // Marcar como carregando para evitar duplicação
+            const loadPromise = (async () => {
+              try {
+                const fieldsWithValues = await getCustomFieldsWithValues(contactId);
+                const validatedFields = fieldsWithValues.filter(field => 
+                  field && field.id && field.field_name
+                );
+                dataCache.current.set(contactId, validatedFields);
+                return validatedFields;
+              } finally {
+                loadingRef.current.delete(contactId);
+              }
+            })();
+            
+            loadingRef.current.set(contactId, loadPromise);
+            return loadPromise;
+          } catch (error) {
+            console.error(`Erro no pré-carregamento para contato ${contactId}:`, error);
+            loadingRef.current.delete(contactId);
+          }
+        })
       );
-      dataCache.current.set(contactId, validatedFields);
-    } catch (error) {
-      console.error("Erro no pré-carregamento de campos personalizados:", error);
+    };
+    
+    // Carregar em lotes de 3 para não sobrecarregar
+    const batchSize = 3;
+    for (let i = 0; i < idsToLoad.length; i += batchSize) {
+      const batch = idsToLoad.slice(i, i + batchSize);
+      try {
+        await loadBatch(batch);
+      } catch (error) {
+        console.error("Erro no pré-carregamento de lote:", error);
+      }
     }
   }, [getCustomFieldsWithValues]);
 

@@ -13,6 +13,7 @@ import ContactInfo from "@/components/chat/ContactInfo";
 import NotesFieldEdit from "./NotesFieldEdit";
 import CustomFieldsSection from "./CustomFieldsSection";
 import LoadingClientState from "@/components/chat/LoadingClientState";
+import { useOptimizedCustomFields } from "@/hooks/useOptimizedCustomFields";
 
 interface EditClientPanelProps {
   isOpen: boolean;
@@ -36,13 +37,21 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
   
   const [dynamicFieldsLoading, setDynamicFieldsLoading] = useState(false);
   const validationErrors = {};
+  
+  // Usar o hook otimizado para pré-carregar campos personalizados
+  const { preloadCustomFields } = useOptimizedCustomFields();
 
   useEffect(() => {
     if (isOpen && selectedContact) {
       console.log("Setting contact data for editing:", selectedContact);
       setContact({ ...selectedContact });
+      
+      // Pré-carregar campos personalizados quando o painel é aberto
+      if (selectedContact.id) {
+        preloadCustomFields(selectedContact.id);
+      }
     }
-  }, [isOpen, selectedContact]);
+  }, [isOpen, selectedContact, preloadCustomFields]);
 
 
 
