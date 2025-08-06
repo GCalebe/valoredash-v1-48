@@ -68,10 +68,15 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages }: Us
 
       console.log('🎯 Estágios inicializados:', Object.keys(stageCounts));
 
-      // Query contacts and count by stage
+      // Get authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Query contacts and count by stage - filtrar por user_id
       const { data: contacts, error: queryError } = await supabase
         .from('contacts')
         .select('id, kanban_stage_id, created_at')
+        .eq('user_id', user.id)
         .is('deleted_at', null)
         .gte('created_at', dateRange.from.toISOString())
         .lte('created_at', dateRange.to.toISOString())

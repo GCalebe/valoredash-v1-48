@@ -57,19 +57,26 @@ const fetchConsolidatedMetrics = async (
   endDate: string
 ): Promise<ConsolidatedMetrics> => {
   try {
-    // Buscar dados de conversas
+    // Get authenticated user first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // Buscar dados de conversas - filtrar por user_id
     const conversationsQuery = supabase
       .from('conversations')
       .select('*')
+      .eq('user_id', user.id)
       .gte('created_at', startDate)
       .lte('created_at', endDate);
 
     const { data: conversations } = await conversationsQuery;
 
-    // Buscar dados de contatos (leads)
+    // Buscar dados de contatos (leads) - usar o mesmo user já autenticado
+
     const contactsQuery = supabase
       .from('contacts')
       .select('*')
+      .eq('user_id', user.id)
       .gte('created_at', startDate)
       .lte('created_at', endDate);
 
@@ -128,10 +135,15 @@ const fetchTimeSeriesData = async (
   endDate: string
 ): Promise<TimeSeriesData[]> => {
   try {
-    // Buscar dados de conversas diárias
+    // Get authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // Buscar dados de conversas diárias - filtrar por user_id
     const { data: dailyData } = await supabase
       .from('conversation_daily_data')
       .select('*')
+      .eq('user_id', user.id)
       .gte('date', startDate.split('T')[0])
       .lte('date', endDate.split('T')[0])
       .order('date', { ascending: true });
@@ -178,7 +190,7 @@ const fetchLeadsBySource = async (
   endDate: string
 ): Promise<LeadsBySourceData[]> => {
   try {
-    // Buscar dados UTM
+    // Buscar dados UTM - NOTA: utm_tracking não tem user_id, então busca todos os dados
     const { data: utmData } = await supabase
       .from('utm_tracking')
       .select('utm_source')
