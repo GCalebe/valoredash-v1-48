@@ -104,23 +104,28 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
             <div className="p-4 space-y-4">
               {/* Client Information with Tabs */}
                {contact && (
-                 <ContactInfo
-                   contact={{
-                     id: contact.id,
-                     name: contact.name,
-                     avatar: contact.avatar || '',
-                     lastMessage: '',
-                     timestamp: new Date().toISOString(),
-                     unreadCount: 0,
-                     isOnline: false,
-                     status: 'offline',
-                     phone: contact.phone,
-                     email: contact.email,
-                     sessionId: contact.id
-                   }}
-                   getStatusColor={() => 'bg-gray-400'}
-                   width={400}
-                 />
+                  <ContactInfo
+                    contact={{
+                      id: contact.id,
+                      name: contact.name,
+                      avatar: contact.avatar || '',
+                      lastMessage: '',
+                      timestamp: new Date().toISOString(),
+                      unreadCount: 0,
+                      isOnline: false,
+                      status: 'offline',
+                      phone: contact.phone,
+                      email: contact.email,
+                      sessionId: contact.id,
+                      tags: contact.tags || [] // Passar as tags reais do contato
+                    }}
+                    getStatusColor={() => 'bg-gray-400'}
+                    width={400}
+                    onTagsChange={(newTags) => {
+                      // Atualizar as tags no estado do contato
+                      setContact(prev => prev ? { ...prev, tags: newTags } : null);
+                    }}
+                  />
                )}
 
               {/* Notes Field */}

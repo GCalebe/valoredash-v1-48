@@ -28,6 +28,7 @@ interface Contact {
   phone?: string;
   email?: string;
   sessionId?: string;
+  tags?: string[]; // Adicionar suporte a tags
 }
 
 interface EditingField {
@@ -41,19 +42,23 @@ interface ContactInfoProps {
   contact: Contact;
   getStatusColor: (status?: string) => string;
   width: number;
+  onTagsChange?: (tags: string[]) => void; // Callback para mudanças nas tags
 }
 
-export default function ContactInfo({ contact, getStatusColor, width }: ContactInfoProps) {
+export default function ContactInfo({ contact, getStatusColor, width, onTagsChange }: ContactInfoProps) {
   const [customFields, setCustomFields] = useState<{[key: string]: string | number | boolean | string[]}>({});
   const [addFieldDialogOpen, setAddFieldDialogOpen] = useState(false);
   const [editFieldDialogOpen, setEditFieldDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"basico" | "comercial" | "utm" | "midia">("basico");
   const [editingField, setEditingField] = useState<EditingField | null>(null);
-  const [tags, setTags] = useState<{id: string; label: string; color: string}[]>([
-    { id: "1", label: "VIP", color: "bg-purple-500" },
-    { id: "2", label: "Cliente", color: "bg-green-500" }
-  ]);
+  const [tags, setTags] = useState<string[]>(contact.tags || []);
   const [newTag, setNewTag] = useState("");
+
+  // Sincronizar mudanças nas tags com o callback
+  const updateTags = (newTags: string[]) => {
+    setTags(newTags);
+    onTagsChange?.(newTags);
+  };
   
   // Hooks para campos customizados
   const { customFields: allCustomFields, fetchCustomFields, deleteCustomField } = useCustomFields();
@@ -154,10 +159,10 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
             {/* Tags */}
             <div className="mt-3">
               <div className="flex flex-wrap gap-1 mb-2">
-                {tags.map((tag) => (
-                  <Badge key={tag.id} className={cn("text-xs px-2 py-0.5 text-white", tag.color)}>
-                    {tag.label}
-                    <X className="w-3 h-3 ml-1 cursor-pointer" onClick={() => setTags(tags.filter(t => t.id !== tag.id))} />
+                {tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs px-2 py-0.5">
+                    {tag}
+                    <X className="w-3 h-3 ml-1 cursor-pointer" onClick={() => updateTags(tags.filter(t => t !== tag))} />
                   </Badge>
                 ))}
               </div>
@@ -169,24 +174,14 @@ export default function ContactInfo({ contact, getStatusColor, width }: ContactI
                   className="h-6 text-xs"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && newTag.trim()) {
-                      const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500'];
-                      setTags([...tags, { 
-                        id: Date.now().toString(), 
-                        label: newTag.trim(), 
-                        color: colors[Math.floor(Math.random() * colors.length)] 
-                      }]);
+                      updateTags([...tags, newTag.trim()]);
                       setNewTag('');
                     }
                   }}
                 />
                 <Button size="sm" variant="outline" className="h-6 px-2" onClick={() => {
                   if (newTag.trim()) {
-                    const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500'];
-                    setTags([...tags, { 
-                      id: Date.now().toString(), 
-                      label: newTag.trim(), 
-                      color: colors[Math.floor(Math.random() * colors.length)] 
-                    }]);
+                    updateTags([...tags, newTag.trim()]);
                     setNewTag('');
                   }
                 }}>
