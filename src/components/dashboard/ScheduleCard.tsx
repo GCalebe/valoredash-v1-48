@@ -60,7 +60,7 @@ const ScheduleCard = () => {
       className="cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white h-full flex flex-col"
       onClick={handleClick}
     >
-      <CardHeader className="pb-2 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-t-lg">
+      <CardHeader className="pb-2 bg-gradient-to-r from-teal-500 to-teal-600 dark:from-teal-600 dark:to-teal-700 text-white rounded-t-lg">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" />
@@ -78,14 +78,14 @@ const ScheduleCard = () => {
             />
           </Button>
         </CardTitle>
-        <CardDescription className="text-blue-100 text-xs">
+        <CardDescription className="text-teal-100 text-xs">
           Gerenciamento de agendamentos
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-2 flex-grow flex flex-col items-center justify-center">
         <div className="mb-2 flex justify-center">
-          <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full">
-            <Calendar className="h-8 w-8 text-blue-500 dark:text-blue-400" />
+          <div className="bg-teal-100 dark:bg-teal-900/30 p-3 rounded-full">
+            <Calendar className="h-8 w-8 text-teal-500 dark:text-teal-400" />
           </div>
         </div>
 
@@ -105,7 +105,7 @@ const ScheduleCard = () => {
               </span>
               <Badge
                 variant="outline"
-                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs"
+                className="bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300 text-xs"
               >
                 {todayEvents.length}
               </Badge>
@@ -116,7 +116,7 @@ const ScheduleCard = () => {
               </span>
               <Badge
                 variant="outline"
-                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs"
+                className="bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300 text-xs"
               >
                 {events.length}
               </Badge>
@@ -130,7 +130,7 @@ const ScheduleCard = () => {
               Próximo hoje:
             </p>
             <div className="flex items-center gap-1 text-xs">
-              <Clock className="h-3 w-3 text-blue-500 flex-shrink-0" />
+              <Clock className="h-3 w-3 text-teal-500 flex-shrink-0" />
               <span className="font-medium">
                 {todayEvents[0].start_time ? new Date(todayEvents[0].start_time).toLocaleTimeString() : 'Sem horário'}
               </span>
@@ -144,7 +144,7 @@ const ScheduleCard = () => {
       <CardFooter className="bg-gray-50 dark:bg-gray-700/50 rounded-b-lg border-t dark:border-gray-700 flex justify-center py-2 mt-auto">
         <Badge
           variant="outline"
-          className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800/50 text-xs"
+          className="bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-800/50 text-xs"
         >
           Acessar calendário
         </Badge>

@@ -23,19 +23,19 @@ const EvolutionCard = () => {
       className="cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:border-gray-700 dark:text-white h-full flex flex-col"
       onClick={handleClick}
     >
-      <CardHeader className="pb-2 bg-gradient-to-r from-blue-400 to-cyan-500 dark:from-blue-500 dark:to-cyan-600 text-white rounded-t-lg">
+      <CardHeader className="pb-2 bg-gradient-to-r from-cyan-500 to-cyan-600 dark:from-cyan-600 dark:to-cyan-700 text-white rounded-t-lg">
         <CardTitle className="flex items-center gap-2 text-sm">
           <Link className="h-4 w-4" />
           Conexões
         </CardTitle>
-        <CardDescription className="text-blue-100 text-xs">
+        <CardDescription className="text-cyan-100 text-xs">
           Conectar e sincronizar
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-2 flex-grow flex flex-col items-center justify-center">
         <div className="mb-2 flex justify-center">
-          <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full">
-            <Link className="h-8 w-8 text-blue-500 dark:text-blue-400" />
+          <div className="bg-cyan-100 dark:bg-cyan-900/30 p-3 rounded-full">
+            <Link className="h-8 w-8 text-cyan-500 dark:text-cyan-400" />
           </div>
         </div>
         <p className="text-gray-600 dark:text-gray-300 text-center text-xs">
@@ -45,7 +45,7 @@ const EvolutionCard = () => {
       <CardFooter className="bg-gray-50 dark:bg-gray-700/50 rounded-b-lg border-t dark:border-gray-700 flex justify-center py-2 mt-auto">
         <Badge
           variant="outline"
-          className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800/50 text-xs"
+          className="bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-800/50 text-xs"
         >
           Conectar Whatsapp
         </Badge>
