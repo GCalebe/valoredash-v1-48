@@ -28,7 +28,6 @@ export function useCustomFieldValidation() {
         toast({
           title: "Erro ao carregar regras",
           description: "Não foi possível carregar as regras de validação.",
-          variant: "destructive",
         });
         return [];
       }

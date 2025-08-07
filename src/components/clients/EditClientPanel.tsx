@@ -16,13 +16,18 @@ import CustomFieldsSection from "./CustomFieldsSection";
 import LoadingClientState from "@/components/chat/LoadingClientState";
 import { useOptimizedCustomFields } from "@/hooks/useOptimizedCustomFields";
 import { SkeletonFormGrid, SkeletonCustomFields } from "@/components/ui/skeleton-form";
-import { Loader2 } from "lucide-react";
+import { Loader2, Save, Clock, CheckCircle } from "lucide-react";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { useRealTimeValidation } from "@/hooks/useRealTimeValidation";
+import ContactPreview from "./ContactPreview";
 
 interface EditClientPanelProps {
   isOpen: boolean;
   onClose: () => void;
   selectedContact: Contact | null;
   onSave: (updatedContact: Contact) => Promise<void>;
+  enableAutoSave?: boolean;
+  showPreview?: boolean;
 }
 
 /**
@@ -34,15 +39,40 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
   onClose,
   selectedContact,
   onSave,
+  enableAutoSave = true,
+  showPreview = true,
 }) => {
-  const [contact, setContact] = useState<Contact | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [customFieldsLoading, setCustomFieldsLoading] = useState(true);
-  const validationErrors = {};
-  
-  // Usar o hook otimizado para pré-carregar campos personalizados
+  const [showContactPreview, setShowContactPreview] = useState(false);
+  // Use optimized custom fields hook
   const { preloadCustomFields } = useOptimizedCustomFields();
+  
+  // Auto-save functionality
+  const {
+    contact,
+    updateContact,
+    hasUnsavedChanges,
+    isSaving: autoSaving,
+    lastSaved,
+    forceSave,
+    discardChanges,
+    resetContact,
+  } = useAutoSave(selectedContact, {
+    enabled: enableAutoSave,
+    delay: 2000,
+    fields: ['name', 'email', 'phone', 'notes', 'address'],
+  });
+
+  // Real-time validation
+  const {
+    errors,
+    isValid,
+    getFieldError,
+    markFieldAsTouched,
+    triggerValidation,
+  } = useRealTimeValidation(contact);
 
   useEffect(() => {
     if (isOpen && selectedContact) {
@@ -50,7 +80,7 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
       setCustomFieldsLoading(true);
       
       console.log("Setting contact data for editing:", selectedContact);
-      setContact({ ...selectedContact });
+      resetContact(selectedContact);
       
       // Simulate loading time for better UX feedback
       setTimeout(() => setIsLoading(false), 200);
@@ -63,17 +93,18 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
         setCustomFieldsLoading(false);
       }
     }
-  }, [isOpen, selectedContact, preloadCustomFields]);
+  }, [isOpen, selectedContact, preloadCustomFields, resetContact]);
 
 
 
   const handleSave = async () => {
     if (!contact) return;
 
-    // Check for validation errors
-    const hasErrors = Object.keys(validationErrors).length > 0;
-    if (hasErrors) {
-      console.warn("Cannot save with validation errors:", validationErrors);
+    // Trigger validation
+    triggerValidation();
+    
+    if (!isValid) {
+      console.warn("Cannot save with validation errors:", errors);
       return;
     }
 
@@ -90,7 +121,10 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
   };
 
   const handleClose = () => {
-    setContact(null);
+    if (hasUnsavedChanges) {
+      // Could add a confirmation dialog here
+    }
+    resetContact(null);
     onClose();
   };
 
@@ -119,19 +153,55 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-4xl w-[90vw] h-[80vh] flex flex-col p-0">
-        {/* Header */}
+        {/* Header with auto-save status */}
         <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle className="text-lg font-semibold">
-            {contact?.name ? `Editar Cliente - ${contact.name}` : 'Editar Cliente'}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-lg font-semibold">
+              {contact?.name ? `Editar Cliente - ${contact.name}` : 'Editar Cliente'}
+            </DialogTitle>
+            
+            {enableAutoSave && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {autoSaving ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span>Salvando...</span>
+                  </>
+                ) : hasUnsavedChanges ? (
+                  <>
+                    <Clock className="h-3 w-3" />
+                    <span>Alterações não salvas</span>
+                  </>
+                ) : lastSaved ? (
+                  <>
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    <span>Salvo às {lastSaved.toLocaleTimeString()}</span>
+                  </>
+                ) : null}
+              </div>
+            )}
+          </div>
+          
+          {showPreview && (
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => setShowContactPreview(!showContactPreview)}
+                className="text-xs text-primary hover:underline"
+              >
+                {showContactPreview ? 'Ocultar' : 'Mostrar'} Preview
+              </button>
+            </div>
+          )}
         </DialogHeader>
         
         {/* Conteúdo principal */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <ScrollArea className="flex-1 min-h-0">
-            <div className="p-4 space-y-4">
-              {/* Client Information with Tabs */}
-               {contact && (
+        <div className="flex-1 flex min-h-0">
+          {/* Left side - Edit form */}
+          <div className={`${showContactPreview ? 'w-1/2' : 'w-full'} min-h-0 flex flex-col`}>
+            <ScrollArea className="flex-1">
+              <div className="p-4 space-y-4">
+                {/* Client Information with Tabs */}
+                {contact && (
                   <ContactInfo
                     contact={{
                       id: contact.id,
@@ -145,35 +215,76 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
                       phone: contact.phone,
                       email: contact.email,
                       sessionId: contact.id,
-                      tags: contact.tags || [] // Passar as tags reais do contato
+                      tags: contact.tags || []
                     }}
                     getStatusColor={() => 'bg-gray-400'}
                     width={400}
                     onTagsChange={(newTags) => {
-                      // Atualizar as tags no estado do contato
-                      setContact(prev => prev ? { ...prev, tags: newTags } : null);
+                      updateContact('tags', newTags);
+                      markFieldAsTouched('tags');
                     }}
                   />
-               )}
-
-              {/* Custom Fields Section */}
-              <div className="mt-6">
-                {customFieldsLoading ? (
-                  <SkeletonCustomFields />
-                ) : (
-                  <CustomFieldsSection contactId={selectedContact?.id || null} />
                 )}
-              </div>
 
-              {/* Notes Field */}
-              <div className="mt-6">
-                <NotesFieldEdit contactId={selectedContact?.id || null} />
+                {/* Custom Fields Section */}
+                <div className="mt-6">
+                  {customFieldsLoading ? (
+                    <SkeletonCustomFields />
+                  ) : (
+                    <CustomFieldsSection contactId={selectedContact?.id || null} />
+                  )}
+                </div>
+
+                {/* Notes Field */}
+                <div className="mt-6">
+                  <NotesFieldEdit contactId={selectedContact?.id || null} />
+                </div>
               </div>
+            </ScrollArea>
+          </div>
+
+          {/* Right side - Preview */}
+          {showContactPreview && showPreview && contact && (
+            <div className="w-1/2 border-l bg-muted/20">
+              <div className="p-4 border-b">
+                <h3 className="font-medium text-sm">Preview do Cliente</h3>
+              </div>
+              <ScrollArea className="flex-1">
+                <div className="p-4">
+                  <ContactPreview contact={contact} />
+                </div>
+              </ScrollArea>
             </div>
-          </ScrollArea>
+          )}
+        </div>
 
-          {/* Footer com botões */}
-          <div className="border-t p-4 flex-shrink-0">
+        {/* Footer com botões */}
+        <div className="border-t p-4 flex-shrink-0">
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              {hasUnsavedChanges && !enableAutoSave && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={discardChanges}
+                  className="text-destructive hover:text-destructive"
+                >
+                  Descartar
+                </Button>
+              )}
+              {enableAutoSave && hasUnsavedChanges && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={forceSave}
+                  disabled={autoSaving || !isValid}
+                >
+                  <Save className="h-3 w-3 mr-1" />
+                  Salvar Agora
+                </Button>
+              )}
+            </div>
+            
             <div className="flex space-x-2">
               <Button variant="outline" onClick={handleClose} disabled={isSaving} className="flex-1">
                 Cancelar
@@ -182,7 +293,7 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
                 onClick={handleSave} 
                 loading={isSaving}
                 loadingText="Salvando..."
-                disabled={Object.keys(validationErrors).length > 0}
+                disabled={!isValid}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground flex-1"
               >
                 Salvar
