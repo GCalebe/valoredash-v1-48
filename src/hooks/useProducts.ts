@@ -95,6 +95,66 @@ export function useProducts() {
     }
   };
 
+  const updateProduct = async (id: string, product: Partial<Product>) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .update(product)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao atualizar produto/serviço:', error);
+        throw error;
+      }
+
+      setProducts(prev => prev.map(p => p.id === id ? data : p));
+      toast({
+        title: "Sucesso",
+        description: "Produto/serviço atualizado com sucesso.",
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('Erro ao atualizar produto/serviço:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o produto/serviço.",
+      });
+      throw error;
+    }
+  };
+
+  const deleteProduct = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao deletar produto/serviço:', error);
+        throw error;
+      }
+
+      setProducts(prev => prev.filter(p => p.id !== id));
+      toast({
+        title: "Sucesso",
+        description: "Produto/serviço deletado com sucesso.",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Erro ao deletar produto/serviço:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível deletar o produto/serviço.",
+      });
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -104,6 +164,8 @@ export function useProducts() {
     loading,
     fetchProducts,
     addProduct,
+    updateProduct,
+    deleteProduct,
   };
 }
 
@@ -115,5 +177,33 @@ export const useProductsQuery = () => {
     data: products,
     isLoading: loading,
     error: null, // Add error handling if needed later
+  };
+};
+
+// Export mutation hooks for backward compatibility
+export const useCreateProductMutation = () => {
+  const { addProduct } = useProducts();
+  
+  return {
+    mutate: addProduct,
+    isLoading: false, // You can enhance this with proper loading state if needed
+  };
+};
+
+export const useUpdateProductMutation = () => {
+  const { updateProduct } = useProducts();
+  
+  return {
+    mutate: updateProduct,
+    isLoading: false,
+  };
+};
+
+export const useDeleteProductMutation = () => {
+  const { deleteProduct } = useProducts();
+  
+  return {
+    mutate: deleteProduct,
+    isLoading: false,
   };
 };
