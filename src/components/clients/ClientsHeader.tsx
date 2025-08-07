@@ -1,13 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ShipWheel, Filter } from "lucide-react";
+import { ArrowLeft, ShipWheel, Filter, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import { Input } from "@/components/ui/input";
+import { useClientImport } from "@/hooks/useClientImport";
 import FilterDialog from "@/components/clients/FilterDialog";
 import AddClientDialog from "@/components/clients/AddClientDialog";
+import ClientMethodSelectionModal from "@/components/clients/ClientMethodSelectionModal";
+import ClientImportModal from "@/components/clients/ClientImportModal";
 import ClientsCompactToggler from "./ClientsCompactToggler";
 import ClientsViewToggler from "./ClientsViewToggler";
 import ClientsRefreshButton from "./ClientsRefreshButton";
@@ -77,6 +80,18 @@ const ClientsHeader = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { settings } = useThemeSettings();
+  
+  const {
+    isMethodSelectionOpen,
+    isImportModalOpen,
+    isAddClientOpen: isImportAddClientOpen,
+    setIsAddClientOpen: setIsImportAddClientOpen,
+    handleNewClientClick,
+    handleSelectManual,
+    handleSelectImport,
+    handleBackToSelection,
+    handleCloseAll,
+  } = useClientImport();
 
   const handleAddContactWrapper = async () => {
     return await handleAddContact();
@@ -172,10 +187,44 @@ const ClientsHeader = ({
             hasActiveFilters={hasActiveFilters}
           />
 
-          {/* Add Cliente */}
+          {/* Add Cliente - New Flow */}
+          <Button 
+            className="h-9 bg-green-500 hover:bg-green-600 text-white"
+            onClick={handleNewClientClick}
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
+            Novo Cliente
+          </Button>
+          
+          {/* Method Selection Modal */}
+          <ClientMethodSelectionModal
+            isOpen={isMethodSelectionOpen}
+            onClose={handleCloseAll}
+            onSelectManual={handleSelectManual}
+            onSelectImport={handleSelectImport}
+          />
+          
+          {/* Import Modal */}
+          <ClientImportModal
+            isOpen={isImportModalOpen}
+            onClose={handleCloseAll}
+            onBack={handleBackToSelection}
+            onImportComplete={() => {
+              handleRefresh();
+              handleCloseAll();
+            }}
+          />
+          
+          {/* Manual Add Client Dialog */}
           <AddClientDialog
-            isOpen={isAddContactOpen}
-            onOpenChange={onAddContactOpenChange}
+            isOpen={isImportAddClientOpen || isAddContactOpen}
+            onOpenChange={(open) => {
+              if (isImportAddClientOpen) {
+                setIsImportAddClientOpen(open);
+              } else {
+                onAddContactOpenChange(open);
+              }
+            }}
             newContact={newContact}
             setNewContact={setNewContact}
             handleAddContact={handleAddContactWrapper}

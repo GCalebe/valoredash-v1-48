@@ -1,0 +1,3 @@
+name,email,phone,client_name,address,cpf_cnpj,client_type,client_size,client_sector,client_objective,notes,payment_method,consultation_stage,tags
+João Silva,joao@exemplo.com,11999999999,Empresa XYZ Ltda,Rua das Flores 123 - São Paulo/SP,12.345.678/0001-90,Pessoa Jurídica,Médio Porte,Tecnologia,Aumentar vendas online,Cliente interessado em soluções digitais,Cartão de Crédito,Nova consulta,"tecnologia,vendas"
+Maria Santos,maria@exemplo.com,11888888888,Maria Santos MEI,Av. Paulista 456 - São Paulo/SP,123.456.789-00,Pessoa Física,Pequeno Porte,Consultoria,Otimizar processos,Busca consultoria em gestão,PIX,Qualificado,"consultoria,gestão"

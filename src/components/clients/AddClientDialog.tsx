@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogTrigger,
   DialogHeader,
   DialogTitle,
   DialogDescription,
@@ -125,7 +124,6 @@ const AddClientDialog = ({
       toast({
         title: "Erro ao salvar",
         description: "Não foi possível salvar o cliente. Tente novamente.",
-        variant: "destructive",
       });
     }
   };
@@ -139,12 +137,6 @@ const AddClientDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button className="h-9 bg-green-500 hover:bg-green-600 text-white">
-          <UserPlus className="mr-2 h-4 w-4" />
-          Novo Cliente
-        </Button>
-      </DialogTrigger>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg flex items-center gap-2">
