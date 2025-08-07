@@ -37,6 +37,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import InstancesManager from "./disparador/components/InstancesManager";
+import SendForm from "./disparador/components/SendForm";
+import ContactsImporter from "./disparador/components/ContactsImporter";
+import SchedulesList from "./disparador/components/SchedulesList";
 
 interface Instance {
   id: string;
@@ -570,347 +574,59 @@ const Disparador: React.FC = () => {
 
           {/* Configurações */}
           <TabsContent value="config" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Server className="h-5 w-5" />
-                  Gerenciar Instâncias WhatsApp
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Formulário para nova instância */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="instanceName">Nome da Instância</Label>
-                    <Input
-                      id="instanceName"
-                      value={newInstanceName}
-                      onChange={(e) => setNewInstanceName(e.target.value)}
-                      placeholder="Ex: WhatsApp Principal"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="instanceAPIKEY">APIKEY</Label>
-                    <Input
-                      id="instanceAPIKEY"
-                      type="password"
-                      value={newInstanceAPIKEY}
-                      onChange={(e) => setNewInstanceAPIKEY(e.target.value)}
-                      placeholder="Digite a APIKEY"
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    <Button
-                      onClick={handleAddInstance}
-                      disabled={isLoading}
-                      className="w-full"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      {isLoading ? 'Cadastrando...' : 'Cadastrar'}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Lista de instâncias */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Instâncias Cadastradas</h3>
-                    <Badge variant="secondary">
-                      {instances.filter(inst => inst.status === 'connected').length} ativas
-                    </Badge>
-                  </div>
-                  
-                  {instances.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Server className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Nenhuma instância cadastrada</p>
-                    </div>
-                  ) : (
-                    <div className="grid gap-4">
-                      {instances.map((instance) => (
-                        <Card key={instance.id} className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-3 h-3 rounded-full ${
-                                instance.status === 'connected' ? 'bg-green-500' :
-                                instance.status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'
-                              }`} />
-                              <div>
-                                <h4 className="font-semibold">{instance.name}</h4>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <Key className="h-3 w-3" />
-                                  {showAPIKEY[instance.id] ? instance.apikey : '••••••••••••'}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => toggleAPIKEYVisibility(instance.id)}
-                                  >
-                                    {showAPIKEY[instance.id] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant={instance.status === 'connected' ? 'default' : 'secondary'}>
-                                {instance.status === 'connected' ? 'Conectado' :
-                                 instance.status === 'connecting' ? 'Conectando' : 'Desconectado'}
-                              </Badge>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => handleRemoveInstance(instance.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <InstancesManager
+              instances={instances}
+              newInstanceName={newInstanceName}
+              newInstanceAPIKEY={newInstanceAPIKEY}
+              showAPIKEY={showAPIKEY}
+              isLoading={isLoading}
+              onChangeNewInstanceName={setNewInstanceName}
+              onChangeNewInstanceAPIKEY={setNewInstanceAPIKEY}
+              onAddInstance={handleAddInstance}
+              onToggleApiKey={toggleAPIKEYVisibility}
+              onRemoveInstance={handleRemoveInstance}
+            />
           </TabsContent>
 
           {/* Enviar */}
           <TabsContent value="send" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Formulário de envio */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Send className="h-5 w-5" />
-                    Configurar Disparo
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="selectInstance">Instância</Label>
-                    <Select value={selectedInstance} onValueChange={setSelectedInstance}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma instância" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {instances.filter(inst => inst.status === 'connected').map((instance) => (
-                          <SelectItem key={instance.id} value={instance.id}>
-                            {instance.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="message">Mensagem</Label>
-                    <Textarea
-                      id="message"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Digite sua mensagem aqui..."
-                      rows={4}
-                    />
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {message.length}/1000 caracteres
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label>Mídia (Opcional)</Label>
-                    <div className="mt-2">
-                      {mediaFile ? (
-                        <div className="flex items-center gap-2 p-2 border rounded">
-                          <FileText className="h-4 w-4" />
-                          <span className="text-sm">{mediaFile.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setMediaFile(null)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="w-full"
-                        >
-                          <Upload className="mr-2 h-4 w-4" />
-                          Selecionar Arquivo
-                        </Button>
-                      )}
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*,video/*,audio/*,.pdf"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Seção de Agendamento */}
-                  <Card className="mb-4">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          id="enableScheduling"
-                          checked={enableScheduling}
-                          onChange={(e) => setEnableScheduling(e.target.checked)}
-                          className="rounded"
-                        />
-                        <label htmlFor="enableScheduling" className="cursor-pointer">
-                          Agendar este disparo
-                        </label>
-                      </CardTitle>
-                    </CardHeader>
-                    {enableScheduling && (
-                      <CardContent className="pt-0">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="scheduleDate">Data</Label>
-                            <Input
-                              id="scheduleDate"
-                              type="date"
-                              value={scheduleDate}
-                              onChange={(e) => setScheduleDate(e.target.value)}
-                              min={new Date().toISOString().split('T')[0]}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="scheduleTime">Hora</Label>
-                            <Input
-                              id="scheduleTime"
-                              type="time"
-                              value={scheduleTime}
-                              onChange={(e) => setScheduleTime(e.target.value)}
-                            />
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          O disparo será executado automaticamente na data/hora especificada
-                        </p>
-                      </CardContent>
-                    )}
-                  </Card>
-
-                  <Button
-                    onClick={handleSendCampaign}
-                    disabled={isLoading || !selectedInstance || !message.trim() || contacts.length === 0}
-                    className="w-full"
-                  >
-                    <Send className="mr-2 h-4 w-4" />
-                    {isLoading ? 'Enviando...' : enableScheduling ? 'Agendar Disparo' : `Enviar para ${contacts.length} contatos`}
-                  </Button>
-                </CardContent>
-              </Card>
+              <SendForm
+                instances={instances}
+                selectedInstance={selectedInstance}
+                onChangeInstance={setSelectedInstance}
+                message={message}
+                onChangeMessage={setMessage}
+                mediaFile={mediaFile}
+                onChooseFile={() => fileInputRef.current?.click()}
+                onRemoveFile={() => setMediaFile(null)}
+                onFileInputChange={handleFileUpload}
+                fileInputRef={fileInputRef}
+                enableScheduling={enableScheduling}
+                onToggleScheduling={setEnableScheduling}
+                scheduleDate={scheduleDate}
+                onChangeScheduleDate={setScheduleDate}
+                scheduleTime={scheduleTime}
+                onChangeScheduleTime={setScheduleTime}
+                contactsCount={contacts.length}
+                isLoading={isLoading}
+                onSubmit={handleSendCampaign}
+              />
 
               {/* Lista de contatos */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Contatos ({contacts.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Importar Contatos</Label>
-                    <input
-                      type="file"
-                      accept=".csv,.txt"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) processContactsFile(file);
-                      }}
-                      className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Formato: número,nome (um por linha)
-                    </p>
-                  </div>
-
-                  {contacts.length > 0 && (
-                    <div className="max-h-64 overflow-y-auto space-y-2">
-                      {contacts.slice(0, 10).map((contact, index) => (
-                        <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded">
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{contact.number}</p>
-                            {contact.name && (
-                              <p className="text-xs text-muted-foreground">{contact.name}</p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                      {contacts.length > 10 && (
-                        <p className="text-sm text-muted-foreground text-center">
-                          +{contacts.length - 10} contatos adicionais
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <ContactsImporter contacts={contacts} onProcessFile={processContactsFile} />
             </div>
           </TabsContent>
 
           {/* Histórico */}
           <TabsContent value="history" className="space-y-6">
-            {/* Agendamentos Ativos */}
-            {scheduledDispatches.filter(s => s.status === 'scheduled').length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Agendamentos Ativos
-                    <Badge variant="secondary">
-                      {scheduledDispatches.filter(s => s.status === 'scheduled').length}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {scheduledDispatches
-                      .filter(s => s.status === 'scheduled')
-                      .map((schedule) => {
-                        const instance = instances.find(i => i.id === schedule.instanceId);
-                        return (
-                          <Card key={schedule.id} className="p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <div>
-                                <h4 className="font-semibold">
-                                  Agendado para {schedule.scheduledDateTime.toLocaleString('pt-BR')}
-                                </h4>
-                                <p className="text-sm text-muted-foreground">
-                                  Instância: {instance?.name || 'Desconhecida'} • {schedule.contacts.length} contatos
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline">
-                                  {getTimeRemaining(schedule.scheduledDateTime)}
-                                </Badge>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => handleCancelSchedule(schedule.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {schedule.message.substring(0, 100)}...
-                            </p>
-                          </Card>
-                        );
-                      })
-                    }
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <SchedulesList
+              schedules={scheduledDispatches as any}
+              instances={instances as any}
+              onCancelSchedule={handleCancelSchedule}
+              timeRemaining={getTimeRemaining}
+            />
             
             {/* Histórico de Campanhas */}
             <Card>
