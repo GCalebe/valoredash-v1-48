@@ -28,6 +28,16 @@ export async function addCalendarEvent(
       status: 'scheduled',
       event_type: 'meeting',
       user_id: (await supabase.auth.getUser()).data.user?.id,
+      // New fields from the updated schema
+      attendance_type: formData.attendanceType,
+      employee_id: formData.employeeId,
+      product_id: formData.productId,
+      service_name: formData.serviceName,
+      tags: formData.tags || [],
+      client_email: formData.clientEmail,
+      client_phone: formData.clientPhone,
+      meeting_link: formData.meetingLink,
+      meeting_location: formData.location,
     };
 
     const { data, error } = await supabase
@@ -72,6 +82,16 @@ export async function editCalendarEvent(
       start_time: startDateTime,
       end_time: endDateTime,
       host_name: formData.hostName,
+      // New fields from the updated schema
+      attendance_type: formData.attendanceType,
+      employee_id: formData.employeeId,
+      product_id: formData.productId,
+      service_name: formData.serviceName,
+      tags: formData.tags || [],
+      client_email: formData.clientEmail,
+      client_phone: formData.clientPhone,
+      meeting_link: formData.meetingLink,
+      meeting_location: formData.location,
     };
 
     const { data, error } = await supabase

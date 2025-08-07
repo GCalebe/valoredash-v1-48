@@ -39,8 +39,14 @@ export interface EventFormState {
   tags: Tag[];
   newTag: string;
   newTagColor: string;
-  initialStatus: "confirmado" | "pendente";
+  initialStatus: "confirmed" | "pending" | "scheduled";
   isDeleteDialogOpen: boolean;
   errors: Record<string, string>;
+  // New fields for improved data structure
+  employeeId?: string;
+  productId?: string;
+  serviceName?: string;
+  clientEmail?: string;
+  clientPhone?: string;
   [key: string]: any; // Add index signature for dynamic properties
 }

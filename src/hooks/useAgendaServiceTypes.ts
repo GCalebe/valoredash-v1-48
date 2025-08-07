@@ -14,27 +14,11 @@ export function useAgendaServiceTypes(agendaId?: string) {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!agendaId) {
-      // Se não há agenda selecionada, usar tipos padrão
-      setServiceTypes([
-        { label: "Presencial", value: "presencial" },
-        { label: "Online", value: "online" },
-      ]);
-      return;
-    }
-
     const fetchServiceTypes = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('agendas')
-          .select('*')
-          .eq('id', agendaId)
-          .single();
-
-        if (error) {
-          console.error('Erro ao buscar tipos de atendimento:', error);
-          // Em caso de erro, usar tipos padrão
+        if (!agendaId) {
+          // Use default service types when no agenda is selected
           setServiceTypes([
             { label: "Presencial", value: "presencial" },
             { label: "Online", value: "online" },
@@ -42,11 +26,36 @@ export function useAgendaServiceTypes(agendaId?: string) {
           return;
         }
 
-        // Since service_types column doesn't exist yet, use default types
-        setServiceTypes([
-          { label: "Presencial", value: "presencial" },
-          { label: "Online", value: "online" },
-        ]);
+        const { data, error } = await supabase
+          .from('agendas')
+          .select('service_types')
+          .eq('id', agendaId)
+          .single();
+
+        if (error) {
+          console.error('Erro ao buscar tipos de atendimento:', error);
+          // Fall back to default types on error
+          setServiceTypes([
+            { label: "Presencial", value: "presencial" },
+            { label: "Online", value: "online" },
+          ]);
+          return;
+        }
+
+        // Use dynamic service types from agenda if available
+        if (data?.service_types && Array.isArray(data.service_types)) {
+          const dynamicTypes = data.service_types.map((type: string) => ({
+            label: type,
+            value: type.toLowerCase().replace(/\s+/g, '_')
+          }));
+          setServiceTypes(dynamicTypes);
+        } else {
+          // Fall back to default types if no service types configured
+          setServiceTypes([
+            { label: "Presencial", value: "presencial" },
+            { label: "Online", value: "online" },
+          ]);
+        }
       } catch (error) {
         console.error('Erro ao buscar tipos de atendimento:', error);
         toast({
@@ -54,7 +63,7 @@ export function useAgendaServiceTypes(agendaId?: string) {
           description: "Não foi possível carregar os tipos de atendimento.",
           variant: "destructive",
         });
-        // Em caso de erro, usar tipos padrão
+        // Fall back to default types on error
         setServiceTypes([
           { label: "Presencial", value: "presencial" },
           { label: "Online", value: "online" },

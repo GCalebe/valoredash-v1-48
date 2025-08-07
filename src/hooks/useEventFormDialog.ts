@@ -133,9 +133,11 @@ export const useEventFormDialog = ({ event, open }: UseEventFormDialogProps) => 
   // Determine initial status from event status
   const determineInitialStatus = (event: CalendarEvent) => {
     if (event.status === "confirmed") {
-      updateState({ initialStatus: "confirmado" });
+      updateState({ initialStatus: "confirmed" });
     } else if (event.status === "tentative") {
-      updateState({ initialStatus: "pendente" });
+      updateState({ initialStatus: "pending" });
+    } else {
+      updateState({ initialStatus: "scheduled" });
     }
   };
 

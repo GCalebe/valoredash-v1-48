@@ -33,7 +33,7 @@ export const useEventFormState = () => {
     tags: [],
     newTag: "",
     newTagColor: "#3b82f6",
-    initialStatus: "confirmado",
+    initialStatus: "confirmed",
     isDeleteDialogOpen: false,
     errors: {},
   });
@@ -74,7 +74,7 @@ export const useEventFormState = () => {
       tags: [],
       newTag: "",
       newTagColor: "#3b82f6",
-      initialStatus: "confirmado",
+      initialStatus: "confirmed",
       isDeleteDialogOpen: false,
       errors: {},
     });
