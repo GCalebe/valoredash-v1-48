@@ -835,66 +835,93 @@ export type Database = {
       calendar_events: {
         Row: {
           all_day: boolean | null
+          attendance_type: string | null
+          client_email: string | null
+          client_phone: string | null
           contact_id: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
+          employee_id: string | null
           end_time: string
           event_type: string | null
           host_name: string | null
           html_link: string | null
           id: string
           location: string | null
+          meeting_link: string | null
+          meeting_location: string | null
           metadata: Json | null
           priority: string | null
+          product_id: string | null
           recurrence_rule: string | null
+          service_name: string | null
           start_time: string
           status: string | null
           summary: string | null
+          tags: Json | null
           title: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
           all_day?: boolean | null
+          attendance_type?: string | null
+          client_email?: string | null
+          client_phone?: string | null
           contact_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          employee_id?: string | null
           end_time: string
           event_type?: string | null
           host_name?: string | null
           html_link?: string | null
           id?: string
           location?: string | null
+          meeting_link?: string | null
+          meeting_location?: string | null
           metadata?: Json | null
           priority?: string | null
+          product_id?: string | null
           recurrence_rule?: string | null
+          service_name?: string | null
           start_time: string
           status?: string | null
           summary?: string | null
+          tags?: Json | null
           title: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
           all_day?: boolean | null
+          attendance_type?: string | null
+          client_email?: string | null
+          client_phone?: string | null
           contact_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          employee_id?: string | null
           end_time?: string
           event_type?: string | null
           host_name?: string | null
           html_link?: string | null
           id?: string
           location?: string | null
+          meeting_link?: string | null
+          meeting_location?: string | null
           metadata?: Json | null
           priority?: string | null
+          product_id?: string | null
           recurrence_rule?: string | null
+          service_name?: string | null
           start_time?: string
           status?: string | null
           summary?: string | null
+          tags?: Json | null
           title?: string
           updated_at?: string | null
           user_id?: string
@@ -905,6 +932,20 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -3669,8 +3710,10 @@ export type Database = {
           differentials: string[] | null
           features: string[] | null
           has_combo: boolean | null
+          has_downsell: boolean | null
           has_promotion: boolean | null
           has_upgrade: boolean | null
+          has_upsell: boolean | null
           icon: string | null
           id: string
           image: string | null
@@ -3692,8 +3735,10 @@ export type Database = {
           differentials?: string[] | null
           features?: string[] | null
           has_combo?: boolean | null
+          has_downsell?: boolean | null
           has_promotion?: boolean | null
           has_upgrade?: boolean | null
+          has_upsell?: boolean | null
           icon?: string | null
           id?: string
           image?: string | null
@@ -3715,8 +3760,10 @@ export type Database = {
           differentials?: string[] | null
           features?: string[] | null
           has_combo?: boolean | null
+          has_downsell?: boolean | null
           has_promotion?: boolean | null
           has_upgrade?: boolean | null
+          has_upsell?: boolean | null
           icon?: string | null
           id?: string
           image?: string | null

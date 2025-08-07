@@ -76,9 +76,11 @@ export const prepareFormData = (
   endDate: Date,
   state: EventFormState
 ): EventFormData => {
-  // Get email
+  // Get email and phone from client or new client data
   const clientEmail = state.selectedClient ? state.selectedClient.email : 
                      state.isNewClient ? state.newClientData.email : state.email;
+  const clientPhone = state.selectedClient ? state.selectedClient.phone : 
+                     state.isNewClient ? state.newClientData.phone : "";
 
   return {
     summary,
@@ -90,6 +92,16 @@ export const prepareFormData = (
     hostName: state.collaborator,
     automation: state.automation,
     colorId: state.selectedColor,
+    // Map new fields
+    attendanceType: state.attendanceType,
+    employeeId: state.employeeId,
+    productId: state.productId,
+    serviceName: state.selectedService,
+    tags: state.tags,
+    clientEmail: clientEmail || "",
+    clientPhone: clientPhone || "",
+    meetingLink: state.attendanceType === "online" ? state.meetingLink : "",
+    location: state.attendanceType === "presencial" ? state.location : "",
   };
 };
 

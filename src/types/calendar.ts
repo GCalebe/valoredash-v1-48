@@ -26,6 +26,16 @@ export type EventFormData = {
   hostName: string;
   automation?: string;
   colorId?: string;
+  // New fields for improved data structure
+  attendanceType?: string;
+  employeeId?: string;
+  productId?: string;
+  serviceName?: string;
+  tags?: any[];
+  clientEmail?: string;
+  clientPhone?: string;
+  meetingLink?: string;
+  location?: string;
 };
 
 // Appointment types (mock data)

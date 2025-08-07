@@ -225,9 +225,12 @@ const Schedule = () => {
                 className="h-8 border-slate-600 text-white bg-slate-700/50 hover:bg-slate-600 text-xs rounded-md w-[140px] px-2"
               >
                 <option value="all">Todos</option>
-                <option value="confirmado">Confirmados</option>
-                <option value="pendente">Pendentes</option>
-                <option value="cancelado">Cancelados</option>
+                <option value="confirmed">Confirmados</option>
+                <option value="pending">Pendentes</option>
+                <option value="scheduled">Agendados</option>
+                <option value="completed">Concluídos</option>
+                <option value="cancelled">Cancelados</option>
+                <option value="no_show">Não compareceu</option>
               </select>
             </div>
             

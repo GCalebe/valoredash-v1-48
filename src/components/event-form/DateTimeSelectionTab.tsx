@@ -99,14 +99,15 @@ export function DateTimeSelectionTab({
         <Label htmlFor="initialStatus">Status Inicial</Label>
         <Select 
           value={state.initialStatus as string} 
-          onValueChange={(value: "confirmado" | "pendente") => updateState({ initialStatus: value })}
+          onValueChange={(value: "confirmed" | "pending" | "scheduled") => updateState({ initialStatus: value })}
         >
           <SelectTrigger id="initialStatus">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="confirmado">Confirmado</SelectItem>
-            <SelectItem value="pendente">Pendente</SelectItem>
+            <SelectItem value="confirmed">Confirmado</SelectItem>
+            <SelectItem value="pending">Pendente</SelectItem>
+            <SelectItem value="scheduled">Agendado</SelectItem>
           </SelectContent>
         </Select>
       </div>
