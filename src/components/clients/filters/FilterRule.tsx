@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
-import { clientProperties, operatorsByType } from "./filterConstants";
+import { fixedClientProperties, operatorsByType } from "./filterConstants";
+import { useFilterableFields } from "@/hooks/useFilterableFields";
 
 export interface FilterRule {
   id: string;
@@ -26,7 +27,8 @@ export const FilterRuleComponent: React.FC<FilterRuleProps> = ({
   onRemove,
   isLast,
 }) => {
-  const selectedField = clientProperties.find((f) => f.id === rule.field);
+  const { fields } = useFilterableFields();
+  const selectedField = fields.find((f) => f.id === rule.field);
   const operators = selectedField
     ? operatorsByType[selectedField.type as keyof typeof operatorsByType]
     : [];
@@ -36,7 +38,7 @@ export const FilterRuleComponent: React.FC<FilterRuleProps> = ({
       <Select
         value={rule.field}
         onValueChange={(value) => {
-          const field = clientProperties.find((f) => f.id === value);
+          const field = fields.find((f) => f.id === value);
           onUpdate(rule.id, {
             ...rule,
             field: value,
@@ -52,11 +54,19 @@ export const FilterRuleComponent: React.FC<FilterRuleProps> = ({
           <SelectValue placeholder="Selecione o campo" />
         </SelectTrigger>
         <SelectContent>
-          {clientProperties.map((field) => (
+          {/* Agrupa: Fixos primeiro, depois Custom */}
+          {fixedClientProperties.map((field) => (
             <SelectItem key={field.id} value={field.id}>
               {field.name}
             </SelectItem>
           ))}
+          {fields
+            .filter((f) => (f as any).isCustom)
+            .map((field) => (
+              <SelectItem key={field.id} value={field.id}>
+                {field.name}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
 

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 export interface ConversationCustomFieldFilter {
   fieldId: string;
@@ -43,6 +43,25 @@ export function useConversationFilters(): ConversationFilters {
   const [customFieldFilters, setCustomFieldFilters] = useState<
     ConversationCustomFieldFilter[]
   >([]);
+
+  // Suporte a filtros avançados via eventos (integrado ao modal)
+  const createInitialFilter = () => ({ id: `group-${Date.now()}`, condition: 'AND', rules: [] });
+  const [advancedFilter, setAdvancedFilter] = useState<any>(createInitialFilter());
+  useEffect(() => {
+    const apply = (e: any) => {
+      const detail = e?.detail;
+      if (detail && detail.id && Array.isArray(detail.rules)) {
+        setAdvancedFilter(detail);
+      }
+    };
+    const clear = () => setAdvancedFilter(createInitialFilter());
+    window.addEventListener('conversations-apply-advanced-filter', apply as any);
+    window.addEventListener('conversations-clear-advanced-filter', clear as any);
+    return () => {
+      window.removeEventListener('conversations-apply-advanced-filter', apply as any);
+      window.removeEventListener('conversations-clear-advanced-filter', clear as any);
+    };
+  }, []);
 
   const hasActiveFilters = useMemo(
     () =>

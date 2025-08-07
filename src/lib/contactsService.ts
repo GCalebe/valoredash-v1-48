@@ -98,6 +98,27 @@ export const contactsService = {
       query = query.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
     }
 
+    // Se houver filtros avançados, usar serviço especializado (sem paginação por cursor)
+    if (filters.advancedFilters) {
+      try {
+        const { data } = await AdvancedFiltersService.applyAdvancedFilters({
+          filterGroup: filters.advancedFilters as any,
+          searchTerm: filters.search,
+          statusFilter: filters.status,
+          segmentFilter: filters.tags && filters.tags[0] ? filters.tags[0] : undefined,
+          limit,
+          offset: 0,
+        });
+        return {
+          data: data as any[],
+          nextCursor: null,
+          hasMore: false,
+        };
+      } catch (e) {
+        console.error('Error applying advanced filters with fallback path:', e);
+      }
+    }
+
     // Aplicar filtros otimizados
     if (filters.kanban_stage_id) {
       query = query.eq('kanban_stage_id', filters.kanban_stage_id);

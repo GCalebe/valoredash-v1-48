@@ -35,6 +35,7 @@ interface ClientsHeaderProps {
   onClearFilters: () => void;
   onClearCustomFieldFilters: () => void;
   hasActiveFilters: boolean;
+  activeFilterChips?: string[];
   isAddContactOpen: boolean;
   onAddContactOpenChange: (open: boolean) => void;
   newContact: Partial<unknown>;
@@ -65,6 +66,7 @@ const ClientsHeader = ({
   onClearFilters,
   onClearCustomFieldFilters,
   hasActiveFilters,
+  activeFilterChips = [],
   isAddContactOpen,
   onAddContactOpenChange,
   newContact,
@@ -169,6 +171,17 @@ const ClientsHeader = ({
               </Badge>
             )}
           </Button>
+
+          {/* Chips dos filtros ativos */}
+          {hasActiveFilters && activeFilterChips.length > 0 && (
+            <div className="flex gap-1 max-w-[520px] overflow-x-auto py-1">
+              {activeFilterChips.map((chip, idx) => (
+                <Badge key={idx} variant="secondary" className="whitespace-nowrap">
+                  {chip}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           <FilterDialog
             isOpen={isFilterDialogOpen}

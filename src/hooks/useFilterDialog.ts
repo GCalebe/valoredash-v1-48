@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { type FilterGroup, type FilterRule } from "@/components/clients/filters/FilterGroup";
-import { clientProperties, operatorsByType } from "@/components/clients/filters/filterConstants";
+import { fixedClientProperties } from "@/components/clients/filters/filterConstants";
 import { AdvancedFiltersService } from "../services/advancedFiltersService";
 import { supabase } from "../integrations/supabase/client";
 
@@ -11,7 +11,7 @@ interface SavedFilter {
   filter: FilterGroup;
 }
 
-export const useFilterDialog = () => {
+export const useFilterDialog = (filterType: 'clients' | 'conversations' = 'clients') => {
   const [filterName, setFilterName] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
@@ -58,7 +58,8 @@ export const useFilterDialog = () => {
       const { success, error } = await AdvancedFiltersService.saveFilter(
         name.trim(),
         advancedFilter,
-        user.id
+        user.id,
+        filterType
       );
 
       if (!success) {
@@ -75,7 +76,7 @@ export const useFilterDialog = () => {
       console.error('Erro ao salvar filtro:', error);
       toast.error('Erro inesperado ao salvar filtro');
     }
-  }, [advancedFilter]);
+  }, [advancedFilter, filterType]);
 
   const applySavedFilter = (filter: FilterGroup) => {
     setAdvancedFilter(filter);
@@ -90,7 +91,7 @@ export const useFilterDialog = () => {
         return;
       }
 
-      const { data, error } = await AdvancedFiltersService.loadSavedFilters(user.id);
+      const { data, error } = await AdvancedFiltersService.loadSavedFilters(user.id, filterType);
       
       if (error) {
         console.error('Erro ao carregar filtros salvos:', error);
@@ -108,7 +109,7 @@ export const useFilterDialog = () => {
     } catch (error) {
       console.error('Erro inesperado ao carregar filtros:', error);
     }
-  }, []);
+  }, [filterType]);
 
   const deleteSavedFilter = useCallback(async (id: string) => {
     try {

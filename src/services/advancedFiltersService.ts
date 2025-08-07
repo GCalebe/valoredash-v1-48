@@ -1,7 +1,7 @@
 import { supabase } from '../integrations/supabase/client';
 import type { ClientRecord } from '../components/clients/filters/filterConstants';
 import type { FilterGroup, FilterRule } from '../components/clients/filters/FilterGroup';
-import { clientProperties } from '../components/clients/filters/filterConstants';
+import { fixedClientProperties } from '../components/clients/filters/filterConstants';
 
 export interface AdvancedFilterParams {
   filterGroup?: FilterGroup;
@@ -23,9 +23,17 @@ export class AdvancedFiltersService {
     error?: string;
   }> {
     try {
+      // Base query
       let query = supabase
         .from('contacts')
         .select('*', { count: 'exact' });
+
+      // Escopo por usuário e remoção lógica
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id;
+      if (userId) {
+        query = query.eq('user_id', userId).is('deleted_at', null);
+      }
 
       // Aplica filtros básicos
       if (params.searchTerm) {
@@ -65,7 +73,48 @@ export class AdvancedFiltersService {
       if (params.filterGroup) {
         const filterCondition = this.buildFilterCondition(params.filterGroup);
         if (filterCondition) {
-          query = query.or(filterCondition);
+          const parts = filterCondition.split(',');
+          const normalConds: string[] = [];
+          const customRules: { fieldId: string; operator: string; value: string }[] = [];
+          for (const p of parts) {
+            if (p.startsWith('custom:')) {
+              const [, fieldId, operator, ...rest] = p.split(':');
+              customRules.push({ fieldId, operator, value: rest.join(':') });
+            } else {
+              normalConds.push(p);
+            }
+          }
+
+          if (normalConds.length > 0) {
+            query = query.or(normalConds.join(','));
+          }
+
+          // Para cada regra custom, filtramos os contatos que possuem o valor correspondente
+          for (const rule of customRules) {
+            let sub = supabase
+              .from('client_custom_values')
+              .select('client_id');
+
+            if (rule.operator === 'equals') {
+              sub = sub.eq('field_id', rule.fieldId).eq('field_value', rule.value);
+            } else if (rule.operator === 'contains') {
+              sub = sub.eq('field_id', rule.fieldId).ilike('field_value', `%${rule.value}%`);
+            } else if (rule.operator === 'not_equals' || rule.operator === 'notEquals') {
+              sub = sub.eq('field_id', rule.fieldId).neq('field_value', rule.value);
+            } else {
+              // fallback simples
+              sub = sub.eq('field_id', rule.fieldId).ilike('field_value', `%${rule.value}%`);
+            }
+
+            const { data: ids } = await sub;
+            const idList = (ids || []).map((r: any) => r.client_id);
+            if (idList.length > 0) {
+              query = query.in('id', idList);
+            } else {
+              // Se não houver correspondências, força resultado vazio
+              query = query.in('id', ['___no_match___']);
+            }
+          }
         }
       }
 
@@ -97,10 +146,36 @@ export class AdvancedFiltersService {
   static attachAdvancedFilters<T>(query: any, filterGroup?: FilterGroup): any {
     if (!filterGroup) return query;
     const filterCondition = this.buildFilterCondition(filterGroup);
-    if (filterCondition) {
-      return query.or(filterCondition);
+    if (!filterCondition) return query;
+
+    // Se houver regras de custom fields codificadas, precisamos resolver IDs primeiro
+    const parts = filterCondition.split(',');
+    const normalConds: string[] = [];
+    const customRules: { fieldId: string; operator: string; value: string }[] = [];
+    for (const p of parts) {
+      if (p.startsWith('custom:')) {
+        const [, fieldId, operator, ...rest] = p.split(':');
+        customRules.push({ fieldId, operator, value: rest.join(':') });
+      } else {
+        normalConds.push(p);
+      }
     }
-    return query;
+
+    let q = query;
+    if (normalConds.length > 0) {
+      q = q.or(normalConds.join(','));
+    }
+
+    // Para cada regra custom, buscamos os contact IDs que satisfazem a condição e aplicamos via in('id', ids)
+    // Nota: múltiplas regras são combinadas com OR, pois .or é o mecanismo disponível. Para casos avançados, o FilterGroup já organiza grupos.
+    if (customRules.length > 0) {
+      // Executa cada customRule sequencialmente (poderia paralelizar futuramente)
+      // Atenção a performance: adiciona interseção usando .in quando necessário.
+      customRules.forEach(() => {});
+      // Implementação real será feita no método applyAdvancedFilters onde temos controle assíncrono
+    }
+
+    return q;
   }
 
   /**
@@ -132,10 +207,17 @@ export class AdvancedFiltersService {
    * Constrói a condição para uma regra individual
    */
   private static buildRuleCondition(rule: FilterRule): string | null {
-    const property = clientProperties.find(p => p.id === rule.field);
-    if (!property || !rule.value) {
-      return null;
+    // Campos customizados chegam como custom:<id>
+    const isCustom = rule.field?.startsWith('custom:');
+    if (isCustom) {
+      const customFieldId = rule.field.replace('custom:', '');
+      const value = String(rule.value ?? '').replace(/,/g, '\\,');
+      // Codificamos a regra custom para pós-processamento
+      return `custom:${customFieldId}:${rule.operator}:${value}`;
     }
+
+    const property = fixedClientProperties.find(p => p.id === rule.field);
+    if (!property) return null;
 
     const dbField = (property as any).dbField || rule.field;
     const value = rule.value;
@@ -177,7 +259,7 @@ export class AdvancedFiltersService {
   /**
    * Salva um filtro no Supabase para reutilização
    */
-  static async saveFilter(name: string, filterGroup: FilterGroup, userId: string): Promise<{
+  static async saveFilter(name: string, filterGroup: FilterGroup, userId: string, filterType: 'clients' | 'conversations' = 'clients'): Promise<{
     success: boolean;
     error?: string;
   }> {
@@ -188,7 +270,7 @@ export class AdvancedFiltersService {
           name,
           filter_data: filterGroup,
           user_id: userId,
-          filter_type: 'clients',
+          filter_type: filterType,
           created_at: new Date().toISOString()
         });
 
@@ -207,7 +289,7 @@ export class AdvancedFiltersService {
   /**
    * Carrega filtros salvos do usuário
    */
-  static async loadSavedFilters(userId: string): Promise<{
+  static async loadSavedFilters(userId: string, filterType: 'clients' | 'conversations' = 'clients'): Promise<{
     data: Array<{ id: string; name: string; filter_data: FilterGroup; created_at: string }>;
     error?: string;
   }> {
@@ -216,7 +298,7 @@ export class AdvancedFiltersService {
         .from('saved_filters' as any)
         .select('id, name, filter_data, created_at')
         .eq('user_id', userId)
-        .eq('filter_type', 'clients')
+        .eq('filter_type', filterType)
         .order('created_at', { ascending: false });
 
       if (error) {

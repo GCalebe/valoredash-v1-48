@@ -80,6 +80,25 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
     };
   }, []);
 
+  // Integração: ouvir evento global do modal para aplicar filtros avançados
+  useEffect(() => {
+    const handleApply = (e: any) => {
+      const detail = e?.detail;
+      if (detail && detail.id && Array.isArray(detail.rules)) {
+        updateAdvancedFilter(detail.id, detail);
+      }
+    };
+    const handleClear = () => {
+      clearAdvancedFilter();
+    };
+    window.addEventListener('clients-apply-advanced-filter', handleApply as any);
+    window.addEventListener('clients-clear-advanced-filter', handleClear as any);
+    return () => {
+      window.removeEventListener('clients-apply-advanced-filter', handleApply as any);
+      window.removeEventListener('clients-clear-advanced-filter', handleClear as any);
+    };
+  }, [updateAdvancedFilter, clearAdvancedFilter]);
+
   // Verifica se há filtros ativos
   const hasActiveFilters = useMemo(
     () =>
