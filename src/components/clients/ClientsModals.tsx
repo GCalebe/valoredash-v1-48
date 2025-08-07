@@ -5,6 +5,7 @@ import { Contact } from "@/types/client";
 import EditClientPanel from "@/components/clients/EditClientPanel";
 import SendMessageDialog from "@/components/clients/SendMessageDialog";
 import PauseDurationDialog from "@/components/PauseDurationDialog";
+import { useOptimizedClientActions } from "@/hooks/useOptimizedClientActions";
 
 interface ClientsModalsProps {
   selectedContact: Contact | null;
@@ -51,13 +52,22 @@ const ClientsModals = ({
   handleMessageSubmit,
   handlePauseDurationConfirm,
 }: ClientsModalsProps) => {
+  const { updateContactWithFields } = useOptimizedClientActions();
   
   const handleSaveContact = async (updatedContact: Contact) => {
     console.log("handleSaveContact called with:", updatedContact);
     
-    // Usar a função handleEditContact que já existe no useClientManagement
-    // Isso vai chamar updateContact com os dados corretos
-    await handleEditContact();
+    if (!selectedContact) return;
+    
+    // Use optimized update function
+    await updateContactWithFields(
+      selectedContact,
+      updatedContact,
+      undefined, // No custom fields for now
+      () => {
+        console.log("Contact updated successfully");
+      }
+    );
   };
 
   return (

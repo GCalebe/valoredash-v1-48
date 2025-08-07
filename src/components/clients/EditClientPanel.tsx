@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Contact } from "@/types/client";
@@ -14,6 +15,8 @@ import NotesFieldEdit from "./NotesFieldEdit";
 import CustomFieldsSection from "./CustomFieldsSection";
 import LoadingClientState from "@/components/chat/LoadingClientState";
 import { useOptimizedCustomFields } from "@/hooks/useOptimizedCustomFields";
+import { SkeletonFormGrid, SkeletonCustomFields } from "@/components/ui/skeleton-form";
+import { Loader2 } from "lucide-react";
 
 interface EditClientPanelProps {
   isOpen: boolean;
@@ -34,8 +37,8 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
 }) => {
   const [contact, setContact] = useState<Contact | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  
-  const [dynamicFieldsLoading, setDynamicFieldsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [customFieldsLoading, setCustomFieldsLoading] = useState(true);
   const validationErrors = {};
   
   // Usar o hook otimizado para pré-carregar campos personalizados
@@ -43,12 +46,21 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
 
   useEffect(() => {
     if (isOpen && selectedContact) {
+      setIsLoading(true);
+      setCustomFieldsLoading(true);
+      
       console.log("Setting contact data for editing:", selectedContact);
       setContact({ ...selectedContact });
       
+      // Simulate loading time for better UX feedback
+      setTimeout(() => setIsLoading(false), 200);
+      
       // Pré-carregar campos personalizados quando o painel é aberto
       if (selectedContact.id) {
-        preloadCustomFields(selectedContact.id);
+        preloadCustomFields(selectedContact.id)
+          .finally(() => setCustomFieldsLoading(false));
+      } else {
+        setCustomFieldsLoading(false);
       }
     }
   }, [isOpen, selectedContact, preloadCustomFields]);
@@ -82,15 +94,22 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
     onClose();
   };
 
-  if (dynamicFieldsLoading) {
+  // Show loading state while initial data loads
+  if (isLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-        <DialogContent className="max-w-4xl w-[90vw] max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Carregando...</DialogTitle>
+        <DialogContent className="max-w-4xl w-[90vw] h-[80vh] flex flex-col p-0">
+          <DialogHeader className="px-6 py-4 border-b">
+            <DialogTitle className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Carregando dados do cliente...
+            </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 flex items-center justify-center">
-            <LoadingClientState />
+          <div className="flex-1 p-6">
+            <SkeletonFormGrid fields={6} />
+            <div className="mt-6">
+              <SkeletonCustomFields />
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -139,7 +158,11 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
 
               {/* Custom Fields Section */}
               <div className="mt-6">
-                <CustomFieldsSection contactId={selectedContact?.id || null} />
+                {customFieldsLoading ? (
+                  <SkeletonCustomFields />
+                ) : (
+                  <CustomFieldsSection contactId={selectedContact?.id || null} />
+                )}
               </div>
 
               {/* Notes Field */}
@@ -155,13 +178,15 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
               <Button variant="outline" onClick={handleClose} disabled={isSaving} className="flex-1">
                 Cancelar
               </Button>
-              <Button 
+              <LoadingButton
                 onClick={handleSave} 
-                disabled={isSaving || Object.keys(validationErrors).length > 0}
-                className="bg-green-500 hover:bg-green-600 text-white flex-1"
+                loading={isSaving}
+                loadingText="Salvando..."
+                disabled={Object.keys(validationErrors).length > 0}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground flex-1"
               >
-                {isSaving ? "Salvando..." : "Salvar"}
-              </Button>
+                Salvar
+              </LoadingButton>
             </div>
           </div>
         </div>

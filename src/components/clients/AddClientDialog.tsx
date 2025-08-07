@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useState, useEffect } from "react";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,6 +26,8 @@ import BasicInfoFields from "./BasicInfoFields";
 import CompanyInfoFields from "./CompanyInfoFields";
 import DialogTabsContent from "./DialogTabsContent";
 import AddClientCustomFields from "./AddClientCustomFields";
+import { SkeletonCustomFields } from "@/components/ui/skeleton-form";
+import { useOptimizedClientActions } from "@/hooks/useOptimizedClientActions";
 
 interface AddClientDialogProps {
   isOpen: boolean;
@@ -41,9 +44,11 @@ const AddClientDialog = ({
   setNewContact,
   handleAddContact,
 }: AddClientDialogProps) => {
-  const { customFields, fetchCustomFields, saveClientCustomValues } = useCustomFields();
+  const { customFields, fetchCustomFields } = useCustomFields();
   const { preloadCustomFields } = useOptimizedCustomFields();
+  const { createContactWithFields } = useOptimizedClientActions();
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   
   // Use custom hook for form logic
   const {
@@ -91,40 +96,38 @@ const AddClientDialog = ({
       return;
     }
 
+    setSaving(true);
     try {
-      // Get newly created contact ID
-      const newContactId = await handleAddContact();
-
-      // Save custom field values if we have them and a contact ID
-      if (newContactId && Object.keys(customValues).length > 0) {
-        try {
-          const customValuesArray = Object.entries(customValues).map(
-            ([fieldId, value]) => ({ fieldId, value: value as any })
-          );
-          await saveClientCustomValues(newContactId, customValuesArray as any);
-        } catch (customFieldError) {
-          console.error("Error saving custom fields:", customFieldError);
+      // Use optimized action that handles contact + custom fields in parallel
+      await createContactWithFields(
+        newContact,
+        customValues,
+        () => {
+          // Success callback
+          resetForm();
+          setBasicCategories([]);
+          setCommercialCategories([]);
+          setDocumentsCategories([]);
+          
+          toast({
+            title: "Cliente adicionado",
+            description: "Cliente foi adicionado com sucesso ao sistema.",
+          });
+          
+          onOpenChange(false);
+        },
+        () => {
+          // Reset callback is handled in the action
         }
-      }
-
-      // Reset form and categories
-      resetForm();
-      setBasicCategories([]);
-      setCommercialCategories([]);
-      setDocumentsCategories([]);
-
-      toast({
-        title: "Cliente adicionado",
-        description: "Cliente foi adicionado com sucesso ao sistema.",
-      });
-
-      onOpenChange(false);
+      );
     } catch (error) {
       console.error("Error saving client:", error);
       toast({
         title: "Erro ao salvar",
         description: "Não foi possível salvar o cliente. Tente novamente.",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -199,12 +202,16 @@ const AddClientDialog = ({
             
             {/* Custom Fields Section */}
             <div className="mt-6">
-              <AddClientCustomFields
-                customFields={customFields}
-                customValues={customValues}
-                onCustomFieldChange={handleCustomFieldChange}
-                loading={loading}
-              />
+              {loading ? (
+                <SkeletonCustomFields />
+              ) : (
+                <AddClientCustomFields
+                  customFields={customFields}
+                  customValues={customValues}
+                  onCustomFieldChange={handleCustomFieldChange}
+                  loading={loading}
+                />
+              )}
             </div>
           </TabsContent>
 
@@ -219,16 +226,19 @@ const AddClientDialog = ({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            disabled={saving}
           >
             Cancelar
           </Button>
-          <Button
+          <LoadingButton
             type="submit"
             onClick={handleSave}
-            className="bg-green-500 hover:bg-green-600 text-white"
+            loading={saving}
+            loadingText="Adicionando..."
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             Adicionar Cliente
-          </Button>
+          </LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>
