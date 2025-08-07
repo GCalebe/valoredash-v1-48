@@ -224,7 +224,8 @@ export class AdvancedFiltersService {
         return { data: [], error: error.message };
       }
 
-      return { data: data || [] };
+      type SavedFilterRow = { id: string; name: string; filter_data: FilterGroup; created_at: string };
+      return { data: (data as unknown as SavedFilterRow[]) || [] };
     } catch (error) {
       console.error('Erro inesperado ao carregar filtros:', error);
       return { data: [], error: 'Erro inesperado ao carregar filtros' };

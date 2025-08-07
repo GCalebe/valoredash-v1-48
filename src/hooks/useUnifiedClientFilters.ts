@@ -49,10 +49,11 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Hook dos filtros avançados
+  const { advancedFilter, updateAdvancedFilter, clearAdvancedFilter, hasAdvancedRules } = useFilterDialog();
+
   const updateAdvancedFilterWrapper = useCallback((filter: FilterGroup) => {
     updateAdvancedFilter(filter.id, filter);
   }, [updateAdvancedFilter]);
-
   // Implementa debounce para o searchTerm
   useEffect(() => {
     if (debounceTimeoutRef.current) {
