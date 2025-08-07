@@ -1,6 +1,6 @@
 
 // @ts-nocheck
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useMemo } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import KanbanStageColumn from "./KanbanStageColumn";
 import { Contact } from "@/types/client";
@@ -20,7 +20,7 @@ interface KanbanViewProps {
   onStageEdit?: (stage: KanbanStage) => void;
 }
 
-const KanbanView = ({
+const KanbanView = React.memo(({
   contacts,
   onContactClick,
   onStageChange,
@@ -44,19 +44,38 @@ const KanbanView = ({
     setOptimisticContacts(contacts);
   }, [contacts]);
 
-  // Filtragem de contatos usando dados otimistas
-  const filteredContacts = optimisticContacts.filter(
-    (contact) =>
-      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (contact.email &&
-        contact.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (contact.clientName &&
-        contact.clientName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (contact.phone && contact.phone.includes(searchTerm)),
-  );
+  // Filtragem de contatos otimizada com useMemo
+  const filteredContacts = useMemo(() => {
+    if (!searchTerm.trim()) return optimisticContacts;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return optimisticContacts.filter(
+      (contact) =>
+        contact.name.toLowerCase().includes(searchLower) ||
+        (contact.email && contact.email.toLowerCase().includes(searchLower)) ||
+        (contact.clientName && contact.clientName.toLowerCase().includes(searchLower)) ||
+        (contact.phone && contact.phone.includes(searchTerm))
+    );
+  }, [optimisticContacts, searchTerm]);
 
   // Agrupamento de contatos por estágio usando hook refatorado
   const contactsByStage = useContactsByKanbanStage(filteredContacts, stages);
+
+  // Memoizar estágios para evitar re-renderizações
+  const memoizedStages = useMemo(() => stages, [stages]);
+
+  // Callbacks otimizados com useCallback
+  const handleContactClick = useCallback((contact: Contact) => {
+    onContactClick(contact);
+  }, [onContactClick]);
+
+  const handleEditClick = useCallback((contact: Contact) => {
+    onEditClick(contact);
+  }, [onEditClick]);
+
+  const handleStageEdit = useCallback((stage: KanbanStage) => {
+    onStageEdit?.(stage);
+  }, [onStageEdit]);
 
   // Log para diagnosticar dados recebidos
   React.useEffect(() => {
@@ -108,9 +127,9 @@ const KanbanView = ({
       return;
     }
 
-    // Find the source and destination stages
-    const sourceStage = stages.find(stage => stage.id === source.droppableId);
-    const destinationStage = stages.find(stage => stage.id === destination.droppableId);
+    // Find the source and destination stages usando memoizedStages
+    const sourceStage = memoizedStages.find(stage => stage.id === source.droppableId);
+    const destinationStage = memoizedStages.find(stage => stage.id === destination.droppableId);
     
     if (!sourceStage || !destinationStage) {
       console.error("[KanbanView] Could not find source or destination stage");
@@ -158,7 +177,7 @@ const KanbanView = ({
     } finally {
       setIsUpdatingStage(false);
     }
-  }, [stages, onStageChange, dragStartTime, contacts]);
+  }, [memoizedStages, onStageChange, dragStartTime, contacts]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!scrollContainerRef.current) return;
@@ -221,15 +240,15 @@ const KanbanView = ({
         )}
         
         <div className="flex gap-3 min-w-max p-1 md:p-2 kanban-drag-area h-full">
-          {stages.map((stage) => (
+          {memoizedStages.map((stage) => (
             <KanbanStageColumn
               key={stage.id}
               stage={stage}
               contacts={contactsByStage[stage.title] || []}
-              onContactClick={onContactClick}
-              onEditClick={onEditClick}
+              onContactClick={handleContactClick}
+              onEditClick={handleEditClick}
               isCompact={isCompact}
-              onStageEdit={onStageEdit}
+              onStageEdit={handleStageEdit}
               isDraggedOver={draggedContactId !== null}
             />
           ))}
@@ -237,6 +256,9 @@ const KanbanView = ({
       </div>
     </DragDropContext>
   );
-};
+});
+
+// Adicionar displayName para debugging
+KanbanView.displayName = 'KanbanView';
 
 export default KanbanView;

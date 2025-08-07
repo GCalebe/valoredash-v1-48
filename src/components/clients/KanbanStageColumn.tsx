@@ -1,5 +1,5 @@
   
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ interface KanbanStageColumnProps {
   isDraggedOver?: boolean;
 }
 
-const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
+const KanbanStageColumn: React.FC<KanbanStageColumnProps> = React.memo(({
   stage,
   contacts,
   onContactClick,
@@ -28,10 +28,15 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
   onStageEdit,
   isDraggedOver,
 }) => {
-  const stageColor = stage.settings?.color || "#6b7280";
-  const headerStyle = {
-    color: stageColor,
-  };
+  // Memoizar o estilo do header para evitar recriações
+  const headerStyle = useMemo(() => ({
+    color: stage.settings?.color || "#6b7280",
+  }), [stage.settings?.color]);
+
+  // Memoizar o callback de edição do stage
+  const handleStageEdit = useCallback(() => {
+    onStageEdit?.(stage);
+  }, [onStageEdit, stage]);
 
   return (
     <div className={`w-[280px] md:w-[320px] flex-shrink-0 transition-all duration-200 ${
@@ -48,7 +53,7 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-4 w-4 p-0 hover:bg-muted/50 transition-colors"
-                onClick={() => onStageEdit?.(stage)}
+                onClick={handleStageEdit}
               >
                 <Edit3 className="h-3 w-3" />
               </Button>
@@ -127,6 +132,9 @@ const KanbanStageColumn: React.FC<KanbanStageColumnProps> = ({
       </Card>
     </div>
   );
-};
+});
+
+// Adicionar displayName para debugging
+KanbanStageColumn.displayName = 'KanbanStageColumn';
 
 export default KanbanStageColumn;
