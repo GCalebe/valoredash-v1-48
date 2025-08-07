@@ -63,6 +63,7 @@ const FilterDialog = ({
     saveFilter,
     applySavedFilter,
     deleteSavedFilter,
+    loadSavedFilters,
     clearAdvancedFilter,
     hasAdvancedRules,
   } = useFilterDialog();
@@ -92,9 +93,8 @@ const FilterDialog = ({
 
           <ScrollArea className="max-h-[60vh] pr-4">
             <SavedFilters
-              savedFilters={savedFilters}
               onApplySavedFilter={applySavedFilter}
-              onDeleteSavedFilter={deleteSavedFilter}
+              onFilterDeleted={loadSavedFilters}
             />
 
             <Separator />

@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import { type FilterGroup, type FilterRule } from "@/components/clients/filters/FilterGroup";
 import { clientProperties, operatorsByType } from "@/components/clients/filters/filterConstants";
+import { AdvancedFiltersService } from "../services/advancedFiltersService";
+import { supabase } from "../integrations/supabase/client";
 
 interface SavedFilter {
   id: string;
@@ -38,26 +41,91 @@ export const useFilterDialog = () => {
     setAdvancedFilter(updateGroup(advancedFilter));
   };
 
-  const saveFilter = () => {
-    if (filterName.trim() === "") return;
+  const saveFilter = useCallback(async (name: string) => {
+    if (!name.trim() || !advancedFilter) {
+      toast.error('Nome do filtro e configurações são obrigatórios');
+      return;
+    }
 
-    const newSavedFilter: SavedFilter = {
-      id: `saved-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: filterName,
-      filter: advancedFilter,
-    };
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        return;
+      }
 
-    setSavedFilters([...savedFilters, newSavedFilter]);
-    setFilterName("");
-  };
+      const { success, error } = await AdvancedFiltersService.saveFilter(
+        name.trim(),
+        advancedFilter,
+        user.id
+      );
+
+      if (!success) {
+        toast.error('Erro ao salvar filtro: ' + error);
+        return;
+      }
+
+      toast.success('Filtro salvo com sucesso!');
+      setFilterName("");
+      
+      // Recarrega a lista de filtros salvos
+      loadSavedFilters();
+    } catch (error) {
+      console.error('Erro ao salvar filtro:', error);
+      toast.error('Erro inesperado ao salvar filtro');
+    }
+  }, [advancedFilter]);
 
   const applySavedFilter = (filter: FilterGroup) => {
     setAdvancedFilter(filter);
   };
 
-  const deleteSavedFilter = (id: string) => {
-    setSavedFilters(savedFilters.filter((f) => f.id !== id));
-  };
+  const loadSavedFilters = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.warn('Usuário não autenticado');
+        return;
+      }
+
+      const { data, error } = await AdvancedFiltersService.loadSavedFilters(user.id);
+      
+      if (error) {
+        console.error('Erro ao carregar filtros salvos:', error);
+        return;
+      }
+
+      // Converte para o formato esperado pelo componente
+      const convertedFilters: SavedFilter[] = data.map(filter => ({
+        id: filter.id,
+        name: filter.name,
+        filters: filter.filter_data
+      }));
+
+      setSavedFilters(convertedFilters);
+    } catch (error) {
+      console.error('Erro inesperado ao carregar filtros:', error);
+    }
+  }, []);
+
+  const deleteSavedFilter = useCallback(async (id: string) => {
+    try {
+      const { success, error } = await AdvancedFiltersService.deleteSavedFilter(id);
+      
+      if (!success) {
+        toast.error('Erro ao deletar filtro: ' + error);
+        return;
+      }
+
+      setSavedFilters(prev => prev.filter(filter => filter.id !== id));
+      toast.success('Filtro deletado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao deletar filtro:', error);
+      toast.error('Erro inesperado ao deletar filtro');
+    }
+  }, []);
 
   const clearAdvancedFilter = () => {
     setAdvancedFilter(createInitialFilter());
@@ -80,6 +148,7 @@ export const useFilterDialog = () => {
     saveFilter,
     applySavedFilter,
     deleteSavedFilter,
+    loadSavedFilters,
     clearAdvancedFilter,
     hasAdvancedRules,
   };

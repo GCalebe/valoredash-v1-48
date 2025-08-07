@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/context/AuthContext";
-import { useClientManagement } from "@/hooks/useClientManagement";
-import { useClientsFilters } from "@/hooks/useClientsFilters";
+import { useClientManagementSimplified } from "@/hooks/useClientManagementSimplified";
+import { useUnifiedClientFilters } from "@/hooks/useUnifiedClientFilters";
+import { useFilteredContacts } from "@/hooks/useFilteredContacts";
 import { useKanbanStagesSupabase, KanbanStage } from "@/hooks/useKanbanStagesSupabase";
 import { useCustomFieldsPreloader } from "@/hooks/useCustomFieldsPreloader";
 import ClientsDashboardLayout from "@/components/clients/ClientsDashboardLayout";
@@ -16,7 +17,7 @@ import { ClientTreeView2, ClientTreeView4 } from '@/components/clients/tree-view
 const ClientsDashboard = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
-  const filter = useClientsFilters();
+  const filter = useUnifiedClientFilters();
   const { customFieldFilters, addCustomFieldFilter, removeCustomFieldFilter } =
     filter;
 
@@ -31,10 +32,15 @@ const ClientsDashboard = () => {
   // Use the new Supabase-based kanban stages hook
   const kanbanStages = useKanbanStagesSupabase();
 
+  // Hook para contatos filtrados
   const {
     contacts,
-    loadingContacts,
-    refreshing,
+    isLoading: loadingContacts,
+    refetch: handleRefresh,
+  } = useFilteredContacts();
+
+  // Hook para gerenciamento de estado dos clientes (sem dados)
+  const {
     selectedContact,
     setSelectedContact,
     isAddContactOpen,
@@ -53,17 +59,52 @@ const ClientsDashboard = () => {
     setMessageText,
     newContact,
     setNewContact,
-    handleRefresh,
     handleContactClick,
-    handleAddContact,
-    handleEditContact,
-    handleDeleteContact,
+    handleAddContact: handleAddContactBase,
+    handleEditContact: handleEditContactBase,
+    handleDeleteContact: handleDeleteContactBase,
     openEditModal,
     handleMessageClick,
-    handleMessageSubmit,
-    handlePauseDurationConfirm,
-    handleKanbanStageChange,
-  } = useClientManagement();
+    handleMessageSubmit: handleMessageSubmitBase,
+    handlePauseDurationConfirm: handlePauseDurationConfirmBase,
+    handleKanbanStageChange: handleKanbanStageChangeBase,
+  } = useClientManagementSimplified();
+
+  // Wrappers para incluir refresh dos dados
+  const handleAddContact = async () => {
+    const result = await handleAddContactBase(() => handleRefresh());
+    return result;
+  };
+
+  const handleEditContact = async () => {
+    await handleEditContactBase(() => handleRefresh());
+  };
+
+  const handleDeleteContact = async () => {
+    await handleDeleteContactBase(() => handleRefresh());
+  };
+
+  const handleMessageSubmit = async () => {
+    await handleMessageSubmitBase(() => handleRefresh());
+  };
+
+  const handlePauseDurationConfirm = async (duration: number) => {
+    await handlePauseDurationConfirmBase(duration, () => handleRefresh());
+  };
+
+  const handleKanbanStageChange = async (contactId: string, newStageId: string) => {
+    await handleKanbanStageChangeBase(contactId, newStageId, () => handleRefresh());
+  };
+
+  // Estado para refreshing
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Wrapper para handleRefresh com estado de loading
+  const handleRefreshWithLoading = async () => {
+    setRefreshing(true);
+    await handleRefresh();
+    setRefreshing(false);
+  };
 
   // Pré-carregar campos personalizados em background
   useCustomFieldsPreloader(contacts);
@@ -126,7 +167,7 @@ const ClientsDashboard = () => {
         isCompactView,
         setIsCompactView,
         refreshing,
-        handleRefresh,
+        handleRefresh: handleRefreshWithLoading,
       }}
     >
       <div className="flex-1 overflow-hidden">

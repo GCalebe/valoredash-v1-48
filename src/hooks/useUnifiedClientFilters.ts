@@ -1,4 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useFilterDialog } from "./useFilterDialog";
+import { ContactFilters } from "@/lib/contactsService";
+import { FilterGroup } from "@/services/advancedFiltersService";
 
 export interface CustomFieldFilter {
   fieldId: string;
@@ -6,7 +9,8 @@ export interface CustomFieldFilter {
   value: string | number | boolean | null;
 }
 
-export interface ClientsFilters {
+export interface UnifiedClientFilters {
+  // Filtros básicos
   searchTerm: string;
   debouncedSearchTerm: string;
   setSearchTerm: (term: string) => void;
@@ -19,20 +23,38 @@ export interface ClientsFilters {
   customFieldFilters: CustomFieldFilter[];
   addCustomFieldFilter: (filter: CustomFieldFilter) => void;
   removeCustomFieldFilter: (id: string) => void;
+  
+  // Filtros avançados
+  advancedFilter: FilterGroup;
+  updateAdvancedFilter: (filter: FilterGroup) => void;
+  clearAdvancedFilter: () => void;
+  hasAdvancedRules: boolean;
+  
+  // Estado unificado
   hasActiveFilters: boolean;
   clearAllFilters: () => void;
+  
+  // Filtros computados para o serviço
+  getContactFilters: () => ContactFilters;
 }
 
-export function useClientsFilters(): ClientsFilters {
+export function useUnifiedClientFilters(): UnifiedClientFilters {
+  // Estados dos filtros básicos
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [segmentFilter, setSegmentFilter] = useState("all");
   const [lastContactFilter, setLastContactFilter] = useState("all");
-  const [customFieldFilters, setCustomFieldFilters] = useState<
-    CustomFieldFilter[]
-  >([]);
+  const [customFieldFilters, setCustomFieldFilters] = useState<CustomFieldFilter[]>([]);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Hook dos filtros avançados
+  const {
+    advancedFilter,
+    updateAdvancedFilter,
+    clearAdvancedFilter,
+    hasAdvancedRules,
+  } = useFilterDialog();
 
   // Implementa debounce para o searchTerm
   useEffect(() => {
@@ -60,52 +82,85 @@ export function useClientsFilters(): ClientsFilters {
     };
   }, []);
 
+  // Verifica se há filtros ativos
   const hasActiveFilters = useMemo(
     () =>
       statusFilter !== "all" ||
       segmentFilter !== "all" ||
       lastContactFilter !== "all" ||
       searchTerm !== "" ||
-      customFieldFilters.length > 0,
+      customFieldFilters.length > 0 ||
+      hasAdvancedRules,
     [
       statusFilter,
       segmentFilter,
       lastContactFilter,
       searchTerm,
       customFieldFilters,
+      hasAdvancedRules,
     ],
   );
 
-  const addCustomFieldFilter = (filter: CustomFieldFilter) => {
+  // Adiciona filtro de campo personalizado
+  const addCustomFieldFilter = useCallback((filter: CustomFieldFilter) => {
     setCustomFieldFilters((prev) => {
-      // Replace if filter for this field already exists
       const exists = prev.some((f) => f.fieldId === filter.fieldId);
       if (exists) {
         return prev.map((f) => (f.fieldId === filter.fieldId ? filter : f));
       }
-      // Otherwise add new filter
       return [...prev, filter];
     });
-  };
+  }, []);
 
-  const removeCustomFieldFilter = (fieldId: string) => {
+  // Remove filtro de campo personalizado
+  const removeCustomFieldFilter = useCallback((fieldId: string) => {
     setCustomFieldFilters((prev) => prev.filter((f) => f.fieldId !== fieldId));
-  };
+  }, []);
 
-  const clearAll = (filterType: "basic" | "customFields" | "all" = "all") => {
-    if (filterType === "all" || filterType === "basic") {
-      setStatusFilter("all");
-      setSegmentFilter("all");
-      setLastContactFilter("all");
-      setSearchTerm("");
+  // Limpa todos os filtros
+  const clearAllFilters = useCallback(() => {
+    setStatusFilter("all");
+    setSegmentFilter("all");
+    setLastContactFilter("all");
+    setSearchTerm("");
+    setCustomFieldFilters([]);
+    clearAdvancedFilter();
+  }, [clearAdvancedFilter]);
+
+  // Converte filtros para o formato do ContactFilters
+  const getContactFilters = useCallback((): ContactFilters => {
+    const filters: ContactFilters = {};
+
+    // Filtros básicos
+    if (debouncedSearchTerm) {
+      filters.search = debouncedSearchTerm;
     }
 
-    if (filterType === "all" || filterType === "customFields") {
-      setCustomFieldFilters([]);
+    if (statusFilter !== "all") {
+      filters.status = statusFilter;
     }
-  };
+
+    // Mapear segmentFilter para tags se necessário
+    if (segmentFilter !== "all") {
+      filters.tags = [segmentFilter];
+    }
+
+    // Filtros avançados
+    if (hasAdvancedRules) {
+      filters.advancedFilters = advancedFilter;
+    }
+
+    return filters;
+  }, [
+    debouncedSearchTerm,
+    statusFilter,
+    segmentFilter,
+    hasAdvancedRules,
+    advancedFilter,
+  ]);
 
   return {
+    // Filtros básicos
     searchTerm,
     debouncedSearchTerm,
     setSearchTerm,
@@ -118,7 +173,16 @@ export function useClientsFilters(): ClientsFilters {
     customFieldFilters,
     addCustomFieldFilter,
     removeCustomFieldFilter,
-    clearAllFilters: clearAll,
+    
+    // Filtros avançados
+    advancedFilter,
+    updateAdvancedFilter,
+    clearAdvancedFilter,
+    hasAdvancedRules,
+    
+    // Estado unificado
     hasActiveFilters,
+    clearAllFilters,
+    getContactFilters,
   };
 }

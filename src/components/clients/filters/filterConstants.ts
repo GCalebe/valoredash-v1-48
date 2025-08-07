@@ -1,25 +1,27 @@
-// Lista estática de propriedades do cliente para filtros
+// Lista de propriedades do cliente para filtros (sincronizada com schema do banco)
 export const clientProperties = [
-  { id: "name", name: "Nome", type: "text" },
-  { id: "email", name: "Email", type: "text" },
-  { id: "phone", name: "Telefone", type: "text" },
+  { id: "name", name: "Nome", type: "text", dbField: "name" },
+  { id: "email", name: "Email", type: "text", dbField: "email" },
+  { id: "phone", name: "Telefone", type: "text", dbField: "phone" },
+  { id: "client_name", name: "Nome do Cliente", type: "text", dbField: "client_name" },
+  { id: "client_size", name: "Porte do Cliente", type: "select", dbField: "client_size", options: ["Pequeno", "Médio", "Grande"] },
+  { id: "client_type", name: "Tipo do Cliente", type: "text", dbField: "client_type" },
+  { id: "cpf_cnpj", name: "CPF/CNPJ", type: "text", dbField: "cpf_cnpj" },
   {
     id: "status",
     name: "Status",
     type: "select",
-    options: ["Ganhos", "Perdidos"],
+    dbField: "status",
+    options: ["Ganhos", "Perdidos", "Em Andamento", "Qualificado", "Não Qualificado"],
   },
-  {
-    id: "consultationStage",
-    name: "Etapa da Consulta",
-    type: "select",
-    options: ["Agendada", "Realizada", "Cancelada"],
-  },
-  { id: "source", name: "Origem", type: "text" },
-  { id: "city", name: "Cidade", type: "text" },
-  { id: "state", name: "Estado", type: "text" },
-  { id: "lastContact", name: "Último Contato", type: "date" },
-  { id: "nextContact", name: "Próximo Contato", type: "date" },
+  { id: "kanban_stage_id", name: "Etapa do Kanban", type: "text", dbField: "kanban_stage_id" },
+  { id: "session_id", name: "ID da Sessão", type: "text", dbField: "session_id" },
+  { id: "asaas_customer_id", name: "ID Cliente Asaas", type: "text", dbField: "asaas_customer_id" },
+  { id: "nome_pet", name: "Nome do Pet", type: "text", dbField: "nome_pet" },
+  { id: "raca_pet", name: "Raça do Pet", type: "text", dbField: "raca_pet" },
+  { id: "porte_pet", name: "Porte do Pet", type: "select", dbField: "porte_pet", options: ["Pequeno", "Médio", "Grande"] },
+  { id: "created_at", name: "Data de Criação", type: "date", dbField: "created_at" },
+  { id: "updated_at", name: "Última Atualização", type: "date", dbField: "updated_at" },
 ];
 
 // Lista de tags disponíveis
@@ -58,22 +60,25 @@ export const operatorsByType = {
 // Tipos de condição para grupos
 export type ConditionType = "AND" | "OR";
 
-// Simple interface that avoids complex type inference
+// Interface para representar um registro de cliente (sincronizada com schema do banco)
 export interface ClientRecord {
-  asaas_customer_id?: string | null;
-  client_name?: string | null;
-  client_size?: string | null;
-  client_type?: string | null;
-  cpf_cnpj?: string | null;
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  client_name?: string;
+  client_size?: string;
+  client_type?: string;
+  cpf_cnpj?: string;
+  status: string;
+  kanban_stage_id?: string;
+  session_id?: string;
+  asaas_customer_id?: string;
+  nome_pet?: string;
+  raca_pet?: string;
+  porte_pet?: string;
   created_at?: string;
-  email?: string | null;
-  id: number;
-  kanban_stage?: string | null;
-  nome?: string | null;
-  nome_pet?: string | null;
-  payments?: unknown;
-  porte_pet?: string | null;
-  raca_pet?: string | null;
-  session_id?: string | null;
-  telefone?: string | null;
+  updated_at?: string;
+  tags?: string[];
+  customFields?: Record<string, any>;
 }

@@ -16,7 +16,7 @@ import ClientsViewToggler from "./ClientsViewToggler";
 import ClientsRefreshButton from "./ClientsRefreshButton";
 import { KanbanSettings } from "./KanbanSettings";
 
-import { CustomFieldFilter } from "@/hooks/useClientsFilters";
+import { CustomFieldFilter } from "@/hooks/useUnifiedClientFilters";
 
 interface ClientsHeaderProps {
   searchTerm: string;
