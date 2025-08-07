@@ -29,6 +29,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
+import ProspectsSearchForm from './prospectar/components/ProspectsSearchForm';
+import ProspectsFilters from './prospectar/components/ProspectsFilters';
+import ProspectCard from './prospectar/components/ProspectCard';
 
 interface Prospect {
   id: string;
@@ -371,84 +374,27 @@ const Prospectar: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Search Form */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                  <div className="md:col-span-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Ex: Petshop em Salvador, Dentista em São Paulo..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div className="md:col-span-3">
-                    <Select value={resultsLimit} onValueChange={setResultsLimit}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="20">20 resultados</SelectItem>
-                        <SelectItem value="40">40 resultados</SelectItem>
-                        <SelectItem value="60">60 resultados</SelectItem>
-                        <SelectItem value="100">100 resultados</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="md:col-span-3">
-                    <Button 
-                      onClick={searchProspects} 
-                      disabled={isLoading || !isConfigured}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    >
-                      {isLoading ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      ) : (
-                        <Search className="mr-2 h-4 w-4" />
-                      )}
-                      {isLoading ? 'Buscando...' : isConfigured ? 'Buscar' : 'Configure APIs'}
-                    </Button>
-                  </div>
-                </div>
+                <ProspectsSearchForm
+                  searchTerm={searchTerm}
+                  onChangeSearchTerm={setSearchTerm}
+                  onKeyPress={handleKeyPress}
+                  resultsLimit={resultsLimit}
+                  onChangeResultsLimit={setResultsLimit}
+                  isLoading={isLoading}
+                  isConfigured={!!isConfigured}
+                  onSearch={searchProspects}
+                />
 
                 {/* Filters */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <Select value={whatsappFilter} onValueChange={setWhatsappFilter}>
-                    <SelectTrigger className="w-auto">
-                      <SelectValue placeholder="WhatsApp" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="true">Apenas com WhatsApp</SelectItem>
-                      <SelectItem value="false">Sem WhatsApp</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Select value={ratingFilter} onValueChange={setRatingFilter}>
-                    <SelectTrigger className="w-auto">
-                      <SelectValue placeholder="Avaliação" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas as avaliações</SelectItem>
-                      <SelectItem value="4">4+ estrelas</SelectItem>
-                      <SelectItem value="3">3+ estrelas</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Input
-                    placeholder="Filtrar por nome..."
-                    value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
-                    className="w-auto min-w-[200px]"
-                  />
-                  
-                  <Button variant="outline" size="sm" onClick={clearFilters}>
-                    <X className="mr-1 h-4 w-4" />
-                    Limpar
-                  </Button>
-                </div>
+                <ProspectsFilters
+                  whatsappFilter={whatsappFilter}
+                  onChangeWhatsapp={setWhatsappFilter}
+                  ratingFilter={ratingFilter}
+                  onChangeRating={setRatingFilter}
+                  searchFilter={searchFilter}
+                  onChangeSearchFilter={setSearchFilter}
+                  onClear={clearFilters}
+                />
 
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between">
@@ -506,74 +452,12 @@ const Prospectar: React.FC = () => {
                     </div>
                   ) : (
                     filteredProspects.map((prospect) => (
-                      <Card 
-                        key={prospect.id} 
-                        className={`cursor-pointer transition-all hover:shadow-md ${
-                          selectedProspects.has(prospect.id) ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950/20' : ''
-                        }`}
-                        onClick={() => toggleProspectSelection(prospect.id)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <h4 className="font-semibold">{prospect.name}</h4>
-                                {prospect.hasWhatsApp && (
-                                  <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                    WhatsApp
-                                  </Badge>
-                                )}
-                                {prospect.verified && (
-                                  <Badge variant="secondary">Verificado</Badge>
-                                )}
-                              </div>
-                              <p className="text-sm text-muted-foreground mb-1">
-                                <MapPin className="inline h-3 w-3 mr-1" />
-                                {prospect.endereco}
-                              </p>
-                              {prospect.telefone && (
-                                <p className="text-sm text-muted-foreground mb-1">
-                                  📞 {prospect.telefone}
-                                </p>
-                              )}
-                              {prospect.email && (
-                                <p className="text-sm text-muted-foreground mb-1">
-                                  ✉️ {prospect.email}
-                                </p>
-                              )}
-                              <div className="flex items-center gap-4 mt-2">
-                                {prospect.rating && (
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-yellow-500">⭐</span>
-                                    <span className="text-sm font-medium">{prospect.rating}</span>
-                                    {prospect.reviews && (
-                                      <span className="text-xs text-muted-foreground">({prospect.reviews} avaliações)</span>
-                                    )}
-                                  </div>
-                                )}
-                                {prospect.website && (
-                                  <a 
-                                    href={prospect.website} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-xs text-blue-600 hover:underline"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    🌐 Website
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                            <div className="ml-4">
-                              {selectedProspects.has(prospect.id) ? (
-                                <CheckSquare className="h-5 w-5 text-blue-600" />
-                              ) : (
-                                <Square className="h-5 w-5 text-muted-foreground" />
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <ProspectCard
+                        key={prospect.id}
+                        prospect={prospect as any}
+                        selected={selectedProspects.has(prospect.id)}
+                        onToggle={toggleProspectSelection}
+                      />
                     ))
                   )}
                 </div>
