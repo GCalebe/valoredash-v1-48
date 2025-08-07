@@ -22,7 +22,7 @@ const initialAgendaState: Omit<LocalAgenda, 'id'> = {
   title: '',
   description: '',
   category: 'consulta', // Categoria padrão definida
-  host: '',
+  host: [], // Agora é um array de IDs de anfitriões
   availabilityInterval: 30,
   duration: 60,
   breakTime: 15,

@@ -74,7 +74,7 @@ export type LocalAgenda = {
   title: string;
   description: string;
   category: AgendaCategory;
-  host: string;
+  host: string[] | string; // Pode ser um array de IDs de anfitriões ou um único ID (para compatibilidade)
   duration: number;
   breakTime: number;
   availabilityInterval: number;
@@ -208,20 +208,23 @@ const AgendaTab = () => {
 
   // Função para converter agenda do Supabase para formato local
   const convertSupabaseToLocal = async (supabaseAgenda: SupabaseAgenda): Promise<LocalAgenda> => {
-    // Buscar anfitrião associado à agenda
-    let hostName = '';
+    // Buscar anfitriões associados à agenda
+    let hostIds: string[] = [];
     try {
-      const { data: employeeAgenda } = await supabase
+      const { data: employeeAgendas } = await supabase
         .from('employee_agendas')
-        .select('employee_id, employees(name)')
+        .select('employee_id, employees(id, name)')
         .eq('agenda_id', supabaseAgenda.id)
-        .limit(1);
+        .order('priority', { ascending: true }); // Ordenar por prioridade para manter a ordem correta
       
-      if (employeeAgenda && employeeAgenda.length > 0 && employeeAgenda[0].employees) {
-        hostName = employeeAgenda[0].employees.name;
+      if (employeeAgendas && employeeAgendas.length > 0) {
+        // Extrair IDs dos anfitriões associados
+        hostIds = employeeAgendas
+          .filter(ea => ea.employees) // Garantir que employees existe
+          .map(ea => ea.employee_id);
       }
     } catch (error) {
-      console.log('Nenhum anfitrião associado à agenda:', error);
+      console.log('Erro ao buscar anfitriões associados à agenda:', error);
     }
 
     return {
@@ -229,7 +232,7 @@ const AgendaTab = () => {
       title: supabaseAgenda.name,
       description: supabaseAgenda.description || '',
       category: (supabaseAgenda.category as AgendaCategory) || '',
-      host: hostName, // Preenchido com o nome do anfitrião associado
+      host: hostIds, // Agora é um array de IDs de anfitriões
       duration: supabaseAgenda.duration_minutes,
       breakTime: supabaseAgenda.buffer_time_minutes,
       availabilityInterval: 30, // Valor padrão
@@ -241,7 +244,7 @@ const AgendaTab = () => {
       redirectUrl: '',
       sendReminders: false,
       reminders: [],
-      serviceTypes: ['Online', 'Presencial'] // Default service types since service_types column doesn't exist yet
+      serviceTypes: supabaseAgenda.service_types || ['Online', 'Presencial']
     };
   };
 
@@ -357,33 +360,47 @@ const AgendaTab = () => {
         agendaId = data.id;
       }
 
-      // Associar anfitrião selecionado à agenda
+      // Associar anfitriões selecionados à agenda
       if (currentAgenda.host) {
-        // Se o host é um nome, precisamos encontrar o ID correspondente
-        let hostId = currentAgenda.host;
+        // Converter para array se for uma string única
+        const hostIds = Array.isArray(currentAgenda.host) ? currentAgenda.host : [currentAgenda.host];
         
-        // Se não parece ser um UUID (não tem o formato UUID), buscar por nome
-        if (!currentAgenda.host.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
-          const { data: employee } = await supabase
-            .from('employees')
-            .select('id')
-            .eq('name', currentAgenda.host)
-            .limit(1);
+        // Processar cada anfitrião
+        for (let i = 0; i < hostIds.length; i++) {
+          let hostId = hostIds[i];
           
-          if (employee && employee.length > 0) {
-            hostId = employee[0].id;
+          // Se não parece ser um UUID (não tem o formato UUID), buscar por nome
+          if (!hostId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+            const { data: employee } = await supabase
+              .from('employees')
+              .select('id')
+              .eq('name', hostId)
+              .limit(1);
+            
+            if (employee && employee.length > 0) {
+              hostId = employee[0].id;
+            }
           }
-        }
-        
-        const { error: hostError } = await supabase
-          .from('employee_agendas')
-          .insert({
-            employee_id: hostId,
-            agenda_id: agendaId
-          });
-        
-        if (hostError) {
-          console.error('Erro ao associar anfitrião:', hostError);
+          
+          // Definir prioridade e status primário com base na ordem
+          const isPrimary = i === 0; // O primeiro anfitrião é o primário
+          const priority = i + 1; // Prioridade baseada na ordem (1, 2, 3...)
+          const commissionPercentage = isPrimary ? 80 : 70; // Exemplo: primário 80%, secundários 70%
+          
+          const { error: hostError } = await supabase
+            .from('employee_agendas')
+            .insert({
+              employee_id: hostId,
+              agenda_id: agendaId,
+              is_primary: isPrimary,
+              priority: priority,
+              commission_percentage: commissionPercentage,
+              is_active: true
+            });
+          
+          if (hostError) {
+            console.error(`Erro ao associar anfitrião ${i+1}:`, hostError);
+          }
         }
       }
 
@@ -634,7 +651,21 @@ const AgendaTab = () => {
             <Card key={agenda.id} className="flex flex-col justify-between bg-background border hover:shadow-md transition-shadow duration-200">
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start gap-3">
-                  <div className="flex-1"><CardTitle className="text-xl font-bold text-foreground">{agenda.title}</CardTitle><CardDescription className="text-base text-muted-foreground mt-1">{agenda.host}</CardDescription></div>
+                  <div className="flex-1">
+                    <CardTitle className="text-xl font-bold text-foreground">{agenda.title}</CardTitle>
+                    <CardDescription className="text-base text-muted-foreground mt-1">
+                      {Array.isArray(agenda.host) && agenda.host.length > 0 ? (
+                        <>
+                          {agenda.host.length > 1 ? 
+                            `${agenda.host.length} anfitriões associados` : 
+                            `1 anfitrião associado`
+                          }
+                        </>
+                      ) : (
+                        "Sem anfitriões associados"
+                      )}
+                    </CardDescription>
+                  </div>
                   <Badge variant="secondary" className="text-sm px-3 py-1 font-medium">{agenda.category}</Badge>
                 </div>
               </CardHeader>
