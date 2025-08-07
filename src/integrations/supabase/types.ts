@@ -3669,8 +3669,10 @@ export type Database = {
           differentials: string[] | null
           features: string[] | null
           has_combo: boolean | null
+          has_downsell: boolean | null
           has_promotion: boolean | null
           has_upgrade: boolean | null
+          has_upsell: boolean | null
           icon: string | null
           id: string
           image: string | null
@@ -3692,8 +3694,10 @@ export type Database = {
           differentials?: string[] | null
           features?: string[] | null
           has_combo?: boolean | null
+          has_downsell?: boolean | null
           has_promotion?: boolean | null
           has_upgrade?: boolean | null
+          has_upsell?: boolean | null
           icon?: string | null
           id?: string
           image?: string | null
@@ -3715,8 +3719,10 @@ export type Database = {
           differentials?: string[] | null
           features?: string[] | null
           has_combo?: boolean | null
+          has_downsell?: boolean | null
           has_promotion?: boolean | null
           has_upgrade?: boolean | null
+          has_upsell?: boolean | null
           icon?: string | null
           id?: string
           image?: string | null
