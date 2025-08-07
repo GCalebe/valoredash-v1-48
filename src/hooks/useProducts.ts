@@ -106,3 +106,14 @@ export function useProducts() {
     addProduct,
   };
 }
+
+// Export alias for backward compatibility with existing components
+export const useProductsQuery = () => {
+  const { products, loading } = useProducts();
+  
+  return {
+    data: products,
+    isLoading: loading,
+    error: null, // Add error handling if needed later
+  };
+};
