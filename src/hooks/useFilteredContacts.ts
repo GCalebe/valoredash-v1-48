@@ -38,11 +38,11 @@ export function useFilteredContacts(
   } = useInfiniteQuery({
     queryKey: ["contacts", "filtered", contactFilters],
     queryFn: async ({ pageParam = null }) => {
-      const result = await contactsService.fetchContactsPaginated({
-        ...contactFilters,
-        cursor: pageParam,
-        limit: 50,
-      });
+      const result = await contactsService.fetchContactsPaginated(
+        contactFilters,
+        pageParam || undefined,
+        50,
+      );
       return result;
     },
     enabled,

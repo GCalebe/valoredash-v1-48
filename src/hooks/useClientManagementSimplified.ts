@@ -86,7 +86,7 @@ export const useClientManagementSimplified = () => {
   const handleMessageSubmit = async (onSuccess?: () => void) => {
     if (!selectedContact || !messageText.trim()) return;
 
-    await sendMessage(selectedContact, messageText, () => {
+    await sendMessage(selectedContact, messageText, null, () => {
       if (onSuccess) onSuccess();
       setIsMessageDialogOpen(false);
       setMessageText("");

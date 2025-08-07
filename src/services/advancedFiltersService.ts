@@ -1,5 +1,6 @@
 import { supabase } from '../integrations/supabase/client';
-import type { FilterGroup, FilterRule, ClientRecord } from '../components/clients/filters/filterConstants';
+import type { ClientRecord } from '../components/clients/filters/filterConstants';
+import type { FilterGroup, FilterRule } from '../components/clients/filters/FilterGroup';
 import { clientProperties } from '../components/clients/filters/filterConstants';
 
 export interface AdvancedFilterParams {
@@ -91,24 +92,31 @@ export class AdvancedFiltersService {
   }
 
   /**
+   * Anexa filtros avançados a uma query existente (usado pelo contactsService)
+   */
+  static attachAdvancedFilters<T>(query: any, filterGroup?: FilterGroup): any {
+    if (!filterGroup) return query;
+    const filterCondition = this.buildFilterCondition(filterGroup);
+    if (filterCondition) {
+      return query.or(filterCondition);
+    }
+    return query;
+  }
+
+  /**
    * Constrói a condição de filtro para o Supabase baseada no FilterGroup
    */
   private static buildFilterCondition(group: FilterGroup): string | null {
     const conditions: string[] = [];
 
-    // Processa regras do grupo
-    group.rules.forEach(rule => {
-      const condition = this.buildRuleCondition(rule);
-      if (condition) {
-        conditions.push(condition);
-      }
-    });
-
-    // Processa subgrupos recursivamente
-    group.groups?.forEach(subGroup => {
-      const subCondition = this.buildFilterCondition(subGroup);
-      if (subCondition) {
-        conditions.push(`(${subCondition})`);
+    // Processa regras e subgrupos do grupo
+    group.rules.forEach((rule) => {
+      if ("field" in rule) {
+        const condition = this.buildRuleCondition(rule);
+        if (condition) conditions.push(condition);
+      } else {
+        const subCondition = this.buildFilterCondition(rule);
+        if (subCondition) conditions.push(`(${subCondition})`);
       }
     });
 
@@ -116,9 +124,8 @@ export class AdvancedFiltersService {
       return null;
     }
 
-    // Junta as condições com o operador do grupo (AND/OR)
-    const operator = group.condition === 'AND' ? ',' : ',';
-    return conditions.join(operator);
+    // Junta as condições (nota: '.or' no Supabase só suporta OR entre condições)
+    return conditions.join(',');
   }
 
   /**
@@ -130,21 +137,25 @@ export class AdvancedFiltersService {
       return null;
     }
 
-    const dbField = property.dbField || rule.field;
+    const dbField = (property as any).dbField || rule.field;
     const value = rule.value;
 
     switch (rule.operator) {
       case 'equals':
         return `${dbField}.eq.${value}`;
       case 'not_equals':
+      case 'notEquals':
         return `${dbField}.neq.${value}`;
       case 'contains':
         return `${dbField}.ilike.%${value}%`;
       case 'not_contains':
+      case 'notContains':
         return `not.${dbField}.ilike.%${value}%`;
       case 'starts_with':
+      case 'startsWith':
         return `${dbField}.ilike.${value}%`;
       case 'ends_with':
+      case 'endsWith':
         return `${dbField}.ilike.%${value}`;
       case 'greater_than':
         return `${dbField}.gt.${value}`;
@@ -172,7 +183,7 @@ export class AdvancedFiltersService {
   }> {
     try {
       const { error } = await supabase
-        .from('saved_filters')
+        .from('saved_filters' as any)
         .insert({
           name,
           filter_data: filterGroup,
@@ -202,7 +213,7 @@ export class AdvancedFiltersService {
   }> {
     try {
       const { data, error } = await supabase
-        .from('saved_filters')
+        .from('saved_filters' as any)
         .select('id, name, filter_data, created_at')
         .eq('user_id', userId)
         .eq('filter_type', 'clients')
@@ -229,7 +240,7 @@ export class AdvancedFiltersService {
   }> {
     try {
       const { error } = await supabase
-        .from('saved_filters')
+        .from('saved_filters' as any)
         .delete()
         .eq('id', filterId);
 

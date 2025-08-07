@@ -2,7 +2,7 @@
 // @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentAuthUser } from '@/hooks/useAuthUser';
-import { AdvancedFiltersService, FilterGroup } from '@/services/advancedFiltersService';
+import { AdvancedFiltersService } from '@/services/advancedFiltersService';
 
 export interface ContactData {
   id: string;
@@ -125,9 +125,8 @@ export const contactsService = {
         .lte('created_at', filters.dateRange.end);
     }
 
-    // Aplicar filtros avançados
     if (filters.advancedFilters) {
-      query = AdvancedFiltersService.applyAdvancedFilters(query, filters.advancedFilters);
+      query = AdvancedFiltersService.attachAdvancedFilters(query, filters.advancedFilters);
     }
 
     const { data, error } = await query;

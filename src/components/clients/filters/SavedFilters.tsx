@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "../../ui/button";
 import { Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { FilterGroup } from "./filterConstants";
+import type { FilterGroup } from "./FilterGroup";
 import { AdvancedFiltersService } from "../../../services/advancedFiltersService";
 import { supabase } from "../../../integrations/supabase/client";
 

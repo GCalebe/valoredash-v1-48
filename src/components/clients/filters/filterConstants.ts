@@ -40,10 +40,10 @@ export const operatorsByType = {
   text: [
     { id: "equals", name: "é igual a" },
     { id: "contains", name: "contém" },
-    { id: "startsWith", name: "começa com" },
-    { id: "endsWith", name: "termina com" },
-    { id: "notEquals", name: "não é igual a" },
-    { id: "notContains", name: "não contém" },
+    { id: "starts_with", name: "começa com" },
+    { id: "ends_with", name: "termina com" },
+    { id: "not_equals", name: "não é igual a" },
+    { id: "not_contains", name: "não contém" },
   ],
   select: [
     { id: "equals", name: "é igual a" },

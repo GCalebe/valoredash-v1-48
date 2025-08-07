@@ -104,9 +104,7 @@ const ConversationFilterDialog = ({
 
           <ScrollArea className="max-h-[60vh] pr-4">
             <SavedFilters
-              savedFilters={savedFilters}
-              onApplySavedFilter={applySavedFilter}
-              onDeleteSavedFilter={deleteSavedFilter}
+              onApplyFilter={applySavedFilter}
             />
 
             <Separator />

@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useFilterDialog } from "./useFilterDialog";
 import { ContactFilters } from "@/lib/contactsService";
-import { FilterGroup } from "@/services/advancedFiltersService";
+import type { FilterGroup } from "@/components/clients/filters/FilterGroup";
 
 export interface CustomFieldFilter {
   fieldId: string;
@@ -49,12 +49,9 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Hook dos filtros avançados
-  const {
-    advancedFilter,
-    updateAdvancedFilter,
-    clearAdvancedFilter,
-    hasAdvancedRules,
-  } = useFilterDialog();
+  const updateAdvancedFilterWrapper = useCallback((filter: FilterGroup) => {
+    updateAdvancedFilter(filter.id, filter);
+  }, [updateAdvancedFilter]);
 
   // Implementa debounce para o searchTerm
   useEffect(() => {
@@ -176,7 +173,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
     
     // Filtros avançados
     advancedFilter,
-    updateAdvancedFilter,
+    updateAdvancedFilter: updateAdvancedFilterWrapper,
     clearAdvancedFilter,
     hasAdvancedRules,
     

@@ -101,7 +101,7 @@ export const useFilterDialog = () => {
       const convertedFilters: SavedFilter[] = data.map(filter => ({
         id: filter.id,
         name: filter.name,
-        filters: filter.filter_data
+        filter: filter.filter_data
       }));
 
       setSavedFilters(convertedFilters);

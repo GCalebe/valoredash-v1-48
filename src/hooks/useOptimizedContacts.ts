@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { contactsService } from '@/lib/contactsService';
-import { Contact, ContactFilters, ContactInput, ContactUpdate } from '@/types/client';
+import { Contact } from '@/types/client';
+import type { ContactFilters, ContactInput, ContactUpdate, PaginatedContactsResult } from '@/lib/contactsService';
 import { useCallback, useMemo } from 'react';
 import { toast } from '@/hooks/use-toast';
 
@@ -17,9 +18,9 @@ export const contactsQueryKeys = {
 };
 
 // Hook para buscar contatos com paginação otimizada
-export const useOptimizedContacts = (filters: ContactFilters = {}, cursor?: string) => {
+export const useOptimizedContacts = (filters: ContactFilters = {}, cursor?: { created_at: string; id: string }) => {
   return useQuery({
-    queryKey: contactsQueryKeys.paginated(filters, cursor),
+    queryKey: contactsQueryKeys.paginated(filters, cursor ? `${cursor.created_at}:${cursor.id}` : undefined),
     queryFn: () => contactsService.fetchContactsPaginated(filters, cursor),
     staleTime: 5 * 60 * 1000, // 5 minutos
     gcTime: 10 * 60 * 1000, // 10 minutos (anteriormente cacheTime)
@@ -34,7 +35,9 @@ export const useOptimizedContacts = (filters: ContactFilters = {}, cursor?: stri
 export const useContactsByKanbanStage = (stageId?: string) => {
   return useQuery({
     queryKey: contactsQueryKeys.byStage(stageId || ''),
-    queryFn: () => stageId ? contactsService.fetchContactsByKanbanStage(stageId) : Promise.resolve([]),
+    queryFn: () => stageId 
+      ? contactsService.fetchContactsByKanbanStage(stageId) 
+      : Promise.resolve({ data: [], nextCursor: null, hasMore: false } as PaginatedContactsResult),
     enabled: !!stageId,
     staleTime: 2 * 60 * 1000, // 2 minutos para dados do Kanban
     gcTime: 5 * 60 * 1000, // 5 minutos
@@ -108,7 +111,6 @@ export const useOptimizedContactMutations = () => {
       toast({
         title: "Erro",
         description: "Erro ao criar contato",
-        variant: "destructive",
       });
     },
   });
@@ -116,7 +118,7 @@ export const useOptimizedContactMutations = () => {
   // Mutação para atualizar contato
   const updateContactMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: ContactUpdate }) => 
-      contactsService.updateContact(id, updates),
+      contactsService.updateContact({ id, ...updates }),
     onMutate: async ({ id, updates }) => {
       // Cancelar queries em andamento
       await queryClient.cancelQueries({ queryKey: contactsQueryKeys.all });
@@ -150,7 +152,6 @@ export const useOptimizedContactMutations = () => {
       toast({
         title: "Erro",
         description: "Erro ao atualizar contato",
-        variant: "destructive",
       });
     },
     onSuccess: (updatedContact) => {
@@ -194,7 +195,6 @@ export const useOptimizedContactMutations = () => {
       toast({
         title: "Erro",
         description: "Erro ao deletar contato",
-        variant: "destructive",
       });
     },
     onSuccess: () => {
@@ -210,7 +210,7 @@ export const useOptimizedContactMutations = () => {
   // Mutação para mudança de estágio (drag and drop)
   const updateStageMutation = useMutation({
     mutationFn: ({ contactId, newStageId }: { contactId: string; newStageId: string }) => 
-      contactsService.updateContact(contactId, { kanban_stage_id: newStageId }),
+      contactsService.updateContact({ id: contactId, kanban_stage_id: newStageId }),
     onMutate: async ({ contactId, newStageId }) => {
       // Cancelar queries relacionadas
       await queryClient.cancelQueries({ queryKey: contactsQueryKeys.all });
@@ -257,7 +257,6 @@ export const useOptimizedContactMutations = () => {
       toast({
         title: "Erro",
         description: "Erro ao mover contato entre estágios",
-        variant: "destructive",
       });
     },
     onSuccess: (updatedContact, { newStageId }) => {
