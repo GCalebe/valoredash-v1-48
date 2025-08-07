@@ -16,6 +16,6 @@ export function convertScheduleEventsToCalendarEvents(scheduleEvents: ScheduleEv
       email: `${event.clientName?.toLowerCase().replace(/\s+/g, '.') || 'cliente'}@cliente.com`,
       responseStatus: event.status === "scheduled" ? "accepted" : event.status === "completed" ? "accepted" : "declined"
     }],
-    hostName: "Sistema de Agenda"
+    hostName: event.host_name || "Sistema de Agenda"
   }));
 }

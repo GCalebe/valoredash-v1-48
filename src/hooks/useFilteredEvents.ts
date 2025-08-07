@@ -73,8 +73,34 @@ export function useFilteredEvents(
     // Convert schedule events to calendar events
     const convertedScheduleEvents = convertScheduleEventsToCalendarEvents(scheduleEvents);
     
-    // Combine events from calendar with events from schedule
-    const allEvents = [...events, ...convertedScheduleEvents];
+    // Combine events and deduplicate by ID to prevent showing same event twice
+    const eventMap = new Map();
+    
+    // Add calendar events first
+    events.forEach(event => {
+      eventMap.set(event.id, event);
+    });
+    
+    // Add schedule events only if they don't already exist
+    convertedScheduleEvents.forEach(event => {
+      // Check for duplicate by looking for events with same client and time
+      const isDuplicate = Array.from(eventMap.values()).some(existingEvent => {
+        const existingTime = existingEvent.start?.split('T')[1]?.substring(0, 5);
+        const newTime = event.start?.split('T')[1]?.substring(0, 5);
+        const existingDate = existingEvent.start?.split('T')[0];
+        const newDate = event.start?.split('T')[0];
+        
+        return existingDate === newDate && 
+               existingTime === newTime && 
+               existingEvent.description?.includes(event.description?.split('\n')[0]?.replace('Cliente: ', '') || '');
+      });
+      
+      if (!isDuplicate) {
+        eventMap.set(event.id, event);
+      }
+    });
+    
+    const allEvents = Array.from(eventMap.values());
     
     return allEvents
       .filter((event) => {
