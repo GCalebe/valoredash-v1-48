@@ -40,7 +40,7 @@ export interface ContactUpdate {
 }
 
 export interface ContactFilters {
-  kanban_stage?: string;
+  kanban_stage_id?: string;
   lead_source?: string;
   search?: string;
   dateRange?: {
@@ -61,8 +61,8 @@ export const contactsService = {
       .order('created_at', { ascending: false });
 
     // Apply filters
-    if (filters.kanban_stage) {
-      query = query.eq('kanban_stage_id', filters.kanban_stage);
+    if (filters.kanban_stage_id) {
+      query = query.eq('kanban_stage_id', filters.kanban_stage_id);
     }
 
     if (filters.search) {

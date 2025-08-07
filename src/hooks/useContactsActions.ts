@@ -79,7 +79,7 @@ export const useContactsActions = () => {
         payment: newContact.payment || null,
         uploaded_files: newContact.uploadedFiles || null,
         consultation_stage: newContact.consultationStage || "Nova consulta",
-        kanban_stage: "Entraram",
+        kanban_stage_id: "Entraram",
         session_id: `session_${Date.now()}`,
         user_id: user?.id || 'anonymous',
       };
