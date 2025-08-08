@@ -95,28 +95,30 @@ const FilterDialog = ({
       <DialogContent className="max-w-7xl h-[90vh] p-0 flex flex-col">
         <FilterHeader />
         
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-hidden">
           {/* Main content com construtor de filtros */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            <FilterBuilder
-              advancedFilter={advancedFilter}
-              updateAdvancedFilter={updateAdvancedFilter}
-              filterName={filterName}
-              setFilterName={setFilterName}
-              onSaveFilter={() => saveFilter(filterName)}
-              hasAdvancedRules={hasAdvancedRules}
-              onAddField={handleAddField}
-              statusFilter={statusFilter}
-              segmentFilter={segmentFilter}
-              lastContactFilter={lastContactFilter}
-              onStatusFilterChange={onStatusFilterChange}
-              onSegmentFilterChange={onSegmentFilterChange}
-              onLastContactFilterChange={onLastContactFilterChange}
-              onApplyFilter={applySavedFilter}
-              onFilterDeleted={loadSavedFilters}
-              activeFiltersCount={activeFiltersCount}
-            />
-          </div>
+          <ScrollArea className="h-full">
+            <div className="p-6">
+              <FilterBuilder
+                advancedFilter={advancedFilter}
+                updateAdvancedFilter={updateAdvancedFilter}
+                filterName={filterName}
+                setFilterName={setFilterName}
+                onSaveFilter={() => saveFilter(filterName)}
+                hasAdvancedRules={hasAdvancedRules}
+                onAddField={handleAddField}
+                statusFilter={statusFilter}
+                segmentFilter={segmentFilter}
+                lastContactFilter={lastContactFilter}
+                onStatusFilterChange={onStatusFilterChange}
+                onSegmentFilterChange={onSegmentFilterChange}
+                onLastContactFilterChange={onLastContactFilterChange}
+                onApplyFilter={applySavedFilter}
+                onFilterDeleted={loadSavedFilters}
+                activeFiltersCount={activeFiltersCount}
+              />
+            </div>
+          </ScrollArea>
         </div>
 
         <FilterActions
