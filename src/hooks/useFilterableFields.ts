@@ -23,6 +23,7 @@ export function useFilterableFields() {
   const [customFields, setCustomFields] = useState<FilterProperty[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [responsibleHosts, setResponsibleHosts] = useState<string[]>([]);
+  const [responsibleHostsMap, setResponsibleHostsMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const { stages: kanbanStages, loading: kanbanLoading } = useKanbanStagesLocal();
 
@@ -71,20 +72,54 @@ export function useFilterableFields() {
           if (isMounted) setAvailableTags(Array.from(allTags).sort());
         }
 
-        // Fetch responsible hosts from contacts
+        // Fetch responsible hosts from contacts with names from profiles
         const { data: hostsData, error: hostsError } = await supabase
           .from("contacts")
-          .select("responsible_hosts")
+          .select(`
+            responsible_hosts
+          `)
           .not("responsible_hosts", "is", null);
 
         if (!hostsError && hostsData) {
-          const allHosts = new Set<string>();
+          // Collect all unique host IDs
+          const allHostIds = new Set<string>();
           hostsData.forEach(contact => {
             if (Array.isArray(contact.responsible_hosts)) {
-              contact.responsible_hosts.forEach(host => allHosts.add(host));
+              contact.responsible_hosts.forEach(hostId => allHostIds.add(hostId));
             }
           });
-          if (isMounted) setResponsibleHosts(Array.from(allHosts).sort());
+
+          // Fetch names for these host IDs from profiles
+          if (allHostIds.size > 0) {
+            const { data: profilesData, error: profilesError } = await supabase
+              .from("profiles")
+              .select("id, full_name")
+              .in("id", Array.from(allHostIds));
+
+            if (!profilesError && profilesData) {
+              const hostNames = profilesData
+                .filter(profile => profile.full_name)
+                .map(profile => profile.full_name)
+                .sort();
+              
+              // Criar mapeamento nome -> id e id -> nome
+              const nameToIdMap: Record<string, string> = {};
+              const idToNameMap: Record<string, string> = {};
+              profilesData.forEach(profile => {
+                if (profile.full_name) {
+                  nameToIdMap[profile.full_name] = profile.id;
+                  idToNameMap[profile.id] = profile.full_name;
+                }
+              });
+              
+              if (isMounted) {
+                setResponsibleHosts(hostNames);
+                setResponsibleHostsMap({ ...nameToIdMap, ...idToNameMap });
+              }
+            } else {
+              console.error('Erro ao carregar nomes dos anfitriões:', profilesError);
+            }
+          }
         }
 
       } finally {
@@ -125,6 +160,7 @@ export function useFilterableFields() {
     loading: loading || kanbanLoading,
     availableTags,
     responsibleHosts,
+    responsibleHostsMap,
     kanbanStages 
   };
 }
