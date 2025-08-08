@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Brain, MessageSquare, Settings, Zap, User, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Brain, MessageSquare, Settings, Zap, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PersonalityConfig, ConfigurationViewProps, PERSONALITY_CATEGORIES, RESPONSE_LENGTH_OPTIONS } from './index';
-import { cn } from '@/lib/utils';
+//
+import WizardStepHeader from './components/WizardStepHeader';
 
 interface WizardConfigurationViewProps extends ConfigurationViewProps {}
 
@@ -20,7 +21,7 @@ const WizardConfigurationView: React.FC<WizardConfigurationViewProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
-  const handleInputChange = (field: keyof PersonalityConfig, value: string | number | boolean | number[] | 'immediate' | 'thoughtful' | 'detailed' | 'concise' | 'moderate') => {
+  const handleInputChange = (field: keyof PersonalityConfig, value: any) => {
     onConfigChange({ ...config, [field]: value });
   };
 
@@ -407,43 +408,7 @@ const WizardConfigurationView: React.FC<WizardConfigurationViewProps> = ({
           </div>
           
           {/* Progress Steps */}
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              const isActive = index === currentStep;
-              const isCompleted = index < currentStep;
-              
-              return (
-                <div key={step.id} className="flex items-center">
-                  <button
-                    onClick={() => goToStep(index)}
-                    className={cn(
-                      "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors",
-                      isActive
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : isCompleted
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-muted-foreground/30 bg-background text-muted-foreground hover:border-primary/50"
-                    )}
-                  >
-                    {isCompleted ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      <Icon className="h-5 w-5" />
-                    )}
-                  </button>
-                  {index < steps.length - 1 && (
-                    <div
-                      className={cn(
-                        "w-16 h-0.5 mx-2",
-                        isCompleted ? "bg-primary" : "bg-muted-foreground/30"
-                      )}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <WizardStepHeader steps={steps as any} currentStep={currentStep} onGoTo={goToStep} />
         </div>
       </div>
 

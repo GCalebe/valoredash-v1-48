@@ -6,13 +6,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import DateTimeStep from './new-appointment/DateTimeStep';
+import AgendaDetailsCard from './new-appointment/AgendaDetailsCard';
+import StepIndicators from './components/StepIndicators';
 import { ClientSelectionTab } from '@/components/event-form/ClientSelectionTab';
 import { ServiceSelectionTab } from '@/components/event-form/ServiceSelectionTab';
 import { AttendanceSelectionTab } from '@/components/event-form/AttendanceSelectionTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEventFormDialog } from '@/hooks/useEventFormDialog';
 import { EventFormData } from '@/types/event';
-import { useContactsData } from '@/hooks/useContactsData';
 import { AgendaSelectionTab } from './AgendaSelectionTab';
 import { useAgendas } from '@/hooks/useAgendas';
 import { useAgendaAvailability } from '@/hooks/useAgendaAvailability';
@@ -23,7 +24,7 @@ interface NewAppointmentFlowProps {
   onFormSubmit?: (formData: EventFormData) => void;
 }
 
-export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: NewAppointmentFlowProps) {
+export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: Readonly<NewAppointmentFlowProps>) {
   const [currentStep, setCurrentStep] = useState<'agenda' | 'datetime' | 'form'>('agenda');
   
   // Agenda selection state
@@ -88,20 +89,18 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
     state,
     updateState,
     filteredContacts,
-    constants,
-    validateForm,
+    // constants,
+    // validateForm,
     handleSubmit,
     handleSelectClient,
     handleNewClient,
     handleSaveNewClient,
-    addTag,
-    removeTag
+    // addTag,
+    // removeTag
   } = useEventFormDialog({ open: true });
   
-  // Mock constants and tag functions for now
+  // Mock constants for now
   const formConstants = { services: [], attendanceTypes: [] };
-  const formAddTag = (tag: string) => console.log('Add tag:', tag);
-  const formRemoveTag = (tag: string) => console.log('Remove tag:', tag);
 
   // Load available time slots when date changes
   useEffect(() => {
@@ -120,69 +119,9 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
   }, [selectedDate]);
   
   // Render agenda details section
-  const renderAgendaDetails = () => {
-    if (!selectedAgenda) return null;
-    
+  function renderAgendaDetails() {
     return (
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
-        <div className="flex items-center gap-6">
-          {/* Icon */}
-          <div className="flex-shrink-0">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-              <Calendar className="w-8 h-8 text-blue-600" />
-            </div>
-          </div>
-          
-          {/* Content */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Title */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                {selectedAgenda.name}
-              </h3>
-              <p className="text-sm text-gray-600">
-                Título do Agendamento
-              </p>
-            </div>
-            
-            {/* Description */}
-            <div>
-              <p className="text-sm text-gray-900 mb-1 line-clamp-2">
-                {selectedAgenda.description || 'Sem descrição disponível'}
-              </p>
-              <p className="text-xs text-gray-600">
-                Descrição
-              </p>
-            </div>
-            
-            {/* Host */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <UserCheck className="w-4 h-4 text-gray-600" />
-                <span className="text-sm text-gray-900">
-                  {selectedAgendaHost || 'Carregando...'}
-                </span>
-              </div>
-              <p className="text-xs text-gray-600">
-                Anfitrião/Consultor
-              </p>
-            </div>
-            
-            {/* Duration */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Clock className="w-4 h-4 text-gray-600" />
-                <span className="text-sm text-gray-900">
-                  {selectedAgenda.duration_minutes} minutos
-                </span>
-              </div>
-              <p className="text-xs text-gray-600">
-                Duração
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <AgendaDetailsCard selectedAgenda={selectedAgenda} selectedAgendaHost={selectedAgendaHost} />
     );
   };
   
@@ -242,20 +181,23 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
   );
 
   const renderDateTimeStep = () => (
-    <DateTimeStep
-      currentDate={currentDate}
-      setCurrentDate={setCurrentDate}
-      selectedDate={selectedDate}
-      onSelectDate={handleDateSelect}
-      selectedTime={selectedTime}
-      onSelectTime={handleTimeSelect}
-      availableTimeSlots={availableTimeSlots}
-      agendaLoading={agendaLoading}
-      selectedAgendaName={selectedAgendaName}
-      selectedAgendaHost={selectedAgendaHost}
-      selectedAgenda={selectedAgenda as any}
-      isDateBookable={isDateBookable}
-    />
+    <>
+      {renderAgendaDetails()}
+      <DateTimeStep
+        currentDate={currentDate}
+        setCurrentDate={setCurrentDate}
+        selectedDate={selectedDate}
+        onSelectDate={handleDateSelect}
+        selectedTime={selectedTime}
+        onSelectTime={handleTimeSelect}
+        availableTimeSlots={availableTimeSlots}
+        agendaLoading={agendaLoading}
+        selectedAgendaName={selectedAgendaName}
+        selectedAgendaHost={selectedAgendaHost}
+        selectedAgenda={selectedAgenda as any}
+        isDateBookable={isDateBookable}
+      />
+    </>
   );
 
   const renderFormStep = () => (
@@ -354,34 +296,7 @@ export function NewAppointmentFlow({ selectedAgendaId, onBack, onFormSubmit }: N
                 Voltar
               </Button>
               
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    currentStep === 'agenda' ? 'bg-primary' : 'bg-muted-foreground/30'
-                  }`} />
-                  <span className={`text-sm font-medium ${
-                    currentStep === 'agenda' ? 'text-foreground' : 'text-muted-foreground'
-                  }`}>Agenda</span>
-                </div>
-                <div className="w-8 h-0.5 bg-muted-foreground/20" />
-                <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    currentStep === 'datetime' ? 'bg-primary' : 'bg-muted-foreground/30'
-                  }`} />
-                  <span className={`text-sm font-medium ${
-                    currentStep === 'datetime' ? 'text-foreground' : 'text-muted-foreground'
-                  }`}>Data/Hora</span>
-                </div>
-                <div className="w-8 h-0.5 bg-muted-foreground/20" />
-                <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    currentStep === 'form' ? 'bg-primary' : 'bg-muted-foreground/30'
-                  }`} />
-                  <span className={`text-sm font-medium ${
-                    currentStep === 'form' ? 'text-foreground' : 'text-muted-foreground'
-                  }`}>Dados</span>
-                </div>
-              </div>
+              <StepIndicators currentStep={currentStep} />
             </div>
             
             <div className="flex items-center gap-3">

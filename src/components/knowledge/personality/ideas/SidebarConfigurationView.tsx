@@ -11,6 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PersonalityConfig, ConfigurationViewProps, PERSONALITY_CATEGORIES, RESPONSE_LENGTH_OPTIONS } from './index';
 import { cn } from '@/lib/utils';
+import BasicInfoSection from './components/BasicInfoSection';
+import PersonalityTraitsSection from './components/PersonalityTraitsSection';
+import BehaviorSection from './components/BehaviorSection';
+import MessagesSection from './components/MessagesSection';
 
 interface SidebarConfigurationViewProps extends ConfigurationViewProps {}
 
@@ -64,232 +68,16 @@ const SidebarConfigurationView: React.FC<SidebarConfigurationViewProps> = ({
   const renderContent = () => {
     switch (activeSection) {
       case 'basic':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">Informações Básicas</h2>
-              <p className="text-muted-foreground mb-6">Configure o nome, descrição e categoria da personalidade.</p>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome da Personalidade</Label>
-                <Input
-                  id="name"
-                  value={config.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="Ex: Assistente Criativo"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Descrição</Label>
-                <Textarea
-                  id="description"
-                  value={config.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Descreva o propósito e características desta personalidade..."
-                  rows={4}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="category">Categoria</Label>
-                <Select value={config.category} onValueChange={(value) => handleInputChange('category', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PERSONALITY_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        );
+        return <BasicInfoSection config={config} onChange={handleInputChange} />;
 
       case 'personality':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">Traços de Personalidade</h2>
-              <p className="text-muted-foreground mb-6">Ajuste os traços comportamentais da IA usando os controles deslizantes.</p>
-            </div>
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label>Criatividade</Label>
-                  <Badge variant="outline">{(config as any).creativity?.[0] ?? 50}%</Badge>
-                </div>
-                <Slider
-                  value={(config as any).creativity || [50]}
-                  onValueChange={(value) => handleSliderChange('creativity' as any, value)}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
-                <p className="text-sm text-muted-foreground">Controla o quão criativa e inovadora a IA será nas respostas.</p>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label>Formalidade</Label>
-                  <Badge variant="outline">{(config as any).formality?.[0] ?? 50}%</Badge>
-                </div>
-                <Slider
-                  value={(config as any).formality || [50]}
-                  onValueChange={(value) => handleSliderChange('formality' as any, value)}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
-                <p className="text-sm text-muted-foreground">Define o nível de formalidade na comunicação.</p>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label>Empatia</Label>
-                  <Badge variant="outline">{(config as any).empathy?.[0] ?? 50}%</Badge>
-                </div>
-                <Slider
-                  value={(config as any).empathy || [50]}
-                  onValueChange={(value) => handleSliderChange('empathy' as any, value)}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
-                <p className="text-sm text-muted-foreground">Controla a capacidade de compreender e responder às emoções.</p>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label>Assertividade</Label>
-                  <Badge variant="outline">{(config as any).assertiveness?.[0] ?? 50}%</Badge>
-                </div>
-                <Slider
-                  value={(config as any).assertiveness || [50]}
-                  onValueChange={(value) => handleSliderChange('assertiveness' as any, value)}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
-                <p className="text-sm text-muted-foreground">Define o quão direta e confiante a IA será.</p>
-              </div>
-            </div>
-          </div>
-        );
+        return <PersonalityTraitsSection config={config as any} onSliderChange={handleSliderChange as any} />;
 
       case 'behavior':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">Comportamento</h2>
-              <p className="text-muted-foreground mb-6">Configure como a IA se comporta durante as interações.</p>
-            </div>
-            <div className="space-y-6">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Usar Emojis</Label>
-                      <p className="text-sm text-muted-foreground">Incluir emojis nas respostas para torná-las mais expressivas</p>
-                    </div>
-                    <Switch
-                      checked={config.useEmojis}
-                      onCheckedChange={(checked) => handleInputChange('useEmojis', checked)}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Consciência de Contexto</Label>
-                      <p className="text-sm text-muted-foreground">Lembrar e referenciar conversas anteriores</p>
-                    </div>
-                    <Switch
-                      checked={config.contextAware}
-                      onCheckedChange={(checked) => handleInputChange('contextAware', checked)}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Aprendizado Contínuo</Label>
-                      <p className="text-sm text-muted-foreground">Aprender e adaptar-se com base nas interações</p>
-                    </div>
-                    <Switch
-                      checked={config.continuousLearning}
-                      onCheckedChange={(checked) => handleInputChange('continuousLearning', checked)}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              <div className="space-y-2">
-                <Label>Tamanho das Respostas</Label>
-                <Select value={config.responseLength} onValueChange={(value) => handleInputChange('responseLength', value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RESPONSE_LENGTH_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        );
+        return <BehaviorSection config={config as any} onChange={handleInputChange as any} onSliderChange={handleSliderChange as any} />;
 
       case 'messages':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">Mensagens Personalizadas</h2>
-              <p className="text-muted-foreground mb-6">Defina mensagens específicas para diferentes situações.</p>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="greeting">Mensagem de Saudação</Label>
-                <Textarea
-                  id="greeting"
-                  value={config.greetingMessage}
-                  onChange={(e) => handleInputChange('greetingMessage', e.target.value)}
-                  placeholder="Olá! Como posso ajudá-lo hoje?"
-                  rows={3}
-                />
-                <p className="text-sm text-muted-foreground">Esta mensagem será exibida quando a conversa começar.</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="error">Mensagem de Erro</Label>
-                <Textarea
-                  id="error"
-                  value={config.errorMessage}
-                  onChange={(e) => handleInputChange('errorMessage', e.target.value)}
-                  placeholder="Desculpe, ocorreu um erro. Tente novamente."
-                  rows={3}
-                />
-                <p className="text-sm text-muted-foreground">Mensagem exibida quando ocorrer um erro no sistema.</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="system">Prompt do Sistema</Label>
-                <Textarea
-                  id="system"
-                  value={config.systemPrompt}
-                  onChange={(e) => handleInputChange('systemPrompt', e.target.value)}
-                  placeholder="Você é um assistente útil e amigável..."
-                  rows={5}
-                />
-                <p className="text-sm text-muted-foreground">Instruções fundamentais que definem o comportamento da IA.</p>
-              </div>
-            </div>
-          </div>
-        );
+        return <MessagesSection config={config as any} onChange={handleInputChange as any} />;
 
       case 'advanced':
         return (

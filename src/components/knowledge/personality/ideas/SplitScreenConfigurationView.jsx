@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { Brain, MessageSquare, Settings, Zap, User, Eye, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+//
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PersonalityConfig, ConfigurationViewProps, PERSONALITY_CATEGORIES, RESPONSE_LENGTH_OPTIONS } from './index';
-import { cn } from '@/lib/utils';
+import BasicInfoSection from './components/BasicInfoSection';
+import PersonalityTraitsSection from './components/PersonalityTraitsSection';
+import BehaviorSection from './components/BehaviorSection';
+import MessagesSection from './components/MessagesSection';
+import { PersonalityConfig, ConfigurationViewProps } from './index';
 
 interface SplitScreenConfigurationViewProps extends ConfigurationViewProps {}
 
@@ -76,279 +72,19 @@ const SplitScreenConfigurationView: React.FC<SplitScreenConfigurationViewProps> 
             </TabsList>
 
             <TabsContent value="basic" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Informações Básicas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome da Personalidade</Label>
-                    <Input
-                      id="name"
-                      value={config.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      placeholder="Ex: Assistente Criativo"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Descrição</Label>
-                    <Textarea
-                      id="description"
-                      value={config.description}
-                      onChange={(e) => handleInputChange('description', e.target.value)}
-                      placeholder="Descreva o propósito e características desta personalidade..."
-                      rows={3}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Categoria</Label>
-                    <Select value={config.category} onValueChange={(value) => handleInputChange('category', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma categoria" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PERSONALITY_CATEGORIES.map((cat) => (
-                          <SelectItem key={cat.value} value={cat.value}>
-                            {cat.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
+              <BasicInfoSection config={config} onChange={handleInputChange} />
             </TabsContent>
 
             <TabsContent value="personality" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-5 w-5" />
-                    Traços de Personalidade
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Label className="font-medium">Criatividade</Label>
-                        <p className="text-sm text-muted-foreground">Controla o quão criativa e inovadora a IA será</p>
-                      </div>
-                      <Badge variant="outline">{(config as any).creativity?.[0] ?? 50}%</Badge>
-                    </div>
-                    <Slider
-                      value={(config as any).creativity || [50]}
-                      onValueChange={(value) => handleSliderChange('creativity' as any, value)}
-                      max={100}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Label className="font-medium">Formalidade</Label>
-                        <p className="text-sm text-muted-foreground">Define o nível de formalidade na comunicação</p>
-                      </div>
-                      <Badge variant="outline">{(config as any).formality?.[0] ?? 50}%</Badge>
-                    </div>
-                    <Slider
-                      value={(config as any).formality || [50]}
-                      onValueChange={(value) => handleSliderChange('formality' as any, value)}
-                      max={100}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Label className="font-medium">Empatia</Label>
-                        <p className="text-sm text-muted-foreground">Capacidade de compreender e responder às emoções</p>
-                      </div>
-                      <Badge variant="outline">{(config as any).empathy?.[0] ?? 50}%</Badge>
-                    </div>
-                    <Slider
-                      value={(config as any).empathy || [50]}
-                      onValueChange={(value) => handleSliderChange('empathy' as any, value)}
-                      max={100}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Label className="font-medium">Assertividade</Label>
-                        <p className="text-sm text-muted-foreground">Define o quão direta e confiante a IA será</p>
-                      </div>
-                      <Badge variant="outline">{(config as any).assertiveness?.[0] ?? 50}%</Badge>
-                    </div>
-                    <Slider
-                      value={(config as any).assertiveness || [50]}
-                      onValueChange={(value) => handleSliderChange('assertiveness' as any, value)}
-                      max={100}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <PersonalityTraitsSection config={config} onSliderChange={handleSliderChange} />
             </TabsContent>
 
             <TabsContent value="behavior" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5" />
-                    Comportamento
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label className="font-medium">Usar Emojis</Label>
-                      <p className="text-sm text-muted-foreground">Incluir emojis nas respostas</p>
-                    </div>
-                    <Switch
-                      checked={config.useEmojis}
-                      onCheckedChange={(checked) => handleInputChange('useEmojis', checked)}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label className="font-medium">Consciência de Contexto</Label>
-                      <p className="text-sm text-muted-foreground">Lembrar e referenciar conversas anteriores</p>
-                    </div>
-                    <Switch
-                      checked={config.contextAware}
-                      onCheckedChange={(checked) => handleInputChange('contextAware', checked)}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label className="font-medium">Aprendizado Contínuo</Label>
-                      <p className="text-sm text-muted-foreground">Aprender e adaptar-se com base nas interações</p>
-                    </div>
-                    <Switch
-                      checked={config.continuousLearning}
-                      onCheckedChange={(checked) => handleInputChange('continuousLearning', checked)}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <Label className="font-medium">Tamanho das Respostas</Label>
-                    <Select value={config.responseLength} onValueChange={(value) => handleInputChange('responseLength', value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {RESPONSE_LENGTH_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Label className="font-medium">Temperatura</Label>
-                        <p className="text-sm text-muted-foreground">Controla a aleatoriedade das respostas</p>
-                      </div>
-                      <Badge variant="outline">{config.temperature[0]}</Badge>
-                    </div>
-                    <Slider
-                      value={config.temperature}
-                      onValueChange={(value) => handleSliderChange('temperature', value)}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Label className="font-medium">Top P</Label>
-                        <p className="text-sm text-muted-foreground">Controla a diversidade do vocabulário</p>
-                      </div>
-                      <Badge variant="outline">{config.topP[0]}</Badge>
-                    </div>
-                    <Slider
-                      value={config.topP}
-                      onValueChange={(value) => handleSliderChange('topP', value)}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Label className="font-medium">Máximo de Tokens</Label>
-                        <p className="text-sm text-muted-foreground">Limite máximo de tokens por resposta</p>
-                      </div>
-                      <Badge variant="outline">{config.maxTokens[0]}</Badge>
-                    </div>
-                    <Slider
-                      value={config.maxTokens}
-                      onValueChange={(value) => handleSliderChange('maxTokens', value)}
-                      min={100}
-                      max={4000}
-                      step={100}
-                      className="w-full"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <BehaviorSection config={config} onChange={handleInputChange} onSliderChange={handleSliderChange} />
             </TabsContent>
 
             <TabsContent value="messages" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
-                    Mensagens Personalizadas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="greeting">Mensagem de Saudação</Label>
-                    <Textarea
-                      id="greeting"
-                      value={config.greetingMessage}
-                      onChange={(e) => handleInputChange('greetingMessage', e.target.value)}
-                      placeholder="Olá! Como posso ajudá-lo hoje?"
-                      rows={3}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="error">Mensagem de Erro</Label>
-                    <Textarea
-                      id="error"
-                      value={config.errorMessage}
-                      onChange={(e) => handleInputChange('errorMessage', e.target.value)}
-                      placeholder="Desculpe, ocorreu um erro. Tente novamente."
-                      rows={3}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="system">Prompt do Sistema</Label>
-                    <Textarea
-                      id="system"
-                      value={config.systemPrompt}
-                      onChange={(e) => handleInputChange('systemPrompt', e.target.value)}
-                      placeholder="Você é um assistente útil e amigável..."
-                      rows={4}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <MessagesSection config={config} onChange={handleInputChange} />
             </TabsContent>
           </Tabs>
         </div>

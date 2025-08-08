@@ -1,24 +1,12 @@
 import React, { useState } from "react";
 //
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 //
-import {
-  User,
-  Shield,
-  Crown,
-  Settings,
-  Menu,
-  Calendar,
-  Link as LinkIcon,
-  FileText,
-  MessageSquare,
-  Bot,
-  Users,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+//
+import { User, Shield, Crown, Settings, Menu } from "lucide-react";
+import RoleTabs from "./permissions/RoleTabs";
 import RoleCard from "./permissions/RoleCard";
-import PermissionItem from "./permissions/PermissionItem";
+import PermissionsSection from "./permissions/PermissionsSection";
 
 // Types for our permissions system
 interface Role {
@@ -312,33 +300,7 @@ const PermissionsManager: React.FC = () => {
   const featurePermissions = getPermissionsByCategory("features");
   const adminPermissions = getPermissionsByCategory("admin");
 
-  // Get icon for permission
-  const getPermissionIcon = (permissionId: string) => {
-    if (permissionId.startsWith("menu_")) {
-      if (permissionId.includes("agenda"))
-        return <Calendar className="h-4 w-4" />;
-      if (permissionId.includes("clientes"))
-        return <Users className="h-4 w-4" />;
-      if (permissionId.includes("contratos"))
-        return <FileText className="h-4 w-4" />;
-      if (permissionId.includes("conexoes"))
-        return <LinkIcon className="h-4 w-4" />;
-      if (permissionId.includes("conversas"))
-        return <MessageSquare className="h-4 w-4" />;
-      if (permissionId.includes("ias")) return <Bot className="h-4 w-4" />;
-      return <Menu className="h-4 w-4" />;
-    }
-
-    if (permissionId.startsWith("feature_")) {
-      return <Settings className="h-4 w-4" />;
-    }
-
-    if (permissionId.startsWith("admin_")) {
-      return <Shield className="h-4 w-4" />;
-    }
-
-    return <Settings className="h-4 w-4" />;
-  };
+  // Get icon for permission (removed; child component does not need it directly)
 
   return (
     <div className="space-y-6">
@@ -369,156 +331,49 @@ const PermissionsManager: React.FC = () => {
       </div>
 
       {/* Role Selection Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-gray-700">
-        {roles.map((role) => (
-          <button
-            key={role.id}
-            className={cn(
-              "py-2 px-4 text-sm font-medium border-b-2 focus:outline-none",
-              selectedRoleId === role.id
-                ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300",
-            )}
-            onClick={() => setSelectedRoleId(role.id)}
-          >
-            <div className="flex items-center gap-2">
-              <div
-                className="w-6 h-6 rounded-full flex items-center justify-center text-white"
-                style={{ backgroundColor: role.color }}
-              >
-                {role.id === "corretor" && <User className="h-3.5 w-3.5" />}
-                {role.id === "gestor" && <Shield className="h-3.5 w-3.5" />}
-                {role.id === "administrador" && (
-                  <Crown className="h-3.5 w-3.5" />
-                )}
-              </div>
-              <span>{role.name}</span>
-            </div>
-          </button>
-        ))}
-      </div>
+      <RoleTabs
+        roles={roles.map(r => ({ id: r.id, name: r.name, color: r.color }))}
+        selectedRoleId={selectedRoleId}
+        onSelect={setSelectedRoleId}
+      />
 
       {/* Permissions List */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: selectedRole.color }}
-            >
-              {selectedRole.id === "corretor" && (
-                <User className="h-6 w-6 text-white" />
-              )}
-              {selectedRole.id === "gestor" && (
-                <Shield className="h-6 w-6 text-white" />
-              )}
-              {selectedRole.id === "administrador" && (
-                <Crown className="h-6 w-6 text-white" />
-              )}
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: selectedRole.color }}>
+              {selectedRole.id === 'corretor' && <User className="h-6 w-6 text-white" />}
+              {selectedRole.id === 'gestor' && <Shield className="h-6 w-6 text-white" />}
+              {selectedRole.id === 'administrador' && <Crown className="h-6 w-6 text-white" />}
             </div>
             <div>
-              <h2 className="text-xl font-bold">
-                Permissões - {selectedRole.name}
-              </h2>
-              <p className="text-gray-500 dark:text-gray-400">
-                Controle o acesso às funcionalidades do sistema
-              </p>
+              <h2 className="text-xl font-bold">Permissões - {selectedRole.name}</h2>
+              <p className="text-gray-500 dark:text-gray-400">Controle o acesso às funcionalidades do sistema</p>
             </div>
           </div>
         </div>
 
-        {/* Menu Permissions */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Menu className="h-5 w-5 text-gray-500" />
-              Menus de Navegação
-            </h3>
-            <Badge variant="outline" className="text-xs">
-              {
-                selectedRole.permissions.filter((p) => p.startsWith("menu_"))
-                  .length
-              }
-              /{menuPermissions.length}
-            </Badge>
-          </div>
-
-          <div className="space-y-4">
-            {menuPermissions.map((permission) => (
-              <PermissionItem
-                key={permission.id}
-                id={permission.id}
-                name={permission.name}
-                description={permission.description}
-                icon={getPermissionIcon(permission.id)}
-                enabled={selectedRole.permissions.includes(permission.id)}
-                onToggle={() => togglePermission(permission.id)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Feature Permissions */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Settings className="h-5 w-5 text-gray-500" />
-              Funcionalidades
-            </h3>
-            <Badge variant="outline" className="text-xs">
-              {
-                selectedRole.permissions.filter((p) => p.startsWith("feature_"))
-                  .length
-              }
-              /{featurePermissions.length}
-            </Badge>
-          </div>
-
-          <div className="space-y-4">
-            {featurePermissions.map((permission) => (
-              <PermissionItem
-                key={permission.id}
-                id={permission.id}
-                name={permission.name}
-                description={permission.description}
-                icon={getPermissionIcon(permission.id)}
-                enabled={selectedRole.permissions.includes(permission.id)}
-                onToggle={() => togglePermission(permission.id)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Admin Permissions */}
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Shield className="h-5 w-5 text-gray-500" />
-              Administração
-            </h3>
-            <Badge variant="outline" className="text-xs">
-              {
-                selectedRole.permissions.filter((p) => p.startsWith("admin_"))
-                  .length
-              }
-              /{adminPermissions.length}
-            </Badge>
-          </div>
-
-          <div className="space-y-4">
-            {adminPermissions.map((permission) => (
-              <PermissionItem
-                key={permission.id}
-                id={permission.id}
-                name={permission.name}
-                description={permission.description}
-                icon={getPermissionIcon(permission.id)}
-                enabled={selectedRole.permissions.includes(permission.id)}
-                onToggle={() => togglePermission(permission.id)}
-              />
-            ))}
-          </div>
-        </div>
+        <PermissionsSection
+          title="Menus de Navegação"
+          icon={<Menu className="h-5 w-5 text-gray-500" />}
+          permissions={menuPermissions}
+          selectedPermissions={selectedRole.permissions}
+          onToggle={togglePermission}
+        />
+        <PermissionsSection
+          title="Funcionalidades"
+          icon={<Settings className="h-5 w-5 text-gray-500" />}
+          permissions={featurePermissions}
+          selectedPermissions={selectedRole.permissions}
+          onToggle={togglePermission}
+        />
+        <PermissionsSection
+          title="Administração"
+          icon={<Shield className="h-5 w-5 text-gray-500" />}
+          permissions={adminPermissions}
+          selectedPermissions={selectedRole.permissions}
+          onToggle={togglePermission}
+        />
       </div>
 
       {/* Save Button */}

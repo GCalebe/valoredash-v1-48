@@ -1,19 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Link,
-  ShipWheel,
-  Plus,
-  QrCode,
-  Smartphone,
-  Wifi,
-  MessageSquare,
-  Activity,
-  Users,
-  X,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, ShipWheel, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
@@ -23,184 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import StatsCards from "@/components/evolution/StatsCards";
 import AddInstanceDialog from "@/components/evolution/AddInstanceDialog";
 import QrCodeDialog from "@/components/evolution/QrCodeDialog";
+import ConnectionCardsList from "@/components/evolution/ConnectionCardsList";
 import useWhatsAppConnection from "@/hooks/useWhatsAppConnection";
 
-// Componente para um item de estatística
-const StatItem = ({ icon, value, label, bgColor }) => (
-  <div className={`${bgColor} p-4 rounded-lg text-center`}>
-    {icon}
-    <p className="text-xl font-bold">{value}</p>
-    <p className="text-xs text-gray-400">{label}</p>
-  </div>
-);
-
-// Componente para as estatísticas da conexão
-const ConnectionStats = ({ stats }) => (
-  <div className="grid grid-cols-3 gap-2">
-    <StatItem 
-      icon={<MessageSquare className="h-5 w-5 mx-auto mb-1 text-blue-400" />}
-      value={stats.messages}
-      label="Mensagens"
-      bgColor="bg-blue-900/20"
-    />
-    <StatItem 
-      icon={<Users className="h-5 w-5 mx-auto mb-1 text-purple-400" />}
-      value={stats.contacts}
-      label="Contatos"
-      bgColor="bg-purple-900/20"
-    />
-    <StatItem 
-      icon={<MessageSquare className="h-5 w-5 mx-auto mb-1 text-green-400" />}
-      value={stats.chats}
-      label="Chats"
-      bgColor="bg-green-900/20"
-    />
-  </div>
-);
-
-// Componente para o conteúdo de uma conexão conectando
-const ConnectingContent = ({ connection }) => (
-  <>
-    <div className="flex items-center text-yellow-400 text-sm">
-      <div className="w-2 h-2 rounded-full bg-yellow-400 mr-2 animate-pulse"></div>
-      {connection.statusText}
-    </div>
-    
-    <div className="bg-gray-700 p-3 rounded-lg flex items-center gap-3">
-      <div className="bg-blue-900/30 p-2 rounded-full">
-        <Activity className="h-5 w-5 text-blue-400" />
-      </div>
-      <div>
-        <p className="font-medium">{connection.lastActivity}</p>
-        <p className="text-xs text-gray-400">Última atividade</p>
-      </div>
-    </div>
-    
-    <ConnectionStats stats={connection.stats} />
-  </>
-);
-
-// Componente para o conteúdo de uma conexão conectada
-const ConnectedContent = ({ connection }) => (
-  <>
-    <div className="flex items-center text-green-400 text-sm">
-      <div className="w-2 h-2 rounded-full bg-green-400 mr-2"></div>
-      {connection.statusText}
-    </div>
-    
-    {connection.phone && (
-      <div className="bg-gray-700 p-3 rounded-lg flex items-center gap-3">
-        <div className="bg-green-900/30 p-2 rounded-full">
-          <Smartphone className="h-5 w-5 text-green-400" />
-        </div>
-        <div>
-          <p className="font-medium">{connection.phone}</p>
-          <p className="text-xs text-gray-400">{connection.phoneLabel}</p>
-        </div>
-      </div>
-    )}
-    
-    <div className="bg-gray-700 p-3 rounded-lg flex items-center gap-3">
-      <div className="bg-blue-900/30 p-2 rounded-full">
-        <Activity className="h-5 w-5 text-blue-400" />
-      </div>
-      <div>
-        <p className="font-medium">{connection.lastActivity}</p>
-        <p className="text-xs text-gray-400">Última atividade</p>
-      </div>
-    </div>
-    
-    <ConnectionStats stats={connection.stats} />
-    
-    {connection.badges && (
-      <div className="flex flex-wrap gap-2">
-        {connection.badges.map((badge, index) => (
-          <Badge 
-            key={index} 
-            className={`
-              ${badge.color === 'blue' ? 'bg-blue-900/30 text-blue-400' : ''}
-              ${badge.color === 'purple' ? 'bg-purple-900/30 text-purple-400' : ''}
-              ${badge.color === 'green' ? 'bg-green-900/30 text-green-400' : ''}
-            `}
-          >
-            {badge.text}
-          </Badge>
-        ))}
-      </div>
-    )}
-  </>
-);
-
-// Componente para o status da conexão
-const ConnectionStatusBadge = ({ status }) => {
-  if (status === "connected") {
-    return (
-      <Badge className="bg-green-500 text-white">
-        Conectado
-      </Badge>
-    );
-  } else if (status === "connecting") {
-    return (
-      <Badge className="bg-yellow-500 text-white">
-        Conectando
-      </Badge>
-    );
-  }
-  return null;
-};
-
-// Componente para um card de conexão
-const ConnectionCard = ({ connection, onShowQrCode, onDisconnect }) => (
-  <Card className="bg-gray-800 text-white border-gray-700">
-    <CardHeader className="pb-2 flex flex-row justify-between items-start">
-      <div>
-        <CardTitle className="text-xl">{connection.name}</CardTitle>
-        <p className="text-gray-400">{connection.displayName}</p>
-      </div>
-      <ConnectionStatusBadge status={connection.status} />
-    </CardHeader>
-    <CardContent className="space-y-4">
-      {connection.status === "connected" ? (
-        <ConnectedContent connection={connection} />
-      ) : (
-        <ConnectingContent connection={connection} />
-      )}
-      
-      <div className="flex gap-2 mt-2">
-        <Button 
-          variant="outline" 
-          className="flex-1 border-blue-500 text-blue-400 hover:bg-blue-900/20"
-          onClick={() => onShowQrCode(connection.id)}
-        >
-          <QrCode className="h-4 w-4 mr-2" />
-          QR Code
-        </Button>
-        <Button 
-          variant="outline" 
-          className="flex-1 border-red-500 text-red-400 hover:bg-red-900/20"
-          onClick={() => onDisconnect(connection.id)}
-        >
-          <X className="h-4 w-4 mr-2" />
-          Desconectar
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
-);
-
-// Componente para a lista de cards de conexão
-const ConnectionCardsList = ({ connections, onShowQrCode, onDisconnect }) => (
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    {connections.map((connection) => (
-      <ConnectionCard 
-        key={connection.id} 
-        connection={connection} 
-        onShowQrCode={onShowQrCode} 
-        onDisconnect={onDisconnect} 
-      />
-    ))}
-  </div>
-);
+//
 
 
 const Evolution = () => {
@@ -287,7 +100,7 @@ const Evolution = () => {
 
         try {
           const responseData = JSON.parse(responseText);
-          if (responseData && responseData.qrcode) {
+          if (responseData?.qrcode) {
             setIsAddDialogOpen(false);
             await updateQrCode(instanceName);
             startStatusMonitoring(instanceName);
@@ -397,11 +210,8 @@ const Evolution = () => {
             </span>
           </div>
           <div className="flex items-center gap-2 min-w-fit">
-            <Badge
-              variant="outline"
-              className="bg-white/10 text-white border border-white/40 px-3 py-1 font-normal rounded-md"
-            >
-              {user?.user_metadata?.name || user?.email}
+            <Badge variant="outline" className="bg-white/10 text-white border border-white/40 px-3 py-1 font-normal rounded-md">
+              {user?.user_metadata?.name ?? user?.email}
             </Badge>
           </div>
         </div>
@@ -426,10 +236,10 @@ const Evolution = () => {
         </div>
 
         {/* Connections Grid */}
-        <ConnectionCardsList 
-          connections={connectionsData.connections} 
-          onShowQrCode={handleShowQrCode} 
-          onDisconnect={handleDisconnect} 
+        <ConnectionCardsList
+          connections={connectionsData.connections}
+          onShowQrCode={handleShowQrCode}
+          onDisconnect={handleDisconnect}
         />
         </div>
       </main>

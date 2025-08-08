@@ -41,48 +41,12 @@ import InstancesManager from "./disparador/components/InstancesManager";
 import SendForm from "./disparador/components/SendForm";
 import ContactsImporter from "./disparador/components/ContactsImporter";
 import SchedulesList from "./disparador/components/SchedulesList";
+import CampaignsHistory from "./disparador/components/CampaignsHistory";
+import HelpSection from "./disparador/components/HelpSection";
+import { APP_CONFIG } from "./disparador/constants";
+import { Instance, Contact, Campaign, ScheduledDispatch } from "./disparador/types";
 
-interface Instance {
-  id: string;
-  name: string;
-  apikey: string;
-  status: 'connected' | 'disconnected' | 'connecting';
-  qrCode?: string;
-}
-
-interface Contact {
-  number: string;
-  name?: string;
-}
-
-interface Campaign {
-  id: string;
-  name: string;
-  message: string;
-  contacts: Contact[];
-  media?: File;
-  status: 'pending' | 'sending' | 'completed' | 'failed';
-  sent: number;
-  total: number;
-  createdAt: Date;
-}
-
-interface ScheduledDispatch {
-  id: string;
-  scheduledDateTime: Date;
-  instanceId: string;
-  message: string;
-  contacts: Contact[];
-  media?: File;
-  status: 'scheduled' | 'executing' | 'completed' | 'cancelled' | 'failed';
-  createdAt: Date;
-}
-
-const APP_CONFIG = {
-  webhookUrl: 'https://webhook.zapplify.app.br/webhook/disparadorProV2',
-  webhookConexao: 'https://webhook.zapplify.app.br/webhook/verificarConexao',
-  version: '2.4',
-};
+// tipos e constantes extraídos
 
 const Disparador: React.FC = () => {
   const navigate = useNavigate();

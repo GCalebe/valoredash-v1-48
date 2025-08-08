@@ -17,6 +17,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useProductsQuery } from "@/hooks/useProducts";
 import ArrayInputField from "./components/ArrayInputField";
 import { ProductSingleSelector, ProductMultiSelector } from "./components/ProductSelectors";
+import BasicInfoCard from "./components/BasicInfoCard";
+import MarketingCard from "./components/MarketingCard";
 import ObjectionsManager from "./ObjectionsManager";
 import { ProductObjection, ProductFormData } from "@/types/product";
 import { 
@@ -271,69 +273,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         </TabsList>
 
         <TabsContent value="basic" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Informações Básicas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nome do Produto/Serviço</Label>
-                <Input
-                  id="name"
-                  {...register("name")}
-                  placeholder="Ex: Consultoria em Marketing Digital"
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="price" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Preço (R$)
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  {...register("price", { valueAsNumber: true })}
-                  placeholder="0,00"
-                />
-                {errors.price && (
-                  <p className="text-sm text-destructive mt-1">{errors.price.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="category" className="flex items-center gap-2">
-                  <Tag className="h-4 w-4" />
-                  Categoria
-                </Label>
-                <Input
-                  id="category"
-                  {...register("category")}
-                  placeholder="Ex: Consultoria, Software, Curso..."
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description" className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Descrição
-                </Label>
-                <Textarea
-                  id="description"
-                  {...register("description")}
-                  placeholder="Descreva seu produto ou serviço..."
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <BasicInfoCard register={register} errors={errors} />
         </TabsContent>
 
         <TabsContent value="details" className="space-y-4">
@@ -353,29 +293,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
         </TabsContent>
 
         <TabsContent value="marketing" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Marketing e Vendas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <ObjectionsManager
-                productId={mode === 'edit' ? (initialData as any)?.id : ''}
-                onObjectionsChange={setObjections}
-                initialObjections={mode === 'create' ? initialData?.objections?.map((question, index) => ({
-                  id: `initial-${index}`,
-                  question,
-                  answer: 'Resposta não definida',
-                  createdAt: new Date().toLocaleDateString(),
-                  createdBy: 'Sistema'
-                })) || [] : []}
-              />
-              
-              {renderArrayField('success_cases', 'Casos de Sucesso', 'Adicione um caso de sucesso...', Award)}
-            </CardContent>
-          </Card>
+          <MarketingCard
+            mode={mode}
+            initialProductId={(initialData as any)?.id}
+            initialObjections={initialData?.objections}
+            objections={objections}
+            setObjections={setObjections}
+            benefits={watchedValues.benefits || []}
+            differentials={watchedValues.differentials || []}
+            successCases={watchedValues.success_cases || []}
+            onAdd={(field, val) => handleArrayAdd(field as any, val)}
+            onRemove={(field, idx) => handleArrayRemove(field as any, idx)}
+          />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">

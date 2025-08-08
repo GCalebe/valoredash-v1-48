@@ -10,7 +10,8 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Host } from '@/hooks/useHosts';
-import { LocalAgenda, AgendaCategory, categoryDetails, tooltipTexts, InfoTooltip, FormField } from './AgendaTab';
+import { LocalAgenda, AgendaCategory } from "../agenda/types";
+import { categoryDetails, tooltipTexts, InfoTooltip, FormField } from './AgendaTab';
 import { Step1BasicInfo } from './agenda-form/Step1BasicInfo';
 import { Step2TimeSettings } from './agenda-form/Step2TimeSettings';
 import { Step3AvailabilitySettings } from './agenda-form/Step3AvailabilitySettings';

@@ -1,64 +1,25 @@
 // @ts-nocheck
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useThemeSettings } from '@/hooks/useThemeSettings';
-import {
-  Search,
-  Download,
-  Settings,
-  Sun,
-  Moon,
-  MapPin,
-  BarChart3,
-  FileSpreadsheet,
-  Send,
-  CheckSquare,
-  Square,
-  Trash2,
-  Filter,
-  X,
-  Crosshair,
-  Layers,
-  Rocket,
-  Info
-} from 'lucide-react';
+import { Search, Settings, Sun, Moon, CheckSquare, Square, Trash2, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import ProspectsSearchForm from './prospectar/components/ProspectsSearchForm';
 import ProspectsFilters from './prospectar/components/ProspectsFilters';
 import ProspectCard from './prospectar/components/ProspectCard';
+import ProspectsStatsCard from './prospectar/components/ProspectsStatsCard';
+import ExportSection from './prospectar/components/ExportSection';
+import ConfigModal from './prospectar/components/ConfigModal';
+import { Prospect, APIConfig } from './prospectar/types';
+import { DEFAULT_RESULTS_LIMIT } from './prospectar/constants';
 
-interface Prospect {
-  id: string;
-  name: string;
-  endereco: string;
-  telefone?: string;
-  email?: string;
-  rating?: number;
-  reviews?: number;
-  website?: string;
-  category?: string;
-  types?: string;
-  hasWhatsApp: boolean;
-  latitude?: number;
-  longitude?: number;
-  verified?: boolean;
-}
-
-interface APIConfig {
-  serpApiKey: string;
-  whatsappBaseUrl: string;
-  whatsappInstance: string;
-  whatsappApiKey: string;
-}
+// tipos movidos para ./prospectar/types
 
 const Prospectar: React.FC = () => {
-  const { user } = useAuth();
+  useAuth();
   const themeSettings = useThemeSettings();
   
   // State management
@@ -67,9 +28,11 @@ const Prospectar: React.FC = () => {
   const [selectedProspects, setSelectedProspects] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [resultsLimit, setResultsLimit] = useState('20');
-  const [hasMoreResults, setHasMoreResults] = useState(false);
+  // paginação futura
+  // const [currentPage] = useState(1);
+  const [resultsLimit, setResultsLimit] = useState(DEFAULT_RESULTS_LIMIT);
+  // paginação futura
+  // const [hasMoreResults] = useState(false);
   
   // Filters
   const [whatsappFilter, setWhatsappFilter] = useState('all');
@@ -117,8 +80,8 @@ const Prospectar: React.FC = () => {
   }, [prospects, whatsappFilter, ratingFilter, searchFilter]);
 
   const updateStatistics = () => {
-    const whatsappCount = filteredProspects.filter(p => p.hasWhatsApp).length;
-    const noWhatsappCount = filteredProspects.filter(p => !p.hasWhatsApp).length;
+    const whatsappCount = filteredProspects.filter(p => p?.hasWhatsApp).length;
+    const noWhatsappCount = filteredProspects.filter(p => !p?.hasWhatsApp).length;
     const avgRating = filteredProspects.length > 0 
       ? filteredProspects.reduce((sum, p) => sum + (p.rating || 0), 0) / filteredProspects.length 
       : 0;
@@ -139,10 +102,10 @@ const Prospectar: React.FC = () => {
     if (searchFilter.trim()) {
       const search = searchFilter.toLowerCase();
       filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(search) ||
-        p.endereco.toLowerCase().includes(search) ||
-        (p.category && p.category.toLowerCase().includes(search)) ||
-        (p.types && p.types.toLowerCase().includes(search))
+        p.name?.toLowerCase().includes(search) ||
+        p.endereco?.toLowerCase().includes(search) ||
+        p.category?.toLowerCase().includes(search) ||
+        p.types?.toLowerCase().includes(search)
       );
     }
 
@@ -468,153 +431,30 @@ const Prospectar: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Statistics */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Estatísticas da Página
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{stats.whatsappCount}</div>
-                    <div className="text-xs text-muted-foreground">Com WhatsApp</div>
-                  </div>
-                  <div className="text-center p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">{stats.noWhatsappCount}</div>
-                    <div className="text-xs text-muted-foreground">Sem WhatsApp</div>
-                  </div>
-                  <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
-                    <div className="text-2xl font-bold text-yellow-600">{stats.avgRating}</div>
-                    <div className="text-xs text-muted-foreground">Rating Médio</div>
-                  </div>
-                  <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{stats.verifiedCount}</div>
-                    <div className="text-xs text-muted-foreground">Verificados</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ProspectsStatsCard stats={stats as any} />
 
             {/* Export Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-center">
-                  <FileSpreadsheet className="h-8 w-8 mx-auto text-green-600 mb-2" />
-                  Exportar Dados
-                </CardTitle>
-                <p className="text-sm text-muted-foreground text-center">
-                  Gere um arquivo Excel com os prospects selecionados
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  onClick={exportToExcel}
-                  disabled={selectedProspects.size === 0}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Exportar {selectedProspects.size} Selecionados
-                </Button>
-                
-                <Button 
-                  onClick={exportAll}
-                  disabled={prospects.length === 0}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <FileSpreadsheet className="mr-2 h-4 w-4" />
-                  Exportar Todos ({prospects.length})
-                </Button>
-                
-                <Button 
-                  onClick={exportDisparadorPro}
-                  disabled={selectedProspects.size === 0}
-                  className="w-full bg-yellow-600 hover:bg-yellow-700"
-                >
-                  <Send className="mr-2 h-4 w-4" />
-                  Disparador PRO ({selectedProspects.size})
-                </Button>
-                
-                <div className="text-xs text-muted-foreground p-3 bg-muted/50 rounded">
-                  <div className="flex items-start gap-1 mb-2">
-                    <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <strong>Dados inclusos:</strong> Nome, Endereço, Telefone, E-mail, Rating, Reviews, Website, Status WhatsApp
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-1 text-yellow-600">
-                    <Send className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <strong>Disparador PRO:</strong> Formato simplificado (Nome, Telefone, E-mail)
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ExportSection
+              selectedCount={selectedProspects.size}
+              totalCount={prospects.length}
+              onExportSelected={exportToExcel}
+              onExportAll={exportAll}
+              onExportDisparador={exportDisparadorPro}
+            />
           </div>
         </div>
       </div>
 
-      {/* Configuration Modal */}
-      {showConfigModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle>Configurar APIs</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">SerpAPI Key</label>
-                <Input
-                  type="password"
-                  placeholder="Sua chave da SerpAPI"
-                  value={apiConfig.serpApiKey}
-                  onChange={(e) => setApiConfig(prev => ({ ...prev, serpApiKey: e.target.value }))}
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">WhatsApp Base URL</label>
-                <Input
-                  placeholder="https://api.whatsapp.com"
-                  value={apiConfig.whatsappBaseUrl}
-                  onChange={(e) => setApiConfig(prev => ({ ...prev, whatsappBaseUrl: e.target.value }))}
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">WhatsApp Instance</label>
-                <Input
-                  placeholder="Nome da instância"
-                  value={apiConfig.whatsappInstance}
-                  onChange={(e) => setApiConfig(prev => ({ ...prev, whatsappInstance: e.target.value }))}
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium">WhatsApp API Key</label>
-                <Input
-                  type="password"
-                  placeholder="Sua chave da API WhatsApp"
-                  value={apiConfig.whatsappApiKey}
-                  onChange={(e) => setApiConfig(prev => ({ ...prev, whatsappApiKey: e.target.value }))}
-                />
-              </div>
-              
-              <div className="flex gap-2 pt-4">
-                <Button onClick={saveConfig} className="flex-1">
-                  Salvar
-                </Button>
-                <Button variant="outline" onClick={() => setShowConfigModal(false)} className="flex-1">
-                  Cancelar
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <ConfigModal
+        open={showConfigModal}
+        serpApiKey={apiConfig.serpApiKey}
+        whatsappBaseUrl={apiConfig.whatsappBaseUrl}
+        whatsappInstance={apiConfig.whatsappInstance}
+        whatsappApiKey={apiConfig.whatsappApiKey}
+        onChange={(patch) => setApiConfig(prev => ({ ...prev, ...patch }))}
+        onSave={saveConfig}
+        onClose={() => setShowConfigModal(false)}
+      />
     </div>
   );
 };

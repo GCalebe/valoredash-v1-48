@@ -1,19 +1,12 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Plus, Edit, Trash2, MessageSquare, CheckCircle, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import ObjectionForm from './components/ObjectionForm';
-import ObjectionItem from './components/ObjectionItem';
+import ObjectionsHeader from './components/ObjectionsHeader';
+import ObjectionsList from './components/ObjectionsList';
+import ObjectionsTips from './components/ObjectionsTips';
 
 interface Objection {
   id: string;
@@ -355,25 +348,7 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Gerenciar Objeções
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Configure respostas para objeções comuns dos clientes
-          </p>
-        </div>
-        <Button 
-          type="button"
-          onClick={() => setIsAddingNew(true)}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Nova Objeção
-        </Button>
-      </div>
+      <ObjectionsHeader onAddNew={() => setIsAddingNew(true)} />
 
       {/* Form for adding/editing objections */}
       {(isAddingNew || editingObjection) && (
@@ -394,46 +369,14 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
         />
       )}
 
-      {/* Objections list */}
-      <div className="space-y-4">
-        {objections.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Nenhuma objeção cadastrada</h3>
-              <p className="text-muted-foreground mb-4">
-                Comece adicionando objeções comuns que seus clientes fazem
-              </p>
-              <Button type="button" onClick={() => setIsAddingNew(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Primeira Objeção
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          objections.map((objection) => (
-            <ObjectionItem
-              key={objection.id}
-              id={objection.id}
-              question={objection.question}
-              answer={objection.answer}
-              createdBy={objection.createdBy}
-              createdAt={objection.createdAt}
-              onEdit={handleEditObjection}
-              onDelete={handleDeleteObjection}
-            />
-          ))
-        )}
-      </div>
+      <ObjectionsList
+        objections={objections}
+        onAddFirst={() => setIsAddingNew(true)}
+        onEdit={handleEditObjection}
+        onDelete={handleDeleteObjection}
+      />
       
-      {objections.length > 0 && (
-        <div className="bg-muted/50 rounded-lg p-4">
-          <h4 className="font-medium text-sm mb-2">💡 Dica</h4>
-          <p className="text-sm text-muted-foreground">
-            Use essas respostas como base durante suas vendas. Personalize-as conforme o contexto específico de cada cliente.
-          </p>
-        </div>
-      )}
+      <ObjectionsTips count={objections.length} />
     </div>
   );
 };
