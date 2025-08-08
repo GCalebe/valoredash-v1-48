@@ -9,14 +9,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from '@/components/animate-ui/base/accordion';
 import { cn } from '@/lib/utils';
 import { 
   Search, 
   Filter, 
   X, 
-  ChevronRight,
-  ChevronDown,
   Users, 
   Tag, 
   TrendingUp,
@@ -81,12 +79,11 @@ export const FilterDesignOption2 = () => {
     }
   ]);
 
-  const [categories, setCategories] = useState<FilterCategory[]>([
+  const [categories, setCategories] = useState([
     {
       id: 'basic',
-      title: 'Filtros Básicos',
+      name: 'Filtros Básicos',
       icon: <Filter className="w-4 h-4" />,
-      expanded: true,
       filters: [
         { id: 'status-active', label: 'Ativo', type: 'checkbox', active: false },
         { id: 'status-inactive', label: 'Inativo', type: 'checkbox', active: false },
@@ -98,7 +95,6 @@ export const FilterDesignOption2 = () => {
       id: 'segment',
       title: 'Segmentação',
       icon: <Users className="w-4 h-4" />,
-      expanded: false,
       filters: [
         { id: 'size-small', label: 'Pequeno Porte', type: 'checkbox', active: false },
         { id: 'size-medium', label: 'Médio Porte', type: 'checkbox', active: false },
@@ -110,7 +106,6 @@ export const FilterDesignOption2 = () => {
       id: 'engagement',
       title: 'Engajamento',
       icon: <TrendingUp className="w-4 h-4" />,
-      expanded: false,
       filters: [
         { id: 'last-contact', label: 'Último Contato', type: 'select', options: ['Hoje', 'Esta semana', 'Este mês', 'Mais de 30 dias'], active: false },
         { id: 'interaction-level', label: 'Nível de Interação', type: 'select', options: ['Alto', 'Médio', 'Baixo'], active: false }
@@ -120,7 +115,6 @@ export const FilterDesignOption2 = () => {
       id: 'tags',
       title: 'Tags e Categorias',
       icon: <Tag className="w-4 h-4" />,
-      expanded: false,
       filters: [
         { id: 'tag-vip', label: 'VIP', type: 'checkbox', active: false },
         { id: 'tag-premium', label: 'Premium', type: 'checkbox', active: false },
@@ -132,7 +126,6 @@ export const FilterDesignOption2 = () => {
       id: 'temporal',
       title: 'Filtros Temporais',
       icon: <Clock className="w-4 h-4" />,
-      expanded: false,
       filters: [
         { id: 'created-date', label: 'Data de Criação', type: 'date', active: false },
         { id: 'updated-date', label: 'Última Atualização', type: 'date', active: false }
@@ -140,11 +133,7 @@ export const FilterDesignOption2 = () => {
     }
   ]);
 
-  const toggleCategory = (categoryId: string) => {
-    setCategories(prev => prev.map(cat => 
-      cat.id === categoryId ? { ...cat, expanded: !cat.expanded } : cat
-    ));
-  };
+
 
   const toggleFilter = (categoryId: string, filterId: string) => {
     setCategories(prev => prev.map(cat => 
@@ -283,17 +272,10 @@ export const FilterDesignOption2 = () => {
             {/* Categorias de Filtros */}
             <ScrollArea className="flex-1">
               <div className="p-4 space-y-2">
-                {categories.map((category) => (
-                  <Collapsible
-                    key={category.id}
-                    open={category.expanded}
-                    onOpenChange={() => toggleCategory(category.id)}
-                  >
-                    <CollapsibleTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-between p-2 h-auto hover:bg-gray-50"
-                      >
+                <Accordion>
+                  {categories.map((category) => (
+                    <AccordionItem key={category.id} value={category.id}>
+                      <AccordionTrigger className="w-full justify-between p-2 h-auto hover:bg-gray-50">
                         <div className="flex items-center gap-2">
                           {category.icon}
                           <span className="text-sm font-medium">{category.title}</span>
@@ -301,13 +283,8 @@ export const FilterDesignOption2 = () => {
                             {category.filters.filter(f => f.active).length}
                           </Badge>
                         </div>
-                        {category.expanded ? 
-                          <ChevronDown className="w-4 h-4" /> : 
-                          <ChevronRight className="w-4 h-4" />
-                        }
-                      </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-2 mt-2 ml-6">
+                      </AccordionTrigger>
+                      <AccordionPanel className="space-y-2 mt-2 ml-6">
                       {category.filters.map((filter) => (
                         <div key={filter.id} className="flex items-center space-x-2">
                           {filter.type === 'checkbox' && (
@@ -346,9 +323,10 @@ export const FilterDesignOption2 = () => {
                           )}
                         </div>
                       ))}
-                    </CollapsibleContent>
-                  </Collapsible>
-                ))}
+                      </AccordionPanel>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </div>
             </ScrollArea>
 

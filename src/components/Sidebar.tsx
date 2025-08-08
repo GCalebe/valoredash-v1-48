@@ -111,10 +111,15 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           path: "/disparador",
         },
         {
-            name: "Prospectar",
-            icon: Search,
-            path: "/prospectar",
-          },
+          name: "Prospectar",
+          icon: Search,
+          path: "/prospectar",
+        },
+        {
+          name: "Design de Filtros",
+          icon: Settings,
+          path: "/filter-designs",
+        },
         // Conversas 2.0 desativado - agora integrado ao item principal
         // {
         //   name: "Conversas 2.0",
