@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useFilterableFields } from "@/hooks/useFilterableFields";
 
 interface FilterSuggestionsTabsProps {
@@ -8,10 +8,21 @@ interface FilterSuggestionsTabsProps {
   context?: "clients" | "conversations";
 }
 
-const SUGGESTION_ORDER = ["principal", "utm", "midia", "produtos"] as const;
+type TabType = "principal" | "utm" | "midia" | "produtos";
 
-export const FilterSuggestionsTabs: React.FC<FilterSuggestionsTabsProps> = ({ onPick, context = "clients" }) => {
+const TABS: { id: TabType; label: string; description: string }[] = [
+  { id: "principal", label: "Principal", description: "Campos básicos do cliente" },
+  { id: "utm", label: "UTM", description: "Dados de origem e tracking" },
+  { id: "midia", label: "Mídia", description: "Tags e classificações" },
+  { id: "produtos", label: "Produtos", description: "Informações comerciais" },
+];
+
+export const FilterSuggestionsTabs: React.FC<FilterSuggestionsTabsProps> = ({ 
+  onPick, 
+  context = "clients" 
+}) => {
   const { fields } = useFilterableFields();
+  const [activeTab, setActiveTab] = useState<TabType>("principal");
 
   const groups = useMemo(() => {
     const byId: Record<string, boolean> = {};
@@ -32,7 +43,7 @@ export const FilterSuggestionsTabs: React.FC<FilterSuggestionsTabsProps> = ({ on
       const name = f.name?.toLowerCase?.() || "";
       const idLower = id.toLowerCase();
 
-      // Heurísticas por aba (espelhando as abas do cadastro: Principal, UTM, Mídia, Produtos)
+      // Heurísticas por aba
       if (["name", "email", "phone", "status", "kanban_stage_id", "created_at", "updated_at"].includes(id)) {
         add(principal, id);
         return;
@@ -41,22 +52,25 @@ export const FilterSuggestionsTabs: React.FC<FilterSuggestionsTabsProps> = ({ on
         add(utm, id);
         return;
       }
-      if (name.includes("tag") || idLower.includes("tag") || idLower.includes("segment") || idLower.includes("midia") || idLower.includes("consultation") || idLower.includes("last_message")) {
+      if (name.includes("tag") || idLower.includes("tag") || idLower.includes("segment") || 
+          idLower.includes("midia") || idLower.includes("consultation") || idLower.includes("last_message")) {
         add(midia, id);
         return;
       }
-      if (idLower.includes("product") || idLower.includes("client_type") || idLower.includes("client_size") || idLower.includes("asaas") || (f as any).category === "produtos") {
+      if (idLower.includes("product") || idLower.includes("client_type") || 
+          idLower.includes("client_size") || idLower.includes("asaas") || 
+          (f as any).category === "produtos") {
         add(produtos, id);
         return;
       }
-      // Fallback por categoria vinda do hook
+      
+      // Fallback por categoria
       const cat = (f as any).category;
       if (cat === "basic" && principal.length < 12) add(principal, id);
       else if (cat === "commercial" && midia.length < 12) add(midia, id);
       else if (cat === "documents" && produtos.length < 12) add(produtos, id);
     });
 
-    // Limitar a 12 sugestões por aba
     return {
       principal: principal.slice(0, 12),
       utm: utm.slice(0, 12),
@@ -67,45 +81,65 @@ export const FilterSuggestionsTabs: React.FC<FilterSuggestionsTabsProps> = ({ on
 
   const getLabel = (id: string) => fields.find((f) => f.id === id)?.name || id;
 
-  return (
-    <div className="border rounded-md">
-      <div className="px-3 py-2 border-b text-sm font-medium">Sugestões por aba</div>
-      <div className="p-3">
-        <Tabs defaultValue="principal" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="principal">Principal</TabsTrigger>
-            <TabsTrigger value="utm">UTM</TabsTrigger>
-            <TabsTrigger value="midia">Mídia</TabsTrigger>
-            <TabsTrigger value="produtos">Produtos</TabsTrigger>
-          </TabsList>
+  const currentFields = groups[activeTab];
 
-          {SUGGESTION_ORDER.map((key) => (
-            <TabsContent key={key} value={key} className="mt-3">
-              <div className="flex flex-wrap gap-2">
-                {(groups as any)[key].length === 0 ? (
-                  <div className="text-xs text-muted-foreground">Sem sugestões para esta aba.</div>
-                ) : (
-                  (groups as any)[key].map((fid: string) => (
-                    <Button
-                      key={fid}
-                      size="sm"
-                      variant="secondary"
-                      className="h-7"
-                      onClick={() => onPick(fid)}
-                    >
-                      {getLabel(fid)}
-                    </Button>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+  return (
+    <div className="space-y-3">
+      {/* Tab Navigation */}
+      <div className="flex gap-1 p-1 bg-muted rounded-lg">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
+              activeTab === tab.id
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="min-h-[120px]">
+        <div className="mb-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {TABS.find(t => t.id === activeTab)?.label}
+            </span>
+            <Badge variant="secondary" className="text-xs">
+              {currentFields.length}
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {TABS.find(t => t.id === activeTab)?.description}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {currentFields.length === 0 ? (
+            <div className="text-xs text-muted-foreground w-full text-center py-4">
+              Nenhum campo disponível nesta categoria
+            </div>
+          ) : (
+            currentFields.map((fieldId) => (
+              <Button
+                key={fieldId}
+                size="sm"
+                variant="secondary"
+                className="h-7 text-xs"
+                onClick={() => onPick(fieldId)}
+              >
+                {getLabel(fieldId)}
+              </Button>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 export default FilterSuggestionsTabs;
-
-
