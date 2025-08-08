@@ -21,6 +21,7 @@ import { ScheduleDialogs } from "@/components/schedule/ScheduleDialogs";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { CalendarViewSwitcher } from "@/components/schedule/CalendarViewSwitcher";
 import { NewAppointmentFlow } from "@/components/schedule/NewAppointmentFlow";
+import ScheduleHeader from "./schedule/components/ScheduleHeader";
 
 const Schedule = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -182,89 +183,21 @@ const Schedule = () => {
 
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900 overflow-hidden">
-      <header
-        className="text-white shadow-md transition-colors duration-300 rounded-b-xl flex-shrink-0"
-        style={{ backgroundColor: settings.primaryColor }}
-      >
-        <div className="flex flex-row items-center justify-between h-16 w-full px-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/dashboard")}
-              className="text-white hover:bg-white/20 focus-visible:ring-white"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-bold">Calendário</h1>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-white text-sm font-medium">Anfitrião:</span>
-              <select 
-                value={hostFilter} 
-                onChange={(e) => setHostFilter(e.target.value)}
-                className="h-8 border-slate-600 text-white bg-slate-700/50 hover:bg-slate-600 text-xs rounded-md w-[120px] px-2"
-                disabled={isHostsLoading}
-              >
-                <option value="all">{isHostsLoading ? "Carregando..." : "Todos"}</option>
-                {hosts.map((host) => (
-                  <option key={host.id} value={host.id}>
-                    {host.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-white text-sm font-medium">Status:</span>
-              <select 
-                value={statusFilter} 
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-8 border-slate-600 text-white bg-slate-700/50 hover:bg-slate-600 text-xs rounded-md w-[140px] px-2"
-              >
-                <option value="all">Todos</option>
-                <option value="confirmed">Confirmados</option>
-                <option value="pending">Pendentes</option>
-                <option value="scheduled">Agendados</option>
-                <option value="completed">Concluídos</option>
-                <option value="cancelled">Cancelados</option>
-                <option value="no_show">Não compareceu</option>
-              </select>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <CalendarViewSwitcher 
-                view={calendarViewTab as "mes" | "semana" | "dia" | "agenda"} 
-                onChange={(view) => setCalendarViewTab(view)} 
-              />
-            </div>
-            
-            <Button
-              variant="outline"
-              onClick={handleRefreshAll}
-              disabled={isAnyRefreshing}
-              className="border-white text-white bg-transparent hover:bg-white/20 h-8 px-2"
-            >
-              <span className="flex items-center gap-1">
-                <RefreshCw className={`h-4 w-4 ${isAnyRefreshing ? "animate-spin" : ""}`} />
-                {isAnyRefreshing ? "Atualizando..." : "Atualizar"}
-              </span>
-            </Button>
-            
-            <Button 
-              onClick={() => {
-                setIsNewAppointmentFlowOpen(true);
-              }}
-              className="bg-white text-blue-600 hover:bg-blue-50 h-8 px-2"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Novo
-            </Button>
-          </div>
-        </div>
-      </header>
+      <ScheduleHeader
+        primaryColor={settings.primaryColor}
+        onBack={() => navigate('/dashboard')}
+        hosts={hosts}
+        isHostsLoading={isHostsLoading}
+        hostFilter={hostFilter}
+        setHostFilter={setHostFilter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        calendarViewTab={calendarViewTab as 'mes' | 'semana' | 'dia' | 'agenda'}
+        setCalendarViewTab={(view) => setCalendarViewTab(view)}
+        onRefreshAll={handleRefreshAll}
+        isRefreshing={isAnyRefreshing}
+        onOpenNew={() => setIsNewAppointmentFlowOpen(true)}
+      />
 
       <div className="flex-1 p-4 overflow-hidden">
         <ScheduleContent

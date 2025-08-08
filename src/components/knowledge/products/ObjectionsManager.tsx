@@ -12,6 +12,8 @@ import { Plus, Edit, Trash2, MessageSquare, CheckCircle, AlertTriangle } from 'l
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import ObjectionForm from './components/ObjectionForm';
+import ObjectionItem from './components/ObjectionItem';
 
 interface Objection {
   id: string;
@@ -375,53 +377,21 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
 
       {/* Form for adding/editing objections */}
       {(isAddingNew || editingObjection) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {editingObjection ? 'Editar Objeção' : 'Nova Objeção'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Objeção do Cliente</label>
-              <Input
-                placeholder="Ex: O preço está muito alto"
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Resposta Sugerida</label>
-              <Textarea
-                placeholder="Digite uma resposta persuasiva para essa objeção..."
-                value={newAnswer}
-                onChange={(e) => setNewAnswer(e.target.value)}
-                rows={4}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                type="button"
-                onClick={editingObjection ? handleUpdateObjection : handleAddObjection}
-                disabled={!newQuestion.trim() || !newAnswer.trim()}
-              >
-                {editingObjection ? 'Atualizar' : 'Adicionar'}
-              </Button>
-              <Button 
-                type="button"
-                variant="outline" 
-                onClick={() => {
-                  setIsAddingNew(false);
-                  setEditingObjection(null);
-                  setNewQuestion('');
-                  setNewAnswer('');
-                }}
-              >
-                Cancelar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <ObjectionForm
+          isEditing={!!editingObjection}
+          question={newQuestion}
+          answer={newAnswer}
+          setQuestion={setNewQuestion}
+          setAnswer={setNewAnswer}
+          onSubmit={editingObjection ? handleUpdateObjection : handleAddObjection}
+          onCancel={() => {
+            setIsAddingNew(false);
+            setEditingObjection(null);
+            setNewQuestion('');
+            setNewAnswer('');
+          }}
+          disabled={!newQuestion.trim() || !newAnswer.trim()}
+        />
       )}
 
       {/* Objections list */}
@@ -442,67 +412,16 @@ const ObjectionsManager: React.FC<ObjectionsManagerProps> = ({
           </Card>
         ) : (
           objections.map((objection) => (
-            <Card key={objection.id}>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="h-4 w-4 text-orange-500" />
-                        <span className="font-medium text-sm">Objeção</span>
-                      </div>
-                      <p className="font-medium">{objection.question}</p>
-                    </div>
-                     <div className="flex items-center gap-2">
-                       <Button
-                         type="button"
-                         variant="outline"
-                         size="sm"
-                         onClick={() => handleEditObjection(objection.id)}
-                       >
-                         <Edit className="h-4 w-4" />
-                       </Button>
-                       <AlertDialog>
-                         <AlertDialogTrigger asChild>
-                           <Button type="button" variant="outline" size="sm">
-                             <Trash2 className="h-4 w-4" />
-                           </Button>
-                         </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza que deseja excluir esta objeção? Esta ação não pode ser desfeita.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteObjection(objection.id)}>
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="font-medium text-sm">Resposta Sugerida</span>
-                    </div>
-                    <p className="text-muted-foreground">{objection.answer}</p>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Criado por: {objection.createdBy}</span>
-                    <span>{objection.createdAt}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ObjectionItem
+              key={objection.id}
+              id={objection.id}
+              question={objection.question}
+              answer={objection.answer}
+              createdBy={objection.createdBy}
+              createdAt={objection.createdAt}
+              onEdit={handleEditObjection}
+              onDelete={handleDeleteObjection}
+            />
           ))
         )}
       </div>

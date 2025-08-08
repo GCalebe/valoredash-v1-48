@@ -12,6 +12,8 @@ import { useKnowledgeBase, useKnowledgeBaseCategories } from '@/hooks/useKnowled
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR, es, enUS } from 'date-fns/locale';
 import { useDebounce } from '@/hooks/utils/useDebounce';
+import KBSidebar from './components/KBSidebar';
+import KBResultsSort from './components/KBResultsSort';
 
 interface KnowledgeBaseSearchProps {
   onBack: () => void;
@@ -195,201 +197,35 @@ export const KnowledgeBaseSearch: React.FC<KnowledgeBaseSearchProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Filters Sidebar */}
         <div className={`lg:col-span-1 space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <Search className="h-5 w-5 mr-2" />
-                {language === 'pt' && 'Buscar'}
-                {language === 'en' && 'Search'}
-                {language === 'es' && 'Buscar'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="search">
-                  {language === 'pt' && 'Termo de busca'}
-                  {language === 'en' && 'Search term'}
-                  {language === 'es' && 'Término de búsqueda'}
-                </Label>
-                <Input
-                  id="search"
-                  placeholder={
-                    language === 'pt' ? 'Digite sua busca...' :
-                    language === 'en' ? 'Type your search...' :
-                    'Escribe tu búsqueda...'
-                  }
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-
-              <Separator />
-
-              {/* Categories */}
-              <div>
-                <Label className="text-sm font-medium">
-                  {language === 'pt' && 'Categorias'}
-                  {language === 'en' && 'Categories'}
-                  {language === 'es' && 'Categorías'}
-                </Label>
-                <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
-                  {categories.map((cat) => (
-                    <div key={cat.category} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`category-${cat.category}`}
-                        checked={selectedCategories.includes(cat.category)}
-                        onCheckedChange={() => handleCategoryToggle(cat.category)}
-                      />
-                      <Label 
-                        htmlFor={`category-${cat.category}`}
-                        className="text-sm cursor-pointer"
-                      >
-                        {cat.category}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Content Types */}
-              <div>
-                <Label className="text-sm font-medium">
-                  {language === 'pt' && 'Tipos de Conteúdo'}
-                  {language === 'en' && 'Content Types'}
-                  {language === 'es' && 'Tipos de Contenido'}
-                </Label>
-                <div className="mt-2 space-y-2">
-                  {Object.entries(CONTENT_TYPES).map(([key, type]) => (
-                    <div key={key} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`type-${key}`}
-                        checked={selectedContentTypes.includes(key)}
-                        onCheckedChange={() => handleContentTypeToggle(key)}
-                      />
-                      <Label 
-                        htmlFor={`type-${key}`}
-                        className="text-sm cursor-pointer flex items-center"
-                      >
-                        <span className="mr-1">{type.icon}</span>
-                        {type.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Difficulty */}
-              <div>
-                <Label className="text-sm font-medium">
-                  {language === 'pt' && 'Nível de Dificuldade'}
-                  {language === 'en' && 'Difficulty Level'}
-                  {language === 'es' && 'Nivel de Dificultad'}
-                </Label>
-                <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder={
-                      language === 'pt' ? 'Selecionar nível' :
-                      language === 'en' ? 'Select level' :
-                      'Seleccionar nivel'
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">
-                      {language === 'pt' && 'Todos os níveis'}
-                      {language === 'en' && 'All levels'}
-                      {language === 'es' && 'Todos los niveles'}
-                    </SelectItem>
-                    {DIFFICULTY_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {hasActiveFilters && (
-                <Button variant="outline" size="sm" onClick={clearFilters} className="w-full">
-                  {language === 'pt' && 'Limpar Filtros'}
-                  {language === 'en' && 'Clear Filters'}
-                  {language === 'es' && 'Limpiar Filtros'}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+          <KBSidebar
+            language={language}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            categories={categories}
+            selectedCategories={selectedCategories}
+            onToggleCategory={handleCategoryToggle}
+            selectedContentTypes={selectedContentTypes}
+            onToggleContentType={handleContentTypeToggle}
+            contentTypes={CONTENT_TYPES}
+            selectedDifficulty={selectedDifficulty}
+            setSelectedDifficulty={setSelectedDifficulty}
+            difficultyLevels={DIFFICULTY_LEVELS}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+          />
         </div>
 
         {/* Results */}
         <div className="lg:col-span-3 space-y-4">
           {/* Sort Controls */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {filteredAndSortedArticles.length} 
-                {language === 'pt' && ' resultados'}
-                {language === 'en' && ' results'}
-                {language === 'es' && ' resultados'}
-              </span>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Label className="text-sm">
-                {language === 'pt' && 'Ordenar por:'}
-                {language === 'en' && 'Sort by:'}
-                {language === 'es' && 'Ordenar por:'}
-              </Label>
-              <Select value={sortBy} onValueChange={(value: 'relevance' | 'date' | 'views' | 'title') => setSortBy(value)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="relevance">
-                    {language === 'pt' && 'Relevância'}
-                    {language === 'en' && 'Relevance'}
-                    {language === 'es' && 'Relevancia'}
-                  </SelectItem>
-                  <SelectItem value="date">
-                    {language === 'pt' && 'Data'}
-                    {language === 'en' && 'Date'}
-                    {language === 'es' && 'Fecha'}
-                  </SelectItem>
-                  <SelectItem value="views">
-                    {language === 'pt' && 'Visualizações'}
-                    {language === 'en' && 'Views'}
-                    {language === 'es' && 'Visualizaciones'}
-                  </SelectItem>
-                  <SelectItem value="title">
-                    {language === 'pt' && 'Título'}
-                    {language === 'en' && 'Title'}
-                    {language === 'es' && 'Título'}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
-                <SelectTrigger className="w-24">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="desc">
-                    {language === 'pt' && 'Desc'}
-                    {language === 'en' && 'Desc'}
-                    {language === 'es' && 'Desc'}
-                  </SelectItem>
-                  <SelectItem value="asc">
-                    {language === 'pt' && 'Asc'}
-                    {language === 'en' && 'Asc'}
-                    {language === 'es' && 'Asc'}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <KBResultsSort
+            language={language}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+            resultsCount={filteredAndSortedArticles.length}
+          />
 
           {/* Results List */}
           {isLoading ? (

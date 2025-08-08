@@ -1,9 +1,10 @@
 // @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { format, addDays, startOfDay, addMinutes, isAfter, isBefore, isSameDay, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { useAgendas, type Agenda } from './useAgendas';
 import { supabase } from '@/integrations/supabase/client';
+import { toYmd, enumerateDates } from './useAgendaAvailability/utils';
 
 export interface TimeSlot {
   time: string;
@@ -143,23 +144,15 @@ export function useAgendaAvailability(agendaId?: string) {
 
   // Get available dates for a month
   const getAvailableDatesForMonth = useCallback((date: Date): Date[] => {
-    const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-    const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    const dates: Date[] = [];
-    
-    for (let d = new Date(startOfMonth); d <= endOfMonth; d = addDays(d, 1)) {
-      if (isDateAvailable(d)) {
-        dates.push(new Date(d));
-      }
-    }
-    
-    return dates;
+    const start = new Date(date.getFullYear(), date.getMonth(), 1);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    return enumerateDates(start, end).filter((d) => isDateAvailable(d));
   }, [isDateAvailable]);
 
   // Get operating hours for a specific date
   const getOperatingHoursForDate = useCallback((date: Date): { start: string; end: string } | null => {
     const dayOfWeek = date.getDay();
-    const dateStr = format(date, 'yyyy-MM-dd');
+    const dateStr = toYmd(date);
     
     // Check for specific date exceptions first
     const dateException = availableDates.find(ad => ad.date === dateStr);

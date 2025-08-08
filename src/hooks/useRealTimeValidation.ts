@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Contact } from '@/types/client';
 import { CustomFieldWithValue } from '@/types/customFields';
+import { EMAIL_REGEX, BR_PHONE_REGEX } from './useRealTimeValidation/utils';
 
 interface ValidationError {
   field: string;
@@ -29,11 +30,9 @@ export const useRealTimeValidation = (
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
-  // Email validation regex
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
-  // Phone validation regex (basic Brazilian format)
-  const phoneRegex = /^(\+55\s?)?(\(?\d{2}\)?\s?)?(\d{4,5}-?\d{4})$/;
+  // Regexes em utilts para reuso/Testes
+  const emailRegex = EMAIL_REGEX;
+  const phoneRegex = BR_PHONE_REGEX;
 
   const validateField = useCallback((field: keyof Contact, value: any): ValidationError | null => {
     switch (field) {
