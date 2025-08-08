@@ -85,6 +85,7 @@ export const FilterDesignOption2 = () => {
     hasActiveFilters,
     clearFilters
   } = unifiedFilters;
+
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([
     {
       id: '1',
@@ -167,7 +168,7 @@ export const FilterDesignOption2 = () => {
     } else if (filterId.startsWith('contato-')) {
       const periodMap: Record<string, string> = {
         'contato-hoje': 'today',
-        'contato-ontem': 'yesterday', 
+        'contato-ontem': 'yesterday',
         'contato-semana': 'week',
         'contato-mes': 'month',
         'contato-trimestre': 'quarter',
@@ -198,11 +199,11 @@ export const FilterDesignOption2 = () => {
     // Adicionar filtros ativos baseados nos hooks do Supabase
     if (statusFilter && statusFilter !== 'all') {
       const stage = kanbanStages.find(s => s.id === statusFilter);
-      if (stage) activeFilters.push(stage.name);
+      if (stage) activeFilters.push(`Pipeline: ${stage.title}`);
     }
     
     if (segmentFilter && segmentFilter !== 'all') {
-      activeFilters.push(segmentFilter);
+      activeFilters.push(`Anfitrião: ${segmentFilter}`);
     }
     
     if (lastContactFilter && lastContactFilter !== 'all') {
@@ -216,7 +217,8 @@ export const FilterDesignOption2 = () => {
         'year': 'Último ano',
         'never': 'Sem contato'
       };
-      activeFilters.push(periodLabels[lastContactFilter] || lastContactFilter);
+      const label = periodLabels[lastContactFilter] || lastContactFilter;
+      activeFilters.push(`Último Contato: ${label}`);
     }
     
     return activeFilters;
@@ -239,37 +241,35 @@ export const FilterDesignOption2 = () => {
               variant="ghost"
               size="sm"
               onClick={() => setIsPanelOpen(false)}
-              className="h-8 w-8 p-0"
+              className="p-1 h-8 w-8"
             >
-              <PanelLeftClose className="h-4 w-4" />
+              <PanelLeftClose className="w-4 h-4" />
             </Button>
           </div>
           
-          {/* Busca Rápida */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          {/* Busca */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Buscar contatos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-10"
+              className="pl-10 h-9"
             />
             {searchTerm && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearSearchTerm}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 p-1 h-7 w-7"
               >
-                <X className="h-3 w-3" />
+                <X className="w-3 h-3" />
               </Button>
             )}
           </div>
-        </div>
 
-        {/* Filtros Ativos */}
-        {hasAnyActiveFilters && (
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          {/* Filtros Ativos */}
+          <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Filtros Ativos ({currentActiveFilters.length + (searchTerm ? 1 : 0)})
@@ -277,13 +277,12 @@ export const FilterDesignOption2 = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  clearAllFilters();
-                  clearSearchTerm();
-                }}
-                className="text-xs h-6 px-2"
+                onClick={clearAllFilters}
+                className="text-xs p-1 h-6"
+                disabled={!hasActiveFilters && !searchTerm}
               >
-                Limpar Tudo
+                <RotateCcw className="w-3 h-3 mr-1" />
+                Limpar
               </Button>
             </div>
             <div className="flex flex-wrap gap-1">
@@ -294,9 +293,9 @@ export const FilterDesignOption2 = () => {
                     variant="ghost"
                     size="sm"
                     onClick={clearSearchTerm}
-                    className="ml-1 h-3 w-3 p-0"
+                    className="ml-1 p-0 h-4 w-4"
                   >
-                    <X className="h-2 w-2" />
+                    <X className="w-2 h-2" />
                   </Button>
                 </Badge>
               )}
@@ -307,45 +306,25 @@ export const FilterDesignOption2 = () => {
               ))}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Lista de Filtros */}
-        <ScrollArea className="flex-1">
-          <div className="p-4">
-            <Accordion type="multiple" className="space-y-2">
-              {categories.map((category) => (
-                <AccordionItem key={category.id} value={category.id}>
-                  <AccordionTrigger className="flex items-center gap-2 text-sm font-medium">
+        <ScrollArea className="flex-1 p-4">
+          <Accordion type="multiple" className="space-y-2">
+            {categories.map((category) => (
+              <AccordionItem key={category.id} value={category.id}>
+                <AccordionTrigger className="flex items-center gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
+                  <div className="flex items-center gap-2">
                     {category.icon}
-                    {category.title}
-                  </AccordionTrigger>
-                  <AccordionPanel className="pt-2">
-                    <div className="space-y-2">
-                      {category.filters.map((filter) => {
-                        // Determinar se o filtro está ativo baseado nos hooks do Supabase
-                        let isActive = false;
-                        if (filter.id.startsWith('pipeline-')) {
-                          const stageId = filter.id.replace('pipeline-', '');
-                          isActive = statusFilter === stageId;
-                        } else if (filter.id.startsWith('host-')) {
-                          const hostName = filter.id.replace('host-', '');
-                          isActive = segmentFilter === hostName;
-                        } else if (filter.id.startsWith('contato-')) {
-                          const periodMap: Record<string, string> = {
-                            'contato-hoje': 'today',
-                            'contato-ontem': 'yesterday',
-                            'contato-semana': 'week',
-                            'contato-mes': 'month',
-                            'contato-trimestre': 'quarter',
-                            'contato-semestre': 'semester',
-                            'contato-ano': 'year',
-                            'sem-contato': 'never'
-                          };
-                          const period = periodMap[filter.id];
-                          isActive = lastContactFilter === period;
-                        }
-                        
-                        return (
+                    <span className="font-medium">{category.title}</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionPanel className="px-3 pb-3">
+                  <div className="space-y-2">
+                    {category.filters.map((filter) => {
+                      const isActive = filter.active;
+                      
+                      return (
                         <div key={filter.id} className="flex items-center space-x-2">
                           {filter.type === 'checkbox' && (
                             <>
@@ -379,28 +358,25 @@ export const FilterDesignOption2 = () => {
                             </div>
                           )}
                         </div>
-                        );
-                      })}
-                    </div>
-                  </AccordionPanel>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
+                      );
+                    })}
+                  </div>
+                </AccordionPanel>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </ScrollArea>
 
         {/* Rodapé do Painel */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="space-y-2">
-            <Button variant="outline" size="sm" className="w-full">
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Filtros
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full" onClick={clearAllFilters}>
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Limpar Filtros
-            </Button>
-          </div>
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+          <Button className="w-full" size="sm">
+            <Save className="w-4 h-4 mr-2" />
+            Salvar Filtros
+          </Button>
+          <Button variant="outline" className="w-full" size="sm" onClick={clearAllFilters}>
+            <Trash2 className="w-4 h-4 mr-2" />
+            Limpar Filtros
+          </Button>
         </div>
       </div>
 
@@ -412,12 +388,12 @@ export const FilterDesignOption2 = () => {
             <div className="flex items-center gap-4">
               {!isPanelOpen && (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => setIsPanelOpen(true)}
-                  className="h-8 w-8 p-0"
+                  className="p-2"
                 >
-                  <PanelLeftOpen className="h-4 w-4" />
+                  <PanelLeftOpen className="w-4 h-4" />
                 </Button>
               )}
               <div>
@@ -432,97 +408,96 @@ export const FilterDesignOption2 = () => {
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm">
                 <Settings className="w-4 h-4 mr-2" />
-                Configurar
+                Configurações
+              </Button>
+              <Button size="sm">
+                <Eye className="w-4 h-4 mr-2" />
+                Visualizar
               </Button>
             </div>
           </div>
         </div>
 
         {/* Lista de Contatos */}
-        <div className="flex-1 overflow-auto p-4">
-          {filteredData.length > 0 ? (
-            <div className="grid gap-4">
-              {filteredData.map((contact) => (
-                <Card key={contact.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4">
+            {filteredData.length > 0 ? (
+              <div className="grid gap-4">
+                {filteredData.map((contact) => (
+                  <Card key={contact.id} className="p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-medium text-gray-900 dark:text-white">
-                            {contact.name || contact.first_name + ' ' + (contact.last_name || '')}
+                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                            {contact.name || 'Nome não informado'}
                           </h3>
-                          <Badge 
-                            variant={contact.kanban_stage?.name === 'Cliente' ? 'default' : 
-                                   contact.kanban_stage?.name === 'Lead' ? 'secondary' : 
-                                   contact.kanban_stage?.name === 'Prospect' ? 'outline' : 'destructive'}
-                          >
-                            {contact.kanban_stage?.name || 'Sem estágio'}
+                          <Badge variant="outline" className="text-xs">
+                            {contact.status || 'Status não definido'}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
                           <div>
-                            <span className="font-medium">Email:</span>
-                            <br />{contact.email || 'N/A'}
+                            <span className="font-medium">Email:</span> {contact.email || 'Não informado'}
                           </div>
                           <div>
-                            <span className="font-medium">Telefone:</span>
-                            <br />{contact.phone || 'N/A'}
+                            <span className="font-medium">Telefone:</span> {contact.phone || 'Não informado'}
                           </div>
                           <div>
-                            <span className="font-medium">Criado em:</span>
-                            <br />{contact.created_at ? new Date(contact.created_at).toLocaleDateString('pt-BR') : 'N/A'}
+                            <span className="font-medium">Criado em:</span> {contact.created_at ? new Date(contact.created_at).toLocaleDateString() : 'Não informado'}
                           </div>
                           <div>
-                            <span className="font-medium">Atualizado:</span>
-                            <br />{contact.updated_at ? new Date(contact.updated_at).toLocaleDateString('pt-BR') : 'N/A'}
+                            <span className="font-medium">Atualizado em:</span> {contact.updated_at ? new Date(contact.updated_at).toLocaleDateString() : 'Não informado'}
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {contact.tags?.map((tag: any, index: number) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {typeof tag === 'string' ? tag : tag.name}
-                            </Badge>
-                          )) || []}
-                        </div>
+                        {contact.tags && contact.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {contact.tags.map((tag, index) => (
+                              <Badge key={index} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2 ml-4">
-                        <Button variant="ghost" size="sm">
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="outline" size="sm">
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-              <Filter className="w-12 h-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                Nenhum contato encontrado
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-4">
-                {searchTerm 
-                  ? `Nenhum resultado para "${searchTerm}"`
-                  : 'Nenhum contato corresponde aos filtros selecionados'
-                }
-              </p>
-              <div className="flex gap-2">
-                {searchTerm && (
-                  <Button variant="outline" onClick={clearSearchTerm}>
-                    Limpar busca
-                  </Button>
-                )}
-                <Button variant="outline" onClick={clearAllFilters}>
-                  Limpar filtros
-                </Button>
+                  </Card>
+                ))}
               </div>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="text-center py-12">
+                <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  Nenhum contato encontrado
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  Tente ajustar seus filtros ou termo de busca
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  {searchTerm && (
+                    <Button variant="outline" size="sm" onClick={clearSearchTerm}>
+                      <X className="w-4 h-4 mr-2" />
+                      Limpar Busca
+                    </Button>
+                  )}
+                  {hasActiveFilters && (
+                    <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Limpar Filtros
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );
