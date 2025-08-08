@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useProductsQuery } from "@/hooks/useProducts";
+import ArrayInputField from "./components/ArrayInputField";
+import { ProductSingleSelector, ProductMultiSelector } from "./components/ProductSelectors";
 import ObjectionsManager from "./ObjectionsManager";
 import { ProductObjection, ProductFormData } from "@/types/product";
 import { 
@@ -108,159 +110,7 @@ interface ProductFormProps {
 }
 
 // Componente para seleção única de produto
-interface ProductSingleSelectorProps {
-  selectedProduct: string;
-  onSelectionChange: (productId: string) => void;
-  placeholder?: string;
-  excludeCurrentProduct?: string;
-}
-
-const ProductSingleSelector: React.FC<ProductSingleSelectorProps> = ({
-  selectedProduct,
-  onSelectionChange,
-  placeholder = "Selecione um produto...",
-  excludeCurrentProduct
-}) => {
-  const { data: products = [] } = useProductsQuery();
-  
-  const availableProducts = products.filter(product => 
-    product.id !== excludeCurrentProduct
-  );
-
-  const selectedProductData = availableProducts.find(p => p.id === selectedProduct);
-
-  return (
-    <Select value={selectedProduct} onValueChange={onSelectionChange}>
-      <SelectTrigger>
-        <SelectValue placeholder={placeholder}>
-          {selectedProductData ? (
-            <div className="flex items-center justify-between w-full">
-              <span>{selectedProductData.name}</span>
-              {selectedProductData.price && (
-                <span className="text-xs text-green-600 font-medium">
-                  R$ {selectedProductData.price.toFixed(2)}
-                </span>
-              )}
-            </div>
-          ) : (
-            placeholder
-          )}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <ScrollArea className="h-48">
-          {availableProducts.length === 0 ? (
-            <div className="p-2 text-sm text-muted-foreground text-center">
-              Nenhum produto disponível
-            </div>
-          ) : (
-            availableProducts.map((product) => (
-              <SelectItem key={product.id} value={product.id}>
-                <div className="flex items-center justify-between w-full">
-                  <div>
-                    <div className="font-medium">{product.name}</div>
-                    {product.description && (
-                      <div className="text-xs text-muted-foreground truncate max-w-xs">
-                        {product.description}
-                      </div>
-                    )}
-                  </div>
-                  {product.price && (
-                    <div className="text-xs text-green-600 font-medium ml-2">
-                      R$ {product.price.toFixed(2)}
-                    </div>
-                  )}
-                </div>
-              </SelectItem>
-            ))
-          )}
-        </ScrollArea>
-      </SelectContent>
-    </Select>
-  );
-};
-
-// Componente para seleção múltipla de produtos
-interface ProductMultiSelectorProps {
-  selectedProducts: string[];
-  onSelectionChange: (products: string[]) => void;
-  placeholder?: string;
-  excludeCurrentProduct?: string;
-}
-
-const ProductMultiSelector: React.FC<ProductMultiSelectorProps> = ({
-  selectedProducts,
-  onSelectionChange,
-  placeholder = "Selecione produtos...",
-  excludeCurrentProduct
-}) => {
-  const { data: products = [] } = useProductsQuery();
-  
-  const availableProducts = products.filter(product => 
-    product.id !== excludeCurrentProduct
-  );
-
-  const handleProductToggle = (productId: string) => {
-    const isSelected = selectedProducts.includes(productId);
-    if (isSelected) {
-      onSelectionChange(selectedProducts.filter(id => id !== productId));
-    } else {
-      onSelectionChange([...selectedProducts, productId]);
-    }
-  };
-
-  const getSelectedProductsText = () => {
-    if (selectedProducts.length === 0) return placeholder;
-    if (selectedProducts.length === 1) {
-      const product = availableProducts.find(p => p.id === selectedProducts[0]);
-      return product?.name || "Produto selecionado";
-    }
-    return `${selectedProducts.length} produtos selecionados`;
-  };
-
-  return (
-    <Select>
-      <SelectTrigger>
-        <SelectValue placeholder={getSelectedProductsText()} />
-      </SelectTrigger>
-      <SelectContent>
-        <ScrollArea className="h-48">
-          {availableProducts.length === 0 ? (
-            <div className="p-2 text-sm text-muted-foreground text-center">
-              Nenhum produto disponível
-            </div>
-          ) : (
-            availableProducts.map((product) => (
-              <div key={product.id} className="flex items-center space-x-2 p-2 hover:bg-accent">
-                <Checkbox
-                  id={`product-${product.id}`}
-                  checked={selectedProducts.includes(product.id)}
-                  onCheckedChange={() => handleProductToggle(product.id)}
-                />
-                <label
-                  htmlFor={`product-${product.id}`}
-                  className="flex-1 text-sm cursor-pointer"
-                >
-                  <div className="font-medium">{product.name}</div>
-                  {product.description && (
-                    <div className="text-xs text-muted-foreground truncate">
-                      {product.description}
-                    </div>
-                  )}
-                  {product.price && (
-                    <div className="text-xs text-green-600 font-medium">
-                      R$ {product.price.toFixed(2)}
-                    </div>
-                  )}
-                </label>
-              </div>
-            ))
-          )}
-        </ScrollArea>
-      </SelectContent>
-    </Select>
-  );
-};
+// Subcomponentes extraídos em ./components/ArrayInputField e ./components/ProductSelectors
 
 const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
@@ -343,74 +193,16 @@ const ProductForm: React.FC<ProductFormProps> = ({
     setValue(field, currentArray.filter((_, i) => i !== index));
   };
 
-  const ArrayInputField = ({ 
-    field, 
-    label, 
-    placeholder, 
-    icon: Icon 
-  }: { 
-    field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases'>;
-    label: string;
-    placeholder: string;
-    icon: LucideIcon;
-  }) => {
-    const [inputValue, setInputValue] = useState("");
-    const items = watchedValues[field] || [];
-
-    return (
-      <div className="space-y-3">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Icon className="h-4 w-4" />
-          {label}
-        </Label>
-        <div className="flex gap-2">
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder={placeholder}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleArrayAdd(field, inputValue);
-                setInputValue("");
-              }
-            }}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => {
-              handleArrayAdd(field, inputValue);
-              setInputValue("");
-            }}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {items.map((item: string, index: number) => (
-            <Badge
-              key={index}
-              variant="secondary"
-              className="flex items-center gap-2 px-3 py-1"
-            >
-              {item}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 hover:bg-transparent"
-                onClick={() => handleArrayRemove(field, index)}
-              >
-                <Minus className="h-3 w-3" />
-              </Button>
-            </Badge>
-          ))}
-        </div>
-      </div>
-    );
-  };
+  const renderArrayField = (field: keyof Pick<ProductFormData, 'benefits' | 'objections' | 'differentials' | 'success_cases'>, label: string, placeholder: string, icon: any) => (
+    <ArrayInputField
+      label={label}
+      placeholder={placeholder}
+      icon={icon}
+      items={watchedValues[field] || []}
+      onAdd={(val) => handleArrayAdd(field, val)}
+      onRemove={(idx) => handleArrayRemove(field, idx)}
+    />
+  );
 
   const handleFormSubmit = async (data: ProductFormData) => {
     console.log('🔍 ProductForm handleFormSubmit called');
@@ -553,19 +345,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <ArrayInputField
-                field="benefits"
-                label="Benefícios"
-                placeholder="Adicione um benefício..."
-                icon={TrendingUp}
-              />
+              {renderArrayField('benefits', 'Benefícios', 'Adicione um benefício...', TrendingUp)}
               
-              <ArrayInputField
-                field="differentials"
-                label="Diferenciais"
-                placeholder="Adicione um diferencial..."
-                icon={Award}
-              />
+              {renderArrayField('differentials', 'Diferenciais', 'Adicione um diferencial...', Award)}
             </CardContent>
           </Card>
         </TabsContent>
@@ -591,12 +373,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 })) || [] : []}
               />
               
-              <ArrayInputField
-                field="success_cases"
-                label="Casos de Sucesso"
-                placeholder="Adicione um caso de sucesso..."
-                icon={Award}
-              />
+              {renderArrayField('success_cases', 'Casos de Sucesso', 'Adicione um caso de sucesso...', Award)}
             </CardContent>
           </Card>
         </TabsContent>
