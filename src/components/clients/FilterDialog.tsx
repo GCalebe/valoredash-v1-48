@@ -7,7 +7,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomFieldFilter } from "@/hooks/useClientsFilters";
 import { useFilterDialog } from "@/hooks/useFilterDialog";
 import { FilterHeader } from "./filters/FilterHeader";
-import { FilterSidebar } from "./filters/FilterSidebar";
 import { FilterBuilder } from "./filters/FilterBuilder";
 import { FilterActions } from "./filters/FilterActions";
 
@@ -96,24 +95,9 @@ const FilterDialog = ({
       <DialogContent className="max-w-7xl h-[90vh] p-0 flex flex-col">
         <FilterHeader />
         
-        <div className="flex-1 min-h-0 flex">
-          {/* Sidebar com filtros rápidos e salvos */}
-          <div className="w-80 border-r bg-muted/20 p-4 overflow-y-auto">
-            <FilterSidebar
-              statusFilter={statusFilter}
-              segmentFilter={segmentFilter}
-              lastContactFilter={lastContactFilter}
-              onStatusFilterChange={onStatusFilterChange}
-              onSegmentFilterChange={onSegmentFilterChange}
-              onLastContactFilterChange={onLastContactFilterChange}
-              onApplyFilter={applySavedFilter}
-              onFilterDeleted={loadSavedFilters}
-              hasActiveFilters={hasActiveFilters}
-            />
-          </div>
-
+        <div className="flex-1 min-h-0">
           {/* Main content com construtor de filtros */}
-          <div className="flex-1 p-4 overflow-y-auto">
+          <div className="flex-1 p-6 overflow-y-auto">
             <FilterBuilder
               advancedFilter={advancedFilter}
               updateAdvancedFilter={updateAdvancedFilter}
@@ -122,6 +106,15 @@ const FilterDialog = ({
               onSaveFilter={() => saveFilter(filterName)}
               hasAdvancedRules={hasAdvancedRules}
               onAddField={handleAddField}
+              statusFilter={statusFilter}
+              segmentFilter={segmentFilter}
+              lastContactFilter={lastContactFilter}
+              onStatusFilterChange={onStatusFilterChange}
+              onSegmentFilterChange={onSegmentFilterChange}
+              onLastContactFilterChange={onLastContactFilterChange}
+              onApplyFilter={applySavedFilter}
+              onFilterDeleted={loadSavedFilters}
+              activeFiltersCount={activeFiltersCount}
             />
           </div>
         </div>
