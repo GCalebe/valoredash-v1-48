@@ -157,9 +157,14 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
       filters.status = statusFilter;
     }
 
-    // Mapear segmentFilter para tags se necessário
+    // Mapear statusFilter para kanban_stage_id
+    if (statusFilter !== "all") {
+      filters.kanban_stage_id = statusFilter;
+    }
+
+    // Mapear segmentFilter para responsible_hosts
     if (segmentFilter !== "all") {
-      filters.tags = [segmentFilter];
+      filters.responsible_hosts = [segmentFilter];
     }
 
     // Filtros avançados

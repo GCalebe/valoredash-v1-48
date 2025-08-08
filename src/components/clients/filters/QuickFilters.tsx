@@ -1,10 +1,8 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { availableTags } from "./filterConstants";
+import { useKanbanStagesLocal } from "@/hooks/useKanbanStagesLocal";
+import { useFilterableFields } from "@/hooks/useFilterableFields";
 
 interface QuickFiltersProps {
   statusFilter: string;
@@ -23,60 +21,52 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({
   onSegmentFilterChange,
   onLastContactFilterChange,
 }) => {
-  const [tagInput, setTagInput] = useState("");
-
-  // Filtrar tags com base na pesquisa
-  const filteredTags =
-    tagInput.trim() !== ""
-      ? availableTags.filter((tag) =>
-          tag.toLowerCase().includes(tagInput.toLowerCase()),
-        )
-      : [];
-
-  // Adicionar tag como filtro
-  const handleAddTag = (tag: string) => {
-    onSegmentFilterChange(tag);
-    setTagInput("");
-  };
+  const { stages, loading: kanbanLoading } = useKanbanStagesLocal();
+  const { responsibleHosts, loading: hostsLoading } = useFilterableFields();
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <Label htmlFor="status-filter" className="text-sm font-medium">
-            Status
+          <Label htmlFor="pipeline-filter" className="text-sm font-medium">
+            Pipeline
           </Label>
           <Select
             value={statusFilter}
             onValueChange={onStatusFilterChange}
+            disabled={kanbanLoading}
           >
-            <SelectTrigger id="status-filter">
-              <SelectValue placeholder="Todos os status" />
+            <SelectTrigger id="pipeline-filter">
+              <SelectValue placeholder="Todos os estágios" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              <SelectItem value="Ganhos">Ganhos</SelectItem>
-              <SelectItem value="Perdidos">Perdidos</SelectItem>
+              <SelectItem value="all">Todos os estágios</SelectItem>
+              {stages.map((stage) => (
+                <SelectItem key={stage.id} value={stage.id}>
+                  {stage.title}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         <div>
-          <Label htmlFor="segment-filter" className="text-sm font-medium">
-            Segmento
+          <Label htmlFor="host-filter" className="text-sm font-medium">
+            Anfitrião
           </Label>
           <Select
             value={segmentFilter}
             onValueChange={onSegmentFilterChange}
+            disabled={hostsLoading}
           >
-            <SelectTrigger id="segment-filter">
-              <SelectValue placeholder="Todos os segmentos" />
+            <SelectTrigger id="host-filter">
+              <SelectValue placeholder="Todos os anfitriões" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os segmentos</SelectItem>
-              {availableTags.map((tag) => (
-                <SelectItem key={tag} value={tag}>
-                  {tag}
+              <SelectItem value="all">Todos os anfitriões</SelectItem>
+              {responsibleHosts.map((host) => (
+                <SelectItem key={host} value={host}>
+                  {host}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -105,34 +95,6 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      <div>
-        <Label className="text-sm font-medium mb-2 block">
-          Pesquisar Tags
-        </Label>
-        <div className="flex gap-2">
-          <Input
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            placeholder="Digite para pesquisar tags..."
-            className="flex-1"
-          />
-        </div>
-        {filteredTags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {filteredTags.map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="cursor-pointer hover:bg-secondary/80"
-                onClick={() => handleAddTag(tag)}
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

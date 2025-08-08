@@ -21,21 +21,6 @@ export const FilterHeader: React.FC<FilterHeaderProps> = ({ onFieldSearch }) => 
         </div>
       </div>
       
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Search className="h-4 w-4" />
-          <span>Busque por qualquer campo para começar</span>
-        </div>
-        <Command className="rounded-lg border border-border/50 bg-background/50">
-          <CommandInput 
-            placeholder="Digite o nome de um campo (ex.: email, status, telefone)..." 
-            onChange={(e) => onFieldSearch?.(e.target.value)}
-          />
-          <CommandList className="max-h-0">
-            <CommandEmpty />
-          </CommandList>
-        </Command>
-      </div>
     </div>
   );
 };
