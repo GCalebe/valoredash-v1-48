@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,17 +6,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Download, Upload, FileText, CheckCircle, AlertCircle, X, ArrowLeft } from "lucide-react";
+//
+import { Upload, ArrowLeft } from "lucide-react";
 import ImportInstructions from "./import/ImportInstructions";
 import UploadStep from "./import/UploadStep";
 import ProcessingStep from "./import/ProcessingStep";
 import ResultsStep from "./import/ResultsStep";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Contact } from "@/types/client";
+//
 import { useAuth } from "@/context/AuthContext";
 
 interface ClientImportModalProps {
@@ -42,7 +40,7 @@ const ClientImportModal = ({
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  //
   const { user } = useAuth();
 
   const handleDownloadTemplate = () => {
@@ -67,19 +65,7 @@ Maria Santos,maria@exemplo.com,11888888888,Maria Santos MEI,Av. Paulista 456 - S
     });
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (selectedFile) {
-      if (selectedFile.type !== 'text/csv' && !selectedFile.name.endsWith('.csv')) {
-        toast({
-          title: "Arquivo inválido",
-          description: "Por favor, selecione um arquivo CSV.",
-        });
-        return;
-      }
-      setFile(selectedFile);
-    }
-  };
+  //
 
   const parseCSV = (text: string): any[] => {
     const lines = text.split('\n');
@@ -213,10 +199,8 @@ Maria Santos,maria@exemplo.com,11888888888,Maria Santos MEI,Av. Paulista 456 - S
       }
 
     } catch (error) {
-      toast({
-        title: "Erro na importação",
-        description: "Erro ao processar o arquivo CSV.",
-      });
+      const message = error instanceof Error ? error.message : 'Erro ao processar o arquivo CSV.';
+      toast({ title: 'Erro na importação', description: message });
       setStep('upload');
     }
   };

@@ -51,8 +51,8 @@ const ResultsStep: React.FC<{ result: ImportResult }> = ({ result }) => {
               <AlertDescription>
                 <strong>Erros encontrados:</strong>
                 <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                  {result.errors.slice(0, 5).map((error, index) => (
-                    <div key={index} className="text-sm">
+                  {result.errors.slice(0, 5).map((error) => (
+                    <div key={`${error.row}-${error.message}`} className="text-sm">
                       Linha {error.row}: {error.message}
                     </div>
                   ))}

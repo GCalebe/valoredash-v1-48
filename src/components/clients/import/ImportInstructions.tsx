@@ -20,7 +20,7 @@ const ImportInstructions: React.FC<ImportInstructionsProps> = ({ onDownloadTempl
 
       <div className="space-y-4">
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">1</span>
               Baixar modelo da planilha
@@ -36,7 +36,7 @@ const ImportInstructions: React.FC<ImportInstructionsProps> = ({ onDownloadTempl
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">2</span>
               Preencher a planilha
@@ -52,7 +52,7 @@ const ImportInstructions: React.FC<ImportInstructionsProps> = ({ onDownloadTempl
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">3</span>
               Fazer upload da planilha
