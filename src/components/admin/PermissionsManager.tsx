@@ -26,6 +26,8 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import RoleCard from "./permissions/RoleCard";
+import PermissionItem from "./permissions/PermissionItem";
 
 // Types for our permissions system
 interface Role {
@@ -292,11 +294,6 @@ const PermissionsManager: React.FC = () => {
   const selectedRole =
     roles.find((role) => role.id === selectedRoleId) || roles[0];
 
-  // Calculate percentage of permissions enabled for each role
-  const calculatePermissionPercentage = (role: Role) => {
-    return Math.round((role.permissions.length / permissions.length) * 100);
-  };
-
   // Toggle a permission for the selected role
   const togglePermission = (permissionId: string) => {
     setRoles((prevRoles) =>
@@ -365,67 +362,19 @@ const PermissionsManager: React.FC = () => {
 
       {/* Role Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {roles.map((role) => {
-          const percentage = calculatePermissionPercentage(role);
-          const activePermissions = role.permissions.length;
-          const totalPermissions = permissions.length;
-
-          return (
-            <Card
-              key={role.id}
-              className={cn(
-                "cursor-pointer transition-all duration-200 hover:shadow-md",
-                selectedRoleId === role.id && "border-2",
-                selectedRoleId === role.id &&
-                  role.id === "corretor" &&
-                  "border-green-500",
-                selectedRoleId === role.id &&
-                  role.id === "gestor" &&
-                  "border-blue-500",
-                selectedRoleId === role.id &&
-                  role.id === "administrador" &&
-                  "border-red-500",
-              )}
-              onClick={() => setSelectedRoleId(role.id)}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: role.color }}
-                    >
-                      {role.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">{role.name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {activePermissions}/{totalPermissions} ativas
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <span
-                      className="text-2xl font-bold"
-                      style={{ color: role.color }}
-                    >
-                      {percentage}%
-                    </span>
-                  </div>
-                </div>
-                <Progress
-                  value={percentage}
-                  className="h-2"
-                  style={
-                    {
-                      "--progress-background": role.color,
-                    } as React.CSSProperties
-                  }
-                />
-              </CardContent>
-            </Card>
-          );
-        })}
+        {roles.map((role) => (
+          <RoleCard
+            key={role.id}
+            id={role.id}
+            name={role.name}
+            icon={role.icon}
+            color={role.color}
+            activePermissions={role.permissions.length}
+            totalPermissions={permissions.length}
+            isSelected={selectedRoleId === role.id}
+            onSelect={() => setSelectedRoleId(role.id)}
+          />
+        ))}
       </div>
 
       {/* Role Selection Tabs */}
@@ -504,50 +453,17 @@ const PermissionsManager: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            {menuPermissions.map((permission) => {
-              const isEnabled = selectedRole.permissions.includes(
-                permission.id,
-              );
-
-              return (
-                <div
-                  key={permission.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-md">
-                      {getPermissionIcon(permission.id)}
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{permission.name}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {permission.description}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {isEnabled ? (
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 flex items-center gap-1">
-                        <Check className="h-3 w-3" />
-                        Ativo
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="text-gray-500 flex items-center gap-1"
-                      >
-                        <X className="h-3 w-3" />
-                        Inativo
-                      </Badge>
-                    )}
-                    <Switch
-                      checked={isEnabled}
-                      onCheckedChange={() => togglePermission(permission.id)}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+            {menuPermissions.map((permission) => (
+              <PermissionItem
+                key={permission.id}
+                id={permission.id}
+                name={permission.name}
+                description={permission.description}
+                icon={getPermissionIcon(permission.id)}
+                enabled={selectedRole.permissions.includes(permission.id)}
+                onToggle={() => togglePermission(permission.id)}
+              />
+            ))}
           </div>
         </div>
 
@@ -568,50 +484,17 @@ const PermissionsManager: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            {featurePermissions.map((permission) => {
-              const isEnabled = selectedRole.permissions.includes(
-                permission.id,
-              );
-
-              return (
-                <div
-                  key={permission.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-md">
-                      {getPermissionIcon(permission.id)}
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{permission.name}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {permission.description}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {isEnabled ? (
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 flex items-center gap-1">
-                        <Check className="h-3 w-3" />
-                        Ativo
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="text-gray-500 flex items-center gap-1"
-                      >
-                        <X className="h-3 w-3" />
-                        Inativo
-                      </Badge>
-                    )}
-                    <Switch
-                      checked={isEnabled}
-                      onCheckedChange={() => togglePermission(permission.id)}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+            {featurePermissions.map((permission) => (
+              <PermissionItem
+                key={permission.id}
+                id={permission.id}
+                name={permission.name}
+                description={permission.description}
+                icon={getPermissionIcon(permission.id)}
+                enabled={selectedRole.permissions.includes(permission.id)}
+                onToggle={() => togglePermission(permission.id)}
+              />
+            ))}
           </div>
         </div>
 
@@ -632,50 +515,17 @@ const PermissionsManager: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            {adminPermissions.map((permission) => {
-              const isEnabled = selectedRole.permissions.includes(
-                permission.id,
-              );
-
-              return (
-                <div
-                  key={permission.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-md">
-                      {getPermissionIcon(permission.id)}
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{permission.name}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {permission.description}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {isEnabled ? (
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 flex items-center gap-1">
-                        <Check className="h-3 w-3" />
-                        Ativo
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="text-gray-500 flex items-center gap-1"
-                      >
-                        <X className="h-3 w-3" />
-                        Inativo
-                      </Badge>
-                    )}
-                    <Switch
-                      checked={isEnabled}
-                      onCheckedChange={() => togglePermission(permission.id)}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+            {adminPermissions.map((permission) => (
+              <PermissionItem
+                key={permission.id}
+                id={permission.id}
+                name={permission.name}
+                description={permission.description}
+                icon={getPermissionIcon(permission.id)}
+                enabled={selectedRole.permissions.includes(permission.id)}
+                onToggle={() => togglePermission(permission.id)}
+              />
+            ))}
           </div>
         </div>
       </div>

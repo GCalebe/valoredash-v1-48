@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useDebouncedValue } from "@/hooks/utils/useDebouncedValue";
 
 export interface CustomFieldFilter {
   fieldId: string;
@@ -39,16 +40,9 @@ export function useClientsFilters(): ClientsFilters {
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
-    
-    debounceTimeoutRef.current = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300); // 300ms de delay
-
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
+    const timeout = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
+    debounceTimeoutRef.current = timeout as unknown as NodeJS.Timeout;
+    return () => clearTimeout(timeout);
   }, [searchTerm]);
 
   // Cleanup do timeout quando o componente é desmontado

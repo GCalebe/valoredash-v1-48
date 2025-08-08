@@ -9,15 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Download, 
-  Upload, 
-  FileText, 
-  CheckCircle, 
-  AlertCircle, 
-  X,
-  ArrowLeft 
-} from "lucide-react";
+import { Download, Upload, FileText, CheckCircle, AlertCircle, X, ArrowLeft } from "lucide-react";
+import ImportInstructions from "./import/ImportInstructions";
+import UploadStep from "./import/UploadStep";
+import ProcessingStep from "./import/ProcessingStep";
+import ResultsStep from "./import/ResultsStep";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Contact } from "@/types/client";
@@ -226,211 +222,16 @@ Maria Santos,maria@exemplo.com,11888888888,Maria Santos MEI,Av. Paulista 456 - S
   };
 
   const renderInstructions = () => (
-    <div className="space-y-6">
-      <div className="text-center">
-        <FileText className="h-16 w-16 text-primary mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Importar clientes via planilha</h3>
-        <p className="text-muted-foreground">
-          Siga os passos abaixo para importar seus clientes
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">1</span>
-              Baixar modelo da planilha
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-3">
-              Baixe nosso modelo CSV com os campos corretos e exemplos de preenchimento.
-            </p>
-            <Button onClick={handleDownloadTemplate} className="w-full">
-              <Download className="h-4 w-4 mr-2" />
-              Baixar Modelo CSV
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">2</span>
-              Preencher a planilha
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Abra o arquivo no Excel, Google Sheets ou similar. Preencha os dados dos seus clientes seguindo o exemplo.
-              <br />
-              <strong>Campos obrigatórios:</strong> Nome
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">3</span>
-              Fazer upload da planilha
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-3">
-              Salve como CSV e faça o upload aqui. Validaremos e importaremos os dados automaticamente.
-            </p>
-            <Button onClick={() => setStep('upload')} className="w-full" variant="outline">
-              Continuar para Upload
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <ImportInstructions onDownloadTemplate={handleDownloadTemplate} onNext={() => setStep('upload')} />
   );
 
   const renderUpload = () => (
-    <div className="space-y-6">
-      <div className="text-center">
-        <Upload className="h-16 w-16 text-primary mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Selecionar arquivo CSV</h3>
-        <p className="text-muted-foreground">
-          Escolha o arquivo CSV com os dados dos clientes
-        </p>
-      </div>
-
-      <Card className="border-dashed border-2">
-        <CardContent className="p-6">
-          <div className="text-center">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-              accept=".csv"
-              className="hidden"
-            />
-            <Button onClick={() => fileInputRef.current?.click()} variant="outline" size="lg">
-              <Upload className="h-4 w-4 mr-2" />
-              Escolher Arquivo CSV
-            </Button>
-            
-            {file && (
-              <div className="mt-4 p-3 bg-muted rounded-lg">
-                <p className="text-sm font-medium">{file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {(file.size / 1024).toFixed(1)} KB
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {file && (
-        <div className="flex gap-2">
-          <Button onClick={handleImport} className="flex-1">
-            Importar Clientes
-          </Button>
-          <Button variant="outline" onClick={() => setFile(null)}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-    </div>
+    <UploadStep file={file} setFile={setFile} onImport={handleImport} />
   );
 
-  const renderProcessing = () => (
-    <div className="space-y-6 text-center">
-      <div>
-        <Upload className="h-16 w-16 text-primary mx-auto mb-4 animate-pulse" />
-        <h3 className="text-lg font-semibold mb-2">Processando importação...</h3>
-        <p className="text-muted-foreground">
-          Aguarde enquanto importamos seus clientes
-        </p>
-      </div>
-      
-      <div className="space-y-2">
-        <Progress value={progress} className="w-full" />
-        <p className="text-sm text-muted-foreground">{Math.round(progress)}% concluído</p>
-      </div>
-    </div>
-  );
+  const renderProcessing = () => <ProcessingStep progress={progress} />;
 
-  const renderResults = () => (
-    <div className="space-y-6">
-      <div className="text-center">
-        {importResult?.errors.length === 0 ? (
-          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-        ) : (
-          <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-        )}
-        <h3 className="text-lg font-semibold mb-2">Importação concluída</h3>
-      </div>
-
-      {importResult && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-green-600">{importResult.success}</p>
-                <p className="text-sm text-muted-foreground">Sucessos</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-red-600">{importResult.errors.length}</p>
-                <p className="text-sm text-muted-foreground">Erros</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold">{importResult.total}</p>
-                <p className="text-sm text-muted-foreground">Total</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {importResult.errors.length > 0 && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Erros encontrados:</strong>
-                <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                  {importResult.errors.slice(0, 5).map((error, index) => (
-                    <div key={index} className="text-xs">
-                      Linha {error.row}: {error.message}
-                    </div>
-                  ))}
-                  {importResult.errors.length > 5 && (
-                    <div className="text-xs text-muted-foreground">
-                      ... e mais {importResult.errors.length - 5} erros
-                    </div>
-                  )}
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <div className="flex gap-2">
-            <Button onClick={() => {
-              onImportComplete();
-              onClose();
-            }} className="flex-1">
-              Concluir
-            </Button>
-            <Button variant="outline" onClick={() => {
-              setStep('upload');
-              setFile(null);
-              setImportResult(null);
-            }}>
-              Importar Novamente
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  const renderResults = () => (importResult ? <ResultsStep result={importResult} /> : null);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
