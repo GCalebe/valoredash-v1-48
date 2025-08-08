@@ -2,16 +2,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fixedClientProperties } from "@/components/clients/filters/filterConstants";
+import { useKanbanStagesLocal } from "@/hooks/useKanbanStagesLocal";
 
 export interface FilterProperty {
   id: string;
   name: string;
-  type: "text" | "select" | "date";
+  type: "text" | "select" | "date" | "number" | "multi_select" | "kanban_stage";
   options?: string[];
   dbField?: string;
   isCustom?: boolean;
   customFieldId?: string;
-  category?: "basic" | "commercial" | "personalized" | "documents";
+  category?: "basic" | "kanban" | "commercial" | "temporal" | "documents" | "personalized";
 }
 
 /**
@@ -20,55 +21,112 @@ export interface FilterProperty {
  */
 export function useFilterableFields() {
   const [customFields, setCustomFields] = useState<FilterProperty[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [responsibleHosts, setResponsibleHosts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const { stages: kanbanStages, loading: kanbanLoading } = useKanbanStagesLocal();
 
   useEffect(() => {
     let isMounted = true;
-    async function fetchCustom() {
+    async function fetchData() {
       try {
         setLoading(true);
-        const { data, error } = await supabase
+        
+        // Fetch custom fields
+        const { data: customFieldsData, error: customFieldsError } = await supabase
           .from("custom_fields")
           .select("id, field_name, field_type, field_options")
           .is("deleted_at", null)
           .order("created_at", { ascending: true });
 
-        if (error) {
-          console.error("Erro ao carregar custom_fields:", error);
-          return;
+        if (customFieldsError) {
+          console.error("Erro ao carregar custom_fields:", customFieldsError);
+        } else {
+          const mapped: FilterProperty[] = (customFieldsData || []).map((f: any) => ({
+            id: `custom:${f.id}`,
+            name: f.field_name,
+            type: f.field_type === "single_select" || f.field_type === "multi_select" ? "select" : "text",
+            options: Array.isArray(f.field_options) ? f.field_options : undefined,
+            isCustom: true,
+            customFieldId: f.id,
+            category: (f.category || "basic") as any,
+          }));
+          
+          if (isMounted) setCustomFields(mapped);
         }
 
-        const mapped: FilterProperty[] = (data || []).map((f: any) => ({
-          id: `custom:${f.id}`,
-          name: f.field_name,
-          type: f.field_type === "single_select" || f.field_type === "multi_select" ? "select" : "text",
-          options: Array.isArray(f.field_options) ? f.field_options : undefined,
-          isCustom: true,
-          customFieldId: f.id,
-          category: (f.category || "basic") as any,
-        }));
+        // Fetch available tags from contacts
+        const { data: tagsData, error: tagsError } = await supabase
+          .from("contacts")
+          .select("tags")
+          .not("tags", "is", null);
 
-        if (isMounted) setCustomFields(mapped);
+        if (!tagsError && tagsData) {
+          const allTags = new Set<string>();
+          tagsData.forEach(contact => {
+            if (Array.isArray(contact.tags)) {
+              contact.tags.forEach(tag => allTags.add(tag));
+            }
+          });
+          if (isMounted) setAvailableTags(Array.from(allTags).sort());
+        }
+
+        // Fetch responsible hosts from contacts
+        const { data: hostsData, error: hostsError } = await supabase
+          .from("contacts")
+          .select("responsible_hosts")
+          .not("responsible_hosts", "is", null);
+
+        if (!hostsError && hostsData) {
+          const allHosts = new Set<string>();
+          hostsData.forEach(contact => {
+            if (Array.isArray(contact.responsible_hosts)) {
+              contact.responsible_hosts.forEach(host => allHosts.add(host));
+            }
+          });
+          if (isMounted) setResponsibleHosts(Array.from(allHosts).sort());
+        }
+
       } finally {
         if (isMounted) setLoading(false);
       }
     }
-    fetchCustom();
+    fetchData();
     return () => {
       isMounted = false;
     };
   }, []);
 
   const allFields: FilterProperty[] = useMemo(() => {
-    // Atribuir categorias-padrão aos campos fixos
-    const fixedWithCategories: FilterProperty[] = (fixedClientProperties as any).map((f: any) => ({
-      ...f,
-      category: (f.category || "basic") as any,
-    }));
-    return [...fixedWithCategories, ...customFields];
-  }, [customFields]);
+    // Processar campos fixos com dados dinâmicos
+    const processedFields: FilterProperty[] = (fixedClientProperties as any).map((f: any) => {
+      const field = {
+        ...f,
+        category: (f.category || "basic") as any,
+      };
 
-  return { fields: allFields, loading };
+      // Adicionar opções dinâmicas para campos especiais
+      if (f.id === "tags") {
+        field.options = availableTags;
+      } else if (f.id === "responsible_hosts") {
+        field.options = responsibleHosts;
+      } else if (f.id === "kanban_stage_id" && !kanbanLoading) {
+        field.options = kanbanStages.map(stage => ({ value: stage.id, label: stage.title }));
+      }
+
+      return field;
+    });
+
+    return [...processedFields, ...customFields];
+  }, [customFields, availableTags, responsibleHosts, kanbanStages, kanbanLoading]);
+
+  return { 
+    fields: allFields, 
+    loading: loading || kanbanLoading,
+    availableTags,
+    responsibleHosts,
+    kanbanStages 
+  };
 }
 
 

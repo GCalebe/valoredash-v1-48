@@ -22,7 +22,7 @@ export const useClientsTableFilters = ({
 }: UseClientsTableFiltersProps) => {
   const filteredContacts = useMemo(() => {
     return contacts.filter((contact) => {
-      // Filtro de busca por texto
+      // Filtro de busca por texto - expandido para incluir novos campos
       const matchesSearch =
         contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (contact.email &&
@@ -31,15 +31,25 @@ export const useClientsTableFilters = ({
           contact.clientName.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (contact.clientType &&
           contact.clientType.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (contact.phone && contact.phone.includes(searchTerm));
+        (contact.phone && contact.phone.includes(searchTerm)) ||
+        (contact.responsibleHosts &&
+          contact.responsibleHosts.some(host => 
+            host.toLowerCase().includes(searchTerm.toLowerCase())
+          )) ||
+        (contact.consultationStage &&
+          contact.consultationStage.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      // Filtro de status
+      // Filtro de status - melhorado para considerar mais estados
       let matchesStatus = statusFilter === "all";
       
       if (statusFilter === "Ganhos") {
-        matchesStatus = contact.consultationStage === "Fatura paga – ganho";
+        matchesStatus = contact.consultationStage === "Fatura paga – ganho" ||
+                       contact.status === "Ganhos";
       } else if (statusFilter === "Perdidos") {
-        matchesStatus = contact.consultationStage === "Projeto cancelado – perdido";
+        matchesStatus = contact.consultationStage === "Projeto cancelado – perdido" ||
+                       contact.status === "Perdidos";
+      } else if (statusFilter !== "all") {
+        matchesStatus = contact.status === statusFilter;
       }
 
       // Filtro de segmento (kanban stage)
