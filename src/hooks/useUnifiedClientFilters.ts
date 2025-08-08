@@ -51,6 +51,9 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
 
   // Hook dos filtros avançados
   const { advancedFilter, updateAdvancedFilter, clearAdvancedFilter, hasAdvancedRules } = useFilterDialog();
+  
+  // Hook para obter responsibleHostsMap
+  const { responsibleHostsMap } = useFilterableFields();
 
   const updateAdvancedFilterWrapper = useCallback((filter: FilterGroup) => {
     updateAdvancedFilter(filter.id, filter);
