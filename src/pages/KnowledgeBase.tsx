@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, BookOpen, Filter, Grid, List, Eye, Clock, Tag, Globe, ArrowLeft, LogOut, ShipWheel, FileText } from 'lucide-react';
+import { Search, Filter, Grid, List, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,8 @@ import { Separator } from '@/components/ui/separator';
 import { useKnowledgeBase, useKnowledgeBaseCategories, useKnowledgeBaseStats } from '@/hooks/useKnowledgeBase';
 import { KnowledgeBaseArticle } from '@/components/knowledge/KnowledgeBaseArticle';
 import { KnowledgeBaseSearch } from '@/components/knowledge/KnowledgeBaseSearch';
+import KBHeader from './knowledge/components/KBHeader';
+import KBStats from './knowledge/components/KBStats';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR, es, enUS } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
@@ -91,59 +93,17 @@ const KnowledgeBasePage = () => {
   if (selectedArticle) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-        <header
-          className="text-white shadow-md transition-colors duration-300 rounded-b-xl"
-          style={{ backgroundColor: settings.primaryColor }}
-        >
-          <div className="flex flex-row items-center justify-between min-h-[64px] w-full px-6 py-0">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedArticle(null)}
-                className="text-white hover:bg-white/20 focus-visible:ring-white"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              {settings.logo ? (
-                <img
-                  src={settings.logo}
-                  alt="Logo"
-                  className="h-8 w-8 object-contain"
-                />
-              ) : (
-                <ShipWheel
-                  className="h-8 w-8"
-                  style={{ color: settings.secondaryColor }}
-                />
-              )}
-              <h1 className="text-2xl font-bold">{settings.brandName}</h1>
-              <span className="text-lg ml-2">Base de Conhecimento</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge
-                variant="outline"
-                className="bg-white/10 text-white border-0 px-3 py-1"
-              >
-                {user?.user_metadata?.name || user?.email}
-              </Badge>
-              <Button
-                variant="outline"
-                onClick={signOut}
-                className="border-white text-white bg-transparent hover:bg-white/20"
-                style={{ height: 40, borderRadius: 8, borderWidth: 1.4 }}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </Button>
-            </div>
-          </div>
-        </header>
+        <KBHeader
+          brandName={settings.brandName}
+          logoUrl={settings.logo}
+          primaryColor={settings.primaryColor}
+          secondaryColor={settings.secondaryColor}
+          userDisplayName={user?.user_metadata?.name || user?.email}
+          onBack={() => setSelectedArticle(null)}
+          onSignOut={signOut}
+        />
         <main className="container mx-auto px-4 py-8">
-          <KnowledgeBaseArticle
-            articleId={selectedArticle}
-            onBack={() => setSelectedArticle(null)}
-          />
+          <KnowledgeBaseArticle articleId={selectedArticle} onBack={() => setSelectedArticle(null)} />
         </main>
       </div>
     );
@@ -151,54 +111,15 @@ const KnowledgeBasePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-      <header
-        className="text-white shadow-md transition-colors duration-300 rounded-b-xl"
-        style={{ backgroundColor: settings.primaryColor }}
-      >
-        <div className="flex flex-row items-center justify-between min-h-[64px] w-full px-6 py-0">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/dashboard")}
-              className="text-white hover:bg-white/20 focus-visible:ring-white"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            {settings.logo ? (
-              <img
-                src={settings.logo}
-                alt="Logo"
-                className="h-8 w-8 object-contain"
-              />
-            ) : (
-              <ShipWheel
-                className="h-8 w-8"
-                style={{ color: settings.secondaryColor }}
-              />
-            )}
-            <h1 className="text-2xl font-bold">{settings.brandName}</h1>
-            <span className="text-lg ml-2">Base de Conhecimento</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge
-              variant="outline"
-              className="bg-white/10 text-white border-0 px-3 py-1"
-            >
-              {user?.user_metadata?.name || user?.email}
-            </Badge>
-            <Button
-              variant="outline"
-              onClick={signOut}
-              className="border-white text-white bg-transparent hover:bg-white/20"
-              style={{ height: 40, borderRadius: 8, borderWidth: 1.4 }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
+      <KBHeader
+        brandName={settings.brandName}
+        logoUrl={settings.logo}
+        primaryColor={settings.primaryColor}
+        secondaryColor={settings.secondaryColor}
+        userDisplayName={user?.user_metadata?.name || user?.email}
+        onBack={() => navigate('/dashboard')}
+        onSignOut={signOut}
+      />
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
@@ -227,71 +148,7 @@ const KnowledgeBasePage = () => {
                   />
                 ) : (
                   <div className="space-y-6">
-                    {/* Statistics */}
-                    {stats && (
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center space-x-2">
-                              <BookOpen className="h-5 w-5 text-blue-600" />
-                              <div>
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                  Categorias
-                                </p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                  {stats.categories}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center space-x-2">
-                              <Eye className="h-5 w-5 text-green-600" />
-                              <div>
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                  Visualizações
-                                </p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                  {stats.views}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center space-x-2">
-                              <Globe className="h-5 w-5 text-purple-600" />
-                              <div>
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                  Idiomas
-                                </p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                  {stats.languages}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center space-x-2">
-                              <FileText className="h-5 w-5 text-orange-600" />
-                              <div>
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                  Artigos
-                                </p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                  {stats.articles}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    )}
+                    <KBStats stats={stats} />
 
                     {/* Filters and Search */}
                     <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">

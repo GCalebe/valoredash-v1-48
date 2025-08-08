@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ShipWheel, Filter, UserPlus } from "lucide-react";
+import { ArrowLeft, ShipWheel, Filter, UserPlus, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
@@ -11,6 +11,8 @@ import FilterDialog from "@/components/clients/FilterDialog";
 import AddClientDialog from "@/components/clients/AddClientDialog";
 import ClientMethodSelectionModal from "@/components/clients/ClientMethodSelectionModal";
 import ClientImportModal from "@/components/clients/ClientImportModal";
+import SmartSuggestionsBar from "@/components/clients/SmartSuggestionsBar";
+import SlidingFilterPanel from "@/components/clients/SlidingFilterPanel";
 import ClientsCompactToggler from "./ClientsCompactToggler";
 import ClientsViewToggler from "./ClientsViewToggler";
 import ClientsRefreshButton from "./ClientsRefreshButton";
@@ -79,6 +81,8 @@ const ClientsHeader = ({
   refreshing,
   handleRefresh,
 }: ClientsHeaderProps) => {
+  const [isSmartSuggestionsOpen, setIsSmartSuggestionsOpen] = useState(false);
+  const [isSlidingFilterOpen, setIsSlidingFilterOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { settings } = useThemeSettings();
@@ -170,6 +174,28 @@ const ClientsHeader = ({
                 !
               </Badge>
             )}
+          </Button>
+
+          {/* Sugestões Inteligentes */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsSmartSuggestionsOpen(true)}
+            className="text-white hover:bg-white/20 focus-visible:ring-white flex items-center gap-1"
+          >
+            <Lightbulb className="h-4 w-4" />
+            Sugestões
+          </Button>
+
+          {/* Filtro Lateral Deslizante */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsSlidingFilterOpen(true)}
+            className="text-white hover:bg-white/20 focus-visible:ring-white flex items-center gap-1"
+          >
+            <Filter className="h-4 w-4" />
+            Filtro Lateral
           </Button>
 
           {/* Chips dos filtros ativos */}
@@ -289,6 +315,18 @@ const ClientsHeader = ({
           </Badge>
         </div>
       )}
+      
+      {/* Smart Suggestions Bar */}
+      <SmartSuggestionsBar
+        isOpen={isSmartSuggestionsOpen}
+        onClose={() => setIsSmartSuggestionsOpen(false)}
+      />
+      
+      {/* Sliding Filter Panel */}
+      <SlidingFilterPanel
+        isOpen={isSlidingFilterOpen}
+        onClose={() => setIsSlidingFilterOpen(false)}
+      />
     </header>
   );
 };
