@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Settings, Trash2, X, Phone, MessageCircle } from "lucide-react";
+import ContactHeader from "./contact-info/ContactHeader";
+import ContactTabs from "./contact-info/ContactTabs";
 import AddCustomFieldDialog from "./AddCustomFieldDialog";
 import EditCustomFieldDialog from "./EditCustomFieldDialog";
 import CustomFieldRenderer from "../clients/CustomFieldRenderer";
