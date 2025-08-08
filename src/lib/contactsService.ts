@@ -3,6 +3,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentAuthUser } from '@/hooks/useAuthUser';
 import { AdvancedFiltersService } from '@/services/advancedFiltersService';
+import type { FilterGroup } from '@/components/clients/filters/FilterGroup';
 
 export interface ContactData {
   id: string;
@@ -55,6 +56,7 @@ export interface ContactFilters {
   search?: string;
   status?: string;
   tags?: string[];
+  responsible_hosts?: string[];
   dateRange?: {
     start: string;
     end: string;
@@ -130,6 +132,10 @@ export const contactsService = {
 
     if (filters.tags && filters.tags.length > 0) {
       query = query.overlaps('tags', filters.tags);
+    }
+
+    if (filters.responsible_hosts && filters.responsible_hosts.length > 0) {
+      query = query.overlaps('responsible_hosts', filters.responsible_hosts);
     }
 
     if (filters.search) {

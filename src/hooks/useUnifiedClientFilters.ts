@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useFilterDialog } from "./useFilterDialog";
 import { ContactFilters } from "@/lib/contactsService";
+import { useFilterableFields } from "@/hooks/useFilterableFields";
 import type { FilterGroup } from "@/components/clients/filters/FilterGroup";
 
 export interface CustomFieldFilter {
@@ -49,7 +50,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Hook dos filtros avançados
-  const { advancedFilter, updateAdvancedFilter, clearAdvancedFilter, hasAdvancedRules } = useFilterDialog('clients');
+  const { advancedFilter, updateAdvancedFilter, clearAdvancedFilter, hasAdvancedRules } = useFilterDialog();
 
   const updateAdvancedFilterWrapper = useCallback((filter: FilterGroup) => {
     updateAdvancedFilter(filter.id, filter);
@@ -153,13 +154,16 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
       filters.search = debouncedSearchTerm;
     }
 
+    // Mapear statusFilter para kanban_stage_id
     if (statusFilter !== "all") {
-      filters.status = statusFilter;
+      filters.kanban_stage_id = statusFilter;
     }
 
-    // Mapear segmentFilter para tags se necessário
+    // Mapear segmentFilter para responsible_hosts
     if (segmentFilter !== "all") {
-      filters.tags = [segmentFilter];
+      // Converter nome do anfitrião para ID se necessário
+      const hostId = responsibleHostsMap[segmentFilter] || segmentFilter;
+      filters.responsible_hosts = [hostId];
     }
 
     // Filtros avançados
@@ -174,6 +178,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
     segmentFilter,
     hasAdvancedRules,
     advancedFilter,
+    responsibleHostsMap,
   ]);
 
   return {

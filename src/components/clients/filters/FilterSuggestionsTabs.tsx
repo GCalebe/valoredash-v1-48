@@ -1,111 +1,153 @@
-import React, { useMemo } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useFilterableFields } from "@/hooks/useFilterableFields";
+import { fieldCategories } from "@/components/clients/filters/filterConstants";
+import { User, Columns, DollarSign, Calendar, FileText, Settings } from "lucide-react";
 
 interface FilterSuggestionsTabsProps {
   onPick: (fieldId: string) => void;
   context?: "clients" | "conversations";
 }
 
-const SUGGESTION_ORDER = ["principal", "utm", "midia", "produtos"] as const;
+type TabType = "basic" | "kanban" | "commercial" | "temporal";
 
-export const FilterSuggestionsTabs: React.FC<FilterSuggestionsTabsProps> = ({ onPick, context = "clients" }) => {
+const ICON_MAP = {
+  User,
+  Columns,
+  DollarSign,
+  Calendar,
+  FileText,
+  Settings,
+};
+
+const TABS: { id: TabType; label: string; description: string; icon: keyof typeof ICON_MAP }[] = [
+  { id: "basic", label: "Básico", description: "Informações básicas do contato", icon: "User" },
+  { id: "kanban", label: "Kanban", description: "Status e etapas do processo", icon: "Columns" },
+  { id: "commercial", label: "Comercial", description: "Dados comerciais e vendas", icon: "DollarSign" },
+  { id: "temporal", label: "Temporal", description: "Datas e histórico temporal", icon: "Calendar" },
+];
+
+export const FilterSuggestionsTabs: React.FC<FilterSuggestionsTabsProps> = ({ 
+  onPick, 
+  context = "clients" 
+}) => {
   const { fields } = useFilterableFields();
+  const [activeTab, setActiveTab] = useState<TabType>("kanban");
 
   const groups = useMemo(() => {
-    const byId: Record<string, boolean> = {};
-    const add = (arr: any[], id: string) => {
-      if (!byId[id]) {
-        byId[id] = true;
-        arr.push(id);
-      }
+    const groupedFields: Record<TabType, string[]> = {
+      basic: [],
+      kanban: [],
+      commercial: [],
+      temporal: [],
     };
 
-    const principal: string[] = [];
-    const utm: string[] = [];
-    const midia: string[] = [];
-    const produtos: string[] = [];
-
-    fields.forEach((f) => {
-      const id = f.id;
-      const name = f.name?.toLowerCase?.() || "";
-      const idLower = id.toLowerCase();
-
-      // Heurísticas por aba (espelhando as abas do cadastro: Principal, UTM, Mídia, Produtos)
-      if (["name", "email", "phone", "status", "kanban_stage_id", "created_at", "updated_at"].includes(id)) {
-        add(principal, id);
-        return;
+    fields.forEach((field) => {
+      const category = field.category as TabType;
+      if (category && groupedFields[category]) {
+        groupedFields[category].push(field.id);
       }
-      if (idLower.includes("utm") || name.includes("utm") || id === "session_id") {
-        add(utm, id);
-        return;
-      }
-      if (name.includes("tag") || idLower.includes("tag") || idLower.includes("segment") || idLower.includes("midia") || idLower.includes("consultation") || idLower.includes("last_message")) {
-        add(midia, id);
-        return;
-      }
-      if (idLower.includes("product") || idLower.includes("client_type") || idLower.includes("client_size") || idLower.includes("asaas") || (f as any).category === "produtos") {
-        add(produtos, id);
-        return;
-      }
-      // Fallback por categoria vinda do hook
-      const cat = (f as any).category;
-      if (cat === "basic" && principal.length < 12) add(principal, id);
-      else if (cat === "commercial" && midia.length < 12) add(midia, id);
-      else if (cat === "documents" && produtos.length < 12) add(produtos, id);
     });
 
-    // Limitar a 12 sugestões por aba
-    return {
-      principal: principal.slice(0, 12),
-      utm: utm.slice(0, 12),
-      midia: midia.slice(0, 12),
-      produtos: produtos.slice(0, 12),
+    // Limitar a 15 campos por categoria e ordenar por relevância
+    const priorities: Record<string, number> = {
+      // Kanban (mais importantes para filtro de kanban)
+      kanban_stage_id: 100,
+      consultation_stage: 95,
+      tags: 90,
+      responsible_hosts: 85,
+      // Básico
+      name: 80,
+      email: 75,
+      phone: 70,
+      status: 65,
+      // Comercial
+      sales: 60,
+      budget: 55,
+      client_name: 50,
+      client_size: 45,
+      // Temporal
+      last_contact: 40,
+      last_message_time: 35,
+      created_at: 30,
+      contract_date: 25,
     };
+
+    Object.keys(groupedFields).forEach(category => {
+      groupedFields[category as TabType] = groupedFields[category as TabType]
+        .sort((a, b) => (priorities[b] || 0) - (priorities[a] || 0))
+        .slice(0, 15);
+    });
+
+    return groupedFields;
   }, [fields]);
 
   const getLabel = (id: string) => fields.find((f) => f.id === id)?.name || id;
 
-  return (
-    <div className="border rounded-md">
-      <div className="px-3 py-2 border-b text-sm font-medium">Sugestões por aba</div>
-      <div className="p-3">
-        <Tabs defaultValue="principal" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="principal">Principal</TabsTrigger>
-            <TabsTrigger value="utm">UTM</TabsTrigger>
-            <TabsTrigger value="midia">Mídia</TabsTrigger>
-            <TabsTrigger value="produtos">Produtos</TabsTrigger>
-          </TabsList>
+  const currentFields = groups[activeTab];
 
-          {SUGGESTION_ORDER.map((key) => (
-            <TabsContent key={key} value={key} className="mt-3">
-              <div className="flex flex-wrap gap-2">
-                {(groups as any)[key].length === 0 ? (
-                  <div className="text-xs text-muted-foreground">Sem sugestões para esta aba.</div>
-                ) : (
-                  (groups as any)[key].map((fid: string) => (
-                    <Button
-                      key={fid}
-                      size="sm"
-                      variant="secondary"
-                      className="h-7"
-                      onClick={() => onPick(fid)}
-                    >
-                      {getLabel(fid)}
-                    </Button>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+  return (
+    <div className="space-y-3">
+      {/* Tab Navigation */}
+      <div className="flex gap-1 p-1 bg-muted rounded-lg">
+        {TABS.map((tab) => {
+          const IconComponent = ICON_MAP[tab.icon];
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-colors flex items-center justify-center gap-1 ${
+                activeTab === tab.id
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <IconComponent className="h-3 w-3" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab Content */}
+      <div className="min-h-[120px]">
+        <div className="mb-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {TABS.find(t => t.id === activeTab)?.label}
+            </span>
+            <Badge variant="secondary" className="text-xs">
+              {currentFields.length}
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {TABS.find(t => t.id === activeTab)?.description}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {currentFields.length === 0 ? (
+            <div className="text-xs text-muted-foreground w-full text-center py-4">
+              Nenhum campo disponível nesta categoria
+            </div>
+          ) : (
+            currentFields.map((fieldId) => (
+              <Button
+                key={fieldId}
+                size="sm"
+                variant="secondary"
+                className="h-7 text-xs"
+                onClick={() => onPick(fieldId)}
+              >
+                {getLabel(fieldId)}
+              </Button>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 export default FilterSuggestionsTabs;
-
-
