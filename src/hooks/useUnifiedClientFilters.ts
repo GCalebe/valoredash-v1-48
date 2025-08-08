@@ -49,7 +49,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Hook dos filtros avançados
-  const { advancedFilter, updateAdvancedFilter, clearAdvancedFilter, hasAdvancedRules } = useFilterDialog();
+  const { advancedFilter, updateAdvancedFilter, clearAdvancedFilter, hasAdvancedRules } = useFilterDialog('clients');
 
   const updateAdvancedFilterWrapper = useCallback((filter: FilterGroup) => {
     updateAdvancedFilter(filter.id, filter);
