@@ -37,16 +37,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
 import { Info, Edit, Trash2, Users, Calendar, Clock, Repeat } from 'lucide-react';
+import AgendasGrid from "../agenda/AgendasGrid";
+import AgendasGridSkeleton from "../agenda/AgendasGridSkeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -604,33 +599,7 @@ const AgendaTab = () => {
       />
 
       {isLoading ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="flex flex-col justify-between bg-background border">
-              <CardHeader className="pb-4">
-                <div className="flex justify-between items-start gap-3">
-                  <div className="flex-1">
-                    <div className="h-6 bg-muted rounded animate-pulse mb-2"></div>
-                    <div className="h-4 bg-muted rounded animate-pulse w-2/3"></div>
-                  </div>
-                  <div className="h-6 w-16 bg-muted rounded animate-pulse"></div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="h-4 bg-muted rounded animate-pulse mb-2"></div>
-                <div className="h-4 bg-muted rounded animate-pulse w-3/4 mb-6"></div>
-                <div className="flex items-center gap-6">
-                  <div className="h-4 bg-muted rounded animate-pulse w-20"></div>
-                  <div className="h-4 bg-muted rounded animate-pulse w-20"></div>
-                </div>
-              </CardContent>
-              <CardFooter className="pt-4 flex justify-end gap-2 bg-muted/30 p-3 mt-4">
-                <div className="h-8 w-8 bg-muted rounded animate-pulse"></div>
-                <div className="h-8 flex-1 bg-muted rounded animate-pulse"></div>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        <AgendasGridSkeleton />
       ) : displayAgendas.length === 0 ? (
         <div className="border-2 border-dashed border-muted rounded-xl p-12 text-center bg-background">
           <p className="text-lg text-muted-foreground">Nenhuma agenda criada ainda.</p>
@@ -645,78 +614,7 @@ const AgendaTab = () => {
           supabaseAgendas={supabaseAgendas}
         />
       ) : (
-        <div className="max-h-[800px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {displayAgendas.map((agenda) => (
-            <Card key={agenda.id} className="flex flex-col justify-between bg-background border hover:shadow-md transition-shadow duration-200">
-              <CardHeader className="pb-4">
-                <div className="flex justify-between items-start gap-3">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl font-bold text-foreground">{agenda.title}</CardTitle>
-                    <CardDescription className="text-base text-muted-foreground mt-1">
-                      {Array.isArray(agenda.host) && agenda.host.length > 0 ? (
-                        <>
-                          {agenda.host.length > 1 ? 
-                            `${agenda.host.length} anfitriões associados` : 
-                            `1 anfitrião associado`
-                          }
-                        </>
-                      ) : (
-                        "Sem anfitriões associados"
-                      )}
-                    </CardDescription>
-                  </div>
-                  <Badge variant="secondary" className="text-sm px-3 py-1 font-medium">{agenda.category}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-base text-muted-foreground leading-relaxed line-clamp-2 h-12">{agenda.description}</p>
-                <div className="space-y-2 mt-6">
-                  <div className="flex items-center gap-6 text-sm font-medium text-foreground">
-                    <span className="flex items-center gap-1.5"><span className="text-muted-foreground">Duração:</span>{agenda.duration} min</span>
-                    <span className="flex items-center gap-1.5"><span className="text-muted-foreground">Intervalo:</span>{agenda.breakTime} min</span>
-                  </div>
-                  <div className="flex items-center gap-6 text-sm font-medium text-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground">Preço:</span>
-                      {(() => {
-                        const supabaseAgenda = supabaseAgendas.find(sa => sa.id === agenda.id);
-                        return supabaseAgenda?.price ? `R$ ${supabaseAgenda.price.toFixed(2)}` : '—';
-                      })()}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground">Máx:</span>
-                      {(() => {
-                        const supabaseAgenda = supabaseAgendas.find(sa => sa.id === agenda.id);
-                        return supabaseAgenda?.max_participants && supabaseAgenda.max_participants > 1 
-                          ? `${supabaseAgenda.max_participants} pessoas` 
-                          : '—';
-                      })()}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="pt-4 flex justify-end gap-2 bg-muted/30 p-3 mt-4">
-                <Button 
-                  variant="destructive" 
-                  size="icon" 
-                  className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-0"
-                  onClick={() => handleDeleteAgenda(agenda.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="default" 
-                  className="flex-1 font-semibold"
-                  onClick={() => handleEditAgenda(agenda)}
-                >
-                  <Edit className="h-4 w-4 mr-2" />Editar Agenda
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-          </div>
-        </div>
+        <AgendasGrid agendas={displayAgendas} supabaseAgendas={supabaseAgendas} onEdit={handleEditAgenda} onDelete={handleDeleteAgenda} />
       )}
       
       {/* Diálogo de confirmação de exclusão */}
