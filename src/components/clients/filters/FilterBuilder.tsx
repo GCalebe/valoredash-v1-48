@@ -3,10 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FieldPicker } from "./FieldPicker";
 import { FilterSuggestionsTabs } from "./FilterSuggestionsTabs";
 import { FilterGroupComponent, FilterGroup } from "./FilterGroup";
-import { Settings, Save, Plus } from "lucide-react";
+import { Settings, Save } from "lucide-react";
 
 interface FilterBuilderProps {
   advancedFilter: FilterGroup;
@@ -30,19 +29,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   return (
     <div className="space-y-4">
       {/* Field Selection */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Plus className="h-4 w-4 text-primary" />
-              Buscar Campo
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <FieldPicker onPick={onAddField} />
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 gap-4">
         <Card className="border-border/50">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
