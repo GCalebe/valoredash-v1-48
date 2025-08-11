@@ -121,8 +121,8 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="top" className="p-0 h-[80vh] max-h-[90vh] overflow-hidden" aria-label="Painel de filtros">
-        <div className="mx-auto w-full max-w-none h-full bg-background">
+      <SheetContent side="top" className="p-0 h-[90vh] overflow-hidden" aria-label="Painel de filtros">
+        <div className="mx-auto w-full max-w-7xl h-full bg-background">
           {/* Top bar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-b bg-muted/30 gap-3">
             <div className="flex items-center gap-3 flex-1">
