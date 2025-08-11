@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Paperclip, X } from 'lucide-react';
-import { LocalAgenda, FormField } from '../AgendaTab';
+import { FormField } from '../AgendaTab';
+import { LocalAgenda } from '../../agenda/types';
 
 interface ReminderType {
   id: number;

@@ -171,7 +171,7 @@ const ClientsDashboard = () => {
         setNewContact,
         handleAddContact,
         viewMode,
-        setViewMode,
+        setViewMode: (v) => setViewMode(v === "kanban" ? "kanban" : "table"),
         isCompactView,
         setIsCompactView,
         refreshing,

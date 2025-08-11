@@ -17,7 +17,8 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { Host } from '@/hooks/useHosts';
-import { LocalAgenda, tooltipTexts, FormField } from '../AgendaTab';
+import { tooltipTexts, FormField } from '../AgendaTab';
+import { LocalAgenda } from '../../agenda/types';
 
 interface Step1BasicInfoProps {
   currentAgenda: Omit<LocalAgenda, 'id'>;

@@ -43,7 +43,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, billingPeriod, currentPlanId,
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
           <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">IAs incluídas:</p>
           <div className="flex flex-wrap gap-2">
-            {plan.aiProducts.slice(0, 5).map((aiId) => {
+            {plan.ai_products.slice(0, 5).map((aiId) => {
               const ai = displayAIProducts.find((p) => p.id === aiId);
               return (
                 <Badge key={aiId} variant="outline" className="text-xs">
@@ -51,8 +51,8 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, billingPeriod, currentPlanId,
                 </Badge>
               );
             })}
-            {plan.aiProducts.length > 5 && (
-              <Badge variant="outline" className="text-xs">+{plan.aiProducts.length - 5} mais</Badge>
+            {plan.ai_products.length > 5 && (
+              <Badge variant="outline" className="text-xs">+{plan.ai_products.length - 5} mais</Badge>
             )}
           </div>
         </div>

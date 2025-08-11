@@ -1,5 +1,5 @@
 import React from 'react';
-import { LocalAgenda } from '../AgendaTab';
+import { LocalAgenda } from '../../agenda/types';
 
 interface Step4ServiceTypesProps {
   currentAgenda: Omit<LocalAgenda, 'id'>;

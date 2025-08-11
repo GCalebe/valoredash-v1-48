@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { LocalAgenda, categoryDetails } from "../tabs/AgendaTab";
+import { categoryDetails } from "../tabs/AgendaTab";
+import { LocalAgenda } from "./types";
 import { Agenda } from "@/hooks/useAgendas";
 import {
   Accordion,

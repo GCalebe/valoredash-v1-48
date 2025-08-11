@@ -10,7 +10,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { LocalAgenda, tooltipTexts, InfoTooltip, FormField } from '../AgendaTab';
+import { tooltipTexts, InfoTooltip, FormField } from '../AgendaTab';
+import { LocalAgenda } from '../../agenda/types';
 
 interface Step3AvailabilitySettingsProps {
   currentAgenda: Omit<LocalAgenda, 'id'>;

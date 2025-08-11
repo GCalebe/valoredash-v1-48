@@ -150,7 +150,7 @@ export const KnowledgeBaseSearch: React.FC<KnowledgeBaseSearchProps> = ({
     setSearchTerm('');
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || selectedContentTypes.length > 0 || selectedDifficulty || searchTerm;
+  const hasActiveFilters = selectedCategories.length > 0 || selectedContentTypes.length > 0 || !!selectedDifficulty || !!searchTerm;
 
   return (
     <div className="space-y-6">

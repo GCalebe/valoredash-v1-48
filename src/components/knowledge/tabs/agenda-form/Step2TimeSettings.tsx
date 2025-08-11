@@ -7,7 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { LocalAgenda, tooltipTexts, FormField } from '../AgendaTab';
+import { tooltipTexts, FormField } from '../AgendaTab';
+import { LocalAgenda } from '../../agenda/types';
 
 interface Step2TimeSettingsProps {
   currentAgenda: Omit<LocalAgenda, 'id'>;

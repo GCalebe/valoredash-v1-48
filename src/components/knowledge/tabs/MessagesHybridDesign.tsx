@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MessageSquare, Play, ArrowRight, Clock, CheckCircle, Target } from 'lucide-react';
 import { AIMessage, SchedulingStage } from '@/components/knowledge/messages/types';
+import StageTimeline from '@/components/knowledge/messages/StageTimeline';
+import MessageEditDialog from '@/components/knowledge/messages/MessageEditDialog';
 
 // tipos movidos para messages/types
 
