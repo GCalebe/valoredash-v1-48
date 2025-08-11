@@ -47,6 +47,14 @@ export const fixedClientProperties = [
     options: ["Active", "Inactive", "Ganhos", "Perdidos", "Em Andamento", "Qualificado", "Não Qualificado"]
   },
 
+  // === CATEGORIA: TAREFAS (UI) ===
+  // Campo auxiliar apenas para UI de filtros (não mapeado no banco diretamente)
+  { id: "tasks_status", name: "Tarefas", type: "select", dbField: "__ui_tasks_status__", category: "kanban", options: [
+    "Sem tarefa",
+    "Atrasadas",
+    "Concluídas",
+  ]},
+
   // === CATEGORIA: TEMPORAL ===
   { id: "last_contact", name: "Último Contato", type: "date", dbField: "last_contact", category: "temporal" },
   { id: "last_message_time", name: "Última Mensagem", type: "date", dbField: "last_message_time", category: "temporal" },

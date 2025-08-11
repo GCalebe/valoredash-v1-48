@@ -15,6 +15,8 @@ export interface UnifiedClientFilters {
   searchTerm: string;
   debouncedSearchTerm: string;
   setSearchTerm: (term: string) => void;
+  selectedTags?: string[];
+  setSelectedTags?: (tags: string[]) => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
   segmentFilter: string;
@@ -47,6 +49,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   const [segmentFilter, setSegmentFilter] = useState("all");
   const [lastContactFilter, setLastContactFilter] = useState("all");
   const [customFieldFilters, setCustomFieldFilters] = useState<CustomFieldFilter[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Hook dos filtros avançados
@@ -88,18 +91,30 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   useEffect(() => {
     const handleApply = (e: any) => {
       const detail = e?.detail;
-      if (detail && detail.id && Array.isArray(detail.rules)) {
+      if (detail?.id && Array.isArray(detail?.rules)) {
         updateAdvancedFilter(detail.id, detail);
       }
     };
     const handleClear = () => {
       clearAdvancedFilter();
     };
+    const handleQuickSearch = (e: any) => {
+      const value = e?.detail ?? "";
+      setSearchTerm(String(value));
+    };
+    const handleQuickTags = (e: any) => {
+      const tags = Array.isArray(e?.detail) ? (e?.detail as string[]) : [];
+      setSelectedTags(tags);
+    };
     window.addEventListener('clients-apply-advanced-filter', handleApply as any);
     window.addEventListener('clients-clear-advanced-filter', handleClear as any);
+    window.addEventListener('clients-quick-search-change', handleQuickSearch as any);
+    window.addEventListener('clients-quick-tags-change', handleQuickTags as any);
     return () => {
       window.removeEventListener('clients-apply-advanced-filter', handleApply as any);
       window.removeEventListener('clients-clear-advanced-filter', handleClear as any);
+      window.removeEventListener('clients-quick-search-change', handleQuickSearch as any);
+      window.removeEventListener('clients-quick-tags-change', handleQuickTags as any);
     };
   }, [updateAdvancedFilter, clearAdvancedFilter]);
 
@@ -110,6 +125,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
       segmentFilter !== "all" ||
       lastContactFilter !== "all" ||
       searchTerm !== "" ||
+      selectedTags.length > 0 ||
       customFieldFilters.length > 0 ||
       hasAdvancedRules,
     [
@@ -117,6 +133,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
       segmentFilter,
       lastContactFilter,
       searchTerm,
+      selectedTags,
       customFieldFilters,
       hasAdvancedRules,
     ],
@@ -174,6 +191,11 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
       filters.advancedFilters = advancedFilter;
     }
 
+    // Tags rápidas
+    if (selectedTags.length > 0) {
+      filters.tags = selectedTags;
+    }
+
     return filters;
   }, [
     debouncedSearchTerm,
@@ -182,6 +204,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
     hasAdvancedRules,
     advancedFilter,
     responsibleHostsMap,
+    selectedTags,
   ]);
 
   return {
@@ -189,6 +212,8 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
     searchTerm,
     debouncedSearchTerm,
     setSearchTerm,
+    selectedTags,
+    setSelectedTags,
     statusFilter,
     setStatusFilter,
     segmentFilter,
