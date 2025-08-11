@@ -222,38 +222,49 @@ export class AdvancedFiltersService {
     const dbField = (property as any).dbField || rule.field;
     const value = rule.value;
 
-    switch (rule.operator) {
-      case 'equals':
-        return `${dbField}.eq.${value}`;
-      case 'not_equals':
-      case 'notEquals':
-        return `${dbField}.neq.${value}`;
-      case 'contains':
-        return `${dbField}.ilike.%${value}%`;
-      case 'not_contains':
-      case 'notContains':
-        return `not.${dbField}.ilike.%${value}%`;
-      case 'starts_with':
-      case 'startsWith':
-        return `${dbField}.ilike.${value}%`;
-      case 'ends_with':
-      case 'endsWith':
-        return `${dbField}.ilike.%${value}`;
-      case 'greater_than':
-        return `${dbField}.gt.${value}`;
-      case 'less_than':
-        return `${dbField}.lt.${value}`;
-      case 'greater_equal':
-        return `${dbField}.gte.${value}`;
-      case 'less_equal':
-        return `${dbField}.lte.${value}`;
-      case 'is_empty':
-        return `${dbField}.is.null`;
-      case 'is_not_empty':
-        return `not.${dbField}.is.null`;
-      default:
-        return null;
-    }
+      switch (rule.operator) {
+        case 'equals':
+          return `${dbField}.eq.${value}`;
+        case 'in': {
+          const vals = Array.isArray(value) ? value : [value];
+          if (!vals || vals.length === 0) return null;
+          // Group OR conditions for IN
+          return `(${vals.map((v: any) => `${dbField}.eq.${v}`).join(',')})`;
+        }
+        case 'contains_any': {
+          const vals = Array.isArray(value) ? value : [value];
+          if (!vals || vals.length === 0) return null;
+          return `${dbField}.ov.{${vals.join(',')}}`;
+        }
+        case 'not_equals':
+        case 'notEquals':
+          return `${dbField}.neq.${value}`;
+        case 'contains':
+          return `${dbField}.ilike.%${value}%`;
+        case 'not_contains':
+        case 'notContains':
+          return `not.${dbField}.ilike.%${value}%`;
+        case 'starts_with':
+        case 'startsWith':
+          return `${dbField}.ilike.${value}%`;
+        case 'ends_with':
+        case 'endsWith':
+          return `${dbField}.ilike.%${value}`;
+        case 'greater_than':
+          return `${dbField}.gt.${value}`;
+        case 'less_than':
+          return `${dbField}.lt.${value}`;
+        case 'greater_equal':
+          return `${dbField}.gte.${value}`;
+        case 'less_equal':
+          return `${dbField}.lte.${value}`;
+        case 'is_empty':
+          return `${dbField}.is.null`;
+        case 'is_not_empty':
+          return `not.${dbField}.is.null`;
+        default:
+          return null;
+      }
   }
 
   /**

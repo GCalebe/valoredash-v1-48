@@ -25,20 +25,27 @@ const LEFT_MENU = [
 // Estrutura SECTIONS alinhada ao formulário "Novo Cliente"
 const SECTIONS = [
   { title: "PRINCIPAL", key: "principal", fields: [
-    { type: "text", key: "name", placeholder: "Nome do cliente" },
-    { type: "text", key: "email", placeholder: "E-mail" },
-    { type: "text", key: "phone", placeholder: "Telefone" },
+    { key: "name", placeholder: "Nome do cliente" },
+    { key: "email", placeholder: "E-mail" },
+    { key: "phone", placeholder: "Telefone" },
+    { key: "address", placeholder: "Endereço" },
+    { key: "notes", placeholder: "Observações" },
+    { key: "responsible_hosts", placeholder: "Responsáveis" },
+  ] },
+  { title: "CLASSIFICAÇÃO", key: "classificacao", fields: [
+    { key: "consultation_stage", placeholder: "Estágio de consulta" },
+    { key: "tags", placeholder: "Tags" },
   ] },
   { title: "EMPRESA", key: "empresa", fields: [
-    { type: "text", key: "client_name", placeholder: "Nome da empresa" },
-    { type: "text", key: "client_type", placeholder: "Tipo de cliente" },
-    { type: "text", key: "client_size", placeholder: "Porte do cliente" },
+    { key: "client_name", placeholder: "Nome da empresa" },
+    { key: "client_type", placeholder: "Tipo de cliente" },
+    { key: "client_size", placeholder: "Porte do cliente" },
   ] },
   { title: "DOCUMENTOS", key: "documentos", fields: [
-    { type: "text", key: "cpf_cnpj", placeholder: "CPF/CNPJ" },
+    { key: "cpf_cnpj", placeholder: "CPF/CNPJ" },
   ] },
   { title: "FINANCEIRO", key: "financeiro", fields: [
-    { type: "number", key: "budget", placeholder: "Orçamento" },
+    { key: "budget", placeholder: "Orçamento" },
   ] },
 ] as const;
 
@@ -183,8 +190,8 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
       return next;
     });
     setValues((prev) => {
-      const next = { ...prev } as Record<string, string>;
-      section.fields.forEach((f) => { next[f.key] = ""; });
+      const next = { ...prev } as Record<string, any[]>;
+      section.fields.forEach((f) => { next[f.key] = []; });
       return next;
     });
   };
@@ -202,10 +209,16 @@ const applyNow = () => {
   const rules: any[] = [];
   SECTIONS.forEach((section) => {
     section.fields.forEach((f) => {
-      const v = values[f.key];
-      if (activeMap[f.key] && v && String(v).trim() !== "") {
-        const operator = f.type === "number" ? "equals" : f.type === "select" ? "equals" : "contains";
-        rules.push({ id: `rule-${f.key}`, field: f.key, operator, value: v });
+      const raw = values[f.key];
+      const arr: string[] = Array.isArray(raw)
+        ? raw
+        : raw != null && String(raw).trim() !== ""
+          ? [String(raw)]
+          : [];
+      if (activeMap[f.key] && arr.length > 0) {
+        const arrayField = f.key === "tags" || f.key === "responsible_hosts";
+        const operator = arrayField ? "contains_any" : "in";
+        rules.push({ id: `rule-${f.key}`, field: f.key, operator, value: arr });
       }
     });
   });
@@ -218,9 +231,14 @@ const applyNow = () => {
     const chips: { key: string; label: string }[] = [];
     SECTIONS.forEach((section) => {
       section.fields.forEach((f) => {
-        const v = values[f.key];
-        if (activeMap[f.key] && v && String(v).trim() !== "") {
-          chips.push({ key: f.key, label: `${f.placeholder}: ${v}` });
+        const raw = values[f.key];
+        const arr: string[] = Array.isArray(raw)
+          ? raw
+          : raw != null && String(raw).trim() !== ""
+            ? [String(raw)]
+            : [];
+        if (activeMap[f.key] && arr.length > 0) {
+          chips.push({ key: f.key, label: `${f.placeholder}: ${arr.join(', ')}` });
         }
       });
     });
@@ -399,7 +417,27 @@ const applyNow = () => {
                                 key={f.key}
                                 active={!!activeMap[f.key]}
                                 onToggle={(v) => setActiveMap((m) => ({ ...m, [f.key]: v }))}
-                                control={<Input className="h-9" placeholder={f.placeholder} value={values[f.key] || ""} onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))} />}
+                                control={
+                                  <ReactSelect
+                                    isMulti
+                                    options={fieldOptions[f.key] || []}
+                                    value={(Array.isArray(values[f.key]) ? values[f.key] : []).map((val: string) =>
+                                      (fieldOptions[f.key] || []).find((o) => o.value === val) || { label: String(val), value: String(val) }
+                                    )}
+                                    onChange={(opts) =>
+                                      setValues((v) => ({
+                                        ...v,
+                                        [f.key]: (opts as any[] | null)?.map((o) => o.value) || [],
+                                      }))
+                                    }
+                                    placeholder={`Selecione ${f.placeholder.toLowerCase()}...`}
+                                    classNamePrefix="rs"
+                                    menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
+                                    styles={{
+                                      menuPortal: (base) => ({ ...base, zIndex: 60 }),
+                                    }}
+                                  />
+                                }
                               />
                             ))}
                           </div>
