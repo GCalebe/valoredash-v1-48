@@ -160,6 +160,7 @@ export default function Conversations() {
         onTabChange={setActiveTab}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        getStatusColor={getStatusColor}
         messages={messages}
         messagesLoading={messagesLoading}
       />
