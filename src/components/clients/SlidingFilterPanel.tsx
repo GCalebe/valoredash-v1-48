@@ -20,27 +20,25 @@ const LEFT_MENU = [
   { label: "Leads com tarefas atrasadas", editable: true },
 ];
 
-// Estrutura SECTIONS recuperada do histórico anterior
+// Estrutura SECTIONS alinhada ao formulário "Novo Cliente"
 const SECTIONS = [
   { title: "PRINCIPAL", key: "principal", fields: [
     { type: "text", key: "name", placeholder: "Nome do cliente" },
     { type: "text", key: "email", placeholder: "E-mail" },
     { type: "text", key: "phone", placeholder: "Telefone" },
   ] },
-  { title: "UTM", key: "utm", fields: [
-    { type: "text", key: "utm_source", placeholder: "utm_source" },
-    { type: "text", key: "utm_medium", placeholder: "utm_medium" },
-    { type: "text", key: "utm_campaign", placeholder: "utm_campaign" },
+  { title: "EMPRESA", key: "empresa", fields: [
+    { type: "text", key: "client_name", placeholder: "Nome da empresa" },
+    { type: "text", key: "client_type", placeholder: "Tipo de cliente" },
+    { type: "text", key: "client_size", placeholder: "Porte do cliente" },
   ] },
-  { title: "MÍDIA", key: "midia", fields: [
-    { type: "text", key: "ad_platform", placeholder: "Plataforma de mídia" },
-    { type: "text", key: "adset", placeholder: "Conjunto/Grupo de anúncios" },
+  { title: "DOCUMENTOS", key: "documentos", fields: [
+    { type: "text", key: "cpf_cnpj", placeholder: "CPF/CNPJ" },
   ] },
-  { title: "PRODUTOS", key: "produtos", fields: [
-    { type: "text", key: "product", placeholder: "Produto" },
-    { type: "text", key: "budget", placeholder: "Orçamento" },
+  { title: "FINANCEIRO", key: "financeiro", fields: [
+    { type: "number", key: "budget", placeholder: "Orçamento" },
   ] },
-];
+] as const;
 
 function FieldRow({ active, onToggle, control }) {
   return (
@@ -102,19 +100,20 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
     window.dispatchEvent(new CustomEvent('clients-clear-advanced-filter'));
   };
 
-  const applyNow = () => {
-    const rules: any[] = [];
-    SECTIONS.forEach((section) => {
-      section.fields.forEach((f) => {
-        const v = values[f.key];
-        if (activeMap[f.key] && v && String(v).trim() !== "") {
-          rules.push({ id: `rule-${f.key}`, field: f.key, operator: "contains", value: v });
-        }
-      });
+const applyNow = () => {
+  const rules: any[] = [];
+  SECTIONS.forEach((section) => {
+    section.fields.forEach((f) => {
+      const v = values[f.key];
+      if (activeMap[f.key] && v && String(v).trim() !== "") {
+        const operator = f.type === "number" ? "equals" : f.type === "select" ? "equals" : "contains";
+        rules.push({ id: `rule-${f.key}`, field: f.key, operator, value: v });
+      }
     });
-    const group = { id: `group-top-panel`, condition: "AND", rules };
-    window.dispatchEvent(new CustomEvent('clients-apply-advanced-filter', { detail: group }));
-  };
+  });
+  const group = { id: `group-top-panel`, condition: "AND", rules };
+  window.dispatchEvent(new CustomEvent('clients-apply-advanced-filter', { detail: group }));
+};
 
   // Atualiza chips selecionados a cada mudança
   useEffect(() => {
