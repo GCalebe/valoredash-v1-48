@@ -121,30 +121,30 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="top" className="p-0 h-[72vh] max-h-[80vh] overflow-hidden" aria-label="Painel de filtros">
-        <div className="mx-auto w-[70vw] max-w-[1100px] h-full bg-white rounded-b-md shadow">
+      <SheetContent side="top" className="p-0 h-[80vh] max-h-[90vh] overflow-hidden" aria-label="Painel de filtros">
+        <div className="mx-auto w-full max-w-none h-full bg-background">
           {/* Top bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 py-3 border-b bg-gray-50 gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-b bg-muted/30 gap-3">
             <div className="flex items-center gap-3 flex-1">
-              <span className="px-2.5 py-0.5 text-xs font-medium rounded-md bg-green-100 text-green-800 border border-green-200">Leads ativos</span>
-              <span className="h-5 w-px bg-gray-200" />
-              <span className="text-sm text-primary">Pesquisar e filtrar</span>
+              <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20">Filtro 2</span>
+              <span className="h-5 w-px bg-border" />
+              <span className="text-sm text-muted-foreground">Filtros avançados e personalizados</span>
             </div>
-            <div className="sm:w-[320px] w-full">
+            <div className="sm:w-[350px] w-full">
               <Input
                 value={menuSearch}
                 onChange={(e) => setMenuSearch(e.target.value)}
-                placeholder="Buscar filtros…"
-                className="h-9"
+                placeholder="Buscar filtros e campos..."
+                className="h-10"
               />
             </div>
           </div>
 
           {/* Chips selecionados */}
           {selectedChips.length > 0 && (
-            <div className="px-4 py-2 flex flex-wrap gap-2 border-b bg-white">
+            <div className="px-6 py-3 flex flex-wrap gap-2 border-b bg-background">
               {selectedChips.map((chip) => (
-                <span key={chip.key} className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-violet-100 text-violet-800">
+                <span key={chip.key} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                   {chip.label}
                   <button
                     aria-label={`Remover ${chip.label}`}
@@ -152,7 +152,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
                       setActiveMap((m) => ({ ...m, [chip.key]: false }));
                       setValues((v) => ({ ...v, [chip.key]: "" }));
                     }}
-                    className="ml-1 hover:text-violet-900"
+                    className="ml-1 hover:text-primary/70"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -161,39 +161,73 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
             </div>
           )}
 
-          <div className="grid grid-cols-12 gap-4 p-4">
-            {/* Left list */}
-            <Card className="col-span-3 h-[58vh] border-r-0 rounded-r-none">
-              <CardContent className="pt-0">
-                <ul className="space-y-1 text-sm">
-                  {filteredMenu.length === 0 && (
-                    <li className="text-xs text-muted-foreground px-2 py-2">Nenhum filtro encontrado</li>
-                  )}
-                  {filteredMenu.map((item, i) => (
-                    <li
-                      key={item.label}
-                      className="group flex items-center justify-between px-2 py-2 hover:bg-amber-50 rounded focus:outline-none focus:ring-2 focus:ring-violet-400 border-l-2 border-transparent hover:border-amber-300"
-                      aria-label={item.label}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`${i === 0 ? "text-sky-600 font-semibold" : ""}`}>{item.label}</span>
-                      </div>
-                      {item.editable && <button aria-label={`Editar ${item.label}`} className="p-1 rounded hover:bg-muted"><Pencil className="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600" /></button>}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-12 gap-0 h-[calc(100%-140px)]">
+            {/* Left column: Quick Filters */}
+            <div className="col-span-3 border-r bg-muted/20 p-4">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3">Filtros Rápidos</h3>
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground">Status</label>
+                      <select className="w-full h-8 px-2 rounded-md border bg-background text-sm">
+                        <option value="all">Todos</option>
+                        <option value="ativo">Ativo</option>
+                        <option value="pausado">Pausado</option>
+                        <option value="finalizado">Finalizado</option>
+                      </select>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground">Segmento</label>
+                      <select className="w-full h-8 px-2 rounded-md border bg-background text-sm">
+                        <option value="all">Todos</option>
+                        <option value="premium">Premium</option>
+                        <option value="standard">Standard</option>
+                        <option value="basic">Básico</option>
+                      </select>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground">Último Contato</label>
+                      <select className="w-full h-8 px-2 rounded-md border bg-background text-sm">
+                        <option value="all">Todos</option>
+                        <option value="today">Hoje</option>
+                        <option value="week">Esta semana</option>
+                        <option value="month">Este mês</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border-t pt-4">
+                  <h4 className="text-sm font-medium text-foreground mb-3">Filtros Predefinidos</h4>
+                  <div className="space-y-1">
+                    {filteredMenu.map((item, i) => (
+                      <button
+                        key={item.label}
+                        className="group w-full flex items-center justify-between px-3 py-2 text-left hover:bg-accent rounded-md transition-colors border-l-2 border-transparent hover:border-primary/50"
+                        aria-label={item.label}
+                      >
+                        <span className={`text-sm ${i === 0 ? "text-primary font-medium" : "text-foreground"}`}>{item.label}</span>
+                        {item.editable && <Pencil className="h-3 w-3 text-muted-foreground group-hover:text-foreground" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Center: sections and fields */}
-            <Card className="col-span-6 h-[58vh] rounded-none border-x">
-              <CardContent className="pt-3">
-                <ScrollArea className="h-[48vh] pr-2">
-                  <div className="space-y-4">
+            <div className="col-span-6 border-r p-4">
+              <div className="h-full">
+                <h3 className="text-sm font-semibold text-foreground mb-4">Campos Personalizados</h3>
+                <ScrollArea className="h-[calc(100%-2rem)]">
+                  <div className="space-y-6">
                     {SECTIONS.map((section) => (
                       <div key={section.key}>
-                        <div className="border-b pb-2 flex justify-between items-center">
-                          <span className="text-[12px] font-semibold tracking-wider text-muted-foreground">{section.title}</span>
+                        <div className="border-b pb-3 flex justify-between items-center">
+                          <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{section.title}</span>
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => clearSection(section.key)}
@@ -201,20 +235,24 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
                             >
                               Limpar
                             </button>
-                            <ChevronDown
-                              className={`h-4 w-4 transition-transform ${collapsed[section.key] ? "-rotate-90" : "rotate-0"}`}
+                            <button
                               onClick={() => setCollapsed((c) => ({ ...c, [section.key]: !c[section.key] }))}
-                            />
+                              className="p-0.5 hover:bg-accent rounded"
+                            >
+                              <ChevronDown
+                                className={`h-4 w-4 transition-transform ${collapsed[section.key] ? "-rotate-90" : "rotate-0"}`}
+                              />
+                            </button>
                           </div>
                         </div>
                         {!collapsed[section.key] && (
-                          <div className="mt-3 space-y-3">
+                          <div className="mt-4 space-y-3">
                             {section.fields.map((f) => (
                               <FieldRow
                                 key={f.key}
                                 active={!!activeMap[f.key]}
                                 onToggle={(v) => setActiveMap((m) => ({ ...m, [f.key]: v }))}
-                                control={<Input className="h-8 border-gray-300" placeholder={f.placeholder} value={values[f.key] || ""} onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))} />}
+                                control={<Input className="h-9" placeholder={f.placeholder} value={values[f.key] || ""} onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))} />}
                               />
                             ))}
                           </div>
@@ -223,50 +261,52 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
                     ))}
                   </div>
                 </ScrollArea>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Right: tags */}
-            <Card className="col-span-3 h-[58vh] rounded-l-none">
-              <CardHeader className="py-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm tracking-wider text-muted-foreground flex items-center gap-2">
-                    <Tag className="h-4 w-4" /> ETIQUETAS
-                  </CardTitle>
-                  <button className="text-sm text-primary hover:underline">Gerenciar</button>
+            <div className="col-span-3 p-4 bg-muted/10">
+              <div className="h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Tag className="h-4 w-4" /> Etiquetas
+                  </h3>
+                  <button className="text-xs text-primary hover:underline">Gerenciar</button>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                {/* Dropdown pesquisável de tags (somente visual + valores do banco) */}
-                <Input className="h-8 border-gray-300 mb-2" placeholder="Buscar tags…" />
-                <div className="max-h-[40vh] overflow-auto border rounded p-2 space-y-1">
-                  {availableTags.length === 0 && (
-                    <p className="text-sm text-muted-foreground">Nenhuma tag disponível</p>
-                  )}
-                  {availableTags.map((t) => (
-                    <label key={t} className="flex items-center gap-2 text-sm">
-                      <Checkbox
-                        checked={!!activeMap[`tag:${t}`]}
-                        onCheckedChange={(v) => {
-                          const on = Boolean(v);
-                          setActiveMap((m) => ({ ...m, [`tag:${t}`]: on }));
-                          setValues((vals) => ({ ...vals, [`tag:${t}`]: on ? t : "" }));
-                        }}
-                        className="h-4 w-4"
-                      />
-                      <span>{t}</span>
-                    </label>
-                  ))}
+                
+                <div className="space-y-3">
+                  <Input className="h-9" placeholder="Buscar etiquetas..." />
+                  <ScrollArea className="h-[calc(100%-6rem)]">
+                    <div className="space-y-2">
+                      {availableTags.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Nenhuma etiqueta disponível</p>
+                      )}
+                      {availableTags.map((t) => (
+                        <label key={t} className="flex items-center gap-2 text-sm p-2 hover:bg-accent rounded-md transition-colors">
+                          <Checkbox
+                            checked={!!activeMap[`tag:${t}`]}
+                            onCheckedChange={(v) => {
+                              const on = Boolean(v);
+                              setActiveMap((m) => ({ ...m, [`tag:${t}`]: on }));
+                              setValues((vals) => ({ ...vals, [`tag:${t}`]: on ? t : "" }));
+                            }}
+                            className="h-4 w-4"
+                          />
+                          <span className="flex-1">{t}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
           {/* Footer */}
-          <div className="flex items-center justify-between px-4 py-3 border-t bg-white">
-            <span className="text-xs text-muted-foreground">Dica: marque os campos para ativar o filtro</span>
-            <div className="flex items-center gap-2">
-              <button onClick={clearAll} className="px-3 py-1.5 text-sm rounded border hover:bg-muted">Limpar Tudo</button>
-              <button onClick={applyNow} className="px-3 py-1.5 text-sm rounded bg-primary text-primary-foreground hover:bg-primary/90">Aplicar</button>
+          <div className="flex items-center justify-between px-6 py-4 border-t bg-background">
+            <span className="text-xs text-muted-foreground">Dica: marque os campos desejados para ativar o filtro</span>
+            <div className="flex items-center gap-3">
+              <button onClick={clearAll} className="px-4 py-2 text-sm rounded-md border border-border hover:bg-accent transition-colors">Limpar Tudo</button>
+              <button onClick={applyNow} className="px-4 py-2 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">Aplicar Filtros</button>
             </div>
           </div>
         </div>
