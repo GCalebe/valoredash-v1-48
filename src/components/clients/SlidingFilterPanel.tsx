@@ -1,13 +1,14 @@
 import { useMemo, useState, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-// button removido (não usado)
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-// select removido (não usado neste layout)
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tag, ChevronDown, Pencil, X } from "lucide-react";
 import { useFilterableFields } from "@/hooks/useFilterableFields";
+import { useKanbanStagesLocal } from "@/hooks/useKanbanStagesLocal";
 import { useDebounce } from "@/hooks/utils/useDebounce";
 
 // LEFT MENU com ícone de lápis nos filtros pré-configurados
@@ -60,8 +61,15 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
   const [values, setValues] = useState<Record<string, string>>({});
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(Object.fromEntries(SECTIONS.map((s) => [s.key, false])) as Record<string, boolean>);
   const [menuSearch, setMenuSearch] = useState("");
+  
+  // Estados dos filtros rápidos
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [segmentFilter, setSegmentFilter] = useState("all");
+  const [lastContactFilter, setLastContactFilter] = useState("all");
+  
   const debouncedMenuSearch = useDebounce(menuSearch, 250);
-  const { availableTags } = useFilterableFields();
+  const { availableTags, responsibleHosts, loading: hostsLoading } = useFilterableFields();
+  const { stages, loading: kanbanLoading } = useKanbanStagesLocal();
   const [selectedChips, setSelectedChips] = useState<{ key: string; label: string }[]>([]);
 
   const filteredMenu = useMemo(() => {
@@ -88,6 +96,9 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
   const clearAll = () => {
     setActiveMap({});
     setValues({});
+    setStatusFilter("all");
+    setSegmentFilter("all");
+    setLastContactFilter("all");
     window.dispatchEvent(new CustomEvent('clients-clear-advanced-filter'));
   };
 
@@ -167,35 +178,74 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3">Filtros Rápidos</h3>
-                  <div className="space-y-2">
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-muted-foreground">Status</label>
-                      <select className="w-full h-8 px-2 rounded-md border bg-background text-sm">
-                        <option value="all">Todos</option>
-                        <option value="ativo">Ativo</option>
-                        <option value="pausado">Pausado</option>
-                        <option value="finalizado">Finalizado</option>
-                      </select>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="pipeline-filter" className="text-xs font-medium text-muted-foreground">
+                        Pipeline
+                      </Label>
+                      <Select
+                        value={statusFilter}
+                        onValueChange={setStatusFilter}
+                        disabled={kanbanLoading}
+                      >
+                        <SelectTrigger id="pipeline-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todos os estágios" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os estágios</SelectItem>
+                          {stages.map((stage) => (
+                            <SelectItem key={stage.id} value={stage.id}>
+                              {stage.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-muted-foreground">Segmento</label>
-                      <select className="w-full h-8 px-2 rounded-md border bg-background text-sm">
-                        <option value="all">Todos</option>
-                        <option value="premium">Premium</option>
-                        <option value="standard">Standard</option>
-                        <option value="basic">Básico</option>
-                      </select>
+
+                    <div>
+                      <Label htmlFor="host-filter" className="text-xs font-medium text-muted-foreground">
+                        Anfitrião
+                      </Label>
+                      <Select
+                        value={segmentFilter}
+                        onValueChange={setSegmentFilter}
+                        disabled={hostsLoading}
+                      >
+                        <SelectTrigger id="host-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todos os anfitriões" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os anfitriões</SelectItem>
+                          {responsibleHosts.map((host) => (
+                            <SelectItem key={host} value={host}>
+                              {host}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-muted-foreground">Último Contato</label>
-                      <select className="w-full h-8 px-2 rounded-md border bg-background text-sm">
-                        <option value="all">Todos</option>
-                        <option value="today">Hoje</option>
-                        <option value="week">Esta semana</option>
-                        <option value="month">Este mês</option>
-                      </select>
+
+                    <div>
+                      <Label htmlFor="last-contact-filter" className="text-xs font-medium text-muted-foreground">
+                        Último Contato
+                      </Label>
+                      <Select
+                        value={lastContactFilter}
+                        onValueChange={setLastContactFilter}
+                      >
+                        <SelectTrigger id="last-contact-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todos os períodos" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os períodos</SelectItem>
+                          <SelectItem value="today">Hoje</SelectItem>
+                          <SelectItem value="yesterday">Ontem</SelectItem>
+                          <SelectItem value="this-week">Esta semana</SelectItem>
+                          <SelectItem value="last-week">Semana passada</SelectItem>
+                          <SelectItem value="this-month">Este mês</SelectItem>
+                          <SelectItem value="last-month">Mês passado</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
