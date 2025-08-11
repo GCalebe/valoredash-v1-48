@@ -9,16 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { saveAgendaWithRelations } from '../agenda/services/agendaPersistence';
 import { toast } from '@/hooks/use-toast';
 // Dialog UI imports removidos
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import DeleteAgendaDialog from "../agenda/DeleteAgendaDialog";
 import { Label } from '@/components/ui/label';
 import { Info, Users, Calendar, Clock, Repeat } from 'lucide-react';
 import AgendasGrid from "../agenda/AgendasGrid";
@@ -323,21 +314,21 @@ const AgendaTab = () => {
         }
         if (displayAgendas.length === 0) {
           return (
-            <div className="border-2 border-dashed border-muted rounded-xl p-12 text-center bg-background">
-              <p className="text-lg text-muted-foreground">Nenhuma agenda criada ainda.</p>
-              <p className="text-base text-muted-foreground mt-2">Clique em "Criar Nova Agenda" para começar.</p>
-            </div>
+        <div className="border-2 border-dashed border-muted rounded-xl p-12 text-center bg-background">
+          <p className="text-lg text-muted-foreground">Nenhuma agenda criada ainda.</p>
+          <p className="text-base text-muted-foreground mt-2">Clique em "Criar Nova Agenda" para começar.</p>
+        </div>
           );
         }
         if (viewMode === 'hierarchy') {
           return (
-            <AgendaHierarchicalView
-              agendas={displayAgendas}
-              onEdit={handleEditAgenda}
-              onDelete={handleDeleteAgenda}
-              searchTerm={searchTerm}
-              supabaseAgendas={supabaseAgendas}
-            />
+        <AgendaHierarchicalView
+          agendas={displayAgendas}
+          onEdit={handleEditAgenda}
+          onDelete={handleDeleteAgenda}
+          searchTerm={searchTerm}
+          supabaseAgendas={supabaseAgendas}
+        />
           );
         }
         return (
@@ -348,33 +339,9 @@ const AgendaTab = () => {
             onDelete={handleDeleteAgenda}
           />
         );
-      })()}
+                      })()}
       
-      {/* Diálogo de confirmação de exclusão */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. A agenda será permanentemente removida do sistema.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setIsDeleteDialogOpen(false);
-              setAgendaToDelete(null);
-            }}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDeleteAgenda}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteAgendaDialog open={isDeleteDialogOpen} onOpenChange={(open) => { setIsDeleteDialogOpen(open); if (!open) setAgendaToDelete(null); }} onConfirm={confirmDeleteAgenda} />
     </div>
   );
 };
