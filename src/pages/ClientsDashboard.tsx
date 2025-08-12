@@ -10,6 +10,7 @@ import { useCustomFieldsPreloader } from "@/hooks/useCustomFieldsPreloader";
 import ClientsDashboardLayout from "@/components/clients/ClientsDashboardLayout";
 import ClientsTable from "@/components/clients/ClientsTable";
 import KanbanView from "@/components/clients/KanbanView";
+import GanttView from "@/components/clients/GanttView";
 import ClientsModals from "@/components/clients/ClientsModals";
 import EditStageDialog from "@/components/clients/EditStageDialog";
 // Tree views não estão presentes; renderização de tree desativada temporariamente
@@ -20,7 +21,7 @@ const ClientsDashboard = () => {
   const filter = useUnifiedClientFilters();
   const { customFieldFilters } = filter;
 
-  const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
+  const [viewMode, setViewMode] = useState<"table" | "kanban" | "gantt">("kanban");
   const [isCompactView, setIsCompactView] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   
@@ -178,7 +179,7 @@ const ClientsDashboard = () => {
         setNewContact,
         handleAddContact,
         viewMode,
-        setViewMode: (v) => setViewMode(v === "kanban" ? "kanban" : "table"),
+        setViewMode: (v) => setViewMode(v as "table" | "kanban" | "gantt"),
         isCompactView,
         setIsCompactView,
         refreshing,
@@ -215,6 +216,13 @@ const ClientsDashboard = () => {
             isCompact={isCompactView}
             stages={kanbanStages.stages}
             onStageEdit={handleStageEdit}
+          />
+        ) : viewMode === "gantt" ? (
+          <GanttView
+            contacts={contacts}
+            onContactClick={handleContactClick}
+            searchTerm={filter.searchTerm}
+            stages={kanbanStages.stages}
           />
         ) : null}
       </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Grid, List } from "lucide-react";
+import { Grid, List, CalendarRange } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/tooltip";
 
 interface ClientsViewTogglerProps {
-  viewMode: "table" | "kanban";
-  setViewMode: (v: "table" | "kanban") => void;
+  viewMode: "table" | "kanban" | "gantt";
+  setViewMode: (v: "table" | "kanban" | "gantt") => void;
 }
 
 const ClientsViewToggler: React.FC<ClientsViewTogglerProps> = ({
@@ -20,6 +20,7 @@ const ClientsViewToggler: React.FC<ClientsViewTogglerProps> = ({
   const views = [
     { id: "table", icon: List, label: "Lista" },
     { id: "kanban", icon: Grid, label: "Kanban" },
+    { id: "gantt", icon: CalendarRange, label: "Gantt" },
   ];
 
   return (
@@ -37,7 +38,7 @@ const ClientsViewToggler: React.FC<ClientsViewTogglerProps> = ({
                 <Button
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setViewMode(view.id as "table" | "kanban")}
+                  onClick={() => setViewMode(view.id as "table" | "kanban" | "gantt")}
                   className={`${isFirst ? "rounded-r-none" : isLast ? "rounded-l-none" : "rounded-none"} ${
                     isActive ? "bg-white text-blue-700" : "text-white hover:bg-white/20 border-0"
                   }`}
