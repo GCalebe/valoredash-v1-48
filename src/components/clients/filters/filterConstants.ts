@@ -4,6 +4,8 @@ export const fixedClientProperties = [
   { id: "name", name: "Nome", type: "text", dbField: "name", category: "basic" },
   { id: "email", name: "Email", type: "text", dbField: "email", category: "basic" },
   { id: "phone", name: "Telefone", type: "text", dbField: "phone", category: "basic" },
+  { id: "address", name: "Endereço", type: "text", dbField: "address", category: "basic" },
+  { id: "notes", name: "Observações", type: "text", dbField: "notes", category: "basic" },
   { id: "created_at", name: "Data de Criação", type: "date", dbField: "created_at", category: "basic" },
   { id: "updated_at", name: "Última Atualização", type: "date", dbField: "updated_at", category: "basic" },
 
