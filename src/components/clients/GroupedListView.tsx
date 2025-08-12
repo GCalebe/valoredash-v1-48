@@ -27,7 +27,7 @@ const GroupedListView: React.FC<GroupedListViewProps> = ({
   const visibleColumns = useMemo(
     () =>
       columnConfig
-        .filter((c) => c.isVisible)
+        .filter((c) => c.isVisible && c.id !== "kanbanStage") // ocultar coluna redundante no agrupado
         .sort((a, b) => a.priority - b.priority)
         .map((c) => c.id),
     [columnConfig]

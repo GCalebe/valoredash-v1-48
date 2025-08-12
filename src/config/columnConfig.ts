@@ -49,7 +49,7 @@ export const defaultColumnConfig: ColumnConfig[] = [
   {
     id: "consultationStage",
     label: "Estágio",
-    accessor: "consultationStage",
+    accessor: (contact) => contact.consultationStage ?? (contact as any).consultation_stage ?? "Nova consulta",
     isVisible: true,
     priority: 5,
     minWidth: 120,

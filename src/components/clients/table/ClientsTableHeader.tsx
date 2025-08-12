@@ -29,14 +29,14 @@ export const ClientsTableHeader: React.FC<ClientsTableHeaderProps> = ({
         )}
         {visibleColumns.includes("status") && <TableHead>Status</TableHead>}
         {visibleColumns.includes("kanbanStage") && (
-          <TableHead>Estágio</TableHead>
+          <TableHead>Segmento</TableHead>
         )}
         {visibleColumns.includes("lastMessage") && (
           <TableHead>Última Mensagem</TableHead>
         )}
         {visibleColumns.includes("tags") && <TableHead>Tags</TableHead>}
         {visibleColumns.includes("consultationStage") && (
-          <TableHead>Consulta</TableHead>
+          <TableHead>Estágio</TableHead>
         )}
         {visibleColumns.includes("budget") && (
           <TableHead>Orçamento</TableHead>
