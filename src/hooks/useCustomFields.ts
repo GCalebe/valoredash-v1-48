@@ -12,7 +12,7 @@ export function useCustomFields() {
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchCustomFields = useCallback(async () => {
+  const fetchCustomFields = useCallback(async (): Promise<CustomField[]> => {
     try {
       setLoading(true);
 
@@ -30,11 +30,9 @@ export function useCustomFields() {
           description: "Não foi possível carregar os campos personalizados.",
           variant: "destructive",
         });
-        return;
+        return [];
       }
 
-      // Transform the data to match our CustomField interface
-      // Ensure data is an array before calling map
       const transformedFields: CustomField[] = (data || []).map((field) => ({
         id: field.id,
         field_name: field.field_name,
@@ -58,6 +56,7 @@ export function useCustomFields() {
       }));
 
       setCustomFields(transformedFields);
+      return transformedFields;
     } catch (error) {
       console.error("Error fetching custom fields:", error);
       toast({
@@ -65,6 +64,7 @@ export function useCustomFields() {
         description: "Não foi possível carregar os campos personalizados.",
         variant: "destructive",
       });
+      return [];
     } finally {
       setLoading(false);
     }
@@ -262,21 +262,22 @@ export function useCustomFields() {
     clientId: string,
   ): Promise<CustomFieldWithValue[]> => {
     try {
-      const [fields, values] = await Promise.all([
-        customFields.length > 0
-          ? Promise.resolve(customFields)
-          : fetchCustomFields().then(() => customFields),
-        fetchClientCustomValues(clientId),
-      ]);
+      // Busca valores e, em paralelo, garante a lista de campos (usando retorno direto quando o estado ainda está vazio)
+      const valuesPromise = fetchClientCustomValues(clientId);
+      let fields: CustomField[] = customFields;
+      if (fields.length === 0) {
+        fields = await fetchCustomFields();
+      }
+      const values = await valuesPromise;
 
-      const valuesMap = new Map();
+      const valuesMap = new Map<string, any>();
       values.forEach((value) => {
         valuesMap.set(value.field_id, value.field_value);
       });
 
       return fields.map((field) => ({
         ...field,
-        value: valuesMap.get(field.id) || null,
+        value: valuesMap.get(field.id) ?? null,
       }));
     } catch (error) {
       console.error("Error getting custom fields with values:", error);

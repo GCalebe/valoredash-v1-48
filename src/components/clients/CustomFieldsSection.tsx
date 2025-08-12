@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, Plus } from "lucide-react";
 import { useOptimizedCustomFields } from "@/hooks/useOptimizedCustomFields";
 
 import CustomFieldRenderer from "./CustomFieldRenderer";
 import { CustomField, CustomFieldWithValue } from "@/types/customFields";
 import { Loader2 } from "lucide-react";
+import CreateCustomFieldDialog from "./CreateCustomFieldDialog";
 
 interface CustomFieldsSectionProps {
   contactId: string | null;
@@ -24,11 +25,15 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
     retry,
   } = useOptimizedCustomFields();
   
-  
   const [customValues, setCustomValues] = useState<{ [fieldId: string]: string | string[] | null }>({});
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-
-  // Carregar valores dos campos personalizados para o cliente específico - apenas quando contactId mudar
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    if (contactId) {
+      loadCustomFieldsForContact(contactId);
+    }
+  };
   useEffect(() => {
     if (contactId) {
       loadCustomFieldsForContact(contactId);
@@ -138,8 +143,11 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
   if (visibleFields.length === 0) {
     return (
       <Card>
-        <CardHeader>
+        <CardHeader className="flex items-center justify-between">
           <CardTitle className="text-sm">Campos Personalizados</CardTitle>
+          <Button size="sm" variant="outline" onClick={() => setIsDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-1" /> Campo
+          </Button>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -149,11 +157,19 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
               <Skeleton className="h-9 w-full" />
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              Nenhum campo personalizado configurado para este cliente.
-            </p>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Nenhum campo personalizado configurado para este cliente.
+              </p>
+              <div className="mt-3">
+                <Button size="sm" onClick={() => setIsDialogOpen(true)}>
+                  <Plus className="w-4 h-4 mr-1" /> Adicionar Campo
+                </Button>
+              </div>
+            </div>
           )}
         </CardContent>
+        <CreateCustomFieldDialog isOpen={isDialogOpen} onClose={handleDialogClose} />
       </Card>
     );
   }
@@ -161,12 +177,17 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm flex items-center gap-2">
-          Campos Personalizados
-          {isLoading && customFieldsWithValues.length === 0 && (
-            <div className="w-3 h-3 border border-muted-foreground rounded-full border-t-transparent animate-spin opacity-60" />
-          )}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm flex items-center gap-2">
+            Campos Personalizados
+            {isLoading && customFieldsWithValues.length === 0 && (
+              <div className="w-3 h-3 border border-muted-foreground rounded-full border-t-transparent animate-spin opacity-60" />
+            )}
+          </CardTitle>
+          <Button size="sm" variant="outline" onClick={() => setIsDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-1" /> Campo
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -191,6 +212,7 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
           ))}
         </div>
       </CardContent>
+      <CreateCustomFieldDialog isOpen={isDialogOpen} onClose={handleDialogClose} />
     </Card>
   );
 };
