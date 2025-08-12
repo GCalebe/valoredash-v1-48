@@ -79,6 +79,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
   const { stages, loading: kanbanLoading } = useKanbanStagesLocal();
   const [selectedChips, setSelectedChips] = useState<{ key: string; label: string }[]>([]);
   const [fieldOptions, setFieldOptions] = useState<Record<string, { label: string; value: string }[]>>({});
+  const customFieldDefs = useMemo(() => (fields || []).filter((f: any) => f.isCustom), [fields]);
 
   useEffect(() => {
     let mounted = true;
@@ -384,9 +385,9 @@ const applyNow = () => {
             </div>
 
             {/* Center: sections and fields */}
-            <div className="col-span-6 border-r p-4">
+            <div className="col-span-6 border-r p-4 overflow-y-auto">
               <div className="h-full">
-                <h3 className="text-sm font-semibold text-foreground mb-4">Campos Personalizados</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-4">Propriedades do Lead</h3>
                 <ScrollArea className="h-[calc(100%-2rem)]">
                   <div className="space-y-6">
                     {SECTIONS.map((section) => (
@@ -424,12 +425,13 @@ const applyNow = () => {
                                     value={(Array.isArray(values[f.key]) ? values[f.key] : []).map((val: string) =>
                                       (fieldOptions[f.key] || []).find((o) => o.value === val) || { label: String(val), value: String(val) }
                                     )}
-                                    onChange={(opts) =>
+                                    onChange={(opts) => {
+                                      setActiveMap((m) => ({ ...m, [f.key]: true }));
                                       setValues((v) => ({
                                         ...v,
                                         [f.key]: (opts as any[] | null)?.map((o) => o.value) || [],
-                                      }))
-                                    }
+                                      }));
+                                    }}
                                     placeholder={`Selecione ${f.placeholder.toLowerCase()}...`}
                                     classNamePrefix="rs"
                                     menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
