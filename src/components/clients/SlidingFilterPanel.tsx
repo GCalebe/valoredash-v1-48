@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Removed unused Card imports
 import { Tag, ChevronDown, Pencil, X } from "lucide-react";
 import { useFilterableFields } from "@/hooks/useFilterableFields";
 import { useKanbanStagesLocal } from "@/hooks/useKanbanStagesLocal";
@@ -22,8 +22,15 @@ const LEFT_MENU = [
   { label: "Leads com tarefas atrasadas", editable: true },
 ];
 
-// Estrutura SECTIONS alinhada ao formulário "Novo Cliente"
-const SECTIONS = [
+// Estrutura de seção e campos
+type SectionDef = {
+  title: string;
+  key: string;
+  fields: { key: string; placeholder: string }[];
+};
+
+// SEÇÕES ESTÁTICAS alinhadas ao formulário "Novo Cliente"
+const STATIC_SECTIONS: SectionDef[] = [
   { title: "PRINCIPAL", key: "principal", fields: [
     { key: "name", placeholder: "Nome do cliente" },
     { key: "email", placeholder: "E-mail" },
@@ -66,7 +73,7 @@ interface SlidingFilterPanelProps {
 export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<SlidingFilterPanelProps>) {
   const [activeMap, setActiveMap] = useState<Record<string, boolean>>({});
   const [values, setValues] = useState<Record<string, any>>({});
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(Object.fromEntries(SECTIONS.map((s) => [s.key, false])) as Record<string, boolean>);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [menuSearch, setMenuSearch] = useState("");
   
   // Estados dos filtros rápidos
@@ -81,11 +88,38 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
   const [fieldOptions, setFieldOptions] = useState<Record<string, { label: string; value: string }[]>>({});
   const customFieldDefs = useMemo(() => (fields || []).filter((f: any) => f.isCustom), [fields]);
 
+  // Seção dinâmica de Campos Personalizados (abaixo de FINANCEIRO)
+  const customSection: SectionDef | null = useMemo(() => {
+    if (!customFieldDefs || customFieldDefs.length === 0) return null;
+    return {
+      title: "CAMPOS PERSONALIZADOS",
+      key: "campos_personalizados",
+      fields: customFieldDefs.map((f: any) => ({ key: f.id, placeholder: f.name })),
+    };
+  }, [customFieldDefs]);
+
+  const allSections: SectionDef[] = useMemo(() => {
+    return customSection ? [...STATIC_SECTIONS, customSection] : [...STATIC_SECTIONS];
+  }, [customSection]);
+
+  // Garantir estado de colapso para todas as seções, incluindo a dinâmica
+  useEffect(() => {
+    setCollapsed((prev) => {
+      const next: Record<string, boolean> = { ...prev };
+      allSections.forEach((s) => {
+        if (typeof next[s.key] === "undefined") next[s.key] = false;
+      });
+      return next;
+    });
+  }, [allSections]);
+
   useEffect(() => {
     let mounted = true;
     async function loadOptions() {
       try {
         const optionsMap: Record<string, { label: string; value: string }[]> = {};
+        const { data: authData } = await supabase.auth.getUser();
+        const currentUserId = authData?.user?.id || null;
 
         // Precompute from known sources
         fields.forEach((f: any) => {
@@ -125,11 +159,24 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
                 });
                 optionsMap[f.id] = Array.from(set).sort().map((v) => ({ label: v, value: v }));
               } else if (f.dbField) {
-                const { data } = await supabase
+                let query = supabase
                   .from('contacts')
                   .select(f.dbField as string)
                   .not(f.dbField as string, 'is', null)
                   .limit(1000);
+                if (currentUserId) {
+                  query = query.eq('user_id', currentUserId);
+                }
+                let { data } = await query;
+                // Fallback sem filtro de usuário se não houver resultados
+                if (!data || data.length === 0) {
+                  const { data: fallback } = await supabase
+                    .from('contacts')
+                    .select(f.dbField as string)
+                    .not(f.dbField as string, 'is', null)
+                    .limit(1000);
+                  data = fallback || [];
+                }
                 const set = new Set<string>();
                 (data || []).forEach((row: any) => {
                   const v = row[f.dbField];
@@ -183,7 +230,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
   }, [fields]);
 
   const clearSection = (sectionKey: string) => {
-    const section = SECTIONS.find((s) => s.key === sectionKey);
+    const section = allSections.find((s) => s.key === sectionKey);
     if (!section) return;
     setActiveMap((prev) => {
       const next = { ...prev } as Record<string, boolean>;
@@ -208,7 +255,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
 
 const applyNow = () => {
   const rules: any[] = [];
-  SECTIONS.forEach((section) => {
+  allSections.forEach((section) => {
     section.fields.forEach((f) => {
       const raw = values[f.key];
       const arr: string[] = Array.isArray(raw)
@@ -227,10 +274,10 @@ const applyNow = () => {
   window.dispatchEvent(new CustomEvent('clients-apply-advanced-filter', { detail: group }));
 };
 
-  // Atualiza chips selecionados a cada mudança
+  // Atualiza chips selecionados a cada mudança (inclui campos personalizados e tags)
   useEffect(() => {
     const chips: { key: string; label: string }[] = [];
-    SECTIONS.forEach((section) => {
+    allSections.forEach((section) => {
       section.fields.forEach((f) => {
         const raw = values[f.key];
         const arr: string[] = Array.isArray(raw)
@@ -243,8 +290,17 @@ const applyNow = () => {
         }
       });
     });
+    // Incluir chips de etiquetas marcadas na coluna direita
+    Object.keys(activeMap)
+      .filter((k) => k.startsWith('tag:') && activeMap[k])
+      .forEach((k) => {
+        const tagVal = values[k];
+        if (tagVal && String(tagVal).trim()) {
+          chips.push({ key: k, label: `Tag: ${String(tagVal)}` });
+        }
+      });
     setSelectedChips(chips);
-  }, [activeMap, values]);
+  }, [activeMap, values, allSections]);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -277,7 +333,7 @@ const applyNow = () => {
                     aria-label={`Remover ${chip.label}`}
                     onClick={() => {
                       setActiveMap((m) => ({ ...m, [chip.key]: false }));
-                      setValues((v) => ({ ...v, [chip.key]: "" }));
+                      setValues((v) => ({ ...v, [chip.key]: Array.isArray(v[chip.key]) ? [] : "" }));
                     }}
                     className="ml-1 hover:text-primary/70"
                   >
@@ -390,7 +446,7 @@ const applyNow = () => {
                 <h3 className="text-sm font-semibold text-foreground mb-4">Propriedades do Lead</h3>
                 <ScrollArea className="h-[calc(100%-2rem)]">
                   <div className="space-y-6">
-                    {SECTIONS.map((section) => (
+                    {allSections.map((section) => (
                       <div key={section.key}>
                         <div className="border-b pb-3 flex justify-between items-center">
                           <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{section.title}</span>
@@ -421,6 +477,11 @@ const applyNow = () => {
                                 control={
                                   <ReactSelect
                                     isMulti
+                                    closeMenuOnSelect={false}
+                                    hideSelectedOptions={false}
+                                    menuPosition="fixed"
+                                    menuShouldBlockScroll={true}
+                                    isSearchable
                                     options={fieldOptions[f.key] || []}
                                     value={(Array.isArray(values[f.key]) ? values[f.key] : []).map((val: string) =>
                                       (fieldOptions[f.key] || []).find((o) => o.value === val) || { label: String(val), value: String(val) }
@@ -436,7 +497,7 @@ const applyNow = () => {
                                     classNamePrefix="rs"
                                     menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
                                     styles={{
-                                      menuPortal: (base) => ({ ...base, zIndex: 80 }),
+                                      menuPortal: (base) => ({ ...base, zIndex: 2147483647 }),
                                       control: (base, state) => ({
                                         ...base,
                                         backgroundColor: 'hsl(var(--background))',
@@ -468,10 +529,12 @@ const applyNow = () => {
                                         color: 'hsl(var(--popover-foreground))',
                                         border: '1px solid hsl(var(--border))',
                                         boxShadow: 'var(--shadow-elegant, 0 10px 30px -10px rgb(0 0 0 / 0.3))',
+                                        pointerEvents: 'auto',
                                       }),
                                       menuList: (base) => ({
                                         ...base,
                                         backgroundColor: 'hsl(var(--popover))',
+                                        pointerEvents: 'auto',
                                       }),
                                       option: (base, state) => ({
                                         ...base,
@@ -484,6 +547,7 @@ const applyNow = () => {
                                           ? 'hsl(var(--accent-foreground))'
                                           : 'hsl(var(--popover-foreground))',
                                         cursor: 'pointer',
+                                        pointerEvents: 'auto',
                                       }),
                                       multiValue: (base) => ({
                                         ...base,
@@ -505,7 +569,7 @@ const applyNow = () => {
                                       clearIndicator: (base) => ({ ...base, color: 'hsl(var(--muted-foreground))' }),
                                       dropdownIndicator: (base) => ({ ...base, color: 'hsl(var(--muted-foreground))' }),
                                       indicatorSeparator: (base) => ({ ...base, backgroundColor: 'hsl(var(--border))' }),
-                                      container: (base) => ({ ...base, width: '100%' }),
+                                      container: (base) => ({ ...base, width: '100%', zIndex: 10 }),
                                     }}
                                   />
                                 }
