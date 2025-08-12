@@ -434,7 +434,76 @@ const applyNow = () => {
                                     classNamePrefix="rs"
                                     menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
                                     styles={{
-                                      menuPortal: (base) => ({ ...base, zIndex: 60 }),
+                                      menuPortal: (base) => ({ ...base, zIndex: 80 }),
+                                      control: (base, state) => ({
+                                        ...base,
+                                        backgroundColor: 'hsl(var(--background))',
+                                        borderColor: state.isFocused ? 'hsl(var(--ring))' : 'hsl(var(--border))',
+                                        boxShadow: state.isFocused ? '0 0 0 2px hsl(var(--ring) / 0.5)' : 'none',
+                                        minHeight: 36,
+                                        cursor: 'text',
+                                      }),
+                                      valueContainer: (base) => ({
+                                        ...base,
+                                        padding: '2px 6px',
+                                        gap: 4,
+                                      }),
+                                      input: (base) => ({
+                                        ...base,
+                                        color: 'hsl(var(--foreground))',
+                                      }),
+                                      placeholder: (base) => ({
+                                        ...base,
+                                        color: 'hsl(var(--muted-foreground))',
+                                      }),
+                                      singleValue: (base) => ({
+                                        ...base,
+                                        color: 'hsl(var(--foreground))',
+                                      }),
+                                      menu: (base) => ({
+                                        ...base,
+                                        backgroundColor: 'hsl(var(--popover))',
+                                        color: 'hsl(var(--popover-foreground))',
+                                        border: '1px solid hsl(var(--border))',
+                                        boxShadow: 'var(--shadow-elegant, 0 10px 30px -10px rgb(0 0 0 / 0.3))',
+                                      }),
+                                      menuList: (base) => ({
+                                        ...base,
+                                        backgroundColor: 'hsl(var(--popover))',
+                                      }),
+                                      option: (base, state) => ({
+                                        ...base,
+                                        backgroundColor: state.isSelected
+                                          ? 'hsl(var(--accent))'
+                                          : state.isFocused
+                                          ? 'hsl(var(--accent) / 0.3)'
+                                          : 'transparent',
+                                        color: state.isSelected
+                                          ? 'hsl(var(--accent-foreground))'
+                                          : 'hsl(var(--popover-foreground))',
+                                        cursor: 'pointer',
+                                      }),
+                                      multiValue: (base) => ({
+                                        ...base,
+                                        backgroundColor: 'hsl(var(--accent) / 0.3)',
+                                        border: '1px solid hsl(var(--accent) / 0.4)',
+                                      }),
+                                      multiValueLabel: (base) => ({
+                                        ...base,
+                                        color: 'hsl(var(--accent-foreground))',
+                                      }),
+                                      multiValueRemove: (base) => ({
+                                        ...base,
+                                        color: 'hsl(var(--accent-foreground))',
+                                        ':hover': {
+                                          backgroundColor: 'hsl(var(--accent) / 0.5)',
+                                          color: 'hsl(var(--accent-foreground))',
+                                        },
+                                      }),
+                                      clearIndicator: (base) => ({ ...base, color: 'hsl(var(--muted-foreground))' }),
+                                      dropdownIndicator: (base) => ({ ...base, color: 'hsl(var(--muted-foreground))' }),
+                                      indicatorSeparator: (base) => ({ ...base, backgroundColor: 'hsl(var(--border))' }),
+                                      container: (base) => ({ ...base, width: '100%' }),
                                     }}
                                   />
                                 }
