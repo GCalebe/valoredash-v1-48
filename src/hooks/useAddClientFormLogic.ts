@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 
 export const useAddClientFormLogic = () => {
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
-  const [activeTab, setActiveTab] = useState("basico");
+  const [activeTab, setActiveTab] = useState("principal");
   const [customValues, setCustomValues] = useState<{ [fieldId: string]: string | string[] | null }>({});
 
   const handleInputChange = useCallback((
@@ -35,9 +35,9 @@ export const useAddClientFormLogic = () => {
 
       // Navigate to first tab with error
       if (validation.errors.name || validation.errors.phone || validation.errors.email) {
-        setActiveTab("basico");
+        setActiveTab("principal");
       } else if (validation.errors.budget || validation.errors.cpfCnpj) {
-        setActiveTab("comercial");
+        setActiveTab("principal");
       }
 
       toast({
@@ -55,7 +55,7 @@ export const useAddClientFormLogic = () => {
   const resetForm = useCallback(() => {
     setCustomValues({});
     setValidationErrors({});
-    setActiveTab("basico");
+    setActiveTab("principal");
   }, []);
 
   const handleCustomFieldChange = useCallback((fieldId: string, value: string | string[] | null) => {

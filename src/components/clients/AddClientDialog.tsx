@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserPlus } from "lucide-react";
 import { Contact } from "@/types/client";
 import { useCustomFields } from "@/hooks/useCustomFields";
-import { useOptimizedCustomFields } from "@/hooks/useOptimizedCustomFields";
+
 import { useAddClientFormLogic } from "@/hooks/useAddClientFormLogic";
 import { DynamicCategory } from "./DynamicCategoryManager";
 import TagsManager from "./TagsManager";
@@ -44,10 +44,10 @@ const AddClientDialog = ({
   setNewContact,
   handleAddContact,
 }: AddClientDialogProps) => {
-  const { customFields, fetchCustomFields } = useCustomFields();
-  const { preloadCustomFields } = useOptimizedCustomFields();
+  const { customFields, loading } = useCustomFields();
+  
   const { createContactWithFields } = useOptimizedClientActions();
-  const [loading, setLoading] = useState(false);
+  
   const [saving, setSaving] = useState(false);
   
   // Use custom hook for form logic
@@ -72,24 +72,7 @@ const AddClientDialog = ({
     baseHandleInputChange(field, value, newContact, setNewContact);
   };
 
-  const loadCustomFields = async () => {
-    try {
-      setLoading(true);
-      await fetchCustomFields();
-      console.log("Custom fields loaded successfully");
-    } catch (error) {
-      console.error("Error loading custom fields:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    if (isOpen) {
-      loadCustomFields();
-      console.log("AddClientDialog opened, loading custom fields");
-    }
-  }, [isOpen, fetchCustomFields]);
 
   const handleSave = async () => {
     if (!validateForm(newContact)) {
@@ -105,6 +88,15 @@ const AddClientDialog = ({
         () => {
           // Success callback
           resetForm();
+          setNewContact({
+            name: "",
+            email: "",
+            phone: "",
+            clientName: "",
+            tags: [],
+            notes: "",
+            consultationStage: "Nova consulta",
+          });
           setBasicCategories([]);
           setCommercialCategories([]);
           setDocumentsCategories([]);
@@ -173,14 +165,9 @@ const AddClientDialog = ({
           />
         </div>
 
-        <Tabs defaultValue="principal" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger
-              value="principal"
-              onClick={() => setActiveTab("basico")}
-            >
-              Principal
-            </TabsTrigger>
+            <TabsTrigger value="principal">Principal</TabsTrigger>
             <TabsTrigger value="utm">UTM</TabsTrigger>
             <TabsTrigger value="midia">Mídia</TabsTrigger>
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
