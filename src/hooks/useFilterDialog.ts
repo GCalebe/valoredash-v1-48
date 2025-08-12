@@ -26,19 +26,18 @@ export const useFilterDialog = (filterType: 'clients' | 'conversations' = 'clien
   const [advancedFilter, setAdvancedFilter] = useState<FilterGroup>(createInitialFilter);
 
   const updateAdvancedFilter = (id: string, updatedGroup: FilterGroup) => {
-    // Atualização direta quando o alvo é o grupo raiz
-    if (advancedFilter.id === id) {
-      setAdvancedFilter(updatedGroup);
-      return;
-    }
-    // Atualização recursiva para subgrupos (mantido por compatibilidade)
     const updateGroup = (group: FilterGroup): FilterGroup => {
-      if (group.id === id) return updatedGroup;
+      if (group.id === id) {
+        return updatedGroup;
+      }
       return {
         ...group,
-        rules: group.rules.map((rule) => ("field" in rule ? rule : updateGroup(rule))),
+        rules: group.rules.map((rule) =>
+          "field" in rule ? rule : updateGroup(rule),
+        ),
       };
     };
+
     setAdvancedFilter(updateGroup(advancedFilter));
   };
 

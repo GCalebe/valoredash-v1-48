@@ -10,8 +10,6 @@ import { useCustomFieldsPreloader } from "@/hooks/useCustomFieldsPreloader";
 import ClientsDashboardLayout from "@/components/clients/ClientsDashboardLayout";
 import ClientsTable from "@/components/clients/ClientsTable";
 import KanbanView from "@/components/clients/KanbanView";
-import ClientsFunnelView from "@/components/clients/ClientsFunnelView";
-import ClientsMarketingView from "@/components/clients/ClientsMarketingView";
 import ClientsModals from "@/components/clients/ClientsModals";
 import EditStageDialog from "@/components/clients/EditStageDialog";
 // Tree views não estão presentes; renderização de tree desativada temporariamente
@@ -23,8 +21,9 @@ const ClientsDashboard = () => {
   const { customFieldFilters, addCustomFieldFilter, removeCustomFieldFilter } =
     filter;
 
-  const [viewMode, setViewMode] = useState<"table" | "kanban" | "tree-sales" | "tree-marketing">("kanban");
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
   const [isCompactView, setIsCompactView] = useState(false);
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   
   // Stage editing state  
   const [isEditStageDialogOpen, setIsEditStageDialogOpen] = useState(false);
@@ -144,10 +143,27 @@ const ClientsDashboard = () => {
       headerProps={{
         searchTerm: filter.searchTerm,
         setSearchTerm: filter.setSearchTerm,
-         hasActiveFilters: filter.hasAdvancedRules || filter.searchTerm !== "",
+        isFilterDialogOpen,
+        setIsFilterDialogOpen,
+        statusFilter: filter.statusFilter,
+        segmentFilter: filter.segmentFilter,
+        lastContactFilter: filter.lastContactFilter,
+        customFieldFilters,
+        onStatusFilterChange: filter.setStatusFilter,
+        onSegmentFilterChange: filter.setSegmentFilter,
+        onLastContactFilterChange: filter.setLastContactFilter,
+        onAddCustomFieldFilter: addCustomFieldFilter,
+        onRemoveCustomFieldFilter: removeCustomFieldFilter,
+        onClearFilters: filter.clearAllFilters,
+        onClearCustomFieldFilters: () => filter.clearAllFilters(),
+        hasActiveFilters: filter.hasActiveFilters,
         activeFilterChips: [
           filter.searchTerm ? `Busca: ${filter.searchTerm}` : "",
-           filter.hasAdvancedRules ? `Filtro 2: ativo` : "",
+          filter.statusFilter !== "all" ? `Status: ${filter.statusFilter}` : "",
+          filter.segmentFilter !== "all" ? `Etapa: ${filter.segmentFilter}` : "",
+          filter.lastContactFilter !== "all" ? `Últ. contato: ${filter.lastContactFilter}` : "",
+          customFieldFilters.length > 0 ? `Custom: ${customFieldFilters.length}` : "",
+          filter.hasAdvancedRules ? `Avançados` : "",
         ].filter(Boolean) as string[],
         isAddContactOpen,
         onAddContactOpenChange: setIsAddContactOpen,
@@ -155,7 +171,7 @@ const ClientsDashboard = () => {
         setNewContact,
         handleAddContact,
         viewMode,
-         setViewMode,
+        setViewMode: (v) => setViewMode(v === "kanban" ? "kanban" : "table"),
         isCompactView,
         setIsCompactView,
         refreshing,
@@ -193,10 +209,6 @@ const ClientsDashboard = () => {
             stages={kanbanStages.stages}
             onStageEdit={handleStageEdit}
           />
-        ) : viewMode === "tree-sales" ? (
-          <ClientsFunnelView contacts={contacts} stages={kanbanStages.stages} />
-        ) : viewMode === "tree-marketing" ? (
-          <ClientsMarketingView contacts={contacts} />
         ) : null}
       </div>
 

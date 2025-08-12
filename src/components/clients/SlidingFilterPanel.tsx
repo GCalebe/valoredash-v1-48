@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-// Removed unused Card imports
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tag, ChevronDown, Pencil, X } from "lucide-react";
 import { useFilterableFields } from "@/hooks/useFilterableFields";
 import { useKanbanStagesLocal } from "@/hooks/useKanbanStagesLocal";
@@ -22,37 +22,23 @@ const LEFT_MENU = [
   { label: "Leads com tarefas atrasadas", editable: true },
 ];
 
-// Estrutura de seção e campos
-type SectionDef = {
-  title: string;
-  key: string;
-  fields: { key: string; placeholder: string }[];
-};
-
-// SEÇÕES ESTÁTICAS alinhadas ao formulário "Novo Cliente"
-const STATIC_SECTIONS: SectionDef[] = [
+// Estrutura SECTIONS alinhada ao formulário "Novo Cliente"
+const SECTIONS = [
   { title: "PRINCIPAL", key: "principal", fields: [
-    { key: "name", placeholder: "Nome do cliente" },
-    { key: "email", placeholder: "E-mail" },
-    { key: "phone", placeholder: "Telefone" },
-    { key: "address", placeholder: "Endereço" },
-    { key: "notes", placeholder: "Observações" },
-    { key: "responsible_hosts", placeholder: "Responsáveis" },
-  ] },
-  { title: "CLASSIFICAÇÃO", key: "classificacao", fields: [
-    { key: "consultation_stage", placeholder: "Estágio de consulta" },
-    { key: "tags", placeholder: "Tags" },
+    { type: "text", key: "name", placeholder: "Nome do cliente" },
+    { type: "text", key: "email", placeholder: "E-mail" },
+    { type: "text", key: "phone", placeholder: "Telefone" },
   ] },
   { title: "EMPRESA", key: "empresa", fields: [
-    { key: "client_name", placeholder: "Nome da empresa" },
-    { key: "client_type", placeholder: "Tipo de cliente" },
-    { key: "client_size", placeholder: "Porte do cliente" },
+    { type: "text", key: "client_name", placeholder: "Nome da empresa" },
+    { type: "text", key: "client_type", placeholder: "Tipo de cliente" },
+    { type: "text", key: "client_size", placeholder: "Porte do cliente" },
   ] },
   { title: "DOCUMENTOS", key: "documentos", fields: [
-    { key: "cpf_cnpj", placeholder: "CPF/CNPJ" },
+    { type: "text", key: "cpf_cnpj", placeholder: "CPF/CNPJ" },
   ] },
   { title: "FINANCEIRO", key: "financeiro", fields: [
-    { key: "budget", placeholder: "Orçamento" },
+    { type: "number", key: "budget", placeholder: "Orçamento" },
   ] },
 ] as const;
 
@@ -73,7 +59,7 @@ interface SlidingFilterPanelProps {
 export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<SlidingFilterPanelProps>) {
   const [activeMap, setActiveMap] = useState<Record<string, boolean>>({});
   const [values, setValues] = useState<Record<string, any>>({});
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(Object.fromEntries(SECTIONS.map((s) => [s.key, false])) as Record<string, boolean>);
   const [menuSearch, setMenuSearch] = useState("");
   
   // Estados dos filtros rápidos
@@ -86,40 +72,12 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
   const { stages, loading: kanbanLoading } = useKanbanStagesLocal();
   const [selectedChips, setSelectedChips] = useState<{ key: string; label: string }[]>([]);
   const [fieldOptions, setFieldOptions] = useState<Record<string, { label: string; value: string }[]>>({});
-  const customFieldDefs = useMemo(() => (fields || []).filter((f: any) => f.isCustom), [fields]);
-
-  // Seção dinâmica de Campos Personalizados (abaixo de FINANCEIRO)
-  const customSection: SectionDef | null = useMemo(() => {
-    if (!customFieldDefs || customFieldDefs.length === 0) return null;
-    return {
-      title: "CAMPOS PERSONALIZADOS",
-      key: "campos_personalizados",
-      fields: customFieldDefs.map((f: any) => ({ key: f.id, placeholder: f.name })),
-    };
-  }, [customFieldDefs]);
-
-  const allSections: SectionDef[] = useMemo(() => {
-    return customSection ? [...STATIC_SECTIONS, customSection] : [...STATIC_SECTIONS];
-  }, [customSection]);
-
-  // Garantir estado de colapso para todas as seções, incluindo a dinâmica
-  useEffect(() => {
-    setCollapsed((prev) => {
-      const next: Record<string, boolean> = { ...prev };
-      allSections.forEach((s) => {
-        if (typeof next[s.key] === "undefined") next[s.key] = false;
-      });
-      return next;
-    });
-  }, [allSections]);
 
   useEffect(() => {
     let mounted = true;
     async function loadOptions() {
       try {
         const optionsMap: Record<string, { label: string; value: string }[]> = {};
-        const { data: authData } = await supabase.auth.getUser();
-        const currentUserId = authData?.user?.id || null;
 
         // Precompute from known sources
         fields.forEach((f: any) => {
@@ -159,24 +117,11 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
                 });
                 optionsMap[f.id] = Array.from(set).sort().map((v) => ({ label: v, value: v }));
               } else if (f.dbField) {
-                let query = supabase
+                const { data } = await supabase
                   .from('contacts')
                   .select(f.dbField as string)
                   .not(f.dbField as string, 'is', null)
                   .limit(1000);
-                if (currentUserId) {
-                  query = query.eq('user_id', currentUserId);
-                }
-                let { data } = await query;
-                // Fallback sem filtro de usuário se não houver resultados
-                if (!data || data.length === 0) {
-                  const { data: fallback } = await supabase
-                    .from('contacts')
-                    .select(f.dbField as string)
-                    .not(f.dbField as string, 'is', null)
-                    .limit(1000);
-                  data = fallback || [];
-                }
                 const set = new Set<string>();
                 (data || []).forEach((row: any) => {
                   const v = row[f.dbField];
@@ -210,10 +155,27 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
     return LEFT_MENU.filter((item) => item.label.toLowerCase().includes(q));
   }, [debouncedMenuSearch]);
 
-  // Removido: labels e agrupamento não são usados no Filtro 2
+  const CATEGORY_LABELS: Record<string, string> = {
+    basic: "BÁSICO",
+    kanban: "KANBAN",
+    commercial: "COMERCIAL",
+    temporal: "TEMPORAL",
+    documents: "DOCUMENTOS",
+    personalized: "PERSONALIZADOS",
+  };
+
+  const groupedFields = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    (fields || []).forEach((f: any) => {
+      const key = f.category || 'basic';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(f);
+    });
+    return groups;
+  }, [fields]);
 
   const clearSection = (sectionKey: string) => {
-    const section = allSections.find((s) => s.key === sectionKey);
+    const section = SECTIONS.find((s) => s.key === sectionKey);
     if (!section) return;
     setActiveMap((prev) => {
       const next = { ...prev } as Record<string, boolean>;
@@ -221,8 +183,8 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
       return next;
     });
     setValues((prev) => {
-      const next = { ...prev } as Record<string, any[]>;
-      section.fields.forEach((f) => { next[f.key] = []; });
+      const next = { ...prev } as Record<string, string>;
+      section.fields.forEach((f) => { next[f.key] = ""; });
       return next;
     });
   };
@@ -236,84 +198,39 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
     window.dispatchEvent(new CustomEvent('clients-clear-advanced-filter'));
   };
 
-  // Helpers para reduzir ternários e facilitar manutenção
-  const getSelectedArray = (input: unknown): string[] => {
-    if (Array.isArray(input)) return input.filter((v) => v != null && String(v).trim());
-    if (input != null && String(input).trim() !== "") return [String(input)];
-    return [];
-  };
-
-  const buildSectionRules = (): any[] => {
-    const out: any[] = [];
-    allSections.forEach((section) => {
-      section.fields.forEach((f) => {
-        const arr = getSelectedArray(values[f.key]);
-        if (activeMap[f.key] && arr.length > 0) {
-          const arrayField = f.key === "tags" || f.key === "responsible_hosts";
-          const operator = arrayField ? "contains_any" : "in";
-          out.push({ id: `rule-${f.key}`, field: f.key, operator, value: arr });
-        }
-      });
+const applyNow = () => {
+  const rules: any[] = [];
+  SECTIONS.forEach((section) => {
+    section.fields.forEach((f) => {
+      const v = values[f.key];
+      if (activeMap[f.key] && v && String(v).trim() !== "") {
+        const operator = f.type === "number" ? "equals" : f.type === "select" ? "equals" : "contains";
+        rules.push({ id: `rule-${f.key}`, field: f.key, operator, value: v });
+      }
     });
-    return out;
-  };
+  });
+  const group = { id: `group-top-panel`, condition: "AND", rules };
+  window.dispatchEvent(new CustomEvent('clients-apply-advanced-filter', { detail: group }));
+};
 
-  const buildQuickFilterRules = (): any[] => {
-    const out: any[] = [];
-    if (statusFilter && statusFilter !== "all") {
-      out.push({ id: `rule-kanban-stage`, field: 'kanban_stage_id', operator: 'in', value: [statusFilter] });
-    }
-    if (segmentFilter && segmentFilter !== "all") {
-      const hostId = responsibleHostsMap[segmentFilter] || segmentFilter;
-      out.push({ id: `rule-responsible-hosts`, field: 'responsible_hosts', operator: 'contains_any', value: [hostId] });
-    }
-    // Tags selecionadas na terceira coluna (Etiquetas)
-    const tagValues = Object.keys(activeMap)
-      .filter((k) => k.startsWith('tag:') && activeMap[k])
-      .map((k) => values[k])
-      .flatMap((v) => getSelectedArray(v));
-    if (tagValues.length > 0) {
-      out.push({ id: `rule-tags`, field: 'tags', operator: 'contains_any', value: tagValues });
-    }
-    return out;
-  };
-
-  const applyNow = () => {
-    // Filtro 2: lista plana de regras (sem AND/OR)
-    const rules = [...buildSectionRules(), ...buildQuickFilterRules()];
-    const payload = { id: `group-top-panel`, condition: 'AND', rules };
-    window.dispatchEvent(new CustomEvent('clients-apply-advanced-filter', { detail: payload }));
-    onClose();
-  };
-
-  // Atualiza chips selecionados a cada mudança (inclui campos personalizados e tags)
+  // Atualiza chips selecionados a cada mudança
   useEffect(() => {
     const chips: { key: string; label: string }[] = [];
-    allSections.forEach((section) => {
+    SECTIONS.forEach((section) => {
       section.fields.forEach((f) => {
-        const arr = getSelectedArray(values[f.key]);
-        if (activeMap[f.key] && arr.length > 0) {
-          chips.push({ key: f.key, label: `${f.placeholder}: ${arr.join(', ')}` });
+        const v = values[f.key];
+        if (activeMap[f.key] && v && String(v).trim() !== "") {
+          chips.push({ key: f.key, label: `${f.placeholder}: ${v}` });
         }
       });
     });
-    // Incluir chips de etiquetas marcadas na coluna direita
-    Object.keys(activeMap)
-      .filter((k) => k.startsWith('tag:') && activeMap[k])
-      .forEach((k) => {
-        const tagVal = values[k];
-        const arr = getSelectedArray(tagVal);
-        if (arr.length > 0) {
-          chips.push({ key: k, label: `Tag: ${arr.join(', ')}` });
-        }
-      });
     setSelectedChips(chips);
-  }, [activeMap, values, allSections]);
+  }, [activeMap, values]);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="top" className="p-0 h-[90vh] overflow-hidden" aria-label="Painel de filtros">
-        <div className="mx-auto w-full max-w-7xl h-full bg-background flex flex-col">
+        <div className="mx-auto w-full max-w-7xl h-full bg-background">
           {/* Top bar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-b bg-muted/30 gap-3">
             <div className="flex items-center gap-3 flex-1">
@@ -341,7 +258,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
                     aria-label={`Remover ${chip.label}`}
                     onClick={() => {
                       setActiveMap((m) => ({ ...m, [chip.key]: false }));
-                      setValues((v) => ({ ...v, [chip.key]: Array.isArray(v[chip.key]) ? [] : "" }));
+                      setValues((v) => ({ ...v, [chip.key]: "" }));
                     }}
                     className="ml-1 hover:text-primary/70"
                   >
@@ -352,9 +269,9 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
             </div>
           )}
 
-          <div className="grid grid-cols-12 gap-0 flex-1 min-h-0 overflow-hidden">
+          <div className="grid grid-cols-12 gap-0 h-[calc(100%-140px)]">
             {/* Left column: Quick Filters */}
-            <div className="col-span-3 border-r bg-muted/20 p-4 overflow-y-auto">
+            <div className="col-span-3 border-r bg-muted/20 p-4">
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3">Filtros Rápidos</h3>
@@ -449,12 +366,12 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
             </div>
 
             {/* Center: sections and fields */}
-            <div className="col-span-6 border-r p-4 overflow-y-auto">
+            <div className="col-span-6 border-r p-4">
               <div className="h-full">
-                <h3 className="text-sm font-semibold text-foreground mb-4">Propriedades do Lead</h3>
-                <ScrollArea className="h-full">
+                <h3 className="text-sm font-semibold text-foreground mb-4">Campos Personalizados</h3>
+                <ScrollArea className="h-[calc(100%-2rem)]">
                   <div className="space-y-6">
-                    {allSections.map((section) => (
+                    {SECTIONS.map((section) => (
                       <div key={section.key}>
                         <div className="border-b pb-3 flex justify-between items-center">
                           <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{section.title}</span>
@@ -482,105 +399,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
                                 key={f.key}
                                 active={!!activeMap[f.key]}
                                 onToggle={(v) => setActiveMap((m) => ({ ...m, [f.key]: v }))}
-                                control={
-                                  <ReactSelect
-                                    isMulti
-                                    closeMenuOnSelect={false}
-                                    hideSelectedOptions={false}
-                                    menuPosition="fixed"
-                                    menuShouldBlockScroll={true}
-                                    isSearchable
-                                    options={fieldOptions[f.key] || []}
-                                    value={(Array.isArray(values[f.key]) ? values[f.key] : []).map((val: string) =>
-                                      (fieldOptions[f.key] || []).find((o) => o.value === val) || { label: String(val), value: String(val) }
-                                    )}
-                                    onChange={(opts) => {
-                                      setActiveMap((m) => ({ ...m, [f.key]: true }));
-                                      setValues((v) => ({
-                                        ...v,
-                                        [f.key]: (opts as any[] | null)?.map((o) => o.value) || [],
-                                      }));
-                                    }}
-                                    placeholder={`Selecione ${f.placeholder.toLowerCase()}...`}
-                                    classNamePrefix="rs"
-                                    menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
-                                    styles={{
-                                      menuPortal: (base) => ({ ...base, zIndex: 2147483647 }),
-                                      control: (base, state) => ({
-                                        ...base,
-                                        backgroundColor: 'hsl(var(--background))',
-                                        borderColor: state.isFocused ? 'hsl(var(--ring))' : 'hsl(var(--border))',
-                                        boxShadow: state.isFocused ? '0 0 0 2px hsl(var(--ring) / 0.5)' : 'none',
-                                        minHeight: 36,
-                                        cursor: 'text',
-                                      }),
-                                      valueContainer: (base) => ({
-                                        ...base,
-                                        padding: '2px 6px',
-                                        gap: 4,
-                                      }),
-                                      input: (base) => ({
-                                        ...base,
-                                        color: 'hsl(var(--foreground))',
-                                      }),
-                                      placeholder: (base) => ({
-                                        ...base,
-                                        color: 'hsl(var(--muted-foreground))',
-                                      }),
-                                      singleValue: (base) => ({
-                                        ...base,
-                                        color: 'hsl(var(--foreground))',
-                                      }),
-                                      menu: (base) => ({
-                                        ...base,
-                                        backgroundColor: 'hsl(var(--popover))',
-                                        color: 'hsl(var(--popover-foreground))',
-                                        border: '1px solid hsl(var(--border))',
-                                        boxShadow: 'var(--shadow-elegant, 0 10px 30px -10px rgb(0 0 0 / 0.3))',
-                                        pointerEvents: 'auto',
-                                      }),
-                                      menuList: (base) => ({
-                                        ...base,
-                                        backgroundColor: 'hsl(var(--popover))',
-                                        pointerEvents: 'auto',
-                                      }),
-                                      option: (base, state) => ({
-                                        ...base,
-                                        backgroundColor: state.isSelected
-                                          ? 'hsl(var(--accent))'
-                                          : state.isFocused
-                                          ? 'hsl(var(--accent) / 0.3)'
-                                          : 'transparent',
-                                        color: state.isSelected
-                                          ? 'hsl(var(--accent-foreground))'
-                                          : 'hsl(var(--popover-foreground))',
-                                        cursor: 'pointer',
-                                        pointerEvents: 'auto',
-                                      }),
-                                      multiValue: (base) => ({
-                                        ...base,
-                                        backgroundColor: 'hsl(var(--accent) / 0.3)',
-                                        border: '1px solid hsl(var(--accent) / 0.4)',
-                                      }),
-                                      multiValueLabel: (base) => ({
-                                        ...base,
-                                        color: 'hsl(var(--accent-foreground))',
-                                      }),
-                                      multiValueRemove: (base) => ({
-                                        ...base,
-                                        color: 'hsl(var(--accent-foreground))',
-                                        ':hover': {
-                                          backgroundColor: 'hsl(var(--accent) / 0.5)',
-                                          color: 'hsl(var(--accent-foreground))',
-                                        },
-                                      }),
-                                      clearIndicator: (base) => ({ ...base, color: 'hsl(var(--muted-foreground))' }),
-                                      dropdownIndicator: (base) => ({ ...base, color: 'hsl(var(--muted-foreground))' }),
-                                      indicatorSeparator: (base) => ({ ...base, backgroundColor: 'hsl(var(--border))' }),
-                                      container: (base) => ({ ...base, width: '100%', zIndex: 10 }),
-                                    }}
-                                  />
-                                }
+                                control={<Input className="h-9" placeholder={f.placeholder} value={values[f.key] || ""} onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))} />}
                               />
                             ))}
                           </div>
@@ -593,7 +412,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
             </div>
 
             {/* Right: tags */}
-            <div className="col-span-3 p-4 bg-muted/10 overflow-y-auto">
+            <div className="col-span-3 p-4 bg-muted/10">
               <div className="h-full">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
