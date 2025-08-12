@@ -10,8 +10,6 @@ import { Tag, ChevronDown, Pencil, X } from "lucide-react";
 import { useFilterableFields } from "@/hooks/useFilterableFields";
 import { useKanbanStagesLocal } from "@/hooks/useKanbanStagesLocal";
 import { useDebounce } from "@/hooks/utils/useDebounce";
-import ReactSelect from "react-select";
-import { supabase } from "@/integrations/supabase/client";
 
 // LEFT MENU com ícone de lápis nos filtros pré-configurados
 const LEFT_MENU = [
@@ -58,7 +56,7 @@ interface SlidingFilterPanelProps {
 
 export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<SlidingFilterPanelProps>) {
   const [activeMap, setActiveMap] = useState<Record<string, boolean>>({});
-  const [values, setValues] = useState<Record<string, any>>({});
+  const [values, setValues] = useState<Record<string, string>>({});
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(Object.fromEntries(SECTIONS.map((s) => [s.key, false])) as Record<string, boolean>);
   const [menuSearch, setMenuSearch] = useState("");
   
@@ -68,111 +66,15 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
   const [lastContactFilter, setLastContactFilter] = useState("all");
   
   const debouncedMenuSearch = useDebounce(menuSearch, 250);
-  const { fields, availableTags, responsibleHosts, responsibleHostsMap, loading: hostsLoading } = useFilterableFields();
+  const { availableTags, responsibleHosts, loading: hostsLoading } = useFilterableFields();
   const { stages, loading: kanbanLoading } = useKanbanStagesLocal();
   const [selectedChips, setSelectedChips] = useState<{ key: string; label: string }[]>([]);
-  const [fieldOptions, setFieldOptions] = useState<Record<string, { label: string; value: string }[]>>({});
-
-  useEffect(() => {
-    let mounted = true;
-    async function loadOptions() {
-      try {
-        const optionsMap: Record<string, { label: string; value: string }[]> = {};
-
-        // Precompute from known sources
-        fields.forEach((f: any) => {
-          if (f.id === 'tags') {
-            optionsMap[f.id] = (availableTags || []).map((t: string) => ({ label: t, value: t }));
-          } else if (f.id === 'responsible_hosts') {
-            optionsMap[f.id] = (responsibleHosts || []).map((name: string) => ({ label: name, value: responsibleHostsMap[name] || name }));
-          } else if (f.id === 'kanban_stage_id') {
-            optionsMap[f.id] = (stages || []).map((s: any) => ({ label: s.title, value: s.id }));
-          } else if (Array.isArray(f.options) && f.options.length > 0) {
-            // fallback to predefined options if exists
-            optionsMap[f.id] = f.options.map((o: any) =>
-              typeof o === 'string' ? { label: o, value: o } : { label: o.label, value: o.value }
-            );
-          }
-        });
-
-        // Fetch distinct values for remaining fields
-        const remaining = fields.filter((f: any) => !optionsMap[f.id]);
-        await Promise.all(
-          remaining.map(async (f: any) => {
-            try {
-              if (f.isCustom && f.customFieldId) {
-                const { data } = await supabase
-                  .from('client_custom_values')
-                  .select('field_value')
-                  .eq('field_id', f.customFieldId)
-                  .limit(1000);
-                const set = new Set<string>();
-                (data || []).forEach((row: any) => {
-                  const val = row.field_value;
-                  if (Array.isArray(val)) {
-                    val.forEach((v) => v != null && String(v).trim() && set.add(String(v)));
-                  } else if (val != null && String(val).trim()) {
-                    set.add(String(val));
-                  }
-                });
-                optionsMap[f.id] = Array.from(set).sort().map((v) => ({ label: v, value: v }));
-              } else if (f.dbField) {
-                const { data } = await supabase
-                  .from('contacts')
-                  .select(f.dbField as string)
-                  .not(f.dbField as string, 'is', null)
-                  .limit(1000);
-                const set = new Set<string>();
-                (data || []).forEach((row: any) => {
-                  const v = row[f.dbField];
-                  if (Array.isArray(v)) {
-                    v.forEach((x) => x != null && String(x).trim() && set.add(String(x)));
-                  } else if (v != null && String(v).trim()) {
-                    set.add(String(v));
-                  }
-                });
-                optionsMap[f.id] = Array.from(set).sort().map((v) => ({ label: v, value: v }));
-              }
-            } catch (e) {
-              // ignore field fetch errors
-              console.warn('distinct options fetch failed for field', f.id, e);
-            }
-          })
-        );
-
-        if (mounted) setFieldOptions(optionsMap);
-      } catch (e) {
-        console.error('Error loading filter options', e);
-      }
-    }
-    loadOptions();
-    return () => { mounted = false; };
-  }, [fields, availableTags, responsibleHosts, stages, responsibleHostsMap]);
 
   const filteredMenu = useMemo(() => {
     const q = debouncedMenuSearch.trim().toLowerCase();
     if (!q) return LEFT_MENU;
     return LEFT_MENU.filter((item) => item.label.toLowerCase().includes(q));
   }, [debouncedMenuSearch]);
-
-  const CATEGORY_LABELS: Record<string, string> = {
-    basic: "BÁSICO",
-    kanban: "KANBAN",
-    commercial: "COMERCIAL",
-    temporal: "TEMPORAL",
-    documents: "DOCUMENTOS",
-    personalized: "PERSONALIZADOS",
-  };
-
-  const groupedFields = useMemo(() => {
-    const groups: Record<string, any[]> = {};
-    (fields || []).forEach((f: any) => {
-      const key = f.category || 'basic';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(f);
-    });
-    return groups;
-  }, [fields]);
 
   const clearSection = (sectionKey: string) => {
     const section = SECTIONS.find((s) => s.key === sectionKey);
