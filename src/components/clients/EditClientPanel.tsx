@@ -14,7 +14,7 @@ import ContactInfo from "@/components/chat/ContactInfo";
 import NotesFieldEdit from "./NotesFieldEdit";
 import CustomFieldsSection from "./CustomFieldsSection";
 import LoadingClientState from "@/components/chat/LoadingClientState";
-import { useOptimizedCustomFields } from "@/hooks/useOptimizedCustomFields";
+
 import { SkeletonFormGrid, SkeletonCustomFields } from "@/components/ui/skeleton-form";
 import { Loader2, Save, Clock, CheckCircle } from "lucide-react";
 import { useAutoSave } from "@/hooks/useAutoSave";
@@ -44,11 +44,8 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
 }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [customFieldsLoading, setCustomFieldsLoading] = useState(true);
-  const [showContactPreview, setShowContactPreview] = useState(false);
-  // Use optimized custom fields hook
-  const { preloadCustomFields } = useOptimizedCustomFields();
   
+  const [showContactPreview, setShowContactPreview] = useState(false);
   // Auto-save functionality
   const {
     contact,
@@ -77,23 +74,14 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
   useEffect(() => {
     if (isOpen && selectedContact) {
       setIsLoading(true);
-      setCustomFieldsLoading(true);
       
       console.log("Setting contact data for editing:", selectedContact);
       resetContact(selectedContact);
       
       // Simulate loading time for better UX feedback
       setTimeout(() => setIsLoading(false), 200);
-      
-      // Pré-carregar campos personalizados quando o painel é aberto
-      if (selectedContact.id) {
-        preloadCustomFields(selectedContact.id)
-          .finally(() => setCustomFieldsLoading(false));
-      } else {
-        setCustomFieldsLoading(false);
-      }
     }
-  }, [isOpen, selectedContact, preloadCustomFields, resetContact]);
+  }, [isOpen, selectedContact, resetContact]);
 
 
 
@@ -228,11 +216,7 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
 
                 {/* Custom Fields Section */}
                 <div className="mt-6">
-                  {customFieldsLoading ? (
-                    <SkeletonCustomFields />
-                  ) : (
-                    <CustomFieldsSection contactId={selectedContact?.id || null} />
-                  )}
+                  <CustomFieldsSection contactId={selectedContact?.id || null} />
                 </div>
 
                 {/* Notes Field */}

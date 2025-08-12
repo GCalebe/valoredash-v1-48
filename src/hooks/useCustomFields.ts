@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   CustomField,
   ClientCustomValue,
@@ -12,7 +12,7 @@ export function useCustomFields() {
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchCustomFields = async () => {
+  const fetchCustomFields = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -68,11 +68,11 @@ export function useCustomFields() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCustomFields();
-  }, []);
+  }, [fetchCustomFields]);
 
   const addCustomField = async (
     field: Omit<CustomField, "id" | "created_at" | "updated_at">,

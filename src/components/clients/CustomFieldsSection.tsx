@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { useOptimizedCustomFields } from "@/hooks/useOptimizedCustomFields";
-import { useCustomFields } from "@/hooks/useCustomFields";
+
 import CustomFieldRenderer from "./CustomFieldRenderer";
 import { CustomField, CustomFieldWithValue } from "@/types/customFields";
 import { Loader2 } from "lucide-react";
@@ -24,13 +24,9 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
     retry,
   } = useOptimizedCustomFields();
   
-  const { customFields, loading: fieldsLoading, fetchCustomFields } = useCustomFields();
+  
   const [customValues, setCustomValues] = useState<{ [fieldId: string]: string | string[] | null }>({});
 
-  // Carregar todos os campos personalizados disponíveis - apenas uma vez
-  useEffect(() => {
-    fetchCustomFields();
-  }, [fetchCustomFields]);
 
   // Carregar valores dos campos personalizados para o cliente específico - apenas quando contactId mudar
   useEffect(() => {
@@ -39,15 +35,6 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
     }
   }, [contactId, loadCustomFieldsForContact]);
   
-  // Pré-carregar campos personalizados para contatos que possam ser selecionados em breve
-  useEffect(() => {
-    // Se temos um contactId atual, podemos pré-carregar outros contatos relacionados
-    // Esta é uma otimização que pode ser expandida conforme necessário
-    if (contactId && customFields.length > 0) {
-      // Aqui poderíamos implementar lógica para pré-carregar contatos relacionados
-      // Por exemplo, contatos da mesma empresa ou grupo
-    }
-  }, [contactId, customFields]);
 
   // Atualizar customValues quando customFieldsWithValues mudar - com verificação para evitar loops
   useEffect(() => {
@@ -123,38 +110,9 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
     );
   }
 
-  // Mostrar esqueleto de carregamento apenas se não tivermos nenhum campo disponível
-  // e estamos carregando os campos (não os valores)
-  if (fieldsLoading && customFields.length === 0) {
-    return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
-            Campos Personalizados
-            <div className="w-3 h-3 border border-muted-foreground rounded-full border-t-transparent animate-spin" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-gray-600 uppercase tracking-wide">
-              CAMPOS PERSONALIZADOS
-            </Label>
-            <div className="space-y-3">
-              {[1, 2].map((i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-7 w-full" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
-  // Filtrar campos que devem ser visíveis na aba básica, como na tela de criação
-  const visibleFields = customFields.filter(field => 
+// Filtrar campos que devem ser visíveis na aba básica, como na tela de criação
+  const visibleFields = customFieldsWithValues.filter(field => 
     field.visibility_settings?.visible_in_tabs?.basic !== false
   );
 
