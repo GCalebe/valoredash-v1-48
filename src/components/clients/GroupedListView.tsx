@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Contact } from "@/types/client";
 import { KanbanStage } from "@/hooks/useKanbanStagesSupabase";
 import { useGroupedContactsByStageTag } from "@/hooks/useGroupedContactsByStageTag";
 import StageGroup from "./grouped/StageGroup";
+import ColumnConfigDialog from "@/components/clients/ColumnConfigDialog";
+import { ColumnConfig, getColumnConfig } from "@/config/columnConfig";
 
 interface GroupedListViewProps {
   contacts: Contact[];
@@ -19,6 +21,18 @@ const GroupedListView: React.FC<GroupedListViewProps> = ({
   onSendMessage,
   onEditClient,
 }) => {
+  const [columnConfig, setColumnConfig] = useState<ColumnConfig[]>(getColumnConfig());
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+
+  const visibleColumns = useMemo(
+    () =>
+      columnConfig
+        .filter((c) => c.isVisible)
+        .sort((a, b) => a.priority - b.priority)
+        .map((c) => c.id),
+    [columnConfig]
+  );
+
   const grouped = useGroupedContactsByStageTag(contacts, stages);
 
   if (grouped.length === 0) {
@@ -30,17 +44,27 @@ const GroupedListView: React.FC<GroupedListViewProps> = ({
   }
 
   return (
-    <div className="space-y-3">
-      {grouped.map((stage) => (
-        <StageGroup
-          key={stage.stageId}
-          stage={stage}
-          onViewDetails={onViewDetails}
-          onSendMessage={onSendMessage}
-          onEditClient={onEditClient}
-        />)
-      )}
-    </div>
+    <>
+      <ColumnConfigDialog
+        isOpen={isConfigOpen}
+        onOpenChange={setIsConfigOpen}
+        columnConfig={columnConfig}
+        onColumnConfigChange={setColumnConfig}
+      />
+      <div className="space-y-3">
+        {grouped.map((stage) => (
+          <StageGroup
+            key={stage.stageId}
+            stage={stage}
+            visibleColumns={visibleColumns}
+            onConfigureColumns={() => setIsConfigOpen(true)}
+            onViewDetails={onViewDetails}
+            onSendMessage={onSendMessage}
+            onEditClient={onEditClient}
+          />
+        ))}
+      </div>
+    </>
   );
 };
 

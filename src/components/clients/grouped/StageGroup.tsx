@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 
 interface StageGroupProps {
   stage: GroupedContacts;
+  visibleColumns: string[];
+  onConfigureColumns: () => void;
   onViewDetails: (contact: any) => void;
   onSendMessage: (contactId: string) => void;
   onEditClient: (contact: any) => void;
 }
 
-const StageGroup: React.FC<StageGroupProps> = ({ stage, onViewDetails, onSendMessage, onEditClient }) => {
+const StageGroup: React.FC<StageGroupProps> = ({ stage, visibleColumns, onConfigureColumns, onViewDetails, onSendMessage, onEditClient }) => {
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
       <Accordion type="multiple" defaultValue={[stage.stageId]}>
@@ -35,6 +37,8 @@ const StageGroup: React.FC<StageGroupProps> = ({ stage, onViewDetails, onSendMes
                   stageId={stage.stageId}
                   tag={tagGroup.tag}
                   contacts={tagGroup.contacts}
+                  visibleColumns={visibleColumns}
+                  onConfigureColumns={onConfigureColumns}
                   onViewDetails={onViewDetails}
                   onSendMessage={onSendMessage}
                   onEditClient={onEditClient}

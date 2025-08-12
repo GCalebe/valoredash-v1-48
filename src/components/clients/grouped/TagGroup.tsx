@@ -1,19 +1,23 @@
 import React from "react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from "@/components/animate-ui/base/accordion";
 import { Badge } from "@/components/ui/badge";
-import ContactListItem from "./ContactListItem";
+import { Table } from "@/components/ui/table";
+import { ClientsTableHeader } from "@/components/clients/table/ClientsTableHeader";
+import { ClientsTableBody } from "@/components/clients/table/ClientsTableBody";
 import { Contact } from "@/types/client";
 
 interface TagGroupProps {
   stageId: string;
   tag: string;
   contacts: Contact[];
+  visibleColumns: string[];
+  onConfigureColumns: () => void;
   onViewDetails: (contact: Contact) => void;
   onSendMessage: (contactId: string) => void;
   onEditClient: (contact: Contact) => void;
 }
 
-const TagGroup: React.FC<TagGroupProps> = ({ stageId, tag, contacts, onViewDetails, onSendMessage, onEditClient }) => {
+const TagGroup: React.FC<TagGroupProps> = ({ stageId, tag, contacts, visibleColumns, onConfigureColumns, onViewDetails, onSendMessage, onEditClient }) => {
   return (
     <div className="mx-3 rounded-md border bg-muted/30">
       <Accordion type="multiple" defaultValue={[`${stageId}-${tag}`]}>
@@ -25,17 +29,16 @@ const TagGroup: React.FC<TagGroupProps> = ({ stageId, tag, contacts, onViewDetai
             </div>
           </AccordionTrigger>
           <AccordionPanel className="px-0 pb-2">
-            <ul className="divide-y">
-              {contacts.map((c) => (
-                <ContactListItem
-                  key={c.id}
-                  contact={c}
-                  onViewDetails={onViewDetails}
-                  onSendMessage={onSendMessage}
-                  onEditClient={onEditClient}
-                />
-              ))}
-            </ul>
+            <Table>
+              <ClientsTableHeader visibleColumns={visibleColumns} onConfigureColumns={onConfigureColumns} />
+              <ClientsTableBody
+                contacts={contacts}
+                visibleColumns={visibleColumns}
+                onViewDetails={onViewDetails}
+                onSendMessage={onSendMessage}
+                onEditClient={onEditClient}
+              />
+            </Table>
           </AccordionPanel>
         </AccordionItem>
       </Accordion>
