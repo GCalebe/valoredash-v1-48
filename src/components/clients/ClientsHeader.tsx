@@ -47,6 +47,8 @@ interface ClientsHeaderProps {
   setViewMode: (v: "table" | "kanban" | "gantt") => void;
   isCompactView: boolean;
   setIsCompactView: (val: boolean) => void;
+  listGrouping: "flat" | "stageTag";
+  setListGrouping: (val: "flat" | "stageTag") => void;
   refreshing: boolean;
   handleRefresh: () => void;
 }
@@ -78,6 +80,8 @@ const ClientsHeader = ({
   setViewMode,
   isCompactView,
   setIsCompactView,
+  listGrouping,
+  setListGrouping,
   refreshing,
   handleRefresh,
 }: ClientsHeaderProps) => {
@@ -284,6 +288,25 @@ const ClientsHeader = ({
               />
             )}
             <ClientsViewToggler viewMode={viewMode} setViewMode={setViewMode} />
+
+            {viewMode === "table" && (
+              <div className="ml-1 flex items-center rounded bg-white/10">
+                <button
+                  className={`px-2 py-1 text-xs rounded-l ${listGrouping === "flat" ? "bg-white/20 text-white" : "text-white/80 hover:text-white"}`}
+                  onClick={() => setListGrouping("flat")}
+                  title="Lista plana"
+                >
+                  Plano
+                </button>
+                <button
+                  className={`px-2 py-1 text-xs rounded-r ${listGrouping === "stageTag" ? "bg-white/20 text-white" : "text-white/80 hover:text-white"}`}
+                  onClick={() => setListGrouping("stageTag")}
+                  title="Agrupar por Estágio e Tag"
+                >
+                  Agrupado
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Botão atualizar */}

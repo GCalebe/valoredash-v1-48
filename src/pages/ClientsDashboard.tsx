@@ -9,6 +9,7 @@ import { useKanbanStagesSupabase, KanbanStage } from "@/hooks/useKanbanStagesSup
 import { useCustomFieldsPreloader } from "@/hooks/useCustomFieldsPreloader";
 import ClientsDashboardLayout from "@/components/clients/ClientsDashboardLayout";
 import ClientsTable from "@/components/clients/ClientsTable";
+import ClientsListView from "@/components/clients/ClientsListView";
 import KanbanView from "@/components/clients/KanbanView";
 import GanttView from "@/components/clients/GanttView";
 import ClientsModals from "@/components/clients/ClientsModals";
@@ -24,6 +25,7 @@ const ClientsDashboard = () => {
   const [viewMode, setViewMode] = useState<"table" | "kanban" | "gantt">("kanban");
   const [isCompactView, setIsCompactView] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  const [listGrouping, setListGrouping] = useState<"flat" | "stageTag">("flat");
   
   // Stage editing state  
   const [isEditStageDialogOpen, setIsEditStageDialogOpen] = useState(false);
@@ -182,13 +184,15 @@ const ClientsDashboard = () => {
         setViewMode: (v) => setViewMode(v as "table" | "kanban" | "gantt"),
         isCompactView,
         setIsCompactView,
+        listGrouping,
+        setListGrouping,
         refreshing,
         handleRefresh: () => { void handleRefreshWithLoading(); },
       }}
     >
       <div className="flex-1 overflow-hidden">
         {viewMode === "table" ? (
-          <ClientsTable
+          <ClientsListView
             contacts={contacts}
             isLoading={loadingContacts}
             searchTerm={filter.searchTerm}
@@ -196,6 +200,8 @@ const ClientsDashboard = () => {
             segmentFilter={filter.segmentFilter}
             lastContactFilter={filter.lastContactFilter}
             customFieldFilters={customFieldFilters}
+            groupingMode={listGrouping}
+            stages={kanbanStages.stages}
             onViewDetails={handleContactClick}
             onSendMessage={(contactId: string) => {
               const contact = contacts.find(c => c.id === contactId);
