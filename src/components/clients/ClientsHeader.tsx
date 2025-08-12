@@ -5,9 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
-import { Input } from "@/components/ui/input";
 import { useClientImport } from "@/hooks/useClientImport";
-import FilterDialog from "@/components/clients/FilterDialog";
 import AddClientDialog from "@/components/clients/AddClientDialog";
 import ClientMethodSelectionModal from "@/components/clients/ClientMethodSelectionModal";
 import ClientImportModal from "@/components/clients/ClientImportModal";
@@ -18,24 +16,11 @@ import ClientsViewToggler from "./ClientsViewToggler";
 import ClientsRefreshButton from "./ClientsRefreshButton";
 import { KanbanSettings } from "./KanbanSettings";
 
-import { CustomFieldFilter } from "@/hooks/useUnifiedClientFilters";
+// Removido filtro antigo, não precisamos mais do tipo CustomFieldFilter aqui
 
 interface ClientsHeaderProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  isFilterDialogOpen: boolean;
-  setIsFilterDialogOpen: (isOpen: boolean) => void;
-  statusFilter: string;
-  segmentFilter: string;
-  lastContactFilter: string;
-  customFieldFilters: CustomFieldFilter[];
-  onStatusFilterChange: (value: string) => void;
-  onSegmentFilterChange: (value: string) => void;
-  onLastContactFilterChange: (value: string) => void;
-  onAddCustomFieldFilter: (filter: CustomFieldFilter) => void;
-  onRemoveCustomFieldFilter: (fieldId: string) => void;
-  onClearFilters: () => void;
-  onClearCustomFieldFilters: () => void;
   hasActiveFilters: boolean;
   activeFilterChips?: string[];
   isAddContactOpen: boolean;
@@ -54,19 +39,6 @@ interface ClientsHeaderProps {
 const ClientsHeader = ({
   searchTerm,
   setSearchTerm,
-  isFilterDialogOpen,
-  setIsFilterDialogOpen,
-  statusFilter,
-  segmentFilter,
-  lastContactFilter,
-  customFieldFilters,
-  onStatusFilterChange,
-  onSegmentFilterChange,
-  onLastContactFilterChange,
-  onAddCustomFieldFilter,
-  onRemoveCustomFieldFilter,
-  onClearFilters,
-  onClearCustomFieldFilters,
   hasActiveFilters,
   activeFilterChips = [],
   isAddContactOpen,
@@ -104,18 +76,7 @@ const ClientsHeader = ({
   };
 
   // Função para exibir o nome do status de forma amigável
-  const getStatusDisplayName = (status: string) => {
-    switch (status) {
-      case "Ganhos":
-        return "Ganhos";
-      case "Perdidos":
-        return "Perdidos";
-      case "all":
-        return "Todos";
-      default:
-        return status;
-    }
-  };
+  // Indicadores do filtro antigo removidos
 
   return (
     <header
@@ -157,25 +118,6 @@ const ClientsHeader = ({
 
         {/* Grupo principal: filtros, novo cliente e controles */}
         <div className="flex flex-row items-center gap-3 h-full">
-          {/* Filtros */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsFilterDialogOpen(true)}
-            className="text-white hover:bg-white/20 focus-visible:ring-white flex items-center gap-1"
-          >
-            <Filter className="h-4 w-4" />
-            Filtros
-            {hasActiveFilters && (
-              <Badge
-                variant="secondary"
-                className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-              >
-                !
-              </Badge>
-            )}
-          </Button>
-
           {/* Sugestões Inteligentes */}
           <Button
             variant="ghost"
@@ -203,30 +145,15 @@ const ClientsHeader = ({
           {/* Chips dos filtros ativos */}
           {hasActiveFilters && activeFilterChips.length > 0 && (
             <div className="flex gap-1 max-w-[520px] overflow-x-auto py-1">
-              {activeFilterChips.map((chip, idx) => (
-                <Badge key={idx} variant="secondary" className="whitespace-nowrap">
+              {activeFilterChips.map((chip) => (
+                <Badge key={chip} variant="secondary" className="whitespace-nowrap">
                   {chip}
                 </Badge>
               ))}
             </div>
           )}
 
-          <FilterDialog
-            isOpen={isFilterDialogOpen}
-            onOpenChange={setIsFilterDialogOpen}
-            statusFilter={statusFilter}
-            segmentFilter={segmentFilter}
-            lastContactFilter={lastContactFilter}
-            customFieldFilters={customFieldFilters}
-            onStatusFilterChange={onStatusFilterChange}
-            onSegmentFilterChange={onSegmentFilterChange}
-            onLastContactFilterChange={onLastContactFilterChange}
-            onAddCustomFieldFilter={onAddCustomFieldFilter}
-            onRemoveCustomFieldFilter={onRemoveCustomFieldFilter}
-            onClearFilters={onClearFilters}
-            onClearCustomFieldFilters={onClearCustomFieldFilters}
-            hasActiveFilters={hasActiveFilters}
-          />
+          {/* Filtro padrão removido. Mantemos apenas o Filtro 2. */}
 
           {/* Add Cliente - New Flow */}
           <Button 
@@ -308,15 +235,7 @@ const ClientsHeader = ({
         </div>
       </div>
       
-      {/* Status filter indicator */}
-      {statusFilter !== "all" && (
-        <div className="bg-white/10 py-1 px-6 text-white text-sm flex items-center">
-          <span className="mr-2">Filtro ativo:</span>
-          <Badge className="bg-blue-500 text-white">
-            Status: {getStatusDisplayName(statusFilter)}
-          </Badge>
-        </div>
-      )}
+      {/* Indicadores do filtro antigo removidos */}
       
       {/* Smart Suggestions Bar */}
       <SmartSuggestionsBar

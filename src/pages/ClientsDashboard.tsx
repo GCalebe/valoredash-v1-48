@@ -25,7 +25,6 @@ const ClientsDashboard = () => {
 
   const [viewMode, setViewMode] = useState<"table" | "kanban" | "tree-sales" | "tree-marketing">("kanban");
   const [isCompactView, setIsCompactView] = useState(false);
-  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   
   // Stage editing state  
   const [isEditStageDialogOpen, setIsEditStageDialogOpen] = useState(false);
@@ -145,27 +144,10 @@ const ClientsDashboard = () => {
       headerProps={{
         searchTerm: filter.searchTerm,
         setSearchTerm: filter.setSearchTerm,
-        isFilterDialogOpen,
-        setIsFilterDialogOpen,
-        statusFilter: filter.statusFilter,
-        segmentFilter: filter.segmentFilter,
-        lastContactFilter: filter.lastContactFilter,
-        customFieldFilters,
-        onStatusFilterChange: filter.setStatusFilter,
-        onSegmentFilterChange: filter.setSegmentFilter,
-        onLastContactFilterChange: filter.setLastContactFilter,
-        onAddCustomFieldFilter: addCustomFieldFilter,
-        onRemoveCustomFieldFilter: removeCustomFieldFilter,
-        onClearFilters: filter.clearAllFilters,
-        onClearCustomFieldFilters: () => filter.clearAllFilters(),
-        hasActiveFilters: filter.hasActiveFilters,
+         hasActiveFilters: filter.hasAdvancedRules || filter.searchTerm !== "",
         activeFilterChips: [
           filter.searchTerm ? `Busca: ${filter.searchTerm}` : "",
-          filter.statusFilter !== "all" ? `Status: ${filter.statusFilter}` : "",
-          filter.segmentFilter !== "all" ? `Etapa: ${filter.segmentFilter}` : "",
-          filter.lastContactFilter !== "all" ? `Últ. contato: ${filter.lastContactFilter}` : "",
-          customFieldFilters.length > 0 ? `Custom: ${customFieldFilters.length}` : "",
-          filter.hasAdvancedRules ? `Avançados` : "",
+           filter.hasAdvancedRules ? `Filtro 2: ativo` : "",
         ].filter(Boolean) as string[],
         isAddContactOpen,
         onAddContactOpenChange: setIsAddContactOpen,

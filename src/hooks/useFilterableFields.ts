@@ -56,11 +56,17 @@ export function useFilterableFields() {
           if (isMounted) setCustomFields(mapped);
         }
 
-        // Fetch available tags from contacts
-        const { data: tagsData, error: tagsError } = await supabase
+        // Fetch available tags from contacts (escopo do usuário atual)
+        const { data: currentAuth } = await supabase.auth.getUser();
+        const currentUserId = currentAuth?.user?.id || null;
+        let tagsQuery = supabase
           .from("contacts")
           .select("tags")
           .not("tags", "is", null);
+        if (currentUserId) {
+          tagsQuery = tagsQuery.eq('user_id', currentUserId);
+        }
+        const { data: tagsData, error: tagsError } = await tagsQuery;
 
         if (!tagsError && tagsData) {
           const allTags = new Set<string>();
@@ -72,13 +78,15 @@ export function useFilterableFields() {
           if (isMounted) setAvailableTags(Array.from(allTags).sort());
         }
 
-        // Fetch responsible hosts from contacts with names from profiles
-        const { data: hostsData, error: hostsError } = await supabase
+        // Fetch responsible hosts from contacts with names from profiles (escopo do usuário)
+        let hostsQuery = supabase
           .from("contacts")
-          .select(`
-            responsible_hosts
-          `)
+          .select(`responsible_hosts`)
           .not("responsible_hosts", "is", null);
+        if (currentUserId) {
+          hostsQuery = hostsQuery.eq('user_id', currentUserId);
+        }
+        const { data: hostsData, error: hostsError } = await hostsQuery;
 
         if (!hostsError && hostsData) {
           // Collect all unique host IDs

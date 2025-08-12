@@ -39,6 +39,8 @@ export interface UnifiedClientFilters {
   
   // Filtros computados para o serviço
   getContactFilters: () => ContactFilters;
+  // Aplicação direta de regras do Filtro 2 (sem event bus)
+  applyAdvancedRules: (rules: any[]) => void;
 }
 
 export function useUnifiedClientFilters(): UnifiedClientFilters {
@@ -61,6 +63,13 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   const updateAdvancedFilterWrapper = useCallback((filter: FilterGroup) => {
     updateAdvancedFilter(filter.id, filter);
   }, [updateAdvancedFilter]);
+
+  // Aplicação direta de regras vindas do Filtro 2
+  const applyAdvancedRules = useCallback((rules: any[]) => {
+    const normalizedRules = Array.isArray(rules) ? rules : [];
+    const group: FilterGroup = { ...advancedFilter, rules: normalizedRules } as FilterGroup;
+    updateAdvancedFilter(group.id, group);
+  }, [advancedFilter, updateAdvancedFilter]);
   // Implementa debounce para o searchTerm
   useEffect(() => {
     if (debounceTimeoutRef.current) {
@@ -236,5 +245,6 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
     hasActiveFilters,
     clearAllFilters,
     getContactFilters,
+    applyAdvancedRules,
   };
 }

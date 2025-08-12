@@ -2,7 +2,7 @@
 // @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentAuthUser } from '@/hooks/useAuthUser';
-import { AdvancedFiltersService } from '@/services/advancedFiltersService';
+import { SimpleFiltersService } from '@/services/simpleFiltersService';
 import type { FilterGroup } from '@/components/clients/filters/FilterGroup';
 
 export interface ContactData {
@@ -100,24 +100,31 @@ export const contactsService = {
       query = query.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
     }
 
-    // Se houver filtros avançados, usar serviço especializado (sem paginação por cursor)
-    if (filters.advancedFilters) {
+    // Se houver filtros avançados, aplicar diretamente com SimpleFiltersService
+    if (filters.advancedFilters && Array.isArray((filters.advancedFilters as any).rules)) {
       try {
-        const { data } = await AdvancedFiltersService.applyAdvancedFilters({
-          filterGroup: filters.advancedFilters as any,
-          searchTerm: filters.search,
-          statusFilter: filters.status,
-          segmentFilter: filters.tags && filters.tags[0] ? filters.tags[0] : undefined,
-          limit,
-          offset: 0,
-        });
-        return {
-          data: data as any[],
-          nextCursor: null,
-          hasMore: false,
-        };
+        let advancedQuery = supabase
+          .from('contacts')
+          .select('id, name, email, phone, kanban_stage_id, created_at, updated_at, sales, budget, client_name, status, tags')
+          .eq('user_id', user.id)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .limit(limit + 1);
+
+        advancedQuery = await SimpleFiltersService.applyRules(advancedQuery, (filters.advancedFilters as any).rules);
+
+        const { data: advData, error: advErr } = await advancedQuery;
+        if (advErr) {
+          console.error('Error applying advanced filters (simple):', advErr);
+          throw advErr;
+        }
+        const advContacts = advData || [];
+        const hasMoreAdv = advContacts.length > limit;
+        const resultAdv = hasMoreAdv ? advContacts.slice(0, limit) : advContacts;
+        return { data: resultAdv, nextCursor: null, hasMore: false };
       } catch (e) {
-        console.error('Error applying advanced filters with fallback path:', e);
+        console.error('Error applying advanced filters (simple):', e);
       }
     }
 
@@ -152,9 +159,7 @@ export const contactsService = {
         .lte('created_at', filters.dateRange.end);
     }
 
-    if (filters.advancedFilters) {
-      query = AdvancedFiltersService.attachAdvancedFilters(query, filters.advancedFilters);
-    }
+    // Caminho legado removido (attachAdvancedFilters) – toda lógica avançada passa por SimpleFiltersService
 
     const { data, error } = await query;
 
