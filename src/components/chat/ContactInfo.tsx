@@ -34,9 +34,10 @@ interface ContactInfoProps {
   getStatusColor: (status?: string) => string;
   width: number;
   onTagsChange?: (tags: string[]) => void; // Callback para mudanças nas tags
+  showCustomFields?: boolean; // Controla renderização de campos personalizados nas abas
 }
 
-export default function ContactInfo({ contact, getStatusColor, width, onTagsChange }: Readonly<ContactInfoProps>) {
+export default function ContactInfo({ contact, getStatusColor, width, onTagsChange, showCustomFields = true }: Readonly<ContactInfoProps>) {
   const [addFieldDialogOpen, setAddFieldDialogOpen] = useState(false);
   const [editFieldDialogOpen, setEditFieldDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"basico" | "comercial" | "utm" | "midia">("basico");
@@ -68,6 +69,7 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
 
   // Função para filtrar campos por categoria/aba
   const getFieldsForTab = (tab: string) => {
+    if (!showCustomFields) return [];
     switch (tab) {
       case "basico":
         return dynamicFields.basic || [];
@@ -137,18 +139,22 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
       />
       
       {/* Tabs Content */}
-      <AddCustomFieldDialog
-        isOpen={addFieldDialogOpen}
-        onClose={() => setAddFieldDialogOpen(false)}
-        targetTab={selectedTab}
-        onFieldAdded={handleFieldAdded}
-      />
-      <EditCustomFieldDialog
-        isOpen={editFieldDialogOpen}
-        onClose={() => setEditFieldDialogOpen(false)}
-        field={editingField}
-        onFieldEdited={handleFieldEdited}
-      />
+      {showCustomFields && (
+        <AddCustomFieldDialog
+          isOpen={addFieldDialogOpen}
+          onClose={() => setAddFieldDialogOpen(false)}
+          targetTab={selectedTab}
+          onFieldAdded={handleFieldAdded}
+        />
+      )}
+      {showCustomFields && (
+        <EditCustomFieldDialog
+          isOpen={editFieldDialogOpen}
+          onClose={() => setEditFieldDialogOpen(false)}
+          field={editingField}
+          onFieldEdited={handleFieldEdited}
+        />
+      )}
       <ContactTabs
         getFieldsForTab={getFieldsForTab}
         onAddField={handleAddField}

@@ -113,7 +113,7 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
 
 // Filtrar campos que devem ser visíveis na aba básica, como na tela de criação
   const visibleFields = customFieldsWithValues.filter(field => 
-    field.visibility_settings?.visible_in_tabs?.basic !== false
+    field.visibility_settings?.visible_in_client_info !== false
   );
 
   // Combinar os campos visíveis com seus valores - evitando duplicação
@@ -142,9 +142,17 @@ const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({ contactId }) 
           <CardTitle className="text-sm">Campos Personalizados</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Nenhum campo personalizado configurado para este cliente.
-          </p>
+          {isLoading ? (
+            <div className="space-y-3">
+              <div className="h-4 w-40 bg-muted rounded animate-pulse" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Nenhum campo personalizado configurado para este cliente.
+            </p>
+          )}
         </CardContent>
       </Card>
     );

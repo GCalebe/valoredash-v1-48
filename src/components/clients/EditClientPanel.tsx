@@ -207,6 +207,7 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
                     }}
                     getStatusColor={() => 'bg-gray-400'}
                     width={400}
+                    showCustomFields={false}
                     onTagsChange={(newTags) => {
                       updateContact('tags', newTags);
                       markFieldAsTouched('tags');
