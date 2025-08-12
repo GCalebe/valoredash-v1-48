@@ -10,6 +10,8 @@ import { useCustomFieldsPreloader } from "@/hooks/useCustomFieldsPreloader";
 import ClientsDashboardLayout from "@/components/clients/ClientsDashboardLayout";
 import ClientsTable from "@/components/clients/ClientsTable";
 import KanbanView from "@/components/clients/KanbanView";
+import ClientsFunnelView from "@/components/clients/ClientsFunnelView";
+import ClientsMarketingView from "@/components/clients/ClientsMarketingView";
 import ClientsModals from "@/components/clients/ClientsModals";
 import EditStageDialog from "@/components/clients/EditStageDialog";
 // Tree views não estão presentes; renderização de tree desativada temporariamente
@@ -21,7 +23,7 @@ const ClientsDashboard = () => {
   const { customFieldFilters, addCustomFieldFilter, removeCustomFieldFilter } =
     filter;
 
-  const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
+  const [viewMode, setViewMode] = useState<"table" | "kanban" | "tree-sales" | "tree-marketing">("kanban");
   const [isCompactView, setIsCompactView] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   
@@ -171,7 +173,7 @@ const ClientsDashboard = () => {
         setNewContact,
         handleAddContact,
         viewMode,
-        setViewMode: (v) => setViewMode(v === "kanban" ? "kanban" : "table"),
+         setViewMode,
         isCompactView,
         setIsCompactView,
         refreshing,
@@ -209,6 +211,10 @@ const ClientsDashboard = () => {
             stages={kanbanStages.stages}
             onStageEdit={handleStageEdit}
           />
+        ) : viewMode === "tree-sales" ? (
+          <ClientsFunnelView contacts={contacts} stages={kanbanStages.stages} />
+        ) : viewMode === "tree-marketing" ? (
+          <ClientsMarketingView contacts={contacts} />
         ) : null}
       </div>
 

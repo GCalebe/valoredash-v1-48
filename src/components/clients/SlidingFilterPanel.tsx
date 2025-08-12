@@ -305,7 +305,7 @@ const applyNow = () => {
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="top" className="p-0 h-[90vh] overflow-hidden" aria-label="Painel de filtros">
-        <div className="mx-auto w-full max-w-7xl h-full bg-background">
+        <div className="mx-auto w-full max-w-7xl h-full bg-background flex flex-col">
           {/* Top bar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-b bg-muted/30 gap-3">
             <div className="flex items-center gap-3 flex-1">
@@ -344,9 +344,9 @@ const applyNow = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-12 gap-0 h-[calc(100%-140px)]">
+          <div className="grid grid-cols-12 gap-0 flex-1 min-h-0 overflow-hidden">
             {/* Left column: Quick Filters */}
-            <div className="col-span-3 border-r bg-muted/20 p-4">
+            <div className="col-span-3 border-r bg-muted/20 p-4 overflow-y-auto">
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3">Filtros Rápidos</h3>
@@ -444,7 +444,7 @@ const applyNow = () => {
             <div className="col-span-6 border-r p-4 overflow-y-auto">
               <div className="h-full">
                 <h3 className="text-sm font-semibold text-foreground mb-4">Propriedades do Lead</h3>
-                <ScrollArea className="h-[calc(100%-2rem)]">
+                <ScrollArea className="h-full">
                   <div className="space-y-6">
                     {allSections.map((section) => (
                       <div key={section.key}>
@@ -585,7 +585,7 @@ const applyNow = () => {
             </div>
 
             {/* Right: tags */}
-            <div className="col-span-3 p-4 bg-muted/10">
+            <div className="col-span-3 p-4 bg-muted/10 overflow-y-auto">
               <div className="h-full">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">

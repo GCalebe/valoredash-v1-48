@@ -91,8 +91,10 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   useEffect(() => {
     const handleApply = (e: any) => {
       const detail = e?.detail;
-      if (detail?.id && Array.isArray(detail?.rules)) {
-        updateAdvancedFilter(detail.id, detail);
+      if (detail && Array.isArray(detail?.rules)) {
+        // Normaliza o id recebido para o id do filtro atual, garantindo update
+        const normalized = { ...detail, id: advancedFilter.id };
+        updateAdvancedFilter(advancedFilter.id, normalized);
       }
     };
     const handleClear = () => {
@@ -116,7 +118,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
       window.removeEventListener('clients-quick-search-change', handleQuickSearch as any);
       window.removeEventListener('clients-quick-tags-change', handleQuickTags as any);
     };
-  }, [updateAdvancedFilter, clearAdvancedFilter]);
+  }, [updateAdvancedFilter, clearAdvancedFilter, advancedFilter.id]);
 
   // Verifica se há filtros ativos
   const hasActiveFilters = useMemo(
