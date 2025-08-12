@@ -10,8 +10,7 @@ import { useCustomFieldsPreloader } from "@/hooks/useCustomFieldsPreloader";
 import ClientsDashboardLayout from "@/components/clients/ClientsDashboardLayout";
 import ClientsTable from "@/components/clients/ClientsTable";
 import KanbanView from "@/components/clients/KanbanView";
-import ClientsFunnelView from "@/components/clients/ClientsFunnelView";
-import ClientsMarketingView from "@/components/clients/ClientsMarketingView";
+// Removed funnel/marketing views
 import ClientsModals from "@/components/clients/ClientsModals";
 import EditStageDialog from "@/components/clients/EditStageDialog";
 // Tree views não estão presentes; renderização de tree desativada temporariamente
@@ -20,10 +19,9 @@ const ClientsDashboard = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
   const filter = useUnifiedClientFilters();
-  const { customFieldFilters, addCustomFieldFilter, removeCustomFieldFilter } =
-    filter;
+  const { customFieldFilters } = filter;
 
-  const [viewMode, setViewMode] = useState<"table" | "kanban" | "tree-sales" | "tree-marketing">("kanban");
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
   const [isCompactView, setIsCompactView] = useState(false);
   
   // Stage editing state  
@@ -103,8 +101,11 @@ const ClientsDashboard = () => {
   // Wrapper para handleRefresh com estado de loading
   const handleRefreshWithLoading = async () => {
     setRefreshing(true);
-    await handleRefresh();
-    setRefreshing(false);
+    try {
+      await Promise.resolve(handleRefresh());
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   // Pré-carregar campos personalizados em background
@@ -139,16 +140,18 @@ const ClientsDashboard = () => {
     );
   }
 
+  const headerActiveFilterChips = [
+    filter.searchTerm ? `Busca: ${filter.searchTerm}` : "",
+    filter.hasAdvancedRules ? `Filtro 2: ativo` : "",
+  ].filter((v): v is string => Boolean(v));
+
   return (
     <ClientsDashboardLayout
       headerProps={{
         searchTerm: filter.searchTerm,
         setSearchTerm: filter.setSearchTerm,
          hasActiveFilters: filter.hasAdvancedRules || filter.searchTerm !== "",
-        activeFilterChips: [
-          filter.searchTerm ? `Busca: ${filter.searchTerm}` : "",
-           filter.hasAdvancedRules ? `Filtro 2: ativo` : "",
-        ].filter(Boolean) as string[],
+        activeFilterChips: headerActiveFilterChips,
         isAddContactOpen,
         onAddContactOpenChange: setIsAddContactOpen,
         newContact,
@@ -159,7 +162,7 @@ const ClientsDashboard = () => {
         isCompactView,
         setIsCompactView,
         refreshing,
-        handleRefresh: handleRefreshWithLoading,
+        handleRefresh: () => { void handleRefreshWithLoading(); },
       }}
     >
       <div className="flex-1 overflow-hidden">
@@ -193,10 +196,6 @@ const ClientsDashboard = () => {
             stages={kanbanStages.stages}
             onStageEdit={handleStageEdit}
           />
-        ) : viewMode === "tree-sales" ? (
-          <ClientsFunnelView contacts={contacts} stages={kanbanStages.stages} />
-        ) : viewMode === "tree-marketing" ? (
-          <ClientsMarketingView contacts={contacts} />
         ) : null}
       </div>
 

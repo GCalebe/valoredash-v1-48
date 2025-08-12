@@ -45,7 +45,15 @@ export function SavedFilters({ onApplyFilter, onFilterDeleted }: SavedFiltersPro
         return;
       }
 
-      setSavedFilters(data);
+      // Garantir tipagem correta para FilterGroup
+      setSavedFilters(
+        (data as any[]).map((row) => ({
+          id: row.id,
+          name: row.name,
+          filter_data: row.filter_data as FilterGroup,
+          created_at: row.created_at,
+        }))
+      );
     } catch (error) {
       console.error('Erro ao carregar filtros salvos:', error);
       toast.error('Erro inesperado ao carregar filtros salvos');

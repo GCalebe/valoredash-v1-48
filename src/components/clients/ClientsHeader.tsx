@@ -28,8 +28,8 @@ interface ClientsHeaderProps {
   newContact: Partial<unknown>;
   setNewContact: (contact: Partial<unknown>) => void;
   handleAddContact: () => Promise<string>;
-  viewMode: "table" | "kanban" | "tree-sales" | "tree-marketing";
-  setViewMode: (v: "table" | "kanban" | "tree-sales" | "tree-marketing") => void;
+  viewMode: "table" | "kanban";
+  setViewMode: (v: "table" | "kanban") => void;
   isCompactView: boolean;
   setIsCompactView: (val: boolean) => void;
   refreshing: boolean;

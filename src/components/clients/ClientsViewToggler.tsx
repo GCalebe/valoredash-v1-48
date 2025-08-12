@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Grid, List, TrendingUp, Tag } from "lucide-react";
+import { Grid, List } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/tooltip";
 
 interface ClientsViewTogglerProps {
-  viewMode: "table" | "kanban" | "tree-sales" | "tree-marketing";
-  setViewMode: (v: "table" | "kanban" | "tree-sales" | "tree-marketing") => void;
+  viewMode: "table" | "kanban";
+  setViewMode: (v: "table" | "kanban") => void;
 }
 
 const ClientsViewToggler: React.FC<ClientsViewTogglerProps> = ({
@@ -20,8 +20,6 @@ const ClientsViewToggler: React.FC<ClientsViewTogglerProps> = ({
   const views = [
     { id: "table", icon: List, label: "Lista" },
     { id: "kanban", icon: Grid, label: "Kanban" },
-    { id: "tree-sales", icon: TrendingUp, label: "Funil" },
-    { id: "tree-marketing", icon: Tag, label: "Marketing" }
   ];
 
   return (
@@ -39,13 +37,9 @@ const ClientsViewToggler: React.FC<ClientsViewTogglerProps> = ({
                 <Button
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setViewMode(view.id as "table" | "kanban" | "tree-sales" | "tree-marketing")}
-                  className={`${
-                    isFirst ? "rounded-r-none" : isLast ? "rounded-l-none" : "rounded-none"
-                  } ${
-                    isActive
-                      ? "bg-white text-blue-700"
-                      : "text-white hover:bg-white/20 border-0"
+                  onClick={() => setViewMode(view.id as "table" | "kanban")}
+                  className={`${isFirst ? "rounded-r-none" : isLast ? "rounded-l-none" : "rounded-none"} ${
+                    isActive ? "bg-white text-blue-700" : "text-white hover:bg-white/20 border-0"
                   }`}
                   style={!isActive && !isLast ? { borderRight: "1px solid #ffffff55" } : {}}
                 >

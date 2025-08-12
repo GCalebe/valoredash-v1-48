@@ -100,10 +100,10 @@ export const useFilterDialog = (filterType: 'clients' | 'conversations' = 'clien
       }
 
       // Converte para o formato esperado pelo componente
-      const convertedFilters: SavedFilter[] = data.map(filter => ({
+      const convertedFilters: SavedFilter[] = (data as any[]).map((filter) => ({
         id: filter.id,
         name: filter.name,
-        filter: filter.filter_data
+        filter: filter.filter_data as FilterGroup,
       }));
 
       setSavedFilters(convertedFilters);
