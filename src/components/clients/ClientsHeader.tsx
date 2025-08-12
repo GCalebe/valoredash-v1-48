@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import { Input } from "@/components/ui/input";
 import { useClientImport } from "@/hooks/useClientImport";
-import FilterDialog from "@/components/clients/FilterDialog";
+
 import AddClientDialog from "@/components/clients/AddClientDialog";
 import ClientMethodSelectionModal from "@/components/clients/ClientMethodSelectionModal";
 import ClientImportModal from "@/components/clients/ClientImportModal";
@@ -162,23 +162,6 @@ const ClientsHeader = ({
         {/* Grupo principal: filtros, novo cliente e controles */}
         <div className="flex flex-row items-center gap-3 h-full">
           {/* Filtros */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsFilterDialogOpen(true)}
-            className="text-white hover:bg-white/20 focus-visible:ring-white flex items-center gap-1"
-          >
-            <Filter className="h-4 w-4" />
-            Filtros
-            {hasActiveFilters && (
-              <Badge
-                variant="secondary"
-                className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-              >
-                !
-              </Badge>
-            )}
-          </Button>
 
           {/* Sugestões Inteligentes */}
           <Button
@@ -204,33 +187,7 @@ const ClientsHeader = ({
             Filtro 2
           </Button>
 
-          {/* Chips dos filtros ativos */}
-          {hasActiveFilters && activeFilterChips.length > 0 && (
-            <div className="flex gap-1 max-w-[520px] overflow-x-auto py-1">
-              {activeFilterChips.map((chip, idx) => (
-                <Badge key={idx} variant="secondary" className="whitespace-nowrap">
-                  {chip}
-                </Badge>
-              ))}
-            </div>
-          )}
 
-          <FilterDialog
-            isOpen={isFilterDialogOpen}
-            onOpenChange={setIsFilterDialogOpen}
-            statusFilter={statusFilter}
-            segmentFilter={segmentFilter}
-            lastContactFilter={lastContactFilter}
-            customFieldFilters={customFieldFilters}
-            onStatusFilterChange={onStatusFilterChange}
-            onSegmentFilterChange={onSegmentFilterChange}
-            onLastContactFilterChange={onLastContactFilterChange}
-            onAddCustomFieldFilter={onAddCustomFieldFilter}
-            onRemoveCustomFieldFilter={onRemoveCustomFieldFilter}
-            onClearFilters={onClearFilters}
-            onClearCustomFieldFilters={onClearCustomFieldFilters}
-            hasActiveFilters={hasActiveFilters}
-          />
 
           {/* Add Cliente - New Flow */}
           <Button 
@@ -289,24 +246,6 @@ const ClientsHeader = ({
             )}
             <ClientsViewToggler viewMode={viewMode} setViewMode={setViewMode} />
 
-            {viewMode === "table" && (
-              <div className="ml-1 flex items-center rounded bg-white/10">
-                <button
-                  className={`px-2 py-1 text-xs rounded-l ${listGrouping === "flat" ? "bg-white/20 text-white" : "text-white/80 hover:text-white"}`}
-                  onClick={() => setListGrouping("flat")}
-                  title="Lista plana"
-                >
-                  Plano
-                </button>
-                <button
-                  className={`px-2 py-1 text-xs rounded-r ${listGrouping === "stageTag" ? "bg-white/20 text-white" : "text-white/80 hover:text-white"}`}
-                  onClick={() => setListGrouping("stageTag")}
-                  title="Agrupar por Estágio e Tag"
-                >
-                  Agrupado
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Botão atualizar */}
@@ -331,15 +270,6 @@ const ClientsHeader = ({
         </div>
       </div>
       
-      {/* Status filter indicator */}
-      {statusFilter !== "all" && (
-        <div className="bg-white/10 py-1 px-6 text-white text-sm flex items-center">
-          <span className="mr-2">Filtro ativo:</span>
-          <Badge className="bg-blue-500 text-white">
-            Status: {getStatusDisplayName(statusFilter)}
-          </Badge>
-        </div>
-      )}
       
       {/* Smart Suggestions Bar */}
       <SmartSuggestionsBar

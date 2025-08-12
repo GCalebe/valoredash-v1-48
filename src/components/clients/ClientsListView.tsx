@@ -1,5 +1,5 @@
 import React from "react";
-import ClientsTable from "./ClientsTable";
+
 import GroupedListView from "./GroupedListView";
 import { Contact } from "@/types/client";
 import { KanbanStage } from "@/hooks/useKanbanStagesSupabase";
@@ -44,27 +44,10 @@ const ClientsListView: React.FC<ClientsListViewProps> = ({
     customFieldFilters,
   });
 
-  if (groupingMode === "stageTag") {
-    return (
-      <GroupedListView
-        contacts={filteredContacts}
-        stages={stages}
-        onViewDetails={onViewDetails}
-        onSendMessage={onSendMessage}
-        onEditClient={onEditClient}
-      />
-    );
-  }
-
   return (
-    <ClientsTable
-      contacts={contacts}
-      isLoading={isLoading}
-      searchTerm={searchTerm}
-      statusFilter={statusFilter}
-      segmentFilter={segmentFilter}
-      lastContactFilter={lastContactFilter}
-      customFieldFilters={customFieldFilters}
+    <GroupedListView
+      contacts={filteredContacts}
+      stages={stages}
       onViewDetails={onViewDetails}
       onSendMessage={onSendMessage}
       onEditClient={onEditClient}
