@@ -210,7 +210,24 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
     return LEFT_MENU.filter((item) => item.label.toLowerCase().includes(q));
   }, [debouncedMenuSearch]);
 
-  // Removido: labels e agrupamento não são usados no Filtro 2
+  const CATEGORY_LABELS: Record<string, string> = {
+    basic: "BÁSICO",
+    kanban: "KANBAN",
+    commercial: "COMERCIAL",
+    temporal: "TEMPORAL",
+    documents: "DOCUMENTOS",
+    personalized: "PERSONALIZADOS",
+  };
+
+  const groupedFields = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    (fields || []).forEach((f: any) => {
+      const key = f.category || 'basic';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(f);
+    });
+    return groups;
+  }, [fields]);
 
   const clearSection = (sectionKey: string) => {
     const section = allSections.find((s) => s.key === sectionKey);
@@ -236,62 +253,38 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
     window.dispatchEvent(new CustomEvent('clients-clear-advanced-filter'));
   };
 
-  // Helpers para reduzir ternários e facilitar manutenção
-  const getSelectedArray = (input: unknown): string[] => {
-    if (Array.isArray(input)) return input.filter((v) => v != null && String(v).trim());
-    if (input != null && String(input).trim() !== "") return [String(input)];
-    return [];
-  };
-
-  const buildSectionRules = (): any[] => {
-    const out: any[] = [];
-    allSections.forEach((section) => {
-      section.fields.forEach((f) => {
-        const arr = getSelectedArray(values[f.key]);
-        if (activeMap[f.key] && arr.length > 0) {
-          const arrayField = f.key === "tags" || f.key === "responsible_hosts";
-          const operator = arrayField ? "contains_any" : "in";
-          out.push({ id: `rule-${f.key}`, field: f.key, operator, value: arr });
-        }
-      });
+const applyNow = () => {
+  const rules: any[] = [];
+  allSections.forEach((section) => {
+    section.fields.forEach((f) => {
+      const raw = values[f.key];
+      const arr: string[] = Array.isArray(raw)
+        ? raw
+        : raw != null && String(raw).trim() !== ""
+          ? [String(raw)]
+          : [];
+      if (activeMap[f.key] && arr.length > 0) {
+        const arrayField = f.key === "tags" || f.key === "responsible_hosts";
+        const operator = arrayField ? "contains_any" : "in";
+        rules.push({ id: `rule-${f.key}`, field: f.key, operator, value: arr });
+      }
     });
-    return out;
-  };
-
-  const buildQuickFilterRules = (): any[] => {
-    const out: any[] = [];
-    if (statusFilter && statusFilter !== "all") {
-      out.push({ id: `rule-kanban-stage`, field: 'kanban_stage_id', operator: 'in', value: [statusFilter] });
-    }
-    if (segmentFilter && segmentFilter !== "all") {
-      const hostId = responsibleHostsMap[segmentFilter] || segmentFilter;
-      out.push({ id: `rule-responsible-hosts`, field: 'responsible_hosts', operator: 'contains_any', value: [hostId] });
-    }
-    // Tags selecionadas na terceira coluna (Etiquetas)
-    const tagValues = Object.keys(activeMap)
-      .filter((k) => k.startsWith('tag:') && activeMap[k])
-      .map((k) => values[k])
-      .flatMap((v) => getSelectedArray(v));
-    if (tagValues.length > 0) {
-      out.push({ id: `rule-tags`, field: 'tags', operator: 'contains_any', value: tagValues });
-    }
-    return out;
-  };
-
-  const applyNow = () => {
-    // Filtro 2: lista plana de regras (sem AND/OR)
-    const rules = [...buildSectionRules(), ...buildQuickFilterRules()];
-    const payload = { id: `group-top-panel`, condition: 'AND', rules };
-    window.dispatchEvent(new CustomEvent('clients-apply-advanced-filter', { detail: payload }));
-    onClose();
-  };
+  });
+  const group = { id: `group-top-panel`, condition: "AND", rules };
+  window.dispatchEvent(new CustomEvent('clients-apply-advanced-filter', { detail: group }));
+};
 
   // Atualiza chips selecionados a cada mudança (inclui campos personalizados e tags)
   useEffect(() => {
     const chips: { key: string; label: string }[] = [];
     allSections.forEach((section) => {
       section.fields.forEach((f) => {
-        const arr = getSelectedArray(values[f.key]);
+        const raw = values[f.key];
+        const arr: string[] = Array.isArray(raw)
+          ? raw
+          : raw != null && String(raw).trim() !== ""
+            ? [String(raw)]
+            : [];
         if (activeMap[f.key] && arr.length > 0) {
           chips.push({ key: f.key, label: `${f.placeholder}: ${arr.join(', ')}` });
         }
@@ -302,9 +295,8 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
       .filter((k) => k.startsWith('tag:') && activeMap[k])
       .forEach((k) => {
         const tagVal = values[k];
-        const arr = getSelectedArray(tagVal);
-        if (arr.length > 0) {
-          chips.push({ key: k, label: `Tag: ${arr.join(', ')}` });
+        if (tagVal && String(tagVal).trim()) {
+          chips.push({ key: k, label: `Tag: ${String(tagVal)}` });
         }
       });
     setSelectedChips(chips);
@@ -313,7 +305,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="top" className="p-0 h-[90vh] overflow-hidden" aria-label="Painel de filtros">
-        <div className="mx-auto w-full max-w-7xl h-full bg-background flex flex-col">
+        <div className="mx-auto w-full max-w-7xl h-full bg-background">
           {/* Top bar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-b bg-muted/30 gap-3">
             <div className="flex items-center gap-3 flex-1">
@@ -352,9 +344,9 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
             </div>
           )}
 
-          <div className="grid grid-cols-12 gap-0 flex-1 min-h-0 overflow-hidden">
+          <div className="grid grid-cols-12 gap-0 h-[calc(100%-140px)]">
             {/* Left column: Quick Filters */}
-            <div className="col-span-3 border-r bg-muted/20 p-4 overflow-y-auto">
+            <div className="col-span-3 border-r bg-muted/20 p-4">
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3">Filtros Rápidos</h3>
@@ -452,7 +444,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
             <div className="col-span-6 border-r p-4 overflow-y-auto">
               <div className="h-full">
                 <h3 className="text-sm font-semibold text-foreground mb-4">Propriedades do Lead</h3>
-                <ScrollArea className="h-full">
+                <ScrollArea className="h-[calc(100%-2rem)]">
                   <div className="space-y-6">
                     {allSections.map((section) => (
                       <div key={section.key}>
@@ -593,7 +585,7 @@ export default function SlidingFilterPanel({ isOpen, onClose }: Readonly<Sliding
             </div>
 
             {/* Right: tags */}
-            <div className="col-span-3 p-4 bg-muted/10 overflow-y-auto">
+            <div className="col-span-3 p-4 bg-muted/10">
               <div className="h-full">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
