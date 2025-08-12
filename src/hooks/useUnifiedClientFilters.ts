@@ -39,8 +39,6 @@ export interface UnifiedClientFilters {
   
   // Filtros computados para o serviço
   getContactFilters: () => ContactFilters;
-  // Aplicação direta de regras do Filtro 2 (sem event bus)
-  applyAdvancedRules: (rules: any[]) => void;
 }
 
 export function useUnifiedClientFilters(): UnifiedClientFilters {
@@ -63,13 +61,6 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   const updateAdvancedFilterWrapper = useCallback((filter: FilterGroup) => {
     updateAdvancedFilter(filter.id, filter);
   }, [updateAdvancedFilter]);
-
-  // Aplicação direta de regras vindas do Filtro 2
-  const applyAdvancedRules = useCallback((rules: any[]) => {
-    const normalizedRules = Array.isArray(rules) ? rules : [];
-    const group: FilterGroup = { ...advancedFilter, rules: normalizedRules } as FilterGroup;
-    updateAdvancedFilter(group.id, group);
-  }, [advancedFilter, updateAdvancedFilter]);
   // Implementa debounce para o searchTerm
   useEffect(() => {
     if (debounceTimeoutRef.current) {
@@ -100,10 +91,8 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
   useEffect(() => {
     const handleApply = (e: any) => {
       const detail = e?.detail;
-      if (detail && Array.isArray(detail?.rules)) {
-        // Normaliza o id recebido para o id do filtro atual, garantindo update
-        const normalized = { ...detail, id: advancedFilter.id };
-        updateAdvancedFilter(advancedFilter.id, normalized);
+      if (detail?.id && Array.isArray(detail?.rules)) {
+        updateAdvancedFilter(detail.id, detail);
       }
     };
     const handleClear = () => {
@@ -127,7 +116,7 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
       window.removeEventListener('clients-quick-search-change', handleQuickSearch as any);
       window.removeEventListener('clients-quick-tags-change', handleQuickTags as any);
     };
-  }, [updateAdvancedFilter, clearAdvancedFilter, advancedFilter.id]);
+  }, [updateAdvancedFilter, clearAdvancedFilter]);
 
   // Verifica se há filtros ativos
   const hasActiveFilters = useMemo(
@@ -245,6 +234,5 @@ export function useUnifiedClientFilters(): UnifiedClientFilters {
     hasActiveFilters,
     clearAllFilters,
     getContactFilters,
-    applyAdvancedRules,
   };
 }

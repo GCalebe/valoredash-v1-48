@@ -10,7 +10,6 @@ import { useCustomFieldsPreloader } from "@/hooks/useCustomFieldsPreloader";
 import ClientsDashboardLayout from "@/components/clients/ClientsDashboardLayout";
 import ClientsTable from "@/components/clients/ClientsTable";
 import KanbanView from "@/components/clients/KanbanView";
-// Removed funnel/marketing views
 import ClientsModals from "@/components/clients/ClientsModals";
 import EditStageDialog from "@/components/clients/EditStageDialog";
 // Tree views não estão presentes; renderização de tree desativada temporariamente
@@ -23,6 +22,7 @@ const ClientsDashboard = () => {
 
   const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
   const [isCompactView, setIsCompactView] = useState(false);
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   
   // Stage editing state  
   const [isEditStageDialogOpen, setIsEditStageDialogOpen] = useState(false);
@@ -150,15 +150,35 @@ const ClientsDashboard = () => {
       headerProps={{
         searchTerm: filter.searchTerm,
         setSearchTerm: filter.setSearchTerm,
-         hasActiveFilters: filter.hasAdvancedRules || filter.searchTerm !== "",
-        activeFilterChips: headerActiveFilterChips,
+        isFilterDialogOpen,
+        setIsFilterDialogOpen,
+        statusFilter: filter.statusFilter,
+        segmentFilter: filter.segmentFilter,
+        lastContactFilter: filter.lastContactFilter,
+        customFieldFilters,
+        onStatusFilterChange: filter.setStatusFilter,
+        onSegmentFilterChange: filter.setSegmentFilter,
+        onLastContactFilterChange: filter.setLastContactFilter,
+        onAddCustomFieldFilter: filter.addCustomFieldFilter,
+        onRemoveCustomFieldFilter: filter.removeCustomFieldFilter,
+        onClearFilters: filter.clearAllFilters,
+        onClearCustomFieldFilters: () => filter.clearAllFilters(),
+        hasActiveFilters: filter.hasActiveFilters,
+        activeFilterChips: [
+          filter.searchTerm ? `Busca: ${filter.searchTerm}` : "",
+          filter.statusFilter !== "all" ? `Status: ${filter.statusFilter}` : "",
+          filter.segmentFilter !== "all" ? `Etapa: ${filter.segmentFilter}` : "",
+          filter.lastContactFilter !== "all" ? `Últ. contato: ${filter.lastContactFilter}` : "",
+          customFieldFilters.length > 0 ? `Custom: ${customFieldFilters.length}` : "",
+          filter.hasAdvancedRules ? `Avançados` : "",
+        ].filter(Boolean) as string[],
         isAddContactOpen,
         onAddContactOpenChange: setIsAddContactOpen,
         newContact,
         setNewContact,
         handleAddContact,
         viewMode,
-         setViewMode,
+        setViewMode: (v) => setViewMode(v === "kanban" ? "kanban" : "table"),
         isCompactView,
         setIsCompactView,
         refreshing,
