@@ -76,7 +76,7 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
       case "comercial":
         return dynamicFields.commercial || [];
       case "utm":
-        return dynamicFields.personalized || []; // UTM pode usar personalized
+        return []; // UTM real será renderizado via ClientUTMData
       case "midia":
         return dynamicFields.documents || [];
       default:
@@ -156,6 +156,7 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
         />
       )}
       <ContactTabs
+        contactId={contact.id}
         getFieldsForTab={getFieldsForTab}
         onAddField={handleAddField}
         onEditField={handleEditField}

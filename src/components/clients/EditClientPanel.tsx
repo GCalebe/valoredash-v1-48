@@ -10,10 +10,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Contact } from "@/types/client";
 
-import ContactInfo from "@/components/chat/ContactInfo";
 import NotesFieldEdit from "./NotesFieldEdit";
 import CustomFieldsSection from "./CustomFieldsSection";
-import LoadingClientState from "@/components/chat/LoadingClientState";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BasicInfoFields from "./BasicInfoFields";
+import CompanyInfoFields from "./CompanyInfoFields";
+import DialogTabsContent from "./DialogTabsContent";
+/* Removed unused import LoadingClientState */
 
 import { SkeletonFormGrid, SkeletonCustomFields } from "@/components/ui/skeleton-form";
 import { Loader2, Save, Clock, CheckCircle } from "lucide-react";
@@ -66,7 +69,7 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
   const {
     errors,
     isValid,
-    getFieldError,
+    // getFieldError,
     markFieldAsTouched,
     triggerValidation,
   } = useRealTimeValidation(contact);
@@ -150,22 +153,24 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
             
             {enableAutoSave && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                {autoSaving ? (
+                {autoSaving && (
                   <>
                     <Loader2 className="h-3 w-3 animate-spin" />
                     <span>Salvando...</span>
                   </>
-                ) : hasUnsavedChanges ? (
+                )}
+                {!autoSaving && hasUnsavedChanges && (
                   <>
                     <Clock className="h-3 w-3" />
                     <span>Alterações não salvas</span>
                   </>
-                ) : lastSaved ? (
+                )}
+                {!autoSaving && !hasUnsavedChanges && lastSaved && (
                   <>
                     <CheckCircle className="h-3 w-3 text-green-600" />
                     <span>Salvo às {lastSaved.toLocaleTimeString()}</span>
                   </>
-                ) : null}
+                )}
               </div>
             )}
           </div>
@@ -188,42 +193,48 @@ const EditClientPanel: React.FC<EditClientPanelProps> = ({
           <div className={`${showContactPreview ? 'w-1/2' : 'w-full'} min-h-0 flex flex-col`}>
             <ScrollArea className="flex-1">
               <div className="p-4 space-y-4">
-                {/* Client Information with Tabs */}
-                {contact && (
-                  <ContactInfo
-                    contact={{
-                      id: contact.id,
-                      name: contact.name,
-                      avatar: contact.avatar || '',
-                      lastMessage: '',
-                      timestamp: new Date().toISOString(),
-                      unreadCount: 0,
-                      isOnline: false,
-                      status: 'offline',
-                      phone: contact.phone,
-                      email: contact.email,
-                      sessionId: contact.id,
-                      tags: contact.tags || []
-                    }}
-                    getStatusColor={() => 'bg-gray-400'}
-                    width={400}
-                    showCustomFields={false}
-                    onTagsChange={(newTags) => {
-                      updateContact('tags', newTags);
-                      markFieldAsTouched('tags');
-                    }}
-                  />
-                )}
+                <Tabs defaultValue="principal" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="principal">Principal</TabsTrigger>
+                    <TabsTrigger value="utm">UTM</TabsTrigger>
+                    <TabsTrigger value="midia">Mídia</TabsTrigger>
+                    <TabsTrigger value="produtos">Produtos</TabsTrigger>
+                  </TabsList>
 
-                {/* Custom Fields Section */}
-                <div className="mt-6">
-                  <CustomFieldsSection contactId={selectedContact?.id || null} />
-                </div>
+                  <TabsContent value="principal" className="space-y-4">
+                    <div className="grid grid-cols-2 gap-6">
+                      <BasicInfoFields
+                        newContact={contact || {}}
+                        validationErrors={{}}
+                        onInputChange={(field, value) => {
+                          updateContact(field as any, value);
+                          markFieldAsTouched(field as any);
+                        }}
+                      />
+                      <CompanyInfoFields
+                        newContact={contact || {}}
+                        validationErrors={{}}
+                        onInputChange={(field, value) => {
+                          updateContact(field as any, value);
+                          markFieldAsTouched(field as any);
+                        }}
+                      />
+                    </div>
 
-                {/* Notes Field */}
-                <div className="mt-6">
-                  <NotesFieldEdit contactId={selectedContact?.id || null} />
-                </div>
+                    {/* Campos personalizados no principal */}
+                    <div className="mt-6">
+                      <CustomFieldsSection contactId={selectedContact?.id || null} />
+                    </div>
+
+                    {/* Observações */}
+                    <div className="mt-6">
+                      <NotesFieldEdit contactId={selectedContact?.id || null} />
+                    </div>
+                  </TabsContent>
+
+                  {/* Abas UTM/Mídia/Produtos padronizadas com a criação */}
+                  <DialogTabsContent newContact={contact || {}} />
+                </Tabs>
               </div>
             </ScrollArea>
           </div>

@@ -8,7 +8,7 @@ import CustomFieldRenderer from "./CustomFieldRenderer";
 import CreateCustomFieldDialog from "./CreateCustomFieldDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -28,9 +28,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+type FieldUpdateValue = string | string[] | null;
 interface CustomFieldsTabProps {
   clientId?: string;
-  onFieldUpdate?: (fieldId: string, value: string | string[] | null) => void;
+  onFieldUpdate?: (fieldId: string, value: FieldUpdateValue) => void;
   readOnly?: boolean;
 }
 
@@ -40,10 +41,10 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
   readOnly = false,
 }) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [customFieldsWithValues, setCustomFieldsWithValues] = useState<CustomFieldWithValue[]>([]);
+  const [customFieldsWithValues] = useState<CustomFieldWithValue[]>([]);
   const { customFields, loading, deleteCustomField, updateCustomField } = useCustomFields();
 
-  const handleFieldChange = (fieldId: string, value: string | string[] | null) => {
+  const handleFieldChange = (fieldId: string, value: FieldUpdateValue) => {
     if (onFieldUpdate) {
       onFieldUpdate(`custom_${fieldId}`, value);
     }
@@ -77,10 +78,10 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
     const newTabSettings = {
       basic: false,
       commercial: false,
-      utm: false,
-      docs: false,
-      [selectedTab]: true
-    };
+      personalized: false,
+      documents: false,
+      [selectedTab]: true,
+    } as Record<string, boolean>;
     
     try {
       await updateCustomField(fieldId, {
@@ -99,9 +100,9 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
     const tabSettings = field?.visibility_settings?.visible_in_tabs || {};
     if (tabSettings.basic) return 'basic';
     if (tabSettings.commercial) return 'commercial';
-    if (tabSettings.utm) return 'utm';
-    if (tabSettings.docs) return 'docs';
-    return 'basic'; // default
+    if (tabSettings.personalized) return 'personalized';
+    if (tabSettings.documents) return 'documents';
+    return 'basic';
   };
 
   if (loading) {
@@ -218,8 +219,8 @@ const CustomFieldsTab: React.FC<CustomFieldsTabProps> = ({
                         <SelectContent>
                           <SelectItem value="basic">Básico</SelectItem>
                           <SelectItem value="commercial">Comercial</SelectItem>
-                          <SelectItem value="utm">UTM</SelectItem>
-                          <SelectItem value="docs">Arquivos</SelectItem>
+                          <SelectItem value="personalized">Personalizado</SelectItem>
+                          <SelectItem value="documents">Arquivos</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

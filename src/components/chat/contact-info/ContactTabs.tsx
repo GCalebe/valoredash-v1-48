@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Settings, X } from "lucide-react";
 import CustomFieldRenderer from "@/components/clients/CustomFieldRenderer";
+import ClientUTMData from "@/components/clients/ClientUTMData";
 
 interface FieldItem {
   id: string;
@@ -17,6 +18,7 @@ interface FieldItem {
 }
 
 interface ContactTabsProps {
+  contactId?: string;
   getFieldsForTab: (tab: string) => FieldItem[];
   onAddField: (tab: "basico" | "comercial" | "utm" | "midia") => void;
   onEditField: (id: string, name: string, type: string, options: string[] | null) => void;
@@ -24,7 +26,7 @@ interface ContactTabsProps {
   onUpdateField: (id: string, value: string | string[]) => void;
 }
 
-export const ContactTabs: React.FC<ContactTabsProps> = ({ getFieldsForTab, onAddField, onEditField, onDeleteField, onUpdateField }) => {
+export const ContactTabs: React.FC<ContactTabsProps> = ({ contactId, getFieldsForTab, onAddField, onEditField, onDeleteField, onUpdateField }) => {
   return (
     <div className="flex-1 p-4">
       <Tabs defaultValue="basico" className="h-full">
@@ -46,21 +48,21 @@ export const ContactTabs: React.FC<ContactTabsProps> = ({ getFieldsForTab, onAdd
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-muted-foreground">Nome completo</label>
-                  <Input className="h-8 text-sm" />
+                  <label htmlFor="nome-completo" className="text-xs text-muted-foreground">Nome completo</label>
+                  <Input id="nome-completo" className="h-8 text-sm" />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Email</label>
-                  <Input placeholder="email@exemplo.com" className="h-8 text-sm" />
+                  <label htmlFor="email-basico" className="text-xs text-muted-foreground">Email</label>
+                  <Input id="email-basico" placeholder="email@exemplo.com" className="h-8 text-sm" />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Data de nascimento</label>
-                  <Input type="date" className="h-8 text-sm" />
+                  <label htmlFor="data-nascimento" className="text-xs text-muted-foreground">Data de nascimento</label>
+                  <Input id="data-nascimento" type="date" className="h-8 text-sm" />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Gênero</label>
+                  <label htmlFor="genero" className="text-xs text-muted-foreground">Gênero</label>
                   <Select>
-                    <SelectTrigger className="h-8 text-sm">
+                    <SelectTrigger id="genero" className="h-8 text-sm">
                       <SelectValue placeholder="Selecione..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -98,19 +100,39 @@ export const ContactTabs: React.FC<ContactTabsProps> = ({ getFieldsForTab, onAdd
             <TabsContent key={tab} value={tab} className="mt-0">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium">{tab === 'comercial' ? 'Informações Comerciais' : tab === 'utm' ? 'Parâmetros UTM' : 'Mídia Compartilhada'}</h4>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => onAddField(tab)}>
-                    <Plus className="w-3 h-3 mr-1" />Campo
-                  </Button>
+                  <h4 className="text-sm font-medium">
+                    {tab === 'comercial' && 'Informações Comerciais'}
+                    {tab === 'utm' && 'Parâmetros UTM'}
+                    {tab === 'midia' && 'Mídia Compartilhada'}
+                  </h4>
+                  {tab !== 'utm' && (
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => onAddField(tab)}>
+                      <Plus className="w-3 h-3 mr-1" />Campo
+                    </Button>
+                  )}
                 </div>
-                <div className={tab === 'midia' ? 'grid grid-cols-6 gap-1' : 'space-y-3'}>
-                  {tab === 'midia' && Array.from({ length: 12 }).map((_, i) => (
-                    <div key={i} className="aspect-square bg-muted rounded-sm flex items-center justify-center hover:bg-muted/80 transition-colors cursor-pointer text-xs">
-                      <div className="w-3 h-3 bg-primary/20 rounded"></div>
+                {tab === 'utm' && (
+                  contactId ? (
+                    <div className="space-y-3">
+                      <ClientUTMData contactId={contactId || ""} readOnly={false} />
                     </div>
-                  ))}
-                </div>
-                {getFieldsForTab(tab).map((field) => (
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <h3 className="text-sm font-medium mb-1">Dados UTM</h3>
+                      <p className="text-xs">Disponível após salvar o cliente.</p>
+                    </div>
+                  )
+                )}
+                {tab === 'midia' && (
+                  <div className='grid grid-cols-6 gap-1'>
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <div key={`media-slot-${i}-${tab}`} className="aspect-square bg-muted rounded-sm flex items-center justify-center hover:bg-muted/80 transition-colors cursor-pointer text-xs">
+                        <div className="w-3 h-3 bg-primary/20 rounded"></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {tab !== 'utm' && getFieldsForTab(tab).map((field) => (
                   <div key={field.id} className="relative group">
                     <div className="flex items-center justify-between">
                       <div className="flex-1"></div>
