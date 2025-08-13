@@ -16,10 +16,11 @@ import AddClientCustomFields from "@/components/clients/AddClientCustomFields";
 import ClientUTMData from "@/components/clients/ClientUTMData";
 import ClientFilesTab from "@/components/clients/ClientFilesTab";
 import ClientProductsTab from "@/components/clients/ClientProductsTab";
+import NotesFieldEdit from "@/components/clients/NotesFieldEdit";
 import { Contact } from "@/types/client";
 import { useCustomFields } from "@/hooks/useCustomFields";
 
-type PrincipalLevel = "basic" | "company" | "custom";
+type PrincipalLevel = "basic" | "company" | "custom" | "hidden";
 
 interface ModernContactTabsProps {
   contactId: string;
@@ -47,6 +48,11 @@ const ModernContactTabs = ({ contactId, contact, onFieldUpdate }: ModernContactT
       label: "Campos Personalizados",
       icon: Settings,
       description: "Campos customizados",
+    },
+    hidden: {
+      label: "Ocultar Informações",
+      icon: ChevronDown,
+      description: "Mostrar apenas notas",
     },
   };
 
@@ -157,7 +163,12 @@ const ModernContactTabs = ({ contactId, contact, onFieldUpdate }: ModernContactT
 
               <ScrollArea className="h-[calc(100%-4rem)]">
                 <div className="p-4 space-y-4">
-                  {renderPrincipalContent()}
+                  {principalLevel !== "hidden" && renderPrincipalContent()}
+                  
+                  {/* Seção de Notas - sempre visível */}
+                  <div className={principalLevel !== "hidden" ? "mt-6" : ""}>
+                    <NotesFieldEdit contactId={contactId} />
+                  </div>
                 </div>
               </ScrollArea>
             </div>
