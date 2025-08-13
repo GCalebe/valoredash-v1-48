@@ -27,10 +27,25 @@ export function useConversations() {
 
       console.log("👤 Usuário autenticado:", user.id);
 
-      // Try to get conversations - first from the main conversations table
+      // Try to get conversations - first from the main conversations table with linked contact data
       const { data: conversationsData, error: conversationsError } = await supabase
         .from("conversations")
-        .select("*")
+        .select(`
+          *,
+          contact:contacts(
+            id,
+            name,
+            email,
+            phone,
+            client_name,
+            client_type,
+            client_size,
+            status,
+            tags,
+            budget,
+            sales
+          )
+        `)
         .eq("user_id", user.id)
         .order("last_message_time", { ascending: false });
 

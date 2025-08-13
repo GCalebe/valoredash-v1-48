@@ -11,12 +11,13 @@ import { useConversations } from "@/hooks/useConversations";
 import { useChatMessages } from "@/hooks/useChatMessages";
 // import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import { useToast } from "@/hooks/use-toast";
-import { useConversationFilters } from "@/hooks/useConversationFilters";
+import { useUnifiedConversationFilters } from "@/hooks/useUnifiedConversationFilters";
+import { useConversationTableFilters } from "@/hooks/useConversationTableFilters";
 import { Conversation as DBConversation, ChatMessage } from "@/types/chat";
 
 // Componentes refatorados
 import ConversationLayout from "@/components/chat/ConversationLayout";
-import ConversationFilterDialog from "@/components/chat/ConversationFilterDialog";
+import { ConversationFilterBuilder } from "@/components/conversations/filters/ConversationFilterBuilder";
 
 // Adaptador para converter dados do banco para a interface do componente
 interface Contact {
@@ -72,7 +73,7 @@ export default function Conversations() {
   const { conversations, loading: conversationsLoading, fetchConversations } = useConversations();
   const { messages, loading: messagesLoading } = useChatMessages(selectedContact?.sessionId || null);
   const { toast } = useToast();
-  const filters = useConversationFilters();
+  const filters = useUnifiedConversationFilters();
   
   // TODO: Configurar atualizações em tempo real
   // useRealtimeUpdates({ updateConversationLastMessage, fetchConversations });
@@ -82,10 +83,17 @@ export default function Conversations() {
     fetchConversations();
   }, [fetchConversations]);
   
-  // Converter conversas do banco para o formato do componente
-  const contacts: Contact[] = conversations.map(convertDBConversationToContact);
+  // Use the filtered conversations
+  const { filteredConversations } = useConversationTableFilters({
+    conversations,
+    filters,
+  });
   
-  const filteredContacts = contacts.filter(contact => {
+  // Converter conversas filtradas para o formato do componente
+  const contacts: Contact[] = filteredConversations.map(convertDBConversationToContact);
+  
+  // Apply search and tab filters on top of the unified filters
+  const finalFilteredContacts = contacts.filter(contact => {
     const matchesSearch = contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          contact.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
     
@@ -121,27 +129,10 @@ export default function Conversations() {
         </div>
         
         {/* Filter Dialog */}
-        <ConversationFilterDialog
+        <ConversationFilterBuilder
           isOpen={filterDialogOpen}
-          onOpenChange={setFilterDialogOpen}
-          statusFilter={filters.statusFilter}
-          segmentFilter={filters.segmentFilter}
-          lastContactFilter={filters.lastContactFilter}
-          unreadFilter={filters.unreadFilter}
-          lastMessageFilter={filters.lastMessageFilter}
-          clientTypeFilter={filters.clientTypeFilter}
-          customFieldFilters={filters.customFieldFilters}
-          onStatusFilterChange={filters.setStatusFilter}
-          onSegmentFilterChange={filters.setSegmentFilter}
-          onLastContactFilterChange={filters.setLastContactFilter}
-          onUnreadFilterChange={filters.setUnreadFilter}
-          onLastMessageFilterChange={filters.setLastMessageFilter}
-          onClientTypeFilterChange={filters.setClientTypeFilter}
-          onAddCustomFieldFilter={filters.addCustomFieldFilter}
-          onRemoveCustomFieldFilter={filters.removeCustomFieldFilter}
-          onClearFilters={() => filters.clearAll()}
-          onClearCustomFieldFilters={() => filters.clearAll("customFields")}
-          hasActiveFilters={filters.hasActiveFilters}
+          onClose={() => setFilterDialogOpen(false)}
+          filters={filters}
         />
       </>
     );
@@ -150,7 +141,7 @@ export default function Conversations() {
   return (
     <>
       <ConversationLayout 
-        contacts={filteredContacts}
+        contacts={finalFilteredContacts}
         selectedContactId={selectedContact?.id}
         onContactSelect={handleContactSelect}
         searchQuery={searchQuery}
@@ -166,27 +157,10 @@ export default function Conversations() {
       />
       
       {/* Filter Dialog */}
-      <ConversationFilterDialog
+      <ConversationFilterBuilder
         isOpen={filterDialogOpen}
-        onOpenChange={setFilterDialogOpen}
-        statusFilter={filters.statusFilter}
-        segmentFilter={filters.segmentFilter}
-        lastContactFilter={filters.lastContactFilter}
-        unreadFilter={filters.unreadFilter}
-        lastMessageFilter={filters.lastMessageFilter}
-        clientTypeFilter={filters.clientTypeFilter}
-        customFieldFilters={filters.customFieldFilters}
-        onStatusFilterChange={filters.setStatusFilter}
-        onSegmentFilterChange={filters.setSegmentFilter}
-        onLastContactFilterChange={filters.setLastContactFilter}
-        onUnreadFilterChange={filters.setUnreadFilter}
-        onLastMessageFilterChange={filters.setLastMessageFilter}
-        onClientTypeFilterChange={filters.setClientTypeFilter}
-        onAddCustomFieldFilter={filters.addCustomFieldFilter}
-        onRemoveCustomFieldFilter={filters.removeCustomFieldFilter}
-        onClearFilters={() => filters.clearAll()}
-        onClearCustomFieldFilters={() => filters.clearAll("customFields")}
-        hasActiveFilters={filters.hasActiveFilters}
+        onClose={() => setFilterDialogOpen(false)}
+        filters={filters}
       />
     </>
   );
