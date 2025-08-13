@@ -250,12 +250,16 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
             ? [String(raw)]
             : [];
         if (activeMap[f.key] && arr.length > 0) {
-          const arrayField = f.key === "tags" || f.key === "responsible_hosts";
-          const operator = arrayField ? "contains_any" : "in";
-          // Prefixar custom fields como custom:<id>
-          const isCustomField = customFieldDefs?.some((cf: any) => cf.id === f.key);
-          const fieldKey = isCustomField ? `custom:${f.key}` : f.key;
-          rules.push({ id: `rule-${f.key}`, field: fieldKey, operator, value: arr });
+          // Para campos personalizados (id iniciado por custom:), gerar regras unitárias (equals)
+          if (String(f.key).startsWith('custom:')) {
+            arr.forEach((val) => {
+              rules.push({ id: `rule-${f.key}-${val}`, field: f.key, operator: 'equals', value: String(val) });
+            });
+          } else {
+            const arrayField = f.key === "tags" || f.key === "responsible_hosts";
+            const operator = arrayField ? "contains_any" : "in";
+            rules.push({ id: `rule-${f.key}`, field: f.key, operator, value: arr });
+          }
         }
       });
     });
@@ -271,6 +275,8 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
 
     const group = { id: `group-top-panel`, condition: "AND", rules };
     window.dispatchEvent(new CustomEvent('conversations-apply-advanced-filter', { detail: group }));
+    // Fechar painel após aplicar
+    onClose();
   };
 
   // Atualiza chips selecionados a cada mudança (inclui campos personalizados e tags)
@@ -538,10 +544,17 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
                                     values[field.key].map((v: any) => ({ label: v, value: v })) : 
                                     []
                                   }
-                                  onChange={(selected) => setValues(v => ({ 
-                                    ...v, 
-                                    [field.key]: (selected as any[])?.map((s: any) => s.value) || []
-                                  }))}
+                                  onChange={(selected) => {
+                                    const next = (selected as any[])?.map((s: any) => s.value) || [];
+                                    setValues(v => ({
+                                      ...v,
+                                      [field.key]: next
+                                    }));
+                                    setActiveMap(m => ({
+                                      ...m,
+                                      [field.key]: next.length > 0
+                                    }));
+                                  }}
                                   options={fieldOptions[field.key] || []}
                                   styles={{
                                     control: (provided, state) => ({
