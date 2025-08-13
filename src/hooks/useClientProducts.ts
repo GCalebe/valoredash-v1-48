@@ -63,13 +63,12 @@ export const useClientProducts = (clientId?: string) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setInterests(data || []);
+      setInterests((data || []) as ClientProductInterest[]);
     } catch (error) {
       console.error('Error fetching interests:', error);
       toast({
         title: "Erro",
         description: "Erro ao carregar produtos de interesse",
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -91,13 +90,12 @@ export const useClientProducts = (clientId?: string) => {
         .order('purchase_date', { ascending: false });
 
       if (error) throw error;
-      setPurchases(data || []);
+      setPurchases((data || []) as ClientProductPurchase[]);
     } catch (error) {
       console.error('Error fetching purchases:', error);
       toast({
         title: "Erro",
         description: "Erro ao carregar histórico de compras",
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -124,7 +122,7 @@ export const useClientProducts = (clientId?: string) => {
 
       if (error) throw error;
       
-      setInterests(prev => [data, ...prev]);
+      setInterests(prev => [data as ClientProductInterest, ...prev]);
       toast({
         title: "Sucesso",
         description: "Produto adicionado aos interesses",
@@ -136,7 +134,6 @@ export const useClientProducts = (clientId?: string) => {
       toast({
         title: "Erro",
         description: "Erro ao adicionar produto aos interesses",
-        variant: "destructive",
       });
       throw error;
     }
@@ -156,7 +153,7 @@ export const useClientProducts = (clientId?: string) => {
 
       if (error) throw error;
       
-      setInterests(prev => prev.map(item => item.id === interestId ? data : item));
+      setInterests(prev => prev.map(item => item.id === interestId ? data as ClientProductInterest : item));
       toast({
         title: "Sucesso",
         description: "Interesse atualizado",
@@ -168,7 +165,6 @@ export const useClientProducts = (clientId?: string) => {
       toast({
         title: "Erro",
         description: "Erro ao atualizar interesse",
-        variant: "destructive",
       });
       throw error;
     }
@@ -193,7 +189,6 @@ export const useClientProducts = (clientId?: string) => {
       toast({
         title: "Erro",
         description: "Erro ao remover interesse",
-        variant: "destructive",
       });
       throw error;
     }
@@ -225,7 +220,7 @@ export const useClientProducts = (clientId?: string) => {
 
       if (error) throw error;
       
-      setPurchases(prev => [data, ...prev]);
+      setPurchases(prev => [data as ClientProductPurchase, ...prev]);
       toast({
         title: "Sucesso",
         description: "Compra registrada",
@@ -237,7 +232,6 @@ export const useClientProducts = (clientId?: string) => {
       toast({
         title: "Erro",
         description: "Erro ao registrar compra",
-        variant: "destructive",
       });
       throw error;
     }

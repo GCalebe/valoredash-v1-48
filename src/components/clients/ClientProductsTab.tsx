@@ -81,11 +81,10 @@ const ClientProductsTab: React.FC<ClientProductsTabProps> = ({ clientId }) => {
 
   const handleAddInterest = async () => {
     if (!selectedProduct) {
-      toast({
-        title: "Erro",
-        description: "Selecione um produto",
-        variant: "destructive",
-      });
+    toast({
+      title: "Erro",
+      description: "Selecione um produto",
+    });
       return;
     }
 
@@ -105,7 +104,6 @@ const ClientProductsTab: React.FC<ClientProductsTabProps> = ({ clientId }) => {
       toast({
         title: "Erro",
         description: "Selecione um produto",
-        variant: "destructive",
       });
       return;
     }
