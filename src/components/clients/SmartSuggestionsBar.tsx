@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { X, Lightbulb, TrendingUp, Users, Target, Clock, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 interface SmartSuggestionsBarProps {
   isOpen: boolean;
@@ -76,120 +78,164 @@ const SmartSuggestionsBar: React.FC<SmartSuggestionsBarProps> = ({ isOpen, onClo
     setDismissedSuggestions(prev => [...prev, id]);
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityVariant = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'high': return 'destructive';
+      case 'medium': return 'secondary';
+      case 'low': return 'outline';
+      default: return 'outline';
     }
   };
 
-  const getTypeColor = (type: string) => {
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'Alta';
+      case 'medium': return 'Média';
+      case 'low': return 'Baixa';
+      default: return priority;
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    const iconProps = "h-4 w-4";
     switch (type) {
-      case 'insight': return 'text-blue-600';
-      case 'action': return 'text-green-600';
-      case 'opportunity': return 'text-purple-600';
-      case 'alert': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'insight': return <Lightbulb className={`${iconProps} text-primary`} />;
+      case 'action': return <Target className={`${iconProps} text-success`} />;
+      case 'opportunity': return <TrendingUp className={`${iconProps} text-warning`} />;
+      case 'alert': return <Clock className={`${iconProps} text-destructive`} />;
+      default: return <Star className={`${iconProps} text-muted-foreground`} />;
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'insight': return 'Insight';
+      case 'action': return 'Ação';
+      case 'opportunity': return 'Oportunidade';
+      case 'alert': return 'Alerta';
+      default: return type;
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex justify-end">
-      <div className="w-96 bg-white shadow-2xl h-full overflow-hidden flex flex-col animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex">
+      <div className="w-96 bg-background border-r shadow-xl h-full flex flex-col animate-in slide-in-from-left duration-300">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
-            <h2 className="font-semibold text-lg">Sugestões Inteligentes</h2>
+        <div className="p-6 border-b bg-card">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Lightbulb className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-lg text-foreground">Sugestões Inteligentes</h2>
+                <p className="text-sm text-muted-foreground">Insights personalizados para você</p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-white hover:bg-white/20 h-8 w-8 p-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <ScrollArea className="flex-1 p-4">
           {activeSuggestions.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>Nenhuma sugestão disponível no momento</p>
-              <p className="text-sm mt-2">Volte mais tarde para ver novas insights</p>
+            <div className="text-center py-12">
+              <div className="p-4 rounded-full bg-muted/50 mx-auto w-fit mb-4">
+                <Lightbulb className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="font-medium text-foreground mb-2">Nenhuma sugestão disponível</h3>
+              <p className="text-sm text-muted-foreground">
+                Volte mais tarde para ver novas insights
+              </p>
             </div>
           ) : (
-            activeSuggestions.map((suggestion) => (
-              <Card key={suggestion.id} className="border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className={`p-1.5 rounded-full bg-gray-100 ${getTypeColor(suggestion.type)}`}>
-                        {suggestion.icon}
+            <div className="space-y-4">
+              {activeSuggestions.map((suggestion, index) => (
+                <Card key={suggestion.id} className="animate-fade-in hover:shadow-md transition-all duration-200" style={{ animationDelay: `${index * 100}ms` }}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-muted">
+                          {getTypeIcon(suggestion.type)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs">
+                              {getTypeLabel(suggestion.type)}
+                            </Badge>
+                            <Badge variant={getPriorityVariant(suggestion.priority) as any} className="text-xs">
+                              {getPriorityLabel(suggestion.priority)}
+                            </Badge>
+                          </div>
+                          <CardTitle className="text-base font-medium leading-tight">
+                            {suggestion.title}
+                          </CardTitle>
+                        </div>
                       </div>
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${getPriorityColor(suggestion.priority)}`}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => dismissSuggestion(suggestion.id)}
+                        className="h-8 w-8 p-0 shrink-0 text-muted-foreground hover:text-foreground"
                       >
-                        {suggestion.priority === 'high' ? 'Alta' : 
-                         suggestion.priority === 'medium' ? 'Média' : 'Baixa'}
-                      </Badge>
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => dismissSuggestion(suggestion.id)}
-                      className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  </CardHeader>
                   
-                  <h3 className="font-medium text-gray-900 mb-2">
-                    {suggestion.title}
-                  </h3>
-                  
-                  <p className="text-sm text-gray-600 mb-3">
-                    {suggestion.description}
-                  </p>
-                  
-                  {suggestion.actionLabel && (
-                    <Button 
-                      size="sm" 
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={() => {
-                        // Aqui seria implementada a ação específica
-                        console.log(`Ação executada para sugestão: ${suggestion.id}`);
-                      }}
-                    >
-                      {suggestion.actionLabel}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ))
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                      {suggestion.description}
+                    </p>
+                    
+                    {suggestion.actionLabel && (
+                      <Button 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => {
+                          console.log(`Ação executada para sugestão: ${suggestion.id}`);
+                        }}
+                      >
+                        {suggestion.actionLabel}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
-        </div>
+        </ScrollArea>
 
         {/* Footer */}
-        <div className="border-t bg-gray-50 p-4">
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>{activeSuggestions.length} sugestões ativas</span>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setDismissedSuggestions([])}
-              className="text-blue-600 hover:text-blue-700 h-auto p-0"
-            >
-              Restaurar todas
-            </Button>
+        <div className="border-t bg-card p-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">
+              {activeSuggestions.length} sugestão{activeSuggestions.length !== 1 ? 'ões' : ''} ativa{activeSuggestions.length !== 1 ? 's' : ''}
+            </span>
+            {dismissedSuggestions.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setDismissedSuggestions([])}
+                className="h-auto p-0 text-primary hover:text-primary/80"
+              >
+                Restaurar todas
+              </Button>
+            )}
           </div>
+          <Separator className="my-3" />
+          <p className="text-xs text-muted-foreground text-center">
+            Sugestões baseadas na análise dos seus dados
+          </p>
         </div>
       </div>
     </div>
