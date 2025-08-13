@@ -1,11 +1,8 @@
 // @ts-nocheck
 import React, { useState } from "react";
 import ContactHeader from "./contact-info/ContactHeader";
-import ContactTabs from "./contact-info/ContactTabs";
-import AddCustomFieldDialog from "./AddCustomFieldDialog";
-import EditCustomFieldDialog from "./EditCustomFieldDialog";
-import { useCustomFields } from "@/hooks/useCustomFields";
-import { useDynamicFields } from "@/hooks/useDynamicFields";
+import ModernContactTabs from "./contact-info/ModernContactTabs";
+// Removed old custom field imports - now handled in ModernContactTabs
 
 interface Contact {
   id: string;
@@ -22,26 +19,16 @@ interface Contact {
   tags?: string[]; // Adicionar suporte a tags
 }
 
-interface EditingField {
-  id: string;
-  name: string;
-  type: string;
-  options: string[];
-}
+// Removed EditingField interface - handled in ModernContactTabs
 
 interface ContactInfoProps {
   contact: Contact;
   getStatusColor: (status?: string) => string;
   width: number;
   onTagsChange?: (tags: string[]) => void; // Callback para mudanças nas tags
-  showCustomFields?: boolean; // Controla renderização de campos personalizados nas abas
 }
 
-export default function ContactInfo({ contact, getStatusColor, width, onTagsChange, showCustomFields = true }: Readonly<ContactInfoProps>) {
-  const [addFieldDialogOpen, setAddFieldDialogOpen] = useState(false);
-  const [editFieldDialogOpen, setEditFieldDialogOpen] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<"basico" | "comercial" | "utm" | "midia">("basico");
-  const [editingField, setEditingField] = useState<EditingField | null>(null);
+export default function ContactInfo({ contact, getStatusColor, width, onTagsChange }: Readonly<ContactInfoProps>) {
   const [tags, setTags] = useState<string[]>(contact.tags || []);
   const [newTag, setNewTag] = useState("");
 
@@ -49,70 +36,6 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
   const updateTags = (newTags: string[]) => {
     setTags(newTags);
     onTagsChange?.(newTags);
-  };
-  
-  // Hooks para campos customizados
-  const { fetchCustomFields, deleteCustomField } = useCustomFields();
-  const { dynamicFields, updateField, refetch } = useDynamicFields(contact.id);
-
-  // Função para lidar com a adição de novos campos
-  const handleFieldAdded = () => {
-    refetch();
-    fetchCustomFields();
-  };
-
-  // Função para abrir o diálogo de adicionar campo
-  const handleAddField = (tab: "basico" | "comercial" | "utm" | "midia") => {
-    setSelectedTab(tab);
-    setAddFieldDialogOpen(true);
-  };
-
-  // Função para filtrar campos por categoria/aba
-  const getFieldsForTab = (tab: string) => {
-    if (!showCustomFields) return [];
-    switch (tab) {
-      case "basico":
-        return dynamicFields.basic || [];
-      case "comercial":
-        return dynamicFields.commercial || [];
-      case "utm":
-        return []; // UTM real será renderizado via ClientUTMData
-      case "midia":
-        return dynamicFields.documents || [];
-      default:
-        return [];
-    }
-  };
-
-  // Função para editar campo
-  const handleEditField = (fieldId: string, fieldName: string, fieldType: string, fieldOptions: string[] | null) => {
-    setEditingField({
-      id: fieldId,
-      name: fieldName,
-      type: fieldType,
-      options: fieldOptions || []
-    });
-    setEditFieldDialogOpen(true);
-  };
-
-  // Função para excluir campo
-  const handleDeleteField = async (fieldId: string, fieldName: string) => {
-    if (window.confirm(`Tem certeza que deseja excluir o campo "${fieldName}"? Esta ação não pode ser desfeita.`)) {
-      try {
-        await deleteCustomField(fieldId);
-        refetch();
-        fetchCustomFields();
-      } catch (error) {
-        console.error("Erro ao excluir campo:", error);
-      }
-    }
-  };
-
-  // Função para lidar com a edição concluída
-  const handleFieldEdited = () => {
-    refetch();
-    fetchCustomFields();
-    setEditingField(null);
   };
 
   return (
@@ -138,30 +61,14 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
         onRemoveTag={(tag) => updateTags(tags.filter((t) => t !== tag))}
       />
       
-      {/* Tabs Content */}
-      {showCustomFields && (
-        <AddCustomFieldDialog
-          isOpen={addFieldDialogOpen}
-          onClose={() => setAddFieldDialogOpen(false)}
-          targetTab={selectedTab}
-          onFieldAdded={handleFieldAdded}
-        />
-      )}
-      {showCustomFields && (
-        <EditCustomFieldDialog
-          isOpen={editFieldDialogOpen}
-          onClose={() => setEditFieldDialogOpen(false)}
-          field={editingField}
-          onFieldEdited={handleFieldEdited}
-        />
-      )}
-      <ContactTabs
+      {/* Modern Contact Tabs */}
+      <ModernContactTabs
         contactId={contact.id}
-        getFieldsForTab={getFieldsForTab}
-        onAddField={handleAddField}
-        onEditField={handleEditField}
-        onDeleteField={handleDeleteField}
-        onUpdateField={(id, value) => updateField(id, value as any)}
+        contact={contact}
+        onFieldUpdate={(field, value) => {
+          // Update contact data - this could be expanded to call parent callbacks
+          console.log(`Updating ${field}:`, value);
+        }}
       />
     </div>
   );
