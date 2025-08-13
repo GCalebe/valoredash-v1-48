@@ -32,7 +32,6 @@ export const useOptimizedHosts = () => {
   }, []);
 
   const fetchHosts = useCallback(async (forceRefresh = false) => {
-    if (!user) return;
 
     const now = Date.now();
     const isCacheValid = !forceRefresh && (now - globalHostsCache.lastFetch) < CACHE_DURATION;
@@ -54,11 +53,12 @@ export const useOptimizedHosts = () => {
       setLoading(true);
       notifyListeners();
 
-      const { data, error } = await supabase
+      const query = supabase
         .from("employees")
         .select("*")
-        .eq("user_id", user.id)
         .order("name", { ascending: true });
+      // Quando houver usuário, filtramos; caso contrário, deixamos RLS restringir automaticamente
+      const { data, error } = user ? await query.eq("user_id", user.id) : await query;
 
       if (error) throw error;
       
