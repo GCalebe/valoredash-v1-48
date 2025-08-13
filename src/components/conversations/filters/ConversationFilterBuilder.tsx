@@ -338,45 +338,99 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
                   <h3 className="text-sm font-semibold text-foreground mb-3">Filtros Rápidos</h3>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="pipeline-filter" className="text-xs font-medium text-muted-foreground">
-                        Pipeline
+                      <Label htmlFor="status-filter" className="text-xs font-medium text-muted-foreground">
+                        Status da Conversa
                       </Label>
                       <Select
-                        value={statusFilter}
-                        onValueChange={setStatusFilter}
-                        disabled={kanbanLoading}
+                        value={filters.statusFilter}
+                        onValueChange={filters.setStatusFilter}
                       >
-                        <SelectTrigger id="pipeline-filter" className="h-8 mt-1">
-                          <SelectValue placeholder="Todos os estágios" />
+                        <SelectTrigger id="status-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todos" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos os estágios</SelectItem>
-                          {stages.map((stage) => (
-                            <SelectItem key={stage.id} value={stage.id}>
-                              {stage.title}
-                            </SelectItem>
-                          ))}
+                        <SelectContent className="z-50 bg-background border border-border shadow-md">
+                          <SelectItem value="all">Todos</SelectItem>
+                          <SelectItem value="active">Ativo</SelectItem>
+                          <SelectItem value="inactive">Inativo</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <Label htmlFor="host-filter" className="text-xs font-medium text-muted-foreground">
-                        Anfitrião
+                      <Label htmlFor="unread-filter" className="text-xs font-medium text-muted-foreground">
+                        Mensagens Não Lidas
                       </Label>
                       <Select
-                        value={segmentFilter}
-                        onValueChange={setSegmentFilter}
-                        disabled={hostsLoading}
+                        value={filters.unreadFilter}
+                        onValueChange={filters.setUnreadFilter}
                       >
-                        <SelectTrigger id="host-filter" className="h-8 mt-1">
-                          <SelectValue placeholder="Todos os anfitriões" />
+                        <SelectTrigger id="unread-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todas" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos os anfitriões</SelectItem>
-                          {responsibleHosts.map((host) => (
-                            <SelectItem key={host} value={host}>
-                              {host}
+                        <SelectContent className="z-50 bg-background border border-border shadow-md">
+                          <SelectItem value="all">Todas</SelectItem>
+                          <SelectItem value="unread">Não lidas</SelectItem>
+                          <SelectItem value="read">Lidas</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="last-message-filter" className="text-xs font-medium text-muted-foreground">
+                        Última Mensagem
+                      </Label>
+                      <Select
+                        value={filters.lastMessageFilter}
+                        onValueChange={filters.setLastMessageFilter}
+                      >
+                        <SelectTrigger id="last-message-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todas" />
+                        </SelectTrigger>
+                        <SelectContent className="z-50 bg-background border border-border shadow-md">
+                          <SelectItem value="all">Todas</SelectItem>
+                          <SelectItem value="recent">Últimas 24h</SelectItem>
+                          <SelectItem value="older">Mais antigas</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="client-type-filter" className="text-xs font-medium text-muted-foreground">
+                        Tipo de Cliente
+                      </Label>
+                      <Select
+                        value={filters.clientTypeFilter}
+                        onValueChange={filters.setClientTypeFilter}
+                      >
+                        <SelectTrigger id="client-type-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todos os tipos" />
+                        </SelectTrigger>
+                        <SelectContent className="z-50 bg-background border border-border shadow-md">
+                          <SelectItem value="all">Todos</SelectItem>
+                          <SelectItem value="Pequena empresa">Pequena empresa</SelectItem>
+                          <SelectItem value="Média empresa">Média empresa</SelectItem>
+                          <SelectItem value="Grande empresa">Grande empresa</SelectItem>
+                          <SelectItem value="Pessoa física">Pessoa física</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="segment-filter" className="text-xs font-medium text-muted-foreground">
+                        Etapa do Pipeline
+                      </Label>
+                      <Select
+                        value={filters.segmentFilter}
+                        onValueChange={filters.setSegmentFilter}
+                      >
+                        <SelectTrigger id="segment-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todas as etapas" />
+                        </SelectTrigger>
+                        <SelectContent className="z-50 bg-background border border-border shadow-md">
+                          <SelectItem value="all">Todas as etapas</SelectItem>
+                          {stages.map((stage) => (
+                            <SelectItem key={stage.id} value={stage.id}>
+                              {stage.title}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -388,13 +442,13 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
                         Último Contato
                       </Label>
                       <Select
-                        value={lastContactFilter}
-                        onValueChange={setLastContactFilter}
+                        value={filters.lastContactFilter}
+                        onValueChange={filters.setLastContactFilter}
                       >
                         <SelectTrigger id="last-contact-filter" className="h-8 mt-1">
                           <SelectValue placeholder="Todos os períodos" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-50 bg-background border border-border shadow-md">
                           <SelectItem value="all">Todos os períodos</SelectItem>
                           <SelectItem value="today">Hoje</SelectItem>
                           <SelectItem value="yesterday">Ontem</SelectItem>
