@@ -13,11 +13,11 @@ interface UseClientFilesProps {
 export const useClientFiles = ({ clientId, onFileUpdate }: UseClientFilesProps) => {
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [storageUsage, setStorageUsage] = useState({ used: 0, max: 100 * 1024 * 1024 });
+  const [storageUsage, setStorageUsage] = useState({ used: 0, max: 1024 * 1024 * 1024 }); // 1GB
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const maxFileSize = 10 * 1024 * 1024; // 10MB per file
+  const maxFileSize = 100 * 1024 * 1024; // 100MB per file
 
   useEffect(() => {
     if (clientId) {
