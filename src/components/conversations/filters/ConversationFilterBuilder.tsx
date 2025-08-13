@@ -5,11 +5,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, Pencil, X } from "lucide-react";
+import { Tag, ChevronDown, Pencil, X } from "lucide-react";
 import { useDebounce } from "@/hooks/utils/useDebounce";
 import ReactSelect from "react-select";
 import { UnifiedConversationFilters } from "@/hooks/useUnifiedConversationFilters";
 import { useFilterableFields } from "@/hooks/useFilterableFields";
+import { useKanbanStagesLocal } from "@/hooks/useKanbanStagesLocal";
+import { supabase } from "@/integrations/supabase/client";
 
 // LEFT MENU com filtros pré-configurados para conversas
 const LEFT_MENU = [
@@ -20,33 +22,15 @@ const LEFT_MENU = [
   { label: "Clientes ativos", editable: true },
 ];
 
-// Estrutura de seção e campos para conversas
+// Estrutura de seção e campos
 type SectionDef = {
   title: string;
   key: string;
   fields: { key: string; placeholder: string }[];
 };
 
-// SEÇÕES ESTÁTICAS para conversas
+// SEÇÕES ESTÁTICAS alinhadas ao formulário "Novo Cliente"
 const STATIC_SECTIONS: SectionDef[] = [
-  { title: "CONVERSA", key: "conversa", fields: [
-    { key: "unread", placeholder: "Status de leitura" },
-    { key: "lastMessage", placeholder: "Última mensagem" },
-    { key: "sessionId", placeholder: "ID da sessão" },
-  ] },
-  { title: "CLIENTE", key: "cliente", fields: [
-    { key: "clientName", placeholder: "Nome do cliente" },
-    { key: "clientEmail", placeholder: "Email do cliente" },
-    { key: "clientPhone", placeholder: "Telefone do cliente" },
-    { key: "clientType", placeholder: "Tipo de cliente" },
-    { key: "clientStatus", placeholder: "Status do cliente" },
-  ] },
-  { title: "TEMPORAL", key: "temporal", fields: [
-    { key: "lastContact", placeholder: "Último contato" },
-    { key: "createdAt", placeholder: "Data de criação" },
-    { key: "updatedAt", placeholder: "Última atualização" },
-  ] },
-  // Raízes equivalentes às da tela de Clientes (sem remover as existentes)
   { title: "PRINCIPAL", key: "principal", fields: [
     { key: "name", placeholder: "Nome do cliente" },
     { key: "email", placeholder: "E-mail" },
@@ -97,39 +81,33 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [menuSearch, setMenuSearch] = useState("");
   
+  // Estados dos filtros rápidos
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [segmentFilter, setSegmentFilter] = useState("all");
+  const [lastContactFilter, setLastContactFilter] = useState("all");
+  
   const debouncedMenuSearch = useDebounce(menuSearch, 250);
+  const { fields, availableTags, responsibleHosts, responsibleHostsMap, loading: hostsLoading } = useFilterableFields();
+  const { stages, loading: kanbanLoading } = useKanbanStagesLocal();
   const [selectedChips, setSelectedChips] = useState<{ key: string; label: string }[]>([]);
   const [fieldOptions, setFieldOptions] = useState<Record<string, { label: string; value: string }[]>>({});
+  const customFieldDefs = useMemo(() => (fields || []).filter((f: any) => f.isCustom), [fields]);
 
-  // Campos e opções vindos do ecossistema de clientes
-  const { availableTags, responsibleHosts, responsibleHostsMap, kanbanStages } = useFilterableFields();
-
-  // Obter campos filtráveis fora do useMemo (respeitando regras de hooks)
-  const { fields: filterableFields } = useFilterableFields();
-
-  const allSections: SectionDef[] = useMemo(() => {
-    // Seção dinâmica de campos personalizados
-    const customFields = (filterableFields || []).filter((f: any) => f.isCustom);
-    const customSection: SectionDef | null = customFields.length > 0 ? {
+  // Seção dinâmica de Campos Personalizados (abaixo de FINANCEIRO)
+  const customSection: SectionDef | null = useMemo(() => {
+    if (!customFieldDefs || customFieldDefs.length === 0) return null;
+    return {
       title: "CAMPOS PERSONALIZADOS",
       key: "campos_personalizados",
-      fields: customFields.map((f: any) => ({ key: f.id, placeholder: f.name })),
-    } : null;
-
-    const dynamicClientSection: SectionDef = {
-      title: "CLIENTE (AVANÇADO)",
-      key: "cliente_avancado",
-      fields: [
-        { key: "tags", placeholder: "Tags" },
-        { key: "responsible_hosts", placeholder: "Responsáveis" },
-        { key: "kanban_stage_id", placeholder: "Etapa do Kanban" },
-        { key: "consultation_stage", placeholder: "Estágio de Consulta" },
-      ],
+      fields: customFieldDefs.map((f: any) => ({ key: f.id, placeholder: f.name })),
     };
-    return customSection ? [...STATIC_SECTIONS, dynamicClientSection, customSection] : [...STATIC_SECTIONS, dynamicClientSection];
-  }, [filterableFields]);
+  }, [customFieldDefs]);
 
-  // Garantir estado de colapso para todas as seções
+  const allSections: SectionDef[] = useMemo(() => {
+    return customSection ? [...STATIC_SECTIONS, customSection] : [...STATIC_SECTIONS];
+  }, [customSection]);
+
+  // Garantir estado de colapso para todas as seções, incluindo a dinâmica
   useEffect(() => {
     setCollapsed((prev) => {
       const next: Record<string, boolean> = { ...prev };
@@ -140,73 +118,96 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
     });
   }, [allSections]);
 
-  // Configurar opções para campos do painel (conversa + cliente)
   useEffect(() => {
-    const optionsMap: Record<string, { label: string; value: string }[]> = {
-      unread: [
-        { label: "Todas", value: "all" },
-        { label: "Não lidas", value: "unread" },
-        { label: "Lidas", value: "read" },
-      ],
-      lastMessage: [
-        { label: "Todas", value: "all" },
-        { label: "Últimas 24h", value: "recent" },
-        { label: "Mais antigas", value: "older" },
-      ],
-      clientType: [
-        { label: "Todos", value: "all" },
-        { label: "Pequena empresa", value: "Pequena empresa" },
-        { label: "Média empresa", value: "Média empresa" },
-        { label: "Grande empresa", value: "Grande empresa" },
-        { label: "Pessoa física", value: "Pessoa física" },
-      ],
-      clientStatus: [
-        { label: "Todos", value: "all" },
-        { label: "Ativo", value: "active" },
-        { label: "Inativo", value: "inactive" },
-      ],
-      lastContact: [
-        { label: "Qualquer período", value: "all" },
-        { label: "Hoje", value: "today" },
-        { label: "Esta semana", value: "week" },
-        { label: "Este mês", value: "month" },
-      ],
-    };
+    let mounted = true;
+    async function loadOptions() {
+      try {
+        const optionsMap: Record<string, { label: string; value: string }[]> = {};
+        const { data: authData } = await supabase.auth.getUser();
+        const currentUserId = authData?.user?.id || null;
 
-    // Tags (valores como a própria tag)
-    optionsMap["tags"] = (availableTags || []).map((t) => ({ label: t, value: t }));
+        // Precompute from known sources
+        fields.forEach((f: any) => {
+          if (f.id === 'tags') {
+            optionsMap[f.id] = (availableTags || []).map((t: string) => ({ label: t, value: t }));
+          } else if (f.id === 'responsible_hosts') {
+            optionsMap[f.id] = (responsibleHosts || []).map((name: string) => ({ label: name, value: responsibleHostsMap[name] || name }));
+          } else if (f.id === 'kanban_stage_id') {
+            optionsMap[f.id] = (stages || []).map((s: any) => ({ label: s.title, value: s.id }));
+          } else if (Array.isArray(f.options) && f.options.length > 0) {
+            // fallback to predefined options if exists
+            optionsMap[f.id] = f.options.map((o: any) =>
+              typeof o === 'string' ? { label: o, value: o } : { label: o.label, value: o.value }
+            );
+          }
+        });
 
-    // Responsible hosts (label = nome, value = id quando conhecido)
-    optionsMap["responsible_hosts"] = (responsibleHosts || []).map((name) => {
-      const id = responsibleHostsMap[name] || name;
-      return { label: name, value: id };
-    });
+        // Fetch distinct values for remaining fields
+        const remaining = fields.filter((f: any) => !optionsMap[f.id]);
+        await Promise.all(
+          remaining.map(async (f: any) => {
+            try {
+              if (f.isCustom && f.customFieldId) {
+                const { data } = await supabase
+                  .from('client_custom_values')
+                  .select('field_value')
+                  .eq('field_id', f.customFieldId)
+                  .limit(1000);
+                const set = new Set<string>();
+                (data || []).forEach((row: any) => {
+                  const val = row.field_value;
+                  if (Array.isArray(val)) {
+                    val.forEach((v) => v != null && String(v).trim() && set.add(String(v)));
+                  } else if (val != null && String(val).trim()) {
+                    set.add(String(val));
+                  }
+                });
+                optionsMap[f.id] = Array.from(set).sort().map((v) => ({ label: v, value: v }));
+              } else if (f.dbField) {
+                let query = supabase
+                  .from('contacts')
+                  .select(f.dbField as string)
+                  .not(f.dbField as string, 'is', null)
+                  .limit(1000);
+                if (currentUserId) {
+                  query = query.eq('user_id', currentUserId);
+                }
+                let { data } = await query;
+                // Fallback sem filtro de usuário se não houver resultados
+                if (!data || data.length === 0) {
+                  const { data: fallback } = await supabase
+                    .from('contacts')
+                    .select(f.dbField as string)
+                    .not(f.dbField as string, 'is', null)
+                    .limit(1000);
+                  data = fallback || [];
+                }
+                const set = new Set<string>();
+                (data || []).forEach((row: any) => {
+                  const v = row[f.dbField];
+                  if (Array.isArray(v)) {
+                    v.forEach((x) => x != null && String(x).trim() && set.add(String(x)));
+                  } else if (v != null && String(v).trim()) {
+                    set.add(String(v));
+                  }
+                });
+                optionsMap[f.id] = Array.from(set).sort().map((v) => ({ label: v, value: v }));
+              }
+            } catch (e) {
+              // ignore field fetch errors
+              console.warn('distinct options fetch failed for field', f.id, e);
+            }
+          })
+        );
 
-    // Kanban stages (label = título, value = id)
-    optionsMap["kanban_stage_id"] = (kanbanStages || []).map((s: any) => ({ label: s.title, value: s.id }));
-
-    // Porte do cliente (pareado com tela de clientes)
-    optionsMap["client_size"] = [
-      { label: "Pequeno", value: "Pequeno" },
-      { label: "Médio", value: "Médio" },
-      { label: "Grande", value: "Grande" },
-    ];
-
-    // Consultation stage (mesmas opções da tela de clientes)
-    optionsMap["consultation_stage"] = [
-      { label: "Nova consulta", value: "Nova consulta" },
-      { label: "Qualificado", value: "Qualificado" },
-      { label: "Chamada agendada", value: "Chamada agendada" },
-      { label: "Preparando proposta", value: "Preparando proposta" },
-      { label: "Proposta enviada", value: "Proposta enviada" },
-      { label: "Acompanhamento", value: "Acompanhamento" },
-      { label: "Negociação", value: "Negociação" },
-      { label: "Fatura enviada", value: "Fatura enviada" },
-      { label: "Fatura paga – ganho", value: "Fatura paga – ganho" },
-      { label: "Projeto cancelado – perdido", value: "Projeto cancelado – perdido" },
-    ];
-    setFieldOptions(optionsMap);
-  }, [availableTags, responsibleHosts, responsibleHostsMap, kanbanStages]);
+        if (mounted) setFieldOptions(optionsMap);
+      } catch (e) {
+        console.error('Error loading filter options', e);
+      }
+    }
+    loadOptions();
+    return () => { mounted = false; };
+  }, [fields, availableTags, responsibleHosts, stages, responsibleHostsMap]);
 
   const filteredMenu = useMemo(() => {
     const q = debouncedMenuSearch.trim().toLowerCase();
@@ -232,7 +233,9 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
   const clearAll = () => {
     setActiveMap({});
     setValues({});
-    filters.clearAll();
+    setStatusFilter("all");
+    setSegmentFilter("all");
+    setLastContactFilter("all");
     window.dispatchEvent(new CustomEvent('conversations-clear-advanced-filter'));
   };
 
@@ -257,7 +260,7 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
     window.dispatchEvent(new CustomEvent('conversations-apply-advanced-filter', { detail: group }));
   };
 
-  // Atualiza chips selecionados a cada mudança
+  // Atualiza chips selecionados a cada mudança (inclui campos personalizados e tags)
   useEffect(() => {
     const chips: { key: string; label: string }[] = [];
     allSections.forEach((section) => {
@@ -273,6 +276,15 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
         }
       });
     });
+    // Incluir chips de etiquetas marcadas na coluna direita
+    Object.keys(activeMap)
+      .filter((k) => k.startsWith('tag:') && activeMap[k])
+      .forEach((k) => {
+        const tagVal = values[k];
+        if (tagVal && String(tagVal).trim()) {
+          chips.push({ key: k, label: `Tag: ${String(tagVal)}` });
+        }
+      });
     setSelectedChips(chips);
   }, [activeMap, values, allSections]);
 
@@ -326,79 +338,70 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
                   <h3 className="text-sm font-semibold text-foreground mb-3">Filtros Rápidos</h3>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="status-filter" className="text-xs font-medium text-muted-foreground">
-                        Status da Conversa
+                      <Label htmlFor="pipeline-filter" className="text-xs font-medium text-muted-foreground">
+                        Pipeline
                       </Label>
                       <Select
-                        value={filters.statusFilter}
-                        onValueChange={filters.setStatusFilter}
+                        value={statusFilter}
+                        onValueChange={setStatusFilter}
+                        disabled={kanbanLoading}
                       >
-                        <SelectTrigger id="status-filter" className="h-8 mt-1">
-                          <SelectValue placeholder="Todos os status" />
+                        <SelectTrigger id="pipeline-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todos os estágios" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Todos</SelectItem>
-                          <SelectItem value="active">Ativo</SelectItem>
-                          <SelectItem value="inactive">Inativo</SelectItem>
+                          <SelectItem value="all">Todos os estágios</SelectItem>
+                          {stages.map((stage) => (
+                            <SelectItem key={stage.id} value={stage.id}>
+                              {stage.title}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <Label htmlFor="unread-filter" className="text-xs font-medium text-muted-foreground">
-                        Mensagens Não Lidas
+                      <Label htmlFor="host-filter" className="text-xs font-medium text-muted-foreground">
+                        Anfitrião
                       </Label>
                       <Select
-                        value={filters.unreadFilter}
-                        onValueChange={filters.setUnreadFilter}
+                        value={segmentFilter}
+                        onValueChange={setSegmentFilter}
+                        disabled={hostsLoading}
                       >
-                        <SelectTrigger id="unread-filter" className="h-8 mt-1">
-                          <SelectValue placeholder="Todas" />
+                        <SelectTrigger id="host-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todos os anfitriões" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Todas</SelectItem>
-                          <SelectItem value="unread">Não lidas</SelectItem>
-                          <SelectItem value="read">Lidas</SelectItem>
+                          <SelectItem value="all">Todos os anfitriões</SelectItem>
+                          {responsibleHosts.map((host) => (
+                            <SelectItem key={host} value={host}>
+                              {host}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <Label htmlFor="message-filter" className="text-xs font-medium text-muted-foreground">
-                        Última Mensagem
+                      <Label htmlFor="last-contact-filter" className="text-xs font-medium text-muted-foreground">
+                        Último Contato
                       </Label>
                       <Select
-                        value={filters.lastMessageFilter}
-                        onValueChange={filters.setLastMessageFilter}
+                        value={lastContactFilter}
+                        onValueChange={setLastContactFilter}
                       >
-                        <SelectTrigger id="message-filter" className="h-8 mt-1">
-                          <SelectValue placeholder="Todas" />
+                        <SelectTrigger id="last-contact-filter" className="h-8 mt-1">
+                          <SelectValue placeholder="Todos os períodos" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Todas</SelectItem>
-                          <SelectItem value="recent">Últimas 24h</SelectItem>
-                          <SelectItem value="older">Mais antigas</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="client-type-filter" className="text-xs font-medium text-muted-foreground">
-                        Tipo de Cliente
-                      </Label>
-                      <Select
-                        value={filters.clientTypeFilter}
-                        onValueChange={filters.setClientTypeFilter}
-                      >
-                        <SelectTrigger id="client-type-filter" className="h-8 mt-1">
-                          <SelectValue placeholder="Todos os tipos" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos</SelectItem>
-                          <SelectItem value="Pequena empresa">Pequena empresa</SelectItem>
-                          <SelectItem value="Média empresa">Média empresa</SelectItem>
-                          <SelectItem value="Grande empresa">Grande empresa</SelectItem>
-                          <SelectItem value="Pessoa física">Pessoa física</SelectItem>
+                          <SelectItem value="all">Todos os períodos</SelectItem>
+                          <SelectItem value="today">Hoje</SelectItem>
+                          <SelectItem value="yesterday">Ontem</SelectItem>
+                          <SelectItem value="this-week">Esta semana</SelectItem>
+                          <SelectItem value="last-week">Semana passada</SelectItem>
+                          <SelectItem value="this-month">Este mês</SelectItem>
+                          <SelectItem value="last-month">Mês passado</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -424,69 +427,129 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
               </div>
             </div>
 
-            {/* Middle column: Advanced Filters */}
-            <div className="col-span-6 p-4">
+            {/* Middle column: Advanced Fields with ScrollArea */}
+            <div className="col-span-6 p-4 bg-background">
               <ScrollArea className="h-full">
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground mb-4">Propriedades do Lead</h3>
-                  
+                <div className="space-y-6">
                   {allSections.map((section) => (
-                    <div key={section.key}>
-                      <div
-                        className="border-b pb-3 flex justify-between items-center"
-                        onClick={() => setCollapsed((prev) => ({ ...prev, [section.key]: !prev[section.key] }))}
+                    <div key={section.key} className="space-y-3">
+                      <div 
+                        className="flex items-center justify-between cursor-pointer hover:bg-muted/50 px-3 py-2 rounded-md transition-colors"
+                        onClick={() => setCollapsed(c => ({ ...c, [section.key]: !c[section.key] }))}
                       >
-                        <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{section.title}</span>
-                        <div className="flex items-center gap-3">
+                        <h4 className="text-sm font-semibold text-foreground">{section.title}</h4>
+                        <div className="flex items-center gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               clearSection(section.key);
                             }}
-                            className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                            className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded border border-border hover:bg-muted/50 transition-colors"
                           >
                             Limpar
                           </button>
-                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsed[section.key] ? '-rotate-90' : 'rotate-0'}`} />
+                          <ChevronDown 
+                            className={`h-4 w-4 text-muted-foreground transition-transform ${
+                              collapsed[section.key] ? "-rotate-90" : ""
+                            }`} 
+                          />
                         </div>
                       </div>
+
                       {!collapsed[section.key] && (
-                        <div className="mt-4 space-y-3">
+                        <div className="space-y-3 pl-3">
                           {section.fields.map((field) => (
                             <FieldRow
                               key={field.key}
-                              active={activeMap[field.key] || false}
-                              onToggle={(active: boolean) => setActiveMap((prev) => ({ ...prev, [field.key]: active }))}
+                              active={Boolean(activeMap[field.key])}
+                              onToggle={(active) => setActiveMap(m => ({ ...m, [field.key]: active }))}
                               control={
-                                <div className="space-y-1">
-                                  <Label className="text-xs text-muted-foreground">{field.placeholder}</Label>
-                                  {fieldOptions[field.key] ? (
-                                    <ReactSelect
-                                      isMulti
-                                      value={(values[field.key] || []).map((v: string) => ({ label: v, value: v }))}
-                                      onChange={(selected) => {
-                                        setValues((prev) => ({
-                                          ...prev,
-                                          [field.key]: selected ? selected.map((s: any) => s.value) : [],
-                                        }));
-                                      }}
-                                      options={fieldOptions[field.key] || []}
-                                      placeholder={`Selecione ${field.placeholder.toLowerCase()}...`}
-                                      classNamePrefix="rs"
-                                      menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
-                                      styles={{
-                                        menuPortal: (base) => ({ ...base, zIndex: 2147483647 }),
-                                      }}
-                                    />
-                                  ) : (
-                                    <Input
-                                      value={values[field.key] || ""}
-                                      onChange={(e) => setValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
-                                      placeholder={field.placeholder}
-                                      className="h-7 text-xs"
-                                    />
-                                  )}
-                                </div>
+                                <ReactSelect
+                                  placeholder={field.placeholder}
+                                  isMulti
+                                  value={Array.isArray(values[field.key]) ? 
+                                    values[field.key].map((v: any) => ({ label: v, value: v })) : 
+                                    []
+                                  }
+                                  onChange={(selected) => setValues(v => ({ 
+                                    ...v, 
+                                    [field.key]: (selected as any[])?.map((s: any) => s.value) || []
+                                  }))}
+                                  options={fieldOptions[field.key] || []}
+                                  styles={{
+                                    control: (provided, state) => ({
+                                      ...provided,
+                                      minHeight: '32px',
+                                      height: '32px',
+                                      fontSize: '13px',
+                                      borderColor: state.isFocused ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+                                      backgroundColor: 'hsl(var(--background))',
+                                      boxShadow: state.isFocused ? '0 0 0 1px hsl(var(--primary))' : 'none',
+                                      '&:hover': {
+                                        borderColor: 'hsl(var(--primary))',
+                                      },
+                                    }),
+                                    valueContainer: (provided) => ({
+                                      ...provided,
+                                      height: '32px',
+                                      padding: '0 6px',
+                                    }),
+                                    input: (provided) => ({
+                                      ...provided,
+                                      margin: '0px',
+                                      color: 'hsl(var(--foreground))',
+                                    }),
+                                    indicatorsContainer: (provided) => ({
+                                      ...provided,
+                                      height: '32px',
+                                    }),
+                                    option: (provided, state) => ({
+                                      ...provided,
+                                      fontSize: '13px',
+                                      backgroundColor: state.isSelected 
+                                        ? 'hsl(var(--primary))' 
+                                        : state.isFocused 
+                                          ? 'hsl(var(--muted))' 
+                                          : 'hsl(var(--background))',
+                                      color: state.isSelected 
+                                        ? 'hsl(var(--primary-foreground))' 
+                                        : 'hsl(var(--foreground))',
+                                      '&:hover': {
+                                        backgroundColor: state.isSelected 
+                                          ? 'hsl(var(--primary))' 
+                                          : 'hsl(var(--muted))',
+                                      },
+                                    }),
+                                    menu: (provided) => ({
+                                      ...provided,
+                                      backgroundColor: 'hsl(var(--background))',
+                                      border: '1px solid hsl(var(--border))',
+                                      boxShadow: '0 4px 6px -1px hsl(var(--foreground) / 0.1), 0 2px 4px -1px hsl(var(--foreground) / 0.06)',
+                                    }),
+                                    multiValue: (provided) => ({
+                                      ...provided,
+                                      backgroundColor: 'hsl(var(--primary) / 0.1)',
+                                      border: '1px solid hsl(var(--primary) / 0.2)',
+                                    }),
+                                    multiValueLabel: (provided) => ({
+                                      ...provided,
+                                      color: 'hsl(var(--primary))',
+                                      fontSize: '12px',
+                                    }),
+                                    multiValueRemove: (provided) => ({
+                                      ...provided,
+                                      color: 'hsl(var(--primary))',
+                                      '&:hover': {
+                                        backgroundColor: 'hsl(var(--primary) / 0.2)',
+                                        color: 'hsl(var(--primary))',
+                                      },
+                                    }),
+                                    placeholder: (provided) => ({
+                                      ...provided,
+                                      color: 'hsl(var(--muted-foreground))',
+                                    }),
+                                  }}
+                                />
                               }
                             />
                           ))}
@@ -498,23 +561,51 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
               </ScrollArea>
             </div>
 
-            {/* Right column: Action Buttons */}
+            {/* Right column: Tags */}
             <div className="col-span-3 border-l bg-muted/20 p-4">
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <button
-                    onClick={applyNow}
-                    className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"
-                  >
-                    Aplicar Filtros
-                  </button>
-                  <button
-                    onClick={clearAll}
-                    className="w-full px-4 py-2 border border-border rounded-md text-sm font-medium hover:bg-muted/50"
-                  >
-                    Limpar Todos
-                  </button>
-                </div>
+                <h3 className="text-sm font-semibold text-foreground mb-3">Etiquetas</h3>
+                <ScrollArea className="h-80">
+                  <div className="space-y-2">
+                    {(availableTags || []).map((tag: string) => (
+                      <div key={tag} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`tag-${tag}`}
+                          checked={Boolean(activeMap[`tag:${tag}`])}
+                          onCheckedChange={(checked) => {
+                            const tagKey = `tag:${tag}`;
+                            setActiveMap(m => ({ ...m, [tagKey]: Boolean(checked) }));
+                            setValues(v => ({ ...v, [tagKey]: checked ? tag : "" }));
+                          }}
+                          className="h-4 w-4 rounded-[3px] border-gray-300 data-[state=checked]:bg-primary"
+                        />
+                        <Label 
+                          htmlFor={`tag-${tag}`} 
+                          className="text-sm font-normal text-foreground cursor-pointer flex items-center gap-2"
+                        >
+                          <Tag className="h-3 w-3 text-muted-foreground" />
+                          {tag}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              {/* Action buttons at bottom */}
+              <div className="mt-6 space-y-3">
+                <button
+                  onClick={clearAll}
+                  className="w-full px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-md hover:bg-muted/50 hover:text-foreground transition-colors"
+                >
+                  Limpar Tudo
+                </button>
+                <button
+                  onClick={applyNow}
+                  className="w-full px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors"
+                >
+                  Aplicar Filtros
+                </button>
               </div>
             </div>
           </div>
