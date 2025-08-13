@@ -1213,6 +1213,84 @@ export type Database = {
           },
         ]
       }
+      client_product_purchases: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payment_method: string | null
+          product_id: string
+          purchase_date: string
+          purchase_value: number | null
+          quantity: number | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          product_id: string
+          purchase_date?: string
+          purchase_value?: number | null
+          quantity?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          product_id?: string
+          purchase_date?: string
+          purchase_value?: number | null
+          quantity?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      client_products_interest: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          interest_level: string | null
+          notes: string | null
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          interest_level?: string | null
+          notes?: string | null
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          interest_level?: string | null
+          notes?: string | null
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_stats: {
         Row: {
           created_at: string | null
@@ -1340,6 +1418,7 @@ export type Database = {
           responsible_hosts: string[] | null
           responsible_user: string | null
           sales: number | null
+          search_vector: unknown | null
           session_id: string | null
           status: string | null
           tags: string[] | null
@@ -1379,6 +1458,7 @@ export type Database = {
           responsible_hosts?: string[] | null
           responsible_user?: string | null
           sales?: number | null
+          search_vector?: unknown | null
           session_id?: string | null
           status?: string | null
           tags?: string[] | null
@@ -1418,6 +1498,7 @@ export type Database = {
           responsible_hosts?: string[] | null
           responsible_user?: string | null
           sales?: number | null
+          search_vector?: unknown | null
           session_id?: string | null
           status?: string | null
           tags?: string[] | null
@@ -3811,6 +3892,36 @@ export type Database = {
           last_login_at?: string | null
           role?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      saved_filters: {
+        Row: {
+          created_at: string | null
+          filter_data: Json
+          filter_type: string
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          filter_data: Json
+          filter_type?: string
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          filter_data?: Json
+          filter_type?: string
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

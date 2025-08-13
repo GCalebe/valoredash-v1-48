@@ -3,6 +3,7 @@ import React from 'react';
 import { TabsContent } from "@/components/ui/tabs";
 import ClientUTMData from "./ClientUTMData";
 import ClientFilesTab from "./ClientFilesTab";
+import ClientProductsTab from "./ClientProductsTab";
 import { Contact } from "@/types/client";
 
 interface DialogTabsContentProps {
@@ -40,11 +41,14 @@ const DialogTabsContent = React.memo(({ newContact }: DialogTabsContentProps) =>
       </TabsContent>
 
       <TabsContent value="produtos" className="space-y-4">
-        <div className="text-center py-8 text-gray-500">
-          <h3 className="text-lg font-medium mb-2">Produtos de Interesse</h3>
-          <p>Selecione os produtos Comercials de interesse do cliente.</p>
-          <p className="text-sm mt-2">Em desenvolvimento</p>
-        </div>
+        {newContact.id ? (
+          <ClientProductsTab clientId={newContact.id} />
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <h3 className="text-lg font-medium mb-2">Produtos de Interesse</h3>
+            <p>Os produtos de interesse estarão disponíveis após salvar o cliente.</p>
+          </div>
+        )}
       </TabsContent>
     </>
   );
