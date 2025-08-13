@@ -22,6 +22,8 @@ export interface UnifiedConversationFilters {
   setLastMessageFilter: (v: string) => void;
   clientTypeFilter: string;
   setClientTypeFilter: (v: string) => void;
+  selectedTags?: string[];
+  setSelectedTags?: (tags: string[]) => void;
   customFieldFilters: ConversationCustomFieldFilter[];
   addCustomFieldFilter: (filter: ConversationCustomFieldFilter) => void;
   removeCustomFieldFilter: (fieldId: string) => void;
@@ -38,6 +40,7 @@ export function useUnifiedConversationFilters(): UnifiedConversationFilters {
   const [statusFilter, setStatusFilter] = useState("all");
   const [segmentFilter, setSegmentFilter] = useState("all");
   const [lastContactFilter, setLastContactFilter] = useState("all");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
   // Conversation-specific filters
   const [unreadFilter, setUnreadFilter] = useState("all");
@@ -84,6 +87,7 @@ export function useUnifiedConversationFilters(): UnifiedConversationFilters {
       clientTypeFilter !== "all" ||
       searchTerm !== "" ||
       customFieldFilters.length > 0 ||
+      selectedTags.length > 0 ||
       hasAdvancedRules,
     [
       statusFilter,
@@ -94,6 +98,7 @@ export function useUnifiedConversationFilters(): UnifiedConversationFilters {
       clientTypeFilter,
       searchTerm,
       customFieldFilters,
+      selectedTags,
       hasAdvancedRules,
     ],
   );
@@ -148,6 +153,8 @@ export function useUnifiedConversationFilters(): UnifiedConversationFilters {
     setLastMessageFilter,
     clientTypeFilter,
     setClientTypeFilter,
+    selectedTags,
+    setSelectedTags,
     customFieldFilters,
     addCustomFieldFilter,
     removeCustomFieldFilter,

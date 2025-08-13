@@ -82,44 +82,41 @@ export function useConversationTableFilters({ conversations, filters }: UseConve
         }
       }
 
-      // Segment filter (map to client status for now)
+      // Segment filter (map to kanbanStageId)
       if (filters.segmentFilter !== "all") {
-        // This would need proper mapping based on your business logic
-        // For now, we'll use a simple mapping
-        const segmentMap: { [key: string]: string } = {
-          "leads": "lead",
-          "prospects": "prospect", 
-          "customers": "customer"
-        };
-        
-        // This would come from the linked contact data
-        // For now, we'll skip this filter until proper contact linking is implemented
-      }
-
-      // Last contact filter
-      if (filters.lastContactFilter !== "all") {
-        const lastContact = new Date(conversation.time);
-        const now = new Date();
-        
-        switch (filters.lastContactFilter) {
-          case "today":
-            if (lastContact.toDateString() !== now.toDateString()) return false;
-            break;
-          case "week":
-            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            if (lastContact < weekAgo) return false;
-            break;
-          case "month":
-            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            if (lastContact < monthAgo) return false;
-            break;
+        if (!conversation.kanbanStageId || conversation.kanbanStageId !== filters.segmentFilter) {
+          return false;
         }
       }
 
-      // Custom field filters
+      // Last contact filter (usar lastContact se disponível; senão, cair para time)
+      if (filters.lastContactFilter !== "all") {
+        const base = conversation.lastContact || conversation.time;
+        if (!base) return false;
+        const lastContact = new Date(base);
+        const now = new Date();
+        
+        if (filters.lastContactFilter === "today") {
+          if (lastContact.toDateString() !== now.toDateString()) return false;
+        } else if (filters.lastContactFilter === "week") {
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          if (lastContact < weekAgo) return false;
+        } else if (filters.lastContactFilter === "month") {
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          if (lastContact < monthAgo) return false;
+        }
+      }
+
+      // Tags filter (selectedTags)
+      if (Array.isArray(filters.selectedTags) && filters.selectedTags.length > 0) {
+        const tags = conversation.clientTags || [];
+        const hasAny = filters.selectedTags.some((t) => tags.includes(t));
+        if (!hasAny) return false;
+      }
+
+      // Custom field filters (a serem aplicados no backend em cenários complexos)
       for (const customFilter of filters.customFieldFilters) {
-        // This would need to be implemented based on how custom fields are stored
-        // For now, we'll skip custom field filtering
+        // Placeholder: sem implementação local; preferir aplicação no Supabase
       }
 
       // Advanced rules filtering

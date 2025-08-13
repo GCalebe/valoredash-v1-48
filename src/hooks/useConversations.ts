@@ -5,8 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Conversation } from "@/types/chat";
 import { formatMessageTime } from "@/utils/chatUtils";
+import { ConversationFiltersService } from "@/services/conversationFiltersService";
+import { UnifiedConversationFilters } from "@/hooks/useUnifiedConversationFilters";
 
-export function useConversations() {
+export function useConversations(filters?: UnifiedConversationFilters) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -27,27 +29,56 @@ export function useConversations() {
 
       console.log("👤 Usuário autenticado:", user.id);
 
-      // Try to get conversations - first from the main conversations table with linked contact data
-      const { data: conversationsData, error: conversationsError } = await supabase
-        .from("conversations")
-        .select(`
-          *,
-          contact:contacts(
-            id,
-            name,
-            email,
-            phone,
-            client_name,
-            client_type,
-            client_size,
-            status,
-            tags,
-            budget,
-            sales
-          )
-        `)
-        .eq("user_id", user.id)
-        .order("last_message_time", { ascending: false });
+      // Decide entre busca simples ou com aplicação de filtros no backend
+      const shouldApplyServerFilters = Boolean(
+        filters && (
+          filters.hasAdvancedRules ||
+          (Array.isArray(filters.selectedTags) && filters.selectedTags.length > 0) ||
+          (filters.segmentFilter && filters.segmentFilter !== 'all') ||
+          (Array.isArray(filters.customFieldFilters) && filters.customFieldFilters.length > 0)
+        )
+      );
+
+      let conversationsData: any[] | null = null;
+      let conversationsError: any = null;
+
+      if (shouldApplyServerFilters) {
+        const { data, error } = await ConversationFiltersService.fetchConversationsWithFilters({
+          userId: user.id,
+          filters,
+          limit: 1000,
+          offset: 0,
+        });
+        conversationsData = data as any[];
+        if (error) conversationsError = { message: error };
+      } else {
+        const simple = await supabase
+          .from("conversations")
+          .select(`
+            *,
+            contact:contacts(
+              id,
+              name,
+              email,
+              phone,
+              client_name,
+              client_type,
+              client_size,
+              status,
+              tags,
+              budget,
+              sales,
+              responsible_hosts,
+              kanban_stage_id,
+              consultation_stage,
+              last_contact
+            )
+          `)
+          .eq("user_id", user.id)
+          .order("last_message_time", { ascending: false });
+        conversationsData = simple.data as any[];
+        conversationsError = simple.error;
+      }
 
       if (conversationsError) {
         console.error("Error fetching conversations:", conversationsError);
@@ -129,17 +160,22 @@ export function useConversations() {
 
       const formattedConversations: Conversation[] = conversationsData.map((conv) => ({
         id: conv.id,
-        name: conv.name || "Cliente",
+        name: conv.name || conv?.contact?.name || "Cliente",
         lastMessage: conv.last_message || "",
         time: conv.last_message_time ? formatMessageTime(new Date(conv.last_message_time)) : "",
         unread: conv.unread_count || 0,
         avatar: conv.avatar || "👤",
-        phone: conv.phone || "",
-        email: conv.email || "",
+        phone: conv.phone || conv?.contact?.phone || "",
+        email: conv.email || conv?.contact?.email || "",
         address: (conv.client_data as { address?: string })?.address || "",
-        clientName: (conv.client_data as { client_name?: string })?.client_name || "",
-        clientSize: (conv.client_data as { client_size?: string })?.client_size || "",
-        clientType: (conv.client_data as { client_type?: string })?.client_type || "",
+        clientName: conv?.contact?.client_name || (conv.client_data as { client_name?: string })?.client_name || "",
+        clientSize: conv?.contact?.client_size || (conv.client_data as { client_size?: string })?.client_size || "",
+        clientType: conv?.contact?.client_type || (conv.client_data as { client_type?: string })?.client_type || "",
+        clientTags: conv?.contact?.tags || [],
+        responsibleHosts: conv?.contact?.responsible_hosts || [],
+        kanbanStageId: conv?.contact?.kanban_stage_id || undefined,
+        consultationStage: conv?.contact?.consultation_stage || undefined,
+        lastContact: conv?.contact?.last_contact || undefined,
         sessionId: conv.session_id || "",
       }));
 
@@ -239,7 +275,18 @@ export function useConversations() {
 
   useEffect(() => {
     fetchConversations();
-  }, []); // fetchConversations removida das dependências para evitar re-execuções desnecessárias
+  }, [
+    fetchConversations,
+    filters?.hasAdvancedRules,
+    filters?.segmentFilter,
+    filters?.clientTypeFilter,
+    filters?.unreadFilter,
+    filters?.lastMessageFilter,
+    filters?.lastContactFilter,
+    filters?.searchTerm,
+    filters?.selectedTags?.length,
+    filters?.customFieldFilters?.length,
+  ]);
 
   return {
     conversations,

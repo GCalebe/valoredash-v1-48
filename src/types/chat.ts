@@ -19,6 +19,11 @@ export interface Conversation {
   clientName?: string;
   clientSize?: string;
   clientType?: string;
+  clientTags?: string[];
+  responsibleHosts?: string[];
+  kanbanStageId?: string;
+  consultationStage?: string;
+  lastContact?: string;
   sessionId: string;
 }
 

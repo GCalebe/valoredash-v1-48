@@ -5,10 +5,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tag, ChevronDown, Pencil, X } from "lucide-react";
+import { ChevronDown, Pencil, X } from "lucide-react";
 import { useDebounce } from "@/hooks/utils/useDebounce";
 import ReactSelect from "react-select";
 import { UnifiedConversationFilters } from "@/hooks/useUnifiedConversationFilters";
+import { useFilterableFields } from "@/hooks/useFilterableFields";
 
 // LEFT MENU com filtros pré-configurados para conversas
 const LEFT_MENU = [
@@ -45,6 +46,30 @@ const STATIC_SECTIONS: SectionDef[] = [
     { key: "createdAt", placeholder: "Data de criação" },
     { key: "updatedAt", placeholder: "Última atualização" },
   ] },
+  // Raízes equivalentes às da tela de Clientes (sem remover as existentes)
+  { title: "PRINCIPAL", key: "principal", fields: [
+    { key: "name", placeholder: "Nome do cliente" },
+    { key: "email", placeholder: "E-mail" },
+    { key: "phone", placeholder: "Telefone" },
+    { key: "address", placeholder: "Endereço" },
+    { key: "notes", placeholder: "Observações" },
+    { key: "responsible_hosts", placeholder: "Responsáveis" },
+  ] },
+  { title: "CLASSIFICAÇÃO", key: "classificacao", fields: [
+    { key: "consultation_stage", placeholder: "Estágio de consulta" },
+    { key: "tags", placeholder: "Tags" },
+  ] },
+  { title: "EMPRESA", key: "empresa", fields: [
+    { key: "client_name", placeholder: "Nome da empresa" },
+    { key: "client_type", placeholder: "Tipo de cliente" },
+    { key: "client_size", placeholder: "Porte do cliente" },
+  ] },
+  { title: "DOCUMENTOS", key: "documentos", fields: [
+    { key: "cpf_cnpj", placeholder: "CPF/CNPJ" },
+  ] },
+  { title: "FINANCEIRO", key: "financeiro", fields: [
+    { key: "budget", placeholder: "Orçamento" },
+  ] },
 ] as const;
 
 function FieldRow({ active, onToggle, control }: { active: boolean; onToggle: (active: boolean) => void; control: React.ReactNode }) {
@@ -76,9 +101,33 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
   const [selectedChips, setSelectedChips] = useState<{ key: string; label: string }[]>([]);
   const [fieldOptions, setFieldOptions] = useState<Record<string, { label: string; value: string }[]>>({});
 
+  // Campos e opções vindos do ecossistema de clientes
+  const { availableTags, responsibleHosts, responsibleHostsMap, kanbanStages } = useFilterableFields();
+
+  // Obter campos filtráveis fora do useMemo (respeitando regras de hooks)
+  const { fields: filterableFields } = useFilterableFields();
+
   const allSections: SectionDef[] = useMemo(() => {
-    return [...STATIC_SECTIONS];
-  }, []);
+    // Seção dinâmica de campos personalizados
+    const customFields = (filterableFields || []).filter((f: any) => f.isCustom);
+    const customSection: SectionDef | null = customFields.length > 0 ? {
+      title: "CAMPOS PERSONALIZADOS",
+      key: "campos_personalizados",
+      fields: customFields.map((f: any) => ({ key: f.id, placeholder: f.name })),
+    } : null;
+
+    const dynamicClientSection: SectionDef = {
+      title: "CLIENTE (AVANÇADO)",
+      key: "cliente_avancado",
+      fields: [
+        { key: "tags", placeholder: "Tags" },
+        { key: "responsible_hosts", placeholder: "Responsáveis" },
+        { key: "kanban_stage_id", placeholder: "Etapa do Kanban" },
+        { key: "consultation_stage", placeholder: "Estágio de Consulta" },
+      ],
+    };
+    return customSection ? [...STATIC_SECTIONS, dynamicClientSection, customSection] : [...STATIC_SECTIONS, dynamicClientSection];
+  }, [filterableFields]);
 
   // Garantir estado de colapso para todas as seções
   useEffect(() => {
@@ -91,7 +140,7 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
     });
   }, [allSections]);
 
-  // Configurar opções predefinidas para campos de conversa
+  // Configurar opções para campos do painel (conversa + cliente)
   useEffect(() => {
     const optionsMap: Record<string, { label: string; value: string }[]> = {
       unread: [
@@ -123,8 +172,41 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
         { label: "Este mês", value: "month" },
       ],
     };
+
+    // Tags (valores como a própria tag)
+    optionsMap["tags"] = (availableTags || []).map((t) => ({ label: t, value: t }));
+
+    // Responsible hosts (label = nome, value = id quando conhecido)
+    optionsMap["responsible_hosts"] = (responsibleHosts || []).map((name) => {
+      const id = responsibleHostsMap[name] || name;
+      return { label: name, value: id };
+    });
+
+    // Kanban stages (label = título, value = id)
+    optionsMap["kanban_stage_id"] = (kanbanStages || []).map((s: any) => ({ label: s.title, value: s.id }));
+
+    // Porte do cliente (pareado com tela de clientes)
+    optionsMap["client_size"] = [
+      { label: "Pequeno", value: "Pequeno" },
+      { label: "Médio", value: "Médio" },
+      { label: "Grande", value: "Grande" },
+    ];
+
+    // Consultation stage (mesmas opções da tela de clientes)
+    optionsMap["consultation_stage"] = [
+      { label: "Nova consulta", value: "Nova consulta" },
+      { label: "Qualificado", value: "Qualificado" },
+      { label: "Chamada agendada", value: "Chamada agendada" },
+      { label: "Preparando proposta", value: "Preparando proposta" },
+      { label: "Proposta enviada", value: "Proposta enviada" },
+      { label: "Acompanhamento", value: "Acompanhamento" },
+      { label: "Negociação", value: "Negociação" },
+      { label: "Fatura enviada", value: "Fatura enviada" },
+      { label: "Fatura paga – ganho", value: "Fatura paga – ganho" },
+      { label: "Projeto cancelado – perdido", value: "Projeto cancelado – perdido" },
+    ];
     setFieldOptions(optionsMap);
-  }, []);
+  }, [availableTags, responsibleHosts, responsibleHostsMap, kanbanStages]);
 
   const filteredMenu = useMemo(() => {
     const q = debouncedMenuSearch.trim().toLowerCase();
@@ -346,30 +428,30 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
             <div className="col-span-6 p-4">
               <ScrollArea className="h-full">
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground">Filtros Avançados</h3>
+                  <h3 className="text-sm font-semibold text-foreground mb-4">Propriedades do Lead</h3>
                   
                   {allSections.map((section) => (
-                    <div key={section.key} className="border rounded-lg bg-card">
+                    <div key={section.key}>
                       <div
-                        className="flex items-center justify-between p-3 border-b cursor-pointer hover:bg-muted/30"
+                        className="border-b pb-3 flex justify-between items-center"
                         onClick={() => setCollapsed((prev) => ({ ...prev, [section.key]: !prev[section.key] }))}
                       >
-                        <span className="text-xs font-medium text-foreground">{section.title}</span>
-                        <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{section.title}</span>
+                        <div className="flex items-center gap-3">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               clearSection(section.key);
                             }}
-                            className="text-xs text-muted-foreground hover:text-foreground"
+                            className="text-xs text-muted-foreground hover:text-foreground hover:underline"
                           >
                             Limpar
                           </button>
-                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsed[section.key] ? 'rotate-180' : ''}`} />
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsed[section.key] ? '-rotate-90' : 'rotate-0'}`} />
                         </div>
                       </div>
                       {!collapsed[section.key] && (
-                        <div className="p-3 space-y-3">
+                        <div className="mt-4 space-y-3">
                           {section.fields.map((field) => (
                             <FieldRow
                               key={field.key}
@@ -389,12 +471,11 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
                                         }));
                                       }}
                                       options={fieldOptions[field.key] || []}
-                                      placeholder={`Selecionar ${field.placeholder.toLowerCase()}`}
-                                      className="text-xs"
-                                      classNamePrefix="react-select"
+                                      placeholder={`Selecione ${field.placeholder.toLowerCase()}...`}
+                                      classNamePrefix="rs"
+                                      menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
                                       styles={{
-                                        control: (base) => ({ ...base, minHeight: '28px', fontSize: '12px' }),
-                                        menu: (base) => ({ ...base, fontSize: '12px' }),
+                                        menuPortal: (base) => ({ ...base, zIndex: 2147483647 }),
                                       }}
                                     />
                                   ) : (

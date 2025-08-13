@@ -70,10 +70,10 @@ export default function Conversations() {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   
   // Hooks para integração com banco de dados
-  const { conversations, loading: conversationsLoading, fetchConversations } = useConversations();
+  const filters = useUnifiedConversationFilters();
+  const { conversations, loading: conversationsLoading, fetchConversations } = useConversations(filters);
   const { messages, loading: messagesLoading } = useChatMessages(selectedContact?.sessionId || null);
   const { toast } = useToast();
-  const filters = useUnifiedConversationFilters();
   
   // TODO: Configurar atualizações em tempo real
   // useRealtimeUpdates({ updateConversationLastMessage, fetchConversations });
