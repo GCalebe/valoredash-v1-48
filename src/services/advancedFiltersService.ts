@@ -66,19 +66,18 @@ export class AdvancedFiltersService {
       if (params.lastContactFilter && params.lastContactFilter !== 'all') {
         const now = new Date();
         let dateFilter: Date;
-        
         switch (params.lastContactFilter) {
           case 'today':
             dateFilter = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            query = query.gte('updated_at', dateFilter.toISOString());
+            query = query.gte('last_contact', dateFilter.toISOString());
             break;
           case 'week':
             dateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            query = query.gte('updated_at', dateFilter.toISOString());
+            query = query.gte('last_contact', dateFilter.toISOString());
             break;
           case 'month':
             dateFilter = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-            query = query.gte('updated_at', dateFilter.toISOString());
+            query = query.gte('last_contact', dateFilter.toISOString());
             break;
         }
       }

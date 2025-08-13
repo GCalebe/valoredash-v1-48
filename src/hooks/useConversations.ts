@@ -1,6 +1,6 @@
 
 // @ts-nocheck
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Conversation } from "@/types/chat";
@@ -12,9 +12,19 @@ export function useConversations(filters?: UnifiedConversationFilters) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const filtersRef = useRef<UnifiedConversationFilters | undefined>(filters);
+  const isFetchingRef = useRef<boolean>(false);
 
-  const fetchConversations = useCallback(async () => {
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+
+  const fetchConversations = useCallback(async (overrideFilters?: UnifiedConversationFilters) => {
     try {
+      if (isFetchingRef.current) {
+        return;
+      }
+      isFetchingRef.current = true;
       setLoading(true);
       console.log("🔍 Buscando conversas da tabela unificada...");
 
@@ -30,12 +40,13 @@ export function useConversations(filters?: UnifiedConversationFilters) {
       console.log("👤 Usuário autenticado:", user.id);
 
       // Decide entre busca simples ou com aplicação de filtros no backend
+      const effectiveFilters = overrideFilters ?? filtersRef.current;
       const shouldApplyServerFilters = Boolean(
-        filters && (
-          filters.hasAdvancedRules ||
-          (Array.isArray(filters.selectedTags) && filters.selectedTags.length > 0) ||
-          (filters.segmentFilter && filters.segmentFilter !== 'all') ||
-          (Array.isArray(filters.customFieldFilters) && filters.customFieldFilters.length > 0)
+        effectiveFilters && (
+          effectiveFilters.hasAdvancedRules ||
+          (Array.isArray(effectiveFilters.selectedTags) && effectiveFilters.selectedTags.length > 0) ||
+          (effectiveFilters.segmentFilter && effectiveFilters.segmentFilter !== 'all') ||
+          (Array.isArray(effectiveFilters.customFieldFilters) && effectiveFilters.customFieldFilters.length > 0)
         )
       );
 
@@ -45,7 +56,7 @@ export function useConversations(filters?: UnifiedConversationFilters) {
       if (shouldApplyServerFilters) {
         const { data, error } = await ConversationFiltersService.fetchConversationsWithFilters({
           userId: user.id,
-          filters,
+          filters: effectiveFilters,
           limit: 1000,
           offset: 0,
         });
@@ -191,6 +202,7 @@ export function useConversations(filters?: UnifiedConversationFilters) {
         variant: "destructive",
       });
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
       console.log("🏁 Busca de conversas finalizada.");
     }
@@ -273,20 +285,7 @@ export function useConversations(filters?: UnifiedConversationFilters) {
     }
   }, []);
 
-  useEffect(() => {
-    fetchConversations();
-  }, [
-    fetchConversations,
-    filters?.hasAdvancedRules,
-    filters?.segmentFilter,
-    filters?.clientTypeFilter,
-    filters?.unreadFilter,
-    filters?.lastMessageFilter,
-    filters?.lastContactFilter,
-    filters?.searchTerm,
-    filters?.selectedTags?.length,
-    filters?.customFieldFilters?.length,
-  ]);
+  // Removido o efeito interno de refetch para evitar loops; o componente pai controla quando buscar
 
   return {
     conversations,

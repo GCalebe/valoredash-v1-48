@@ -252,10 +252,23 @@ export const ConversationFilterBuilder: React.FC<ConversationFilterBuilderProps>
         if (activeMap[f.key] && arr.length > 0) {
           const arrayField = f.key === "tags" || f.key === "responsible_hosts";
           const operator = arrayField ? "contains_any" : "in";
-          rules.push({ id: `rule-${f.key}`, field: f.key, operator, value: arr });
+          // Prefixar custom fields como custom:<id>
+          const isCustomField = customFieldDefs?.some((cf: any) => cf.id === f.key);
+          const fieldKey = isCustomField ? `custom:${f.key}` : f.key;
+          rules.push({ id: `rule-${f.key}`, field: fieldKey, operator, value: arr });
         }
       });
     });
+
+    // Atualizar selectedTags a partir da coluna direita (tags marcadas)
+    const selectedTags: string[] = Object.keys(activeMap)
+      .filter((k) => k.startsWith('tag:') && activeMap[k])
+      .map((k) => String(values[k] || '').trim())
+      .filter((v) => v.length > 0);
+    if (typeof filters.setSelectedTags === 'function') {
+      filters.setSelectedTags(selectedTags);
+    }
+
     const group = { id: `group-top-panel`, condition: "AND", rules };
     window.dispatchEvent(new CustomEvent('conversations-apply-advanced-filter', { detail: group }));
   };

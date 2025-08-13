@@ -80,8 +80,28 @@ export default function Conversations() {
   
   // Carregar conversas ao montar o componente
   useEffect(() => {
-    fetchConversations();
-  }, [fetchConversations]);
+    // Busca inicial
+    fetchConversations(filters);
+  // desabilita warning de dependência para evitar refetch em loop quando filtros mudam a cada render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Rebuscar quando filtros relevantes mudarem, evitando piscadas constantes
+  useEffect(() => {
+    fetchConversations(filters);
+  }, [
+    fetchConversations,
+    JSON.stringify(filters.advancedFilter),
+    filters.hasAdvancedRules,
+    filters.segmentFilter,
+    filters.clientTypeFilter,
+    filters.unreadFilter,
+    filters.lastMessageFilter,
+    filters.lastContactFilter,
+    filters.searchTerm,
+    filters.selectedTags?.length,
+    filters.customFieldFilters?.length,
+  ]);
   
   // Use the filtered conversations
   const { filteredConversations } = useConversationTableFilters({
