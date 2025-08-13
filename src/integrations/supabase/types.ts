@@ -1802,6 +1802,7 @@ export type Database = {
         Row: {
           avatar: string | null
           client_data: Json | null
+          contact_id: string | null
           created_at: string | null
           email: string | null
           id: string
@@ -1817,6 +1818,7 @@ export type Database = {
         Insert: {
           avatar?: string | null
           client_data?: Json | null
+          contact_id?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -1832,6 +1834,7 @@ export type Database = {
         Update: {
           avatar?: string | null
           client_data?: Json | null
+          contact_id?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -1845,6 +1848,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_conversations_user"
             columns: ["user_id"]
