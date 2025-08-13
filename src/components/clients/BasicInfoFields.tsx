@@ -87,18 +87,6 @@ const BasicInfoFields = React.memo(({ newContact, validationErrors, onInputChang
         onInputChange={onInputChange}
       />
 
-      <div>
-        <Label htmlFor="notes" className="text-gray-700 dark:text-gray-300">
-          Observações
-        </Label>
-        <Textarea
-          id="notes"
-          value={newContact.notes || ""}
-          onChange={(e) => onInputChange("notes", e.target.value)}
-          placeholder="Observações sobre o cliente"
-          className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 min-h-[80px]"
-        />
-      </div>
     </div>
   );
 });

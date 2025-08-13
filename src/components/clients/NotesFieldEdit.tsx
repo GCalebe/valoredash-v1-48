@@ -6,6 +6,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, Plus, AlertCircle, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOptimizedNotes } from "@/hooks/useOptimizedNotes";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface NotesFieldEditProps {
   contactId: string | null;
@@ -13,6 +23,10 @@ interface NotesFieldEditProps {
 
 const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
   const [newNote, setNewNote] = useState("");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<
+    { type: "add" } | { type: "remove"; noteId: string } | null
+  >(null);
   
   const {
     notes,
@@ -25,6 +39,12 @@ const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
     retry,
   } = useOptimizedNotes();
 
+  const confirmAdd = () => {
+    if (!newNote.trim()) return;
+    setPendingAction({ type: "add" });
+    setIsConfirmOpen(true);
+  };
+
   const handleAddNote = async () => {
     if (!contactId || !newNote.trim()) return;
 
@@ -32,6 +52,11 @@ const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
     if (success) {
       setNewNote("");
     }
+  };
+
+  const requestRemove = (noteId: string) => {
+    setPendingAction({ type: "remove", noteId });
+    setIsConfirmOpen(true);
   };
 
   const handleRemoveNote = async (noteId: string) => {
@@ -98,6 +123,7 @@ const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle className="text-sm">Notas</CardTitle>
@@ -106,21 +132,21 @@ const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
         <div className="space-y-4">
           {/* Input para nova nota */}
           <div className="flex gap-2">
-            <Input
+              <Input
               placeholder="Adicione uma nova nota..."
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  handleAddNote();
+                  confirmAdd();
                 }
               }}
               disabled={isSaving}
               className="flex-1"
             />
             <Button
-              onClick={handleAddNote}
+              onClick={confirmAdd}
               disabled={!newNote.trim() || isSaving}
               size="sm"
             >
@@ -150,7 +176,7 @@ const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleRemoveNote(note.id)}
+                        onClick={() => requestRemove(note.id)}
                         disabled={isSaving}
                       >
                         <X className="w-3 h-3" />
@@ -177,6 +203,34 @@ const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
         </div>
       </CardContent>
     </Card>
+    
+    {/* Confirmação de alteração para notas */}
+    <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Confirmar alteração?</AlertDialogTitle>
+          <AlertDialogDescription>
+            {pendingAction?.type === "add"
+              ? "Deseja adicionar esta nota?"
+              : "Deseja remover esta nota?"}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => { setPendingAction(null); setIsConfirmOpen(false); }}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={async () => {
+            if (!pendingAction) { setIsConfirmOpen(false); return; }
+            if (pendingAction.type === "add") {
+              await handleAddNote();
+            } else if (pendingAction.type === "remove") {
+              await handleRemoveNote(pendingAction.noteId);
+            }
+            setPendingAction(null);
+            setIsConfirmOpen(false);
+          }}>Confirmar</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,16 @@ import ClientProductsTab from "@/components/clients/ClientProductsTab";
 import NotesFieldEdit from "@/components/clients/NotesFieldEdit";
 import { Contact } from "@/types/client";
 import { useCustomFields } from "@/hooks/useCustomFields";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type PrincipalLevel = "basic" | "company" | "custom" | "hidden";
 
@@ -32,6 +42,25 @@ const ModernContactTabs = ({ contactId, contact, onFieldUpdate }: ModernContactT
   const [principalLevel, setPrincipalLevel] = useState<PrincipalLevel>("basic");
   const { customFields, loading: customFieldsLoading } = useCustomFields();
   const [customValues, setCustomValues] = useState<{ [fieldId: string]: string | string[] | null }>({});
+
+  // Estado de rascunho para exibir imediatamente as edições no UI
+  const [draftContact, setDraftContact] = useState<Partial<Contact>>({});
+  // Valores em edição (ainda não confirmados) por campo
+  const [editingValues, setEditingValues] = useState<Partial<Contact>>({});
+  // Confirmação
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [pendingChange, setPendingChange] = useState<{ field: keyof Contact | null; value: any }>(
+    { field: null, value: null }
+  );
+  const confirmTimeoutRef = useRef<number | null>(null);
+
+  // Sincroniza rascunho quando o contato muda
+  useEffect(() => {
+    if (contact) {
+      setDraftContact({ ...contact });
+      setEditingValues({});
+    }
+  }, [contact]);
 
   const principalLevelConfig = {
     basic: {
@@ -56,8 +85,21 @@ const ModernContactTabs = ({ contactId, contact, onFieldUpdate }: ModernContactT
     },
   };
 
+  const openConfirmSoon = () => {
+    if (confirmTimeoutRef.current) {
+      window.clearTimeout(confirmTimeoutRef.current);
+    }
+    confirmTimeoutRef.current = window.setTimeout(() => {
+      setIsConfirmOpen(true);
+    }, 500);
+  };
+
   const handleInputChange = (field: keyof Contact, value: any) => {
-    onFieldUpdate?.(field, value);
+    // Atualiza valor em edição para refletir imediatamente no input
+    setEditingValues(prev => ({ ...prev, [field]: value }));
+    // Agenda confirmação
+    setPendingChange({ field, value });
+    openConfirmSoon();
   };
 
   const handleCustomFieldChange = (fieldId: string, value: string | string[] | null) => {
@@ -68,17 +110,18 @@ const ModernContactTabs = ({ contactId, contact, onFieldUpdate }: ModernContactT
   };
 
   // Convert contact to format expected by BasicInfoFields and CompanyInfoFields
+  // Mescla rascunho com valores em edição para exibir no formulário
   const contactData: Partial<Contact> = {
-    name: contact.name,
-    email: contact.email,
-    phone: contact.phone,
-    address: contact.address,
-    clientName: contact.clientName,
-    clientType: contact.clientType,
-    clientSize: contact.clientSize,
-    cpfCnpj: contact.cpfCnpj,
-    notes: contact.notes,
-    responsibleHosts: contact.responsibleHosts,
+    name: editingValues.name ?? draftContact.name,
+    email: editingValues.email ?? draftContact.email,
+    phone: editingValues.phone ?? draftContact.phone,
+    address: editingValues.address ?? draftContact.address,
+    clientName: editingValues.clientName ?? draftContact.clientName,
+    clientType: editingValues.clientType ?? draftContact.clientType,
+    clientSize: editingValues.clientSize ?? draftContact.clientSize,
+    cpfCnpj: editingValues.cpfCnpj ?? draftContact.cpfCnpj,
+    notes: editingValues.notes ?? draftContact.notes,
+    responsibleHosts: editingValues.responsibleHosts ?? draftContact.responsibleHosts,
   };
 
   const renderPrincipalContent = () => {
@@ -114,6 +157,37 @@ const ModernContactTabs = ({ contactId, contact, onFieldUpdate }: ModernContactT
   };
 
   const CurrentIcon = principalLevelConfig[principalLevel].icon;
+
+  const handleConfirm = () => {
+    if (!pendingChange.field) {
+      setIsConfirmOpen(false);
+      return;
+    }
+    const { field, value } = pendingChange;
+    setDraftContact(prev => ({ ...prev, [field]: value }));
+    setEditingValues(prev => {
+      const next = { ...prev } as any;
+      delete next[field];
+      return next;
+    });
+    onFieldUpdate?.(field, value);
+    setPendingChange({ field: null, value: null });
+    setIsConfirmOpen(false);
+  };
+
+  const handleCancel = () => {
+    if (pendingChange.field) {
+      // descarta valor em edição do campo atual
+      const field = pendingChange.field;
+      setEditingValues(prev => {
+        const next = { ...prev } as any;
+        delete next[field];
+        return next;
+      });
+    }
+    setPendingChange({ field: null, value: null });
+    setIsConfirmOpen(false);
+  };
 
   return (
     <div className="flex-1 overflow-hidden">
@@ -225,6 +299,22 @@ const ModernContactTabs = ({ contactId, contact, onFieldUpdate }: ModernContactT
           </TabsContent>
         </div>
       </Tabs>
+
+      {/* Confirmação de alteração */}
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar alteração?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja aplicar esta alteração no contato?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancel}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirm}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
