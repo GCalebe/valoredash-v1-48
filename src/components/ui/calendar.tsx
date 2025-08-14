@@ -13,7 +13,7 @@ export function Calendar({ selected, onSelect, className, mode = "single" }: Cal
   return (
     <DayPicker
       mode={mode}
-      selected={selected}
+      selected={selected as any}
       onSelect={onSelect}
       locale={ptBR}
       className={`calendar pointer-events-auto ${className || ""}`}

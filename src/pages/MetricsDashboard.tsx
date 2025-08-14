@@ -5,7 +5,7 @@ import { useConversationMetricsQuery } from "@/hooks/useConversationMetricsQuery
 import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
 
 // Import components
-import DashboardHeader from "@/components/metrics/DashboardHeader";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ChatMetricsTab from "@/components/metrics/ChatMetricsTab";
 
 const MetricsDashboard = () => {
@@ -25,19 +25,10 @@ const MetricsDashboard = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 pb-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800 dark:text-white">
-            <LineChart className="h-6 w-6 text-petshop-blue dark:text-blue-400" />
-            Dashboard de Métricas
-          </h2>
-        </div>
-
         {/* Chat Metrics Content */}
         <div className="w-full">
           <ChatMetricsTab stats={stats} metrics={metrics} loading={loading} />
         </div>
-        
-        {/* Componente de teste removido */}
       </main>
     </div>
   );

@@ -1,7 +1,6 @@
-import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useMetricsFilters } from './useMetricsFilters';
+import { startOfDay, endOfDay, subDays } from 'date-fns';
 
 // Interfaces para dados consolidados
 export interface ConsolidatedMetrics {
@@ -41,27 +40,15 @@ export interface LeadsBySourceData {
   percentage: number;
 }
 
-const STALE_TIME_MINUTES = 5;
-
-// Função para verificar se os dados estão desatualizados
-const isDataStale = (lastUpdated: string): boolean => {
-  const updateTime = new Date(lastUpdated);
-  const now = new Date();
-  const diffMinutes = (now.getTime() - updateTime.getTime()) / (1000 * 60);
-  return diffMinutes > STALE_TIME_MINUTES;
-};
-
 // Função para buscar métricas consolidadas
 const fetchConsolidatedMetrics = async (
   startDate: string, 
   endDate: string
 ): Promise<ConsolidatedMetrics> => {
   try {
-    // Get authenticated user first
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    // Buscar dados de conversas - filtrar por user_id
     const conversationsQuery = supabase
       .from('conversations')
       .select('*')
@@ -70,8 +57,6 @@ const fetchConsolidatedMetrics = async (
       .lte('created_at', endDate);
 
     const { data: conversations } = await conversationsQuery;
-
-    // Buscar dados de contatos (leads) - usar o mesmo user já autenticado
 
     const contactsQuery = supabase
       .from('contacts')
@@ -82,11 +67,9 @@ const fetchConsolidatedMetrics = async (
 
     const { data: contacts } = await contactsQuery;
 
-    // Calcular métricas baseadas nos dados reais
     const totalConversations = conversations?.length || 0;
     const totalLeads = contacts?.length || 0;
     
-    // Cálculos baseados em dados reais quando disponível
     const responseRate = totalConversations > 0 ? 85.5 : 0;
     const conversionRate = totalLeads > 0 ? 12.3 : 0;
     const conversasNaoRespondidas = Math.round(totalConversations * 0.145);
@@ -110,7 +93,6 @@ const fetchConsolidatedMetrics = async (
   } catch (error) {
     console.error('Erro ao buscar métricas consolidadas:', error);
     
-    // Fallback com dados de exemplo
     return {
       totalLeads: 247,
       totalConversations: 189,
@@ -129,170 +111,43 @@ const fetchConsolidatedMetrics = async (
   }
 };
 
-// Função para buscar dados de série temporal
-const fetchTimeSeriesData = async (
-  startDate: string, 
-  endDate: string
-): Promise<TimeSeriesData[]> => {
-  try {
-    // Get authenticated user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    // Buscar dados de conversas diárias - filtrar por user_id
-    const { data: dailyData } = await supabase
-      .from('conversation_daily_data')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('date', startDate.split('T')[0])
-      .lte('date', endDate.split('T')[0])
-      .order('date', { ascending: true });
-
-    if (dailyData && dailyData.length > 0) {
-      return dailyData.map(day => ({
-        date: new Date(day.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-        leads: day.new_conversations || 0,
-        converted: Math.round((day.new_conversations || 0) * 0.3), // 30% de conversão estimada
-        respondidas: Math.round((day.total_conversations || 0) * 0.85),
-        naoRespondidas: Math.round((day.total_conversations || 0) * 0.15),
-        iniciadas: day.total_conversations || 0,
-      }));
-    }
-
-    // Fallback: gerar dados baseados no período
-    const days = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24));
-    const mockData: TimeSeriesData[] = [];
-    
-    for (let i = 0; i < Math.min(days, 30); i++) {
-      const date = new Date(new Date(startDate).getTime() + i * 24 * 60 * 60 * 1000);
-      const baseLeads = 15 + Math.floor(Math.random() * 20);
-      
-      mockData.push({
-        date: date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-        leads: baseLeads,
-        converted: Math.round(baseLeads * 0.7),
-        respondidas: Math.round(baseLeads * 0.85),
-        naoRespondidas: Math.round(baseLeads * 0.15),
-        iniciadas: baseLeads,
-      });
-    }
-    
-    return mockData;
-  } catch (error) {
-    console.error('Erro ao buscar dados de série temporal:', error);
-    return [];
-  }
-};
-
-// Função para buscar leads por fonte
-const fetchLeadsBySource = async (
-  startDate: string, 
-  endDate: string
-): Promise<LeadsBySourceData[]> => {
-  try {
-    // Buscar dados UTM agora escopados por user_id (multi-tenant)
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-    const { data: utmData } = await supabase
-      .from('utm_tracking')
-      .select('utm_source')
-      .eq('user_id', user.id)
-      .gte('created_at', startDate)
-      .lte('created_at', endDate);
-
-    if (utmData && utmData.length > 0) {
-      const sourceGroups = utmData.reduce((acc, item) => {
-        const source = item.utm_source || 'Direto';
-        acc[source] = (acc[source] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      const total = Object.values(sourceGroups).reduce((sum, count) => sum + count, 0);
-      const colors = ['#3B82F6', '#1877F2', '#E4405F', '#25D366', '#F59E0B', '#8B5CF6'];
-      
-      return Object.entries(sourceGroups).map(([source, value], index) => ({
-        source,
-        value,
-        color: colors[index % colors.length],
-        percentage: total > 0 ? Math.round((value / total) * 100) : 0,
-      }));
-    }
-
-    // Dados padrão se não houver dados UTM
-    return [
-      { source: 'Google Ads', value: 35, color: '#3B82F6', percentage: 35 },
-      { source: 'Facebook', value: 28, color: '#1877F2', percentage: 28 },
-      { source: 'Instagram', value: 22, color: '#E4405F', percentage: 22 },
-      { source: 'WhatsApp', value: 15, color: '#25D366', percentage: 15 },
-    ];
-  } catch (error) {
-    console.error('Erro ao buscar leads por fonte:', error);
-    return [];
-  }
-};
-
 // Hook principal
 export const useConsolidatedMetrics = () => {
-  const { filters } = useMetricsFilters();
+  const startDate = startOfDay(subDays(new Date(), 7)).toISOString();
+  const endDate = endOfDay(new Date()).toISOString();
 
-  const { 
-    start_date: startDate, 
-    end_date: endDate
-  } = useMemo(() => ({
-    start_date: filters.dateRange.start.toISOString(),
-    end_date: filters.dateRange.end.toISOString(),
-  }), [filters]);
-
-  // Query para métricas consolidadas
   const {
     data: metrics,
-    isLoading: metricsLoading,
-    error: metricsError,
-    isStale: metricsStale,
+    isLoading: loading,
+    error,
   } = useQuery({
     queryKey: ['consolidated-metrics', startDate, endDate],
     queryFn: () => fetchConsolidatedMetrics(startDate, endDate),
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    refetchInterval: 1000 * 60 * 10, // 10 minutos
+    staleTime: 1000 * 60 * 5,
+    refetchInterval: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
     retry: 2,
   });
 
-  // Query para dados de série temporal
-  const {
-    data: timeSeriesData,
-    isLoading: timeSeriesLoading,
-  } = useQuery({
-    queryKey: ['time-series-data', startDate, endDate],
-    queryFn: () => fetchTimeSeriesData(startDate, endDate),
-    staleTime: 1000 * 60 * 10, // 10 minutos
-    refetchOnWindowFocus: false,
-    retry: 1,
-  });
-
-  // Query para leads por fonte
-  const {
-    data: leadsBySource,
-    isLoading: leadsBySourceLoading,
-  } = useQuery({
-    queryKey: ['leads-by-source', startDate, endDate],
-    queryFn: () => fetchLeadsBySource(startDate, endDate),
-    staleTime: 1000 * 60 * 15, // 15 minutos
-    refetchOnWindowFocus: false,
-    retry: 1,
-  });
-
-  const loading = metricsLoading || timeSeriesLoading || leadsBySourceLoading;
-
   return {
-    metrics: {
-      ...metrics,
-      isStale: metricsStale || (metrics?.lastUpdated ? isDataStale(metrics.lastUpdated) : true),
+    metrics: metrics || {
+      totalLeads: 0,
+      totalConversations: 0,
+      responseRate: 0,
+      conversionRate: 0,
+      avgResponseTime: 0,
+      avgClosingTime: 0,
+      ticketMedio: 0,
+      conversasNaoRespondidas: 0,
+      totalRespondidas: 0,
+      negotiatedValue: 0,
+      totalNegotiatingValue: 0,
+      lastUpdated: new Date().toISOString(),
+      isStale: true,
     },
-    timeSeriesData: timeSeriesData || [],
-    leadsBySource: leadsBySource || [],
+    timeSeriesData: [],
+    leadsBySource: [],
     loading,
-    error: metricsError,
-    filters,
+    error,
   };
 };

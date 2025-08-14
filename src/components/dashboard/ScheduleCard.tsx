@@ -86,7 +86,7 @@ const ScheduleCard = () => {
         // Fallback: usar eventos locais já carregados
         const localWeekCount = events.filter((event: ScheduleEvent) => {
           const d = new Date(event.date || event.start_time || '');
-          return d >= weekStart && d <= weekEnd;
+          return d >= weekStartLocal && d <= weekEndLocal;
         }).length;
         const localDayCount = events.filter((event: ScheduleEvent) => (event.date || '').startsWith(todayStr)).length;
         console.log('[ScheduleCard] Fallback local - Semana:', localWeekCount, 'Dia:', localDayCount);

@@ -50,7 +50,7 @@ const ClientsCard = () => {
         console.error("Erro ao buscar leads do dia:", error);
         setNewLeadsToday(0);
       } else {
-        setNewLeadsToday(typeof count === "number" ? count : (data?.length || 0));
+        setNewLeadsToday(count || 0);
       }
     } catch (e) {
       console.error("Erro ao calcular leads do dia:", e);

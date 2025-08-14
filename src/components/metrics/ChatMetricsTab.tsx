@@ -40,8 +40,10 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
     leadsBySource,
     loading: consolidatedLoading,
     error: consolidatedError,
-    filters,
   } = useConsolidatedMetrics();
+  
+  // Get filters from separate hook  
+  const { filters } = useMetricsFilters();
   
   // Real-time updates
   const { lastUpdate, updateCount, forceRefresh, isConnected } = useRealTimeMetrics();
