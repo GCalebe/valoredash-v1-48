@@ -105,11 +105,43 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header com gradiente */}
-      <MetricsHeader 
-        title="Dashboard de Métricas Avançado"
-        description="Análise completa de performance, leads e conversões em tempo real"
-      />
+      {/* Header Principal */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Dashboard de Métricas Avançado
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
+            Análise completa de performance, leads e conversões em tempo real
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-muted-foreground">
+            Período: {filters.dataPeriod === "custom" && filters.customStartDate && filters.customEndDate ? (
+              `${format(new Date(filters.customStartDate), "dd/MM/yyyy", { locale: ptBR })} - ${format(new Date(filters.customEndDate), "dd/MM/yyyy", { locale: ptBR })}`
+            ) : (
+              (() => {
+                const periodOptions = [
+                  { label: "Hoje", value: "today" },
+                  { label: "Últimos 7 dias", value: "last7days" },
+                  { label: "Últimos 30 dias", value: "last30days" },
+                  { label: "Este mês", value: "thisMonth" },
+                ];
+                const option = periodOptions.find(p => p.value === filters.dataPeriod);
+                return option?.label || "Últimos 7 dias";
+              })()
+            )}
+          </div>
+          <MetricsFilters
+            datePeriod={filters.dataPeriod}
+            customStartDate={filters.customStartDate}
+            customEndDate={filters.customEndDate}
+            onDatePeriodChange={handleDatePeriodChange}
+            onCustomDateChange={updateCustomDateRange}
+            onReset={resetFilters}
+          />
+        </div>
+      </div>
 
       {/* Status da Conexão e Qualidade dos Dados */}
       {!isDataReliable && (
@@ -140,35 +172,9 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
 
       {/* Header com Filtros */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
-            Métricas de Conversas
-          </h3>
-          <div className="text-sm text-muted-foreground">
-            Período: {filters.dataPeriod === "custom" && filters.customStartDate && filters.customEndDate ? (
-              `${format(new Date(filters.customStartDate), "dd/MM/yyyy", { locale: ptBR })} - ${format(new Date(filters.customEndDate), "dd/MM/yyyy", { locale: ptBR })}`
-            ) : (
-              (() => {
-                const periodOptions = [
-                  { label: "Hoje", value: "today" },
-                  { label: "Últimos 7 dias", value: "last7days" },
-                  { label: "Últimos 30 dias", value: "last30days" },
-                  { label: "Este mês", value: "thisMonth" },
-                ];
-                const option = periodOptions.find(p => p.value === filters.dataPeriod);
-                return option?.label || "Últimos 7 dias";
-              })()
-            )}
-          </div>
-        </div>
-        <MetricsFilters
-          datePeriod={filters.dataPeriod}
-          customStartDate={filters.customStartDate}
-          customEndDate={filters.customEndDate}
-          onDatePeriodChange={handleDatePeriodChange}
-          onCustomDateChange={updateCustomDateRange}
-          onReset={resetFilters}
-        />
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
+          Métricas de Conversas
+        </h3>
       </div>
 
       {/* KPIs Reformulados */}
