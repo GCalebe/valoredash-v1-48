@@ -35,10 +35,13 @@ export const ContactHeader: React.FC<ContactHeaderProps> = ({
       <div className="flex items-start gap-4">
         <div className="relative">
           <Avatar className="w-16 h-16">
-            <AvatarImage src={contact.avatar} alt={contact.name} />
-            <AvatarFallback className="text-lg">
-              {contact.name.split(" ").map((n) => n[0]).join("")}
-            </AvatarFallback>
+            {contact.avatar ? (
+              <AvatarImage src={contact.avatar} alt={contact.name} />
+            ) : (
+              <AvatarFallback className="text-lg">
+                {contact.name.split(" ").map((n) => n[0]).join("")}
+              </AvatarFallback>
+            )}
           </Avatar>
           <div
             className={cn(

@@ -37,18 +37,12 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
     { label: "Personalizado", value: "custom" },
   ];
 
-  const handleCustomDateSelect = (date: Date | undefined, type: 'start' | 'end') => {
-    if (!date) return;
-    
-    const dateStr = format(date, 'yyyy-MM-dd');
-    
-    if (type === 'start') {
-      const endDate = customEndDate || dateStr;
-      onCustomDateChange(dateStr, endDate);
-    } else {
-      const startDate = customStartDate || dateStr;
-      onCustomDateChange(startDate, dateStr);
-    }
+  // Novo: seleção por intervalo com um único calendário
+  const handleRangeSelect = (range: { from?: Date; to?: Date } | undefined) => {
+    if (!(range?.from && range?.to)) return;
+    const startStr = format(range.from, 'yyyy-MM-dd');
+    const endStr = format(range.to, 'yyyy-MM-dd');
+    onCustomDateChange(startStr, endStr);
   };
 
   const getCurrentPeriodLabel = () => {
@@ -106,65 +100,33 @@ const MetricsFilters: React.FC<MetricsFiltersProps> = ({
             </Select>
           </div>
 
-          {/* Calendário Personalizado */}
+          {/* Calendário Personalizado: seleção de intervalo */}
           {datePeriod === "custom" && (
             <div className="space-y-4">
               <Label className="text-base font-medium">Datas Personalizadas</Label>
-              
-              {/* Data de Início */}
               <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">Data de Início</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !customStartDate && "text-muted-foreground"
+                        !(customStartDate && customEndDate) && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {customStartDate ? (
-                        format(new Date(customStartDate), "dd/MM/yyyy", { locale: ptBR })
+                      {customStartDate && customEndDate ? (
+                        `${format(new Date(customStartDate), "dd/MM/yyyy", { locale: ptBR })} - ${format(new Date(customEndDate), "dd/MM/yyyy", { locale: ptBR })}`
                       ) : (
-                        <span>Selecione a data inicial</span>
+                        <span>Selecione o intervalo</span>
                       )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
-                      selected={customStartDate ? new Date(customStartDate) : undefined}
-                      onSelect={(date) => handleCustomDateSelect(date, 'start')}
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Data de Fim */}
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">Data de Fim</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !customEndDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {customEndDate ? (
-                        format(new Date(customEndDate), "dd/MM/yyyy", { locale: ptBR })
-                      ) : (
-                        <span>Selecione a data final</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      selected={customEndDate ? new Date(customEndDate) : undefined}
-                      onSelect={(date) => handleCustomDateSelect(date, 'end')}
+                      mode="range"
+                      selected={{ from: customStartDate ? new Date(customStartDate) : undefined, to: customEndDate ? new Date(customEndDate) : undefined }}
+                      onSelect={handleRangeSelect}
                       className="pointer-events-auto"
                     />
                   </PopoverContent>

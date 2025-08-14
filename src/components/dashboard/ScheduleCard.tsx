@@ -1,4 +1,5 @@
 import React from "react";
+import { startOfWeek, endOfWeek, format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -12,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, RefreshCw } from "lucide-react";
 import { useScheduleData } from "@/hooks/useScheduleData";
+import { useAuth } from "@/context/AuthContext";
+import { fetchCalendarEvents } from "@/hooks/useFetchCalendarEvents";
 
 interface ScheduleEvent {
   id: string;
@@ -28,17 +31,24 @@ interface ScheduleEvent {
 
 const ScheduleCard = () => {
   const navigate = useNavigate();
-  const { events, loading, refreshing, refetchScheduleData } =
+  const { user } = useAuth();
+  const { events, loading, refreshing, refetchScheduleData, getEventsInRange } =
     useScheduleData();
+
+  // Sem dependência de cache do hook do calendário; buscar direto via fetchCalendarEvents
+
+  const [weekCount, setWeekCount] = React.useState<number>(0);
+  const [dayCount, setDayCount] = React.useState<number>(0);
 
   const handleClick = () => {
     navigate("/schedule");
   };
 
-  const handleRefresh = (e: React.MouseEvent) => {
+  const handleRefresh = async (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log("Schedule card refresh clicked");
-    refetchScheduleData();
+    await refetchScheduleData();
+    await updateCounts();
   };
 
   // Próximos agendamentos hoje
@@ -47,6 +57,56 @@ const ScheduleCard = () => {
     const eventDate = new Date(event.date || event.start_time || '');
     return eventDate.toDateString() === today.toDateString();
   });
+
+  const updateCounts = React.useCallback(async () => {
+    // Recalcula os limites sempre que executar
+    const now = new Date();
+    const weekStartLocal = startOfWeek(now, { weekStartsOn: 0 });
+    const weekEndLocal = endOfWeek(now, { weekStartsOn: 0 });
+    const weekStartStr = format(weekStartLocal, 'yyyy-MM-dd');
+    const weekEndStr = format(weekEndLocal, 'yyyy-MM-dd');
+    const todayStr = format(now, 'yyyy-MM-dd');
+
+    try {
+      // Buscar eventos do calendário diretamente (fonte da tela de calendário)
+      const weeklyCalendar = await fetchCalendarEvents(undefined, { start: weekStartLocal, end: weekEndLocal });
+      console.log('[ScheduleCard] Semana calendar_events (filtrado):', weekStartStr, '->', weekEndStr, 'Eventos:', weeklyCalendar.length);
+      let computedWeekCount = weeklyCalendar.length;
+      let computedDayCount = weeklyCalendar.filter(ev => format(new Date(ev.start), 'yyyy-MM-dd') === todayStr).length;
+
+      // Fallback para agenda_bookings se o calendário estiver vazio
+      if (computedWeekCount === 0) {
+        const weeklyAgenda = await getEventsInRange(weekStartStr, weekEndStr);
+        console.log('[ScheduleCard] Fallback agenda_bookings:', weeklyAgenda.length);
+        computedWeekCount = weeklyAgenda.length;
+        computedDayCount = weeklyAgenda.filter(ev => ev.date === todayStr).length;
+      }
+
+      if (computedWeekCount === 0 && events.length > 0) {
+        // Fallback: usar eventos locais já carregados
+        const localWeekCount = events.filter((event: ScheduleEvent) => {
+          const d = new Date(event.date || event.start_time || '');
+          return d >= weekStart && d <= weekEnd;
+        }).length;
+        const localDayCount = events.filter((event: ScheduleEvent) => (event.date || '').startsWith(todayStr)).length;
+        console.log('[ScheduleCard] Fallback local - Semana:', localWeekCount, 'Dia:', localDayCount);
+        setWeekCount(localWeekCount);
+        setDayCount(localDayCount);
+      } else {
+        setWeekCount(computedWeekCount);
+        setDayCount(computedDayCount);
+      }
+    } catch (err) {
+      console.error('Erro ao calcular contadores da semana/dia:', err);
+      setWeekCount(0);
+      setDayCount(0);
+    }
+  }, [events.length, user?.id]);
+
+  React.useEffect(() => {
+    updateCounts();
+    // Recalcula quando o estado de atualização mudar ou o usuário autenticar
+  }, [updateCounts, refreshing, user?.id]);
 
   console.log("ScheduleCard render:", {
     eventsCount: events.length,
@@ -107,18 +167,18 @@ const ScheduleCard = () => {
                 variant="outline"
                 className="bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300 text-xs"
               >
-                {todayEvents.length}
+                {dayCount}
               </Badge>
             </div>
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-gray-600 dark:text-gray-300">
-                Total:
+                Semana:
               </span>
               <Badge
                 variant="outline"
                 className="bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300 text-xs"
               >
-                {events.length}
+                {weekCount}
               </Badge>
             </div>
           </div>

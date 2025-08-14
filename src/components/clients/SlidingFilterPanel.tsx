@@ -309,7 +309,7 @@ const applyNow = () => {
           {/* Top bar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-b bg-muted/30 gap-3">
             <div className="flex items-center gap-3 flex-1">
-              <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20">Filtro 2</span>
+              <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20">Filtro</span>
               <span className="h-5 w-px bg-border" />
               <span className="text-sm text-muted-foreground">Filtros avançados e personalizados</span>
             </div>

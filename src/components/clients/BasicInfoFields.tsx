@@ -86,7 +86,7 @@ const BasicInfoFields = React.memo(({ newContact, validationErrors, onInputChang
         newContact={newContact}
         onInputChange={onInputChange}
       />
-
+ 
     </div>
   );
 });

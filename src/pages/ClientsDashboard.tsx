@@ -145,7 +145,7 @@ const ClientsDashboard = () => {
 
   const headerActiveFilterChips = [
     filter.searchTerm ? `Busca: ${filter.searchTerm}` : "",
-    filter.hasAdvancedRules ? `Filtro 2: ativo` : "",
+    filter.hasAdvancedRules ? `Filtro: ativo` : "",
   ].filter((v): v is string => Boolean(v));
 
   return (

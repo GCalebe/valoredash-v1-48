@@ -174,17 +174,17 @@ const ClientsHeader = ({
             Sugestões
           </Button>
 
-          {/* Filtro 2 (painel deslizante) */}
+          {/* Filtro (painel deslizante) */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsSlidingFilterOpen(true)}
             className="text-white hover:bg-white/20 focus-visible:ring-white flex items-center gap-1"
-            aria-label="Abrir Filtro 2"
-            title="Abrir Filtro 2"
+            aria-label="Abrir Filtro"
+            title="Abrir Filtro"
           >
             <Filter className="h-4 w-4" />
-            Filtro 2
+            Filtro
           </Button>
 
 

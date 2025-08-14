@@ -10,12 +10,17 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Users, RefreshCw } from "lucide-react";
+import { MessageSquare, RefreshCw } from "lucide-react";
 import { useConversations } from "@/hooks/useConversations";
 
 const ChatsCard = () => {
   const navigate = useNavigate();
   const { conversations, loading, fetchConversations } = useConversations();
+
+  // Buscar conversas ao montar para evitar loading infinito
+  React.useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
 
   const handleClick = () => {
     navigate("/chats");
@@ -76,21 +81,19 @@ const ChatsCard = () => {
             Carregando...
           </p>
         ) : (
-          <div className="space-y-1 text-center">
-            <div className="flex items-center justify-center gap-1">
-              <Users className="h-3 w-3 text-gray-600 dark:text-gray-400" />
-              <span className="text-xs text-gray-600 dark:text-gray-300">
-                {conversations.length} conversas ativas
-              </span>
+          <div className="space-y-2 text-center">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-gray-600 dark:text-gray-300">Ativas:</span>
+              <Badge variant="outline" className="bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-300 text-xs">
+                {conversations.length}
+              </Badge>
             </div>
-
-            {unreadCount > 0 && (
-              <div className="flex items-center justify-center">
-                <Badge className="bg-red-500 text-white text-xs">
-                  {unreadCount} não lidas
-                </Badge>
-              </div>
-            )}
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-gray-600 dark:text-gray-300">Não lidas:</span>
+              <Badge variant="outline" className={`text-xs ${unreadCount > 0 ? 'bg-red-500 text-white' : 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-300'}`}>
+                {unreadCount}
+              </Badge>
+            </div>
           </div>
         )}
       </CardContent>
