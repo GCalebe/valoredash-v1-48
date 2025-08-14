@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import EditableField from "./EditableField";
 import {
@@ -50,6 +50,7 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
     newValue: string | number | null;
     prevValue: string | number | null;
   }>({ fieldId: null, newValue: null, prevValue: null });
+  const confirmTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchUTMData = async () => {
@@ -125,11 +126,20 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
     }
   };
 
+  const openConfirmSoon = () => {
+    if (confirmTimeoutRef.current) {
+      window.clearTimeout(confirmTimeoutRef.current);
+    }
+    confirmTimeoutRef.current = window.setTimeout(() => {
+      setIsConfirmOpen(true);
+    }, 500);
+  };
+
   const handleFieldChange = (fieldId: string, newValue: string | number) => {
     const prev = (utmData as any)?.[fieldId] ?? null;
     setUtmData(prevState => ({ ...(prevState || {}), [fieldId]: newValue }));
     setPendingChange({ fieldId: fieldId as keyof UTMData, newValue, prevValue: prev });
-    setIsConfirmOpen(true);
+    openConfirmSoon();
   };
 
   const confirmSave = async () => {
@@ -140,15 +150,19 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
     const fieldId = pendingChange.fieldId as string;
     const newValue = pendingChange.newValue as any;
     try {
+      // Precisamos de user_id para o upsert multi-tenant
+      const { data: auth } = await supabase.auth.getUser();
+      const currentUserId = auth?.user?.id;
       const { error } = await supabase
         .from("utm_tracking")
         .upsert(
           {
             lead_id: contactId,
+            user_id: currentUserId || null,
             [fieldId]: newValue,
             updated_at: new Date().toISOString(),
           },
-          { onConflict: "lead_id" }
+          { onConflict: currentUserId ? "user_id,lead_id" : "lead_id" }
         );
       if (error) {
         console.error(`Erro ao salvar ${fieldId}:`, error);

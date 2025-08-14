@@ -46,6 +46,7 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
   const [newTag, setNewTag] = useState("");
   const [details, setDetails] = useState<Record<string, any> | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const confirmTimeoutRef = useRef<number | null>(null);
   const [pendingAction, setPendingAction] = useState<
     { type: "add"; value: string } | { type: "remove"; value: string } | null
   >(null);
@@ -116,11 +117,13 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
           const value = newTag.trim();
           if (!value) return;
           setPendingAction({ type: "add", value });
-          setIsConfirmOpen(true);
+          if (confirmTimeoutRef.current) window.clearTimeout(confirmTimeoutRef.current);
+          confirmTimeoutRef.current = window.setTimeout(() => setIsConfirmOpen(true), 500);
         }}
         onRemoveTag={(tag) => {
           setPendingAction({ type: "remove", value: tag });
-          setIsConfirmOpen(true);
+          if (confirmTimeoutRef.current) window.clearTimeout(confirmTimeoutRef.current);
+          confirmTimeoutRef.current = window.setTimeout(() => setIsConfirmOpen(true), 500);
         }}
       />
       

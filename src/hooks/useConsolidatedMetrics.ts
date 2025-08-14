@@ -190,10 +190,13 @@ const fetchLeadsBySource = async (
   endDate: string
 ): Promise<LeadsBySourceData[]> => {
   try {
-    // Buscar dados UTM - NOTA: utm_tracking não tem user_id, então busca todos os dados
+    // Buscar dados UTM agora escopados por user_id (multi-tenant)
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
     const { data: utmData } = await supabase
       .from('utm_tracking')
       .select('utm_source')
+      .eq('user_id', user.id)
       .gte('created_at', startDate)
       .lte('created_at', endDate);
 

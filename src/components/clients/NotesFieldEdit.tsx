@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ interface NotesFieldEditProps {
 const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
   const [newNote, setNewNote] = useState("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const confirmTimeoutRef = useRef<number | null>(null);
   const [pendingAction, setPendingAction] = useState<
     { type: "add" } | { type: "remove"; noteId: string } | null
   >(null);
@@ -39,10 +40,19 @@ const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
     retry,
   } = useOptimizedNotes();
 
+  const openConfirmSoon = () => {
+    if (confirmTimeoutRef.current) {
+      window.clearTimeout(confirmTimeoutRef.current);
+    }
+    confirmTimeoutRef.current = window.setTimeout(() => {
+      setIsConfirmOpen(true);
+    }, 500);
+  };
+
   const confirmAdd = () => {
     if (!newNote.trim()) return;
     setPendingAction({ type: "add" });
-    setIsConfirmOpen(true);
+    openConfirmSoon();
   };
 
   const handleAddNote = async () => {
@@ -56,7 +66,7 @@ const NotesFieldEdit: React.FC<NotesFieldEditProps> = ({ contactId }) => {
 
   const requestRemove = (noteId: string) => {
     setPendingAction({ type: "remove", noteId });
-    setIsConfirmOpen(true);
+    openConfirmSoon();
   };
 
   const handleRemoveNote = async (noteId: string) => {
