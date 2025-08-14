@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ContactHeader from "./contact-info/ContactHeader";
 import ModernContactTabs from "./contact-info/ModernContactTabs";
 // Removed old custom field imports - now handled in ModernContactTabs
