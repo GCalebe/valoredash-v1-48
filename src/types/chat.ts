@@ -8,6 +8,8 @@ export interface Message {
 
 export interface Conversation {
   id: string;
+  // ID do contato associado (quando disponível). Usado para padronizar buscas/salvamentos no Supabase.
+  contactId?: string;
   name: string;
   lastMessage: string;
   time: string;

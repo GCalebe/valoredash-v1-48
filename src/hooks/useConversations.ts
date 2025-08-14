@@ -107,8 +107,9 @@ export function useConversations(filters?: UnifiedConversationFilters) {
         }
 
         // Convert contacts to conversations format
-        const formattedConversations: Conversation[] = (contactsData || []).map((contact, index) => ({
+      const formattedConversations: Conversation[] = (contactsData || []).map((contact, index) => ({
           id: contact.id,
+          contactId: contact.id,
           name: contact.name || contact.client_name || `Cliente ${index + 1}`,
           lastMessage: contact.last_message || "Nova conversa",
           time: contact.last_message_time ? formatMessageTime(new Date(contact.last_message_time)) : formatMessageTime(new Date(contact.created_at)),
@@ -171,6 +172,7 @@ export function useConversations(filters?: UnifiedConversationFilters) {
 
       const formattedConversations: Conversation[] = conversationsData.map((conv) => ({
         id: conv.id,
+        contactId: conv.contact?.id ?? conv.contact_id ?? undefined,
         name: conv.name || conv?.contact?.name || "Cliente",
         lastMessage: conv.last_message || "",
         time: conv.last_message_time ? formatMessageTime(new Date(conv.last_message_time)) : "",

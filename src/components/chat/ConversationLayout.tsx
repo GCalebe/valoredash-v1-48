@@ -9,7 +9,8 @@ import ContactInfo from '@/components/chat/ContactInfo';
 import ResizeHandle from '@/components/chat/ResizeHandle';
 
 export interface ContactMinimal {
-  id: string;
+  id: string; // id da conversa
+  contactId?: string; // id real do contato na tabela contacts
   name: string;
   avatar: string;
   lastMessage: string;
@@ -141,7 +142,19 @@ const ConversationLayout: React.FC<ConversationLayoutProps> = ({
 
       {selectedContactData && <ResizeHandle onMouseDown={() => handleMouseDown('right')} />}
 
-      {selectedContactData && <ContactInfo contact={selectedContactData} getStatusColor={getStatusColor} width={rightPanelWidth} />}
+      {selectedContactData && (
+        <ContactInfo
+          contact={selectedContactData}
+          getStatusColor={getStatusColor}
+          width={rightPanelWidth}
+          onTagsChange={(newTags) => {
+            // Atualiza o objeto local para refletir tags também na lista, se necessário
+            // Nota: se a lista que alimenta contacts não usa tags, não terá efeito visual, mas mantemos consistência
+            // Este set é feito no pai via setState quando necessário; aqui apenas log para debug
+            console.log("Tags atualizadas no header:", newTags);
+          }}
+        />
+      )}
     </div>
   );
 };

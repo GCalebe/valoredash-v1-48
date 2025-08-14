@@ -4,16 +4,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+ 
 
 // Hooks para integração com banco de dados
 import { useConversations } from "@/hooks/useConversations";
 import { useChatMessages } from "@/hooks/useChatMessages";
-// import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
-import { useToast } from "@/hooks/use-toast";
+ 
 import { useUnifiedConversationFilters } from "@/hooks/useUnifiedConversationFilters";
 import { useConversationTableFilters } from "@/hooks/useConversationTableFilters";
-import { Conversation as DBConversation, ChatMessage } from "@/types/chat";
+import { Conversation as DBConversation } from "@/types/chat";
 
 // Componentes refatorados
 import ConversationLayout from "@/components/chat/ConversationLayout";
@@ -22,6 +21,7 @@ import { ConversationFilterBuilder } from "@/components/conversations/filters/Co
 // Adaptador para converter dados do banco para a interface do componente
 interface Contact {
   id: string;
+  contactId?: string; // id real do contato na tabela contacts
   name: string;
   avatar: string;
   lastMessage: string;
@@ -32,12 +32,14 @@ interface Contact {
   phone?: string;
   email?: string;
   sessionId?: string;
+  tags?: string[];
 }
 
 // Função para converter conversas do banco para o formato do componente
 const convertDBConversationToContact = (conversation: DBConversation): Contact => {
   return {
     id: conversation.id,
+    contactId: (conversation as any).contactId,
     name: conversation.name || conversation.clientName || 'Cliente',
     avatar: conversation.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${conversation.name}`,
     lastMessage: conversation.lastMessage || 'Nova conversa',
@@ -47,7 +49,8 @@ const convertDBConversationToContact = (conversation: DBConversation): Contact =
     status: Math.random() > 0.5 ? 'online' : 'away',
     phone: conversation.phone,
     email: conversation.email,
-    sessionId: conversation.sessionId
+    sessionId: conversation.sessionId,
+    tags: (conversation as any).clientTags || [],
   };
 };
 
@@ -73,16 +76,12 @@ export default function Conversations() {
   const filters = useUnifiedConversationFilters();
   const { conversations, loading: conversationsLoading, fetchConversations } = useConversations(filters);
   const { messages, loading: messagesLoading } = useChatMessages(selectedContact?.sessionId || null);
-  const { toast } = useToast();
   
-  // TODO: Configurar atualizações em tempo real
-  // useRealtimeUpdates({ updateConversationLastMessage, fetchConversations });
+  // Realtime pode ser habilitado posteriormente via hook dedicado
   
   // Carregar conversas ao montar o componente
   useEffect(() => {
-    // Busca inicial
     fetchConversations(filters);
-  // desabilita warning de dependência para evitar refetch em loop quando filtros mudam a cada render
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
