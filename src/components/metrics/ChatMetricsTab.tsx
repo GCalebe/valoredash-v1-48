@@ -13,7 +13,7 @@ import AdManagerSection from "./enhanced/AdManagerSection";
 import KanbanStagesFunnelChart from "./KanbanStagesFunnelChart";
 
 // Imported refactored sections
-import MetricsHeader from "./sections/MetricsHeader";
+// import MetricsHeader from "./sections/MetricsHeader";
 import SectionHeader from "./sections/SectionHeader";
 
 // Individual filters
@@ -21,10 +21,10 @@ import SectionDateFilter from "./filters/SectionDateFilter";
 import { useIndividualMetricsFilters } from "@/hooks/useIndividualMetricsFilters";
 
 // Icons
-import { MessageCircle, Users, Target, Clock, TrendingUp, DollarSign, Star, RefreshCw, AlertTriangle } from "lucide-react";
+import { MessageCircle, Users, Target, Clock, DollarSign, Star, RefreshCw, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -39,20 +39,23 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
   metrics,
   loading,
 }) => {
-  // Novos hooks consolidados
+  // Filtro global (fonte única)
+  const { filters, updateDatePeriod, updateCustomDateRange, resetFilters } = useMetricsFilters();
+
+  // Novos hooks consolidados com período vindo do filtro global
   const {
     metrics: consolidatedMetrics,
     timeSeriesData,
-    leadsBySource,
+    // leadsBySource,
     loading: consolidatedLoading,
-    error: consolidatedError,
-  } = useConsolidatedMetrics();
-  
-  // Get filters from separate hook  
-  const { filters } = useMetricsFilters();
+    // error: consolidatedError,
+  } = useConsolidatedMetrics({
+    startDate: filters.dateRange.start.toISOString(),
+    endDate: filters.dateRange.end.toISOString(),
+  });
   
   // Real-time updates
-  const { lastUpdate, updateCount, forceRefresh, isConnected } = useRealTimeMetrics();
+  const { lastUpdate, forceRefresh, isConnected } = useRealTimeMetrics();
   
   // Validação de dados
   const {
@@ -62,15 +65,10 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
     allErrors,
     allWarnings,
     isDataReliable,
-    hasWarnings,
+    // hasWarnings,
   } = useValidatedData(consolidatedMetrics, timeSeriesData, consolidatedMetrics?.lastUpdated);
   
-  // Filters hook
-  const {
-    updateDatePeriod,
-    updateCustomDateRange,
-    resetFilters,
-  } = useMetricsFilters();
+  // Handlers já vindos do mesmo hook acima (evita estados duplicados)
 
   // Individual section filters
   const indicatorsFilter = useIndividualMetricsFilters('indicators', filters);

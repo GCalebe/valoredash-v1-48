@@ -27,12 +27,15 @@ interface UseKanbanStagesFunnelDataParams {
   stageIds: string[];
   dateRange: DateRange;
   allStages: KanbanStageLocal[];
+  includeMovements?: boolean;
 }
 
-export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages }: UseKanbanStagesFunnelDataParams) {
+export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages, includeMovements = false }: UseKanbanStagesFunnelDataParams) {
   const [data, setData] = useState<FunnelStageData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [movements, setMovements] = useState<Record<string, number>>({});
+  const [noShow, setNoShow] = useState<{ count: number; total: number; rate: number }>({ count: 0, total: 0, rate: 0 });
 
   const fetchFunnelData = useCallback(async () => {
     if (stageIds.length === 0 || allStages.length === 0) {
@@ -118,6 +121,65 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages }: Us
       console.log('🎯 Dados do funil finais (todos os estágios):', funnelData);
       setData(funnelData);
 
+      // Optional: movements (entries) by stage using contact_stage_history (by changed_at)
+      if (includeMovements) {
+        const selectedStageNames = allStages
+          .filter(s => stageIds.includes(s.id))
+          .map(s => s.title);
+
+        // Proteção de performance: se período > 60 dias, não buscar histórico
+        const days = Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 3600 * 24));
+        if (selectedStageNames.length > 0 && days <= 60) {
+          const { data: historyRows, error: histError } = await supabase
+            .from('contact_stage_history')
+            .select('new_stage')
+            .gte('changed_at', dateRange.from.toISOString())
+            .lte('changed_at', dateRange.to.toISOString())
+            .in('new_stage', selectedStageNames)
+            .limit(10000);
+
+          if (histError) {
+            console.warn('⚠️ Erro ao buscar histórico (movements), seguindo sem overlay:', histError.message);
+            setMovements({});
+          } else {
+            const movementCounts: Record<string, number> = {};
+            (historyRows || []).forEach(row => {
+              const key = (row as any).new_stage as string;
+              if (!key) return;
+              movementCounts[key] = (movementCounts[key] || 0) + 1;
+            });
+            setMovements(movementCounts);
+          }
+        } else {
+          setMovements({});
+        }
+      } else {
+        setMovements({});
+      }
+
+      // Optional: No-Show rate on the same period (agenda_bookings)
+      try {
+        const startDay = dateRange.from.toISOString().slice(0,10);
+        const endDay = dateRange.to.toISOString().slice(0,10);
+        const { count: totalBookings } = await supabase
+          .from('agenda_bookings')
+          .select('id', { count: 'exact', head: true })
+          .gte('booking_date', startDay)
+          .lte('booking_date', endDay);
+        const { count: noShowCount } = await supabase
+          .from('agenda_bookings')
+          .select('id', { count: 'exact', head: true })
+          .gte('booking_date', startDay)
+          .lte('booking_date', endDay)
+          .eq('status', 'no_show');
+        const total = totalBookings || 0;
+        const ns = noShowCount || 0;
+        setNoShow({ count: ns, total, rate: total > 0 ? (ns / total) * 100 : 0 });
+      } catch (e) {
+        console.warn('⚠️ Erro ao calcular No-Show:', (e as Error).message);
+        setNoShow({ count: 0, total: 0, rate: 0 });
+      }
+
     } catch (err) {
       console.error('❌ Erro ao buscar dados do funil:', err);
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido ao buscar dados';
@@ -139,7 +201,7 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages }: Us
     } finally {
       setLoading(false);
     }
-  }, [stageIds, dateRange, allStages]);
+  }, [stageIds, dateRange, allStages, includeMovements]);
 
   useEffect(() => {
     fetchFunnelData();
@@ -150,5 +212,7 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages }: Us
     loading,
     error,
     refetch: fetchFunnelData,
+    movements,
+    noShow,
   };
 }

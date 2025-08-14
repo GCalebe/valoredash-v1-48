@@ -36,10 +36,11 @@ const KanbanStagesFunnelChart: React.FC = () => {
   const { stages, loading: stagesLoading, stageNameMap } = useKanbanStagesLocal();
   
   // Pass the complete stage list to the funnel data hook
-  const { data: funnelData, loading, refetch, error } = useKanbanStagesFunnelData({
+  const { data: funnelData, loading, refetch, error, movements, noShow } = useKanbanStagesFunnelData({
     stageIds: selectedStageIds,
     dateRange,
     allStages: stages,
+    includeMovements: true,
   });
 
   // Cores do funil seguindo o padrão da imagem
@@ -280,8 +281,13 @@ const KanbanStagesFunnelChart: React.FC = () => {
                     <div className="font-medium text-gray-700 dark:text-gray-300">
                       {stage.stage}
                     </div>
-                    <div className="text-gray-500 dark:text-gray-400">
-                      {stage.count} contatos
+                    <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                      <span>{stage.count} contatos</span>
+                      {movements[stage.stage] !== undefined && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                          +{movements[stage.stage]} entraram
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -295,6 +301,10 @@ const KanbanStagesFunnelChart: React.FC = () => {
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 <strong>Total de contatos criados no período:</strong> {funnelStageData.reduce((sum, stage) => sum + stage.count, 0)}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-2">
+                <strong>No-Show:</strong>
+                <span>{noShow.count}/{noShow.total} ({noShow.rate.toFixed(1)}%)</span>
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-500 mt-2 italic">
                 ✅ Todos os estágios selecionados são exibidos, mesmo sem contatos
