@@ -2,6 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import EditableField from "./EditableField";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface UTMData {
   utm_source?: string | null;
@@ -34,6 +44,12 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
   const [utmData, setUtmData] = useState<UTMData | null>(null);
   const [loading, setLoading] = useState(true);
   const [fieldVisibility, setFieldVisibility] = useState<Record<string, boolean>>({});
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [pendingChange, setPendingChange] = useState<{
+    fieldId: keyof UTMData | null;
+    newValue: string | number | null;
+    prevValue: string | number | null;
+  }>({ fieldId: null, newValue: null, prevValue: null });
 
   useEffect(() => {
     const fetchUTMData = async () => {
@@ -109,36 +125,50 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
     }
   };
 
-  const handleFieldChange = async (fieldId: string, newValue: string | number) => {
-    // Atualizar o estado local imediatamente
-    setUtmData(prev => ({
-      ...prev,
-      [fieldId]: newValue
-    }));
+  const handleFieldChange = (fieldId: string, newValue: string | number) => {
+    const prev = (utmData as any)?.[fieldId] ?? null;
+    setUtmData(prevState => ({ ...(prevState || {}), [fieldId]: newValue }));
+    setPendingChange({ fieldId: fieldId as keyof UTMData, newValue, prevValue: prev });
+    setIsConfirmOpen(true);
+  };
 
-    // Chamar a função de callback se fornecida
-    if (onFieldUpdate) {
-      onFieldUpdate(fieldId, newValue);
+  const confirmSave = async () => {
+    if (!pendingChange.fieldId) {
+      setIsConfirmOpen(false);
+      return;
     }
-
-    // Salvar no banco de dados
+    const fieldId = pendingChange.fieldId as string;
+    const newValue = pendingChange.newValue as any;
     try {
       const { error } = await supabase
         .from("utm_tracking")
-        .upsert({
-          lead_id: contactId,
-          [fieldId]: newValue,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'lead_id'
-        });
-
+        .upsert(
+          {
+            lead_id: contactId,
+            [fieldId]: newValue,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "lead_id" }
+        );
       if (error) {
         console.error(`Erro ao salvar ${fieldId}:`, error);
+      } else if (onFieldUpdate) {
+        onFieldUpdate(fieldId, newValue);
       }
     } catch (error) {
       console.error(`Erro ao salvar ${fieldId}:`, error);
+    } finally {
+      setIsConfirmOpen(false);
+      setPendingChange({ fieldId: null, newValue: null, prevValue: null });
     }
+  };
+
+  const cancelSave = () => {
+    if (pendingChange.fieldId) {
+      setUtmData(prev => ({ ...(prev || {}), [pendingChange.fieldId as string]: pendingChange.prevValue as any }));
+    }
+    setIsConfirmOpen(false);
+    setPendingChange({ fieldId: null, newValue: null, prevValue: null });
   };
 
   if (loading) {
@@ -251,6 +281,21 @@ const ClientUTMData: React.FC<ClientUTMDataProps> = ({
         isVisible={fieldVisibility.ip_address !== false}
         showVisibilityControl={showVisibilityControl}
       />
+
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar alteração?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Salvar mudança em {pendingChange.fieldId ?? "campo"} para este contato?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelSave}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmSave}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -126,11 +126,34 @@ export default function ContactInfo({ contact, getStatusColor, width, onTagsChan
       
       {/* Modern Contact Tabs */}
       <ModernContactTabs
-        contactId={contact.id}
+        key={(details && (details as any).id) || contact.contactId || contact.id}
+        contactId={(details && (details as any).id) || contact.contactId || contact.id}
         contact={{ ...contact, ...details, tags }}
         onFieldUpdate={(field, value) => {
-          // Update contact data - this could be expanded to call parent callbacks
-          console.log(`Updating ${field}:`, value);
+          // Persistir no Supabase mapeando campos camelCase -> snake_case
+          const realId = ((details && (details as any).id) || contact.contactId || contact.id) as string;
+          const map: Record<string, string> = {
+            name: 'name',
+            email: 'email',
+            phone: 'phone',
+            address: 'address',
+            notes: 'notes',
+            clientName: 'client_name',
+            clientSize: 'client_size',
+            clientType: 'client_type',
+            cpfCnpj: 'cpf_cnpj',
+            responsibleHosts: 'responsible_hosts',
+          };
+          const dbField = map[String(field)] || String(field);
+          optimizedContactsService
+            .updateContact({ id: realId, [dbField]: value } as any)
+            .then((updated) => {
+              // Atualiza estado local com retorno da API
+              setDetails(prev => ({ ...(prev || {}), ...updated }));
+            })
+            .catch((e) => {
+              console.error('Falha ao salvar campo', field, e);
+            });
         }}
       />
       {/* Confirmação para alterações nas tags */}
