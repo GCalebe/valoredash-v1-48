@@ -16,6 +16,10 @@ import KanbanStagesFunnelChart from "./KanbanStagesFunnelChart";
 import MetricsHeader from "./sections/MetricsHeader";
 import SectionHeader from "./sections/SectionHeader";
 
+// Individual filters
+import SectionDateFilter from "./filters/SectionDateFilter";
+import { useIndividualMetricsFilters } from "@/hooks/useIndividualMetricsFilters";
+
 // Icons
 import { MessageCircle, Users, Target, Clock, TrendingUp, DollarSign, Star, RefreshCw, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +69,12 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
     updateCustomDateRange,
     resetFilters,
   } = useMetricsFilters();
+
+  // Individual section filters
+  const indicatorsFilter = useIndividualMetricsFilters('indicators', filters);
+  const timeAnalysisFilter = useIndividualMetricsFilters('timeAnalysis', filters);
+  const funnelFilter = useIndividualMetricsFilters('funnel', filters);
+  const adManagerFilter = useIndividualMetricsFilters('adManager', filters);
 
   const handleDatePeriodChange = useCallback((period: string) => {
     console.log('🎯 ChatMetricsTab: handleDatePeriodChange chamado com:', period);
@@ -143,22 +153,30 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
 
       {/* KPIs Reformulados */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <SectionHeader 
-            title="📊 Indicadores Principais" 
-            borderColor="border-blue-200 dark:border-blue-700" 
+        <SectionHeader 
+          title="📊 Indicadores Principais" 
+          borderColor="border-blue-200 dark:border-blue-700"
+        >
+          <SectionDateFilter
+            sectionId="indicators"
+            datePeriod={indicatorsFilter.filters.dataPeriod}
+            customStartDate={indicatorsFilter.filters.customStartDate}
+            customEndDate={indicatorsFilter.filters.customEndDate}
+            isInheritingGlobal={indicatorsFilter.isInheritingGlobal}
+            onDatePeriodChange={indicatorsFilter.updateDatePeriod}
+            onCustomDateChange={indicatorsFilter.updateCustomDateRange}
+            onToggleInheritGlobal={indicatorsFilter.toggleInheritGlobal}
+            onReset={indicatorsFilter.resetFilters}
           />
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              {safeMetrics.isStale ? "Dados desatualizados" : "Tempo real"}
-            </Badge>
-            {lastUpdate && (
-              <span className="text-xs text-muted-foreground">
-                Última atualização: {lastUpdate.toLocaleTimeString('pt-BR')}
-              </span>
-            )}
-          </div>
-        </div>
+          <Badge variant="outline" className="text-xs">
+            {safeMetrics.isStale ? "Dados desatualizados" : "Tempo real"}
+          </Badge>
+          {lastUpdate && (
+            <span className="text-xs text-muted-foreground">
+              Última atualização: {lastUpdate.toLocaleTimeString('pt-BR')}
+            </span>
+          )}
+        </SectionHeader>
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           <MetricCard
@@ -268,8 +286,20 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
       <div className="space-y-4">
         <SectionHeader 
           title="📈 Análise Temporal" 
-          borderColor="border-indigo-200 dark:border-indigo-700" 
-        />
+          borderColor="border-indigo-200 dark:border-indigo-700"
+        >
+          <SectionDateFilter
+            sectionId="timeAnalysis"
+            datePeriod={timeAnalysisFilter.filters.dataPeriod}
+            customStartDate={timeAnalysisFilter.filters.customStartDate}
+            customEndDate={timeAnalysisFilter.filters.customEndDate}
+            isInheritingGlobal={timeAnalysisFilter.isInheritingGlobal}
+            onDatePeriodChange={timeAnalysisFilter.updateDatePeriod}
+            onCustomDateChange={timeAnalysisFilter.updateCustomDateRange}
+            onToggleInheritGlobal={timeAnalysisFilter.toggleInheritGlobal}
+            onReset={timeAnalysisFilter.resetFilters}
+          />
+        </SectionHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <NewLeadsOverTimeChart
@@ -288,14 +318,44 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
       <div className="space-y-4">
         <SectionHeader 
           title="🎯 Funil de Conversão por Estágios" 
-          borderColor="border-emerald-200 dark:border-emerald-700" 
-        />
+          borderColor="border-emerald-200 dark:border-emerald-700"
+        >
+          <SectionDateFilter
+            sectionId="funnel"
+            datePeriod={funnelFilter.filters.dataPeriod}
+            customStartDate={funnelFilter.filters.customStartDate}
+            customEndDate={funnelFilter.filters.customEndDate}
+            isInheritingGlobal={funnelFilter.isInheritingGlobal}
+            onDatePeriodChange={funnelFilter.updateDatePeriod}
+            onCustomDateChange={funnelFilter.updateCustomDateRange}
+            onToggleInheritGlobal={funnelFilter.toggleInheritGlobal}
+            onReset={funnelFilter.resetFilters}
+          />
+        </SectionHeader>
 
         <KanbanStagesFunnelChart />
       </div>
 
       {/* Seção do Gerenciador de Anúncios */}
-      <AdManagerSection loading={isLoading} />
+      <div className="space-y-4">
+        <SectionHeader 
+          title="📊 Gerenciador de Anúncios" 
+          borderColor="border-purple-200 dark:border-purple-700"
+        >
+          <SectionDateFilter
+            sectionId="adManager"
+            datePeriod={adManagerFilter.filters.dataPeriod}
+            customStartDate={adManagerFilter.filters.customStartDate}
+            customEndDate={adManagerFilter.filters.customEndDate}
+            isInheritingGlobal={adManagerFilter.isInheritingGlobal}
+            onDatePeriodChange={adManagerFilter.updateDatePeriod}
+            onCustomDateChange={adManagerFilter.updateCustomDateRange}
+            onToggleInheritGlobal={adManagerFilter.toggleInheritGlobal}
+            onReset={adManagerFilter.resetFilters}
+          />
+        </SectionHeader>
+        <AdManagerSection loading={isLoading} />
+      </div>
     </div>
   );
 };
