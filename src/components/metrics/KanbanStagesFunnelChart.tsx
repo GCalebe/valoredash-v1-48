@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useKanbanStagesFunnelData } from "@/hooks/useKanbanStagesFunnelData";
 import { useKanbanStagesLocal } from "@/hooks/useKanbanStagesLocal";
@@ -31,16 +32,17 @@ const KanbanStagesFunnelChart: React.FC = () => {
     to: new Date(),
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [includeMovements, setIncludeMovements] = useState(true);
 
   // Use the new local hook that combines Supabase with fallback
-  const { stages, loading: stagesLoading, stageNameMap } = useKanbanStagesLocal();
+  const { stages, loading: stagesLoading } = useKanbanStagesLocal();
   
   // Pass the complete stage list to the funnel data hook
   const { data: funnelData, loading, refetch, error, movements, noShow } = useKanbanStagesFunnelData({
     stageIds: selectedStageIds,
     dateRange,
     allStages: stages,
-    includeMovements: true,
+    includeMovements,
   });
 
   // Cores do funil seguindo o padrão da imagem
@@ -201,6 +203,17 @@ const KanbanStagesFunnelChart: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Opções Avançadas */}
+                <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Exibir movimentações</Label>
+                    <Switch
+                      checked={includeMovements}
+                      onCheckedChange={(v) => setIncludeMovements(Boolean(v))}
+                    />
+                  </div>
+                </div>
+
                 <Button 
                   onClick={() => refetch()} 
                   className="w-full" 
@@ -216,11 +229,12 @@ const KanbanStagesFunnelChart: React.FC = () => {
       </CardHeader>
 
       <CardContent>
-        {loading ? (
+        {loading && (
           <div className="h-96 flex items-center justify-center">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : funnelStageData.length > 0 ? (
+        )}
+        {!loading && funnelStageData.length > 0 && (
           <div className="space-y-4">
             {/* Funil Visual */}
             <div className="relative h-96 flex flex-col justify-center items-center space-y-1">
@@ -311,7 +325,8 @@ const KanbanStagesFunnelChart: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : (
+        )}
+        {!loading && funnelStageData.length === 0 && (
           <div className="h-96 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
             <AlertCircle className="h-12 w-12 mb-4" />
             <p className="text-lg font-medium">Nenhum estágio selecionado</p>

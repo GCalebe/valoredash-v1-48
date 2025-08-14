@@ -56,18 +56,13 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages, incl
         endDate: dateRange.to.toISOString()
       });
 
-      // Initialize all stages with zero count using the provided stage list
-      const stageCounts: Record<string, { count: number, title: string, ordering: number }> = {};
-      
-      allStages.forEach(stage => {
-        if (stageIds.includes(stage.id)) {
-          stageCounts[stage.id] = {
-            count: 0,
-            title: stage.title,
-            ordering: stage.ordering
-          };
-        }
-      });
+      // Initialize stage counts with zero
+      const stageCounts: Record<string, { count: number, title: string, ordering: number }> = allStages
+        .filter(stage => stageIds.includes(stage.id))
+        .reduce((acc, stage) => {
+          acc[stage.id] = { count: 0, title: stage.title, ordering: stage.ordering };
+          return acc;
+        }, {} as Record<string, { count: number, title: string, ordering: number }>);
 
       console.log('🎯 Estágios inicializados:', Object.keys(stageCounts));
 
@@ -93,11 +88,9 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages, incl
       console.log('📊 Contatos encontrados:', contacts?.length || 0);
 
       // Count contacts by stage
-      contacts?.forEach(contact => {
-        const stageId = contact.kanban_stage_id;
-        if (stageId && stageCounts[stageId] !== undefined) {
-          stageCounts[stageId].count++;
-        }
+      (contacts || []).forEach(contact => {
+        const sid = (contact as any).kanban_stage_id as string | null;
+        if (sid && stageCounts[sid]) stageCounts[sid].count++;
       });
 
       console.log('📈 Contagem final por estágio:', stageCounts);
@@ -108,15 +101,14 @@ export function useKanbanStagesFunnelData({ stageIds, dateRange, allStages, incl
 
       // Convert to funnel format and sort by ordering
       const funnelData: FunnelStageData[] = Object.entries(stageCounts)
-        .map(([stageId, stageData]) => ({
-          stage: stageData.title,
-          stageId: stageId,
-          count: stageData.count,
-          percentage: totalCount > 0 ? (stageData.count / totalCount) * 100 : 0,
-          ordering: stageData.ordering,
-        }))
+        .map(([id, s]) => ({ id, ...s }))
         .sort((a, b) => a.ordering - b.ordering)
-        .map(({ ordering, ...rest }) => rest); // Remove ordering from final result
+        .map(({ id, title, count, ordering }) => ({
+          stage: title,
+          stageId: id,
+          count,
+          percentage: totalCount > 0 ? (count / totalCount) * 100 : 0,
+        }));
 
       console.log('🎯 Dados do funil finais (todos os estágios):', funnelData);
       setData(funnelData);

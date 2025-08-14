@@ -22,6 +22,14 @@ export interface ConsolidatedMetrics {
   // Meta dados
   lastUpdated: string;
   isStale: boolean;
+  trends?: {
+    totalLeads?: { value: number | null; label: string; direction: 'up' | 'down' | 'neutral' };
+    conversasNaoRespondidas?: { value: number | null; label: string; direction: 'up' | 'down' | 'neutral' };
+    conversionRate?: { value: number | null; label: string; direction: 'up' | 'down' | 'neutral' };
+    ticketMedio?: { value: number | null; label: string; direction: 'up' | 'down' | 'neutral' };
+    avgResponseTime?: { value: number | null; label: string; direction: 'up' | 'down' | 'neutral' };
+    responseRate?: { value: number | null; label: string; direction: 'up' | 'down' | 'neutral' };
+  }
 }
 
 export interface TimeSeriesData {
@@ -46,6 +54,27 @@ const fetchConsolidatedMetrics = async (
   endDate: string
 ): Promise<ConsolidatedMetrics> => {
   try {
+    // Helper para tendência
+    const buildTrend = (current: number, previous: number, higherIsBetter: boolean): { value: number | null; label: string; direction: 'up' | 'down' | 'neutral' } => {
+      if (!isFinite(previous) || previous === 0) {
+        return { value: null, label: '— vs período anterior', direction: 'neutral' };
+      }
+      const delta = ((current - previous) / previous) * 100;
+      const value = Number(delta.toFixed(1));
+      let direction: 'up' | 'down' | 'neutral' = 'neutral';
+      if (value > 0.05) direction = higherIsBetter ? 'up' : 'down';
+      else if (value < -0.05) direction = higherIsBetter ? 'down' : 'up';
+      const sign = value > 0 ? '+' : '';
+      return { value, label: `${sign}${value}% vs período anterior`, direction };
+    };
+
+    // Janela anterior para tendências
+    const startMs = new Date(startDate).getTime();
+    const endMs = new Date(endDate).getTime();
+    const durationMs = Math.max(0, endMs - startMs);
+    const prevStart = new Date(startMs - durationMs).toISOString();
+    const prevEnd = new Date(startMs).toISOString();
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -136,6 +165,68 @@ const fetchConsolidatedMetrics = async (
     const responseRate = totalConversations > 0 ? (totalRespondidas / totalConversations) * 100 : 0;
     const conversionRate = totalLeads > 0 ? (convertidos / totalLeads) * 100 : 0;
 
+    // Tendências: calcular valores anteriores
+    const { count: prevLeadsCount } = await supabase
+      .from('contacts')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('created_at', prevStart)
+      .lte('created_at', prevEnd);
+
+    const { count: prevConvCount } = await supabase
+      .from('conversations')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('created_at', prevStart)
+      .lte('created_at', prevEnd);
+
+    const { count: prevUnreadConvCount } = await supabase
+      .from('conversations')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gt('unread_count', 0)
+      .gte('created_at', prevStart)
+      .lte('created_at', prevEnd);
+
+    const { data: prevConvertedRows } = await supabase
+      .from('contacts')
+      .select('id, budget, created_at, contract_date')
+      .eq('user_id', user.id)
+      .eq('consultation_stage', 'Fatura paga – ganho')
+      .not('contract_date', 'is', null)
+      .gte('contract_date', prevStart.split('T')[0])
+      .lte('contract_date', prevEnd.split('T')[0]);
+
+    const prevConvertidos = prevConvertedRows?.length || 0;
+    const prevTicketMedio = prevConvertedRows && prevConvertedRows.length > 0
+      ? prevConvertedRows.reduce((sum, r) => sum + (Number(r.budget) || 0), 0) / prevConvertedRows.length
+      : 0;
+
+    const { data: prevConvRowsForResponse } = await supabase
+      .from('conversations')
+      .select('created_at, last_message_time')
+      .eq('user_id', user.id)
+      .not('last_message_time', 'is', null)
+      .gte('created_at', prevStart)
+      .lte('created_at', prevEnd)
+      .limit(5000);
+
+    const prevResponseSamples = (prevConvRowsForResponse || []).map(r => {
+      const start = r.created_at ? new Date(r.created_at as unknown as string).getTime() : NaN;
+      const end = r.last_message_time ? new Date(r.last_message_time as unknown as string).getTime() : NaN;
+      return isFinite(start) && isFinite(end) && end > start ? (end - start) / (1000 * 3600) : NaN;
+    }).filter(v => isFinite(v));
+    const prevAvgResponseTime = prevResponseSamples.length > 0
+      ? prevResponseSamples.reduce((a, b) => a + b, 0) / prevResponseSamples.length
+      : 0;
+
+    const prevTotalConversations = prevConvCount || 0;
+    const prevTotalLeads = prevLeadsCount || 0;
+    const prevNaoRespondidas = prevUnreadConvCount || 0;
+    const prevRespondidas = Math.max(0, prevTotalConversations - prevNaoRespondidas);
+    const prevResponseRate = prevTotalConversations > 0 ? (prevRespondidas / prevTotalConversations) * 100 : 0;
+    const prevConversionRate = prevTotalLeads > 0 ? (prevConvertidos / prevTotalLeads) * 100 : 0;
+
     return {
       totalLeads,
       totalConversations,
@@ -150,6 +241,14 @@ const fetchConsolidatedMetrics = async (
       totalNegotiatingValue,
       lastUpdated: new Date().toISOString(),
       isStale: false,
+      trends: {
+        totalLeads: buildTrend(totalLeads, prevTotalLeads, true),
+        conversasNaoRespondidas: buildTrend(conversasNaoRespondidas, prevNaoRespondidas, false),
+        conversionRate: buildTrend(conversionRate, prevConversionRate, true),
+        ticketMedio: buildTrend(ticketMedio, prevTicketMedio, true),
+        avgResponseTime: buildTrend(avgResponseTime, prevAvgResponseTime, false),
+        responseRate: buildTrend(responseRate, prevResponseRate, true),
+      }
     };
   } catch (error) {
     console.error('Erro ao buscar métricas consolidadas:', error);

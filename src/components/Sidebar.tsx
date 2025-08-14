@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/context/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useThemeSettings } from "@/context/ThemeSettingsContext";
 import {
@@ -15,7 +14,6 @@ import {
   ShipWheel,
   Users,
   Link,
-  Bot,
   CreditCard,
   Shield,
   UserCog,
@@ -82,6 +80,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           name: "Métricas",
           icon: BarChart,
           path: "/metrics",
+        },
+        {
+          name: "Anúncios (Gestão)",
+          icon: Link,
+          path: "/metrics/ads-manager",
         },
         // Botão de Portais desativado conforme solicitado
         // {

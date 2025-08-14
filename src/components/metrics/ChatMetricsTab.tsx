@@ -210,9 +210,9 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             description="Número total de leads captados no período selecionado"
             absoluteValue={safeMetrics.totalLeads || 0}
             trend={{
-              value: 12.5,
-              label: "+12.5% vs período anterior",
-              direction: 'up'
+              value: consolidatedMetrics.trends?.totalLeads?.value ?? null,
+              label: consolidatedMetrics.trends?.totalLeads?.label || '— vs período anterior',
+              direction: consolidatedMetrics.trends?.totalLeads?.direction || 'neutral'
             }}
             iconBgClass="bg-blue-100 dark:bg-blue-900/30"
             iconTextClass="text-blue-600 dark:text-blue-400"
@@ -230,9 +230,9 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
               Math.round((safeMetrics.conversasNaoRespondidas / safeMetrics.totalConversations) * 100) : 0
             }
             trend={{
-              value: -5.2,
-              label: "-5.2% vs período anterior",
-              direction: 'down'
+              value: consolidatedMetrics.trends?.conversasNaoRespondidas?.value ?? null,
+              label: consolidatedMetrics.trends?.conversasNaoRespondidas?.label || '— vs período anterior',
+              direction: consolidatedMetrics.trends?.conversasNaoRespondidas?.direction || 'neutral'
             }}
             iconBgClass="bg-red-100 dark:bg-red-900/30"
             iconTextClass="text-red-600 dark:text-red-400"
@@ -246,9 +246,9 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             icon={<Target />}
             description="Percentual de leads que se tornaram clientes"
             trend={{
-              value: 2.8,
-              label: "+2.8% vs período anterior",
-              direction: 'up'
+              value: consolidatedMetrics.trends?.conversionRate?.value ?? null,
+              label: consolidatedMetrics.trends?.conversionRate?.label || '— vs período anterior',
+              direction: consolidatedMetrics.trends?.conversionRate?.direction || 'neutral'
             }}
             iconBgClass="bg-green-100 dark:bg-green-900/30"
             iconTextClass="text-green-600 dark:text-green-400"
@@ -262,9 +262,9 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             icon={<DollarSign />}
             description="Valor médio dos negócios fechados"
             trend={{
-              value: 8.3,
-              label: "+8.3% vs período anterior",
-              direction: 'up'
+              value: consolidatedMetrics.trends?.ticketMedio?.value ?? null,
+              label: consolidatedMetrics.trends?.ticketMedio?.label || '— vs período anterior',
+              direction: consolidatedMetrics.trends?.ticketMedio?.direction || 'neutral'
             }}
             iconBgClass="bg-emerald-100 dark:bg-emerald-900/30"
             iconTextClass="text-emerald-600 dark:text-emerald-400"
@@ -278,9 +278,9 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             icon={<Clock />}
             description="Tempo médio para primeira resposta aos leads"
             trend={{
-              value: -15.6,
-              label: "-15.6% vs período anterior",
-              direction: 'down'
+              value: consolidatedMetrics.trends?.avgResponseTime?.value ?? null,
+              label: consolidatedMetrics.trends?.avgResponseTime?.label || '— vs período anterior',
+              direction: consolidatedMetrics.trends?.avgResponseTime?.direction || 'neutral'
             }}
             iconBgClass="bg-orange-100 dark:bg-orange-900/30"
             iconTextClass="text-orange-600 dark:text-orange-400"
@@ -294,9 +294,9 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             icon={<Star />}
             description="Percentual de conversas que receberam resposta"
             trend={{
-              value: 0,
-              label: "Mantendo o nível",
-              direction: 'neutral'
+              value: consolidatedMetrics.trends?.responseRate?.value ?? null,
+              label: consolidatedMetrics.trends?.responseRate?.label || '— vs período anterior',
+              direction: consolidatedMetrics.trends?.responseRate?.direction || 'neutral'
             }}
             iconBgClass="bg-purple-100 dark:bg-purple-900/30"
             iconTextClass="text-purple-600 dark:text-purple-400"
@@ -378,7 +378,11 @@ const ChatMetricsTab: React.FC<ChatMetricsTabProps> = ({
             onReset={adManagerFilter.resetFilters}
           />
         </SectionHeader>
-        <AdManagerSection loading={isLoading} />
+        <AdManagerSection 
+          loading={isLoading} 
+          startDate={adManagerFilter.filters.dateRange.start.toISOString()} 
+          endDate={adManagerFilter.filters.dateRange.end.toISOString()} 
+        />
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import MetricsDashboard from "./pages/MetricsDashboard";
+import AdsManager from "./pages/AdsManager";
 import KnowledgeManager from "./pages/KnowledgeManager";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import ClientsDashboard from "./pages/ClientsDashboard";
@@ -16,7 +17,6 @@ import Evolution from "./pages/Evolution";
 import Schedule from "./pages/Schedule";
 import ThemeSettings from "./pages/ThemeSettings";
 import AdminDashboard from "./pages/AdminDashboard";
-import AIStore from "./pages/AIStore";
 import Pricing from "./pages/Pricing";
 import Subscription from "./pages/Subscription";
 import UserManagement from "./pages/UserManagement";
@@ -47,6 +47,7 @@ const App = () => (
                 <Route element={<AppLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/metrics" element={<MetricsDashboard />} />
+                  <Route path="/metrics/ads-manager" element={<AdsManager />} />
                   <Route path="/analytics-portals" element={<Navigate to="/metrics" replace />} />
                   <Route path="/chats" element={<Conversations />} />
                   <Route path="/knowledge" element={<KnowledgeManager />} />
