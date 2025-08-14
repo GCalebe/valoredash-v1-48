@@ -4,8 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Zap, Settings, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import ApiIntegrationPanel from "@/components/ads/ApiIntegrationPanel";
 
 type AdPlatform = { id: string; name: string; external_id: string | null };
 type AdCampaign = { id: string; name: string | null; campaign_external_id: string | null; platform_id: string | null };
@@ -111,12 +115,113 @@ const AdsManager: React.FC = () => {
     <div className="h-full bg-gray-100 dark:bg-gray-900 transition-colors duration-300 overflow-auto">
       <DashboardHeader />
       <main className="container mx-auto px-4 py-8 pb-16 space-y-8">
-        <div>
-          <h1 className="text-2xl font-semibold mb-1">Gestão de Anúncios</h1>
-          <p className="text-sm text-muted-foreground">Cadastre plataformas e campanhas, e insira métricas diárias para alimentar as análises da seção de Métricas &gt; Anúncios.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold mb-1">Gestão de Anúncios</h1>
+            <p className="text-sm text-muted-foreground">Gerencie plataformas, campanhas e importe métricas automaticamente via APIs ou manualmente.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Zap className="h-3 w-3" />
+              Integração Automática
+            </Badge>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Tabs defaultValue="integration" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="integration" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Integração com APIs
+            </TabsTrigger>
+            <TabsTrigger value="manual" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Importação Manual
+            </TabsTrigger>
+            <TabsTrigger value="management" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Gerenciamento
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="integration">
+            <ApiIntegrationPanel />
+          </TabsContent>
+
+          <TabsContent value="manual" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Importação Rápida de Métricas Diárias</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+                  <div>
+                    <Label>Data</Label>
+                    <Input type="date" value={metricDate} onChange={(e) => setMetricDate(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Plataforma</Label>
+                    <Select value={metricPlatform} onValueChange={setMetricPlatform}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="facebook">Facebook</SelectItem>
+                        <SelectItem value="google">Google</SelectItem>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                        <SelectItem value="other">Outra</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Campanha (opcional)</Label>
+                    <Select value={metricCampaignId} onValueChange={setMetricCampaignId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="—" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {campaigns.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name || c.id}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Impressões</Label>
+                    <Input type="number" value={metricImpressions} onChange={(e) => setMetricImpressions(Number(e.target.value || 0))} />
+                  </div>
+                  <div>
+                    <Label>Cliques</Label>
+                    <Input type="number" value={metricClicks} onChange={(e) => setMetricClicks(Number(e.target.value || 0))} />
+                  </div>
+                  <div>
+                    <Label>Custo (R$)</Label>
+                    <Input type="number" step="0.01" value={metricCost} onChange={(e) => setMetricCost(Number(e.target.value || 0))} />
+                  </div>
+                  <div>
+                    <Label>Leads</Label>
+                    <Input type="number" value={metricLeads} onChange={(e) => setMetricLeads(Number(e.target.value || 0))} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label>Receita (R$) - opcional</Label>
+                    <Input type="number" step="0.01" value={metricRevenue} onChange={(e) => setMetricRevenue(Number(e.target.value || 0))} />
+                  </div>
+                  <div className="flex items-end">
+                    <Button className="w-full" onClick={handleInsertDailyMetric} disabled={!metricDate || loading}>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Inserir Métrica
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="management" className="space-y-6">
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Plataformas</CardTitle>
@@ -203,72 +308,9 @@ const AdsManager: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Importação Rápida de Métricas Diárias</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
-              <div>
-                <Label>Data</Label>
-                <Input type="date" value={metricDate} onChange={(e) => setMetricDate(e.target.value)} />
-              </div>
-              <div>
-                <Label>Plataforma</Label>
-                <Select value={metricPlatform} onValueChange={setMetricPlatform}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="facebook">Facebook</SelectItem>
-                    <SelectItem value="google">Google</SelectItem>
-                    <SelectItem value="instagram">Instagram</SelectItem>
-                    <SelectItem value="other">Outra</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Campanha (opcional)</Label>
-                <Select value={metricCampaignId} onValueChange={setMetricCampaignId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="—" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {campaigns.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name || c.id}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Impressões</Label>
-                <Input type="number" value={metricImpressions} onChange={(e) => setMetricImpressions(Number(e.target.value || 0))} />
-              </div>
-              <div>
-                <Label>Cliques</Label>
-                <Input type="number" value={metricClicks} onChange={(e) => setMetricClicks(Number(e.target.value || 0))} />
-              </div>
-              <div>
-                <Label>Custo (R$)</Label>
-                <Input type="number" step="0.01" value={metricCost} onChange={(e) => setMetricCost(Number(e.target.value || 0))} />
-              </div>
-              <div>
-                <Label>Leads</Label>
-                <Input type="number" value={metricLeads} onChange={(e) => setMetricLeads(Number(e.target.value || 0))} />
-              </div>
-              <div>
-                <Label>Receita (R$)</Label>
-                <Input type="number" step="0.01" value={metricRevenue} onChange={(e) => setMetricRevenue(Number(e.target.value || 0))} />
-              </div>
-              <div className="flex items-end">
-                <Button className="w-full" onClick={handleInsertDailyMetric} disabled={!metricDate}>Salvar Métrica</Button>
-              </div>
             </div>
-            <p className="text-xs text-muted-foreground">Dica: após alguns dias de dados, as tendências serão calculadas sem mocks, comparando janelas (ex.: últimos 7 dias vs 7 dias anteriores).</p>
-          </CardContent>
-        </Card>
+          </TabsContent>
+        </Tabs>
 
       </main>
     </div>

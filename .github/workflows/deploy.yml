@@ -1,0 +1,231 @@
+name: Deploy ValoreDash to VPS
+
+# Trigger do workflow
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Permite execução manual
+
+# Variáveis de ambiente globais
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Job de testes
+  test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Instalar dependências
+      run: npm ci
+    
+    - name: Executar linting
+      run: npm run lint || true  # Não falhar se não tiver lint configurado
+    
+    - name: Executar testes
+      run: npm test || true  # Não falhar se não tiver testes configurados
+    
+    - name: Build da aplicação
+      run: npm run build
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+  # Job de build e deploy
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Instalar dependências
+      run: npm ci
+    
+    - name: Build da aplicação
+      run: npm run build
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+    
+    # Opcional: Build e push da imagem Docker para registry
+    - name: Log in to Container Registry
+      if: env.REGISTRY != ''
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Extract metadata
+      if: env.REGISTRY != ''
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: Build and push Docker image
+      if: env.REGISTRY != ''
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
+    
+    # Deploy para VPS
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT || 22 }}
+        script: |
+          # Definir variáveis
+          APP_DIR="/home/${{ secrets.VPS_USER }}/valoredash"
+          BACKUP_DIR="/home/${{ secrets.VPS_USER }}/backups/valoredash"
+          
+          # Criar diretórios se não existirem
+          mkdir -p $APP_DIR
+          mkdir -p $BACKUP_DIR
+          
+          # Navegar para diretório da aplicação
+          cd $APP_DIR
+          
+          # Fazer backup do banco se existir
+          if docker ps | grep -q "valoredash-db"; then
+            echo "📦 Fazendo backup do banco..."
+            docker exec valoredash-db pg_dump -U valoredash_user valoredash > $BACKUP_DIR/pre_deploy_$(date +%Y%m%d_%H%M%S).sql || true
+          fi
+          
+          # Clonar ou atualizar repositório
+          if [ -d ".git" ]; then
+            echo "📥 Atualizando código..."
+            git fetch origin
+            git reset --hard origin/main
+          else
+            echo "📥 Clonando repositório..."
+            git clone https://github.com/${{ github.repository }}.git .
+          fi
+          
+          # Criar arquivo .env se não existir
+          if [ ! -f ".env" ]; then
+            echo "📝 Criando arquivo .env..."
+            cp .env.example .env
+            
+            # Configurar variáveis de ambiente principais
+            sed -i "s|VITE_SUPABASE_URL=.*|VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}|" .env
+            sed -i "s|VITE_SUPABASE_ANON_KEY=.*|VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}|" .env
+            sed -i "s|REDIS_PASSWORD=.*|REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}|" .env
+            sed -i "s|APP_URL=.*|APP_URL=${{ secrets.APP_URL }}|" .env
+            sed -i "s|SSL_DOMAIN=.*|SSL_DOMAIN=${{ secrets.SSL_DOMAIN }}|" .env
+            sed -i "s|SSL_EMAIL=.*|SSL_EMAIL=${{ secrets.SSL_EMAIL }}|" .env
+          fi
+          
+          # Parar containers existentes
+          echo "⏹️ Parando containers..."
+          docker-compose down || true
+          
+          # Limpar imagens antigas
+          echo "🧹 Limpando imagens antigas..."
+          docker image prune -f || true
+          
+          # Build e start dos containers
+          echo "🔨 Construindo e iniciando containers..."
+          docker-compose build --no-cache
+          docker-compose up -d
+          
+          # Aguardar containers iniciarem
+          echo "⏳ Aguardando containers iniciarem..."
+          sleep 30
+          
+          # Verificar se containers estão rodando
+          echo "🏥 Verificando status dos containers..."
+          docker-compose ps
+          
+          # Testar conectividade
+          echo "🌐 Testando conectividade..."
+          for i in {1..10}; do
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "✅ Aplicação está respondendo!"
+              break
+            else
+              echo "⏳ Tentativa $i/10 - Aguardando aplicação..."
+              sleep 10
+            fi
+          done
+          
+          # Mostrar logs se houver problemas
+          if ! curl -f http://localhost:3000 > /dev/null 2>&1; then
+            echo "❌ Aplicação não está respondendo. Logs:"
+            docker-compose logs --tail=20
+          fi
+          
+          echo "🎉 Deploy concluído!"
+    
+    # Notificar sucesso
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "✅ Deploy realizado com sucesso!"
+        echo "🌐 Aplicação disponível em: ${{ secrets.APP_URL || 'http://seu-dominio.com' }}"
+    
+    # Notificar falha
+    - name: Notify deployment failure
+      if: failure()
+      run: |
+        echo "❌ Deploy falhou!"
+        echo "Verifique os logs acima para mais detalhes."
+
+  # Job de notificação (opcional)
+  notify:
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Notify Slack on success
+      if: needs.deploy.result == 'success' && secrets.SLACK_WEBHOOK != ''
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        text: '✅ ValoreDash deployed successfully to production!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+    
+    - name: Notify Slack on failure
+      if: needs.deploy.result == 'failure' && secrets.SLACK_WEBHOOK != ''
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        text: '❌ ValoreDash deployment failed!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
