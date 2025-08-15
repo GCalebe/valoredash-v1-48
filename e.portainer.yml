@@ -1,0 +1,5 @@
+[33m5741a32[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Refatoração do Dockerfile para utilizar usuário 'nginx' em vez de 'nextjs' e ajustar permissões de diretórios. Isso melhora a segurança e a organização do ambiente de execução do Nginx.
+[33mdd184e9[m update compose
+[33m75ffd12[m fix: Corrigir Dockerfile para copiar package-lock.json explicitamente e simplificar .dockerignore
+[33m9fb9736[m up compose
+[33m19312d1[m Atualiza configurações do Docker Compose e ajusta .dockerignore
