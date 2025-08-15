@@ -14,7 +14,7 @@ services:
         git clone https://github.com/GCalebe/valoredash-v1-48.git &&
         cd valoredash-v1-48 &&
         npm ci &&
-        npm run build &&
+        npx vite build &&
         cp -r dist/* /usr/local/apache2/htdocs/ &&
         echo 'LoadModule rewrite_module modules/mod_rewrite.so' >> /usr/local/apache2/conf/httpd.conf &&
         echo 'RewriteEngine On' >> /usr/local/apache2/conf/httpd.conf &&
