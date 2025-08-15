@@ -14,7 +14,7 @@ services:
         git clone https://github.com/GCalebe/valoredash-v1-48.git /tmp/source &&
         cp -r /tmp/source/* /app/ &&
         cp -r /tmp/source/.* /app/ 2>/dev/null || true &&
-        npm ci &&
+        npm ci --include=dev &&
         npm run build &&
         echo 'Build completed successfully!' &&
         ls -la dist/
