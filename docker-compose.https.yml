@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Aplicação principal
+  valoredash-app:
+    image: gabrielk1/valoredash:latest
+    container_name: valoredash-app
+    expose:
+      - "80"
+    environment:
+      - NODE_ENV=production
+      - VITE_SUPABASE_URL=https://nkyvhwmjuksumizljclc.supabase.co
+      - VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5reXZod21qdWtzdW1pemxqY2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1ODI4NzIsImV4cCI6MjA2NTE1ODg3Mn0.JYAUGHTbf9KVPCYFN9IDCm2uRT85cEj9G7llkOcrBEk
+    networks:
+      - valoredash-network
+
+  # Nginx reverso proxy
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    depends_on:
+      - valoredash-app
+    networks:
+      - valoredash-network
+
+  # Certbot para SSL
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    command: certonly --webroot --webroot-path=/var/www/html --email admin@comercial247.com.br --agree-tos --no-eff-email -d comercial247.com.br -d www.comercial247.com.br
+    depends_on:
+      - nginx-proxy
+    networks:
+      - valoredash-network
+
+volumes:
+  certbot-etc:
+  certbot-var:
+
+networks:
+  valoredash-network:
+    driver: bridge
