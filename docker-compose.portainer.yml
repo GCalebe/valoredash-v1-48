@@ -5,7 +5,6 @@ services:
     build:
       context: https://github.com/GCalebe/valoredash-v1-48.git#main
       dockerfile: Dockerfile
-    container_name: valoredash-frontend
     ports:
       - "3000:80"
     environment:
@@ -13,8 +12,6 @@ services:
       - VITE_SUPABASE_URL=https://nkyvhwmjuksumizljclc.supabase.co
       - VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5reXZod21qdWtzdW1pemxqY2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1ODI4NzIsImV4cCI6MjA2NTE1ODg3Mn0.JYAUGHTbf9KVPCYFN9IDCm2uRT85cEj9G7llkOcrBEk
     restart: unless-stopped
-    networks:
-      - valoredash-network
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     logging:
@@ -28,12 +25,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-networks:
-  valoredash-network:
-    driver: bridge
-    labels:
-      - "com.valoredash.network=main"
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16

@@ -21,6 +21,8 @@ Os arquivos foram corrigidos e otimizados:
 - Removido Nginx Proxy Manager (desnecessário)
 - Simplificado para apenas a aplicação
 - Health check corrigido
+- **CORRIGIDO:** Removida configuração de rede que causava conflito
+- **CORRIGIDO:** Removido container_name (não suportado no Portainer)
 
 ### ✅ **nginx.conf**
 - Configuração simplificada para SPA React
@@ -76,7 +78,7 @@ Se você já tem o Nginx Proxy Manager rodando:
 4. Configure:
    - **Domain Names**: `valoredash.comercial247.com.br`
    - **Scheme**: `http`
-   - **Forward Hostname/IP**: `valoredash-frontend`
+   - **Forward Hostname/IP**: `valoredash-app` (nome do serviço)
    - **Forward Port**: `80`
    - **SSL**: Ative e configure certificado
 
@@ -95,7 +97,7 @@ docker ps | grep valoredash
 ### 2. **Verificar Logs**
 ```bash
 # Via SSH na VPS
-docker logs valoredash-frontend
+docker logs valoredash-app
 ```
 
 ### 3. **Health Check**
@@ -103,6 +105,11 @@ Acesse: `http://31.97.26.252:3000/health`
 Deve retornar: `healthy`
 
 ## 🛠️ Troubleshooting
+
+### **Erro de Rede (RESOLVIDO)**
+- ❌ **Problema:** `Pool overlaps with other one on this address space`
+- ✅ **Solução:** Removida configuração de subnet específica
+- ✅ **Resultado:** Docker gerencia automaticamente a rede
 
 ### **Erro de Build**
 - Verifique se o repositório está público
@@ -122,12 +129,12 @@ Deve retornar: `healthy`
 ## 📊 Monitoramento
 
 ### **Logs no Portainer**
-1. Vá em **Containers** → `valoredash-frontend`
+1. Vá em **Containers** → `valoredash-app`
 2. Clique em **Logs**
 3. Monitore erros e performance
 
 ### **Métricas**
-1. Vá em **Containers** → `valoredash-frontend`
+1. Vá em **Containers** → `valoredash-app`
 2. Clique em **Stats**
 3. Monitore CPU, memória e rede
 
