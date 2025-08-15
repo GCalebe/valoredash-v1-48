@@ -31,7 +31,7 @@ FROM nginx:alpine AS production
 RUN apk add --no-cache curl
 
 # Remover configuração padrão do nginx
-RUN rm /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx/conf.d/default.conf
 
 # Copiar configuração customizada do nginx
 COPY nginx.conf /etc/nginx/nginx.conf
@@ -39,12 +39,16 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Copiar arquivos buildados do stage anterior
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Criar diretórios necessários
+# Criar diretórios necessários e ajustar permissões
 RUN mkdir -p /var/cache/nginx/client_temp && \
     mkdir -p /var/cache/nginx/proxy_temp && \
     mkdir -p /var/cache/nginx/fastcgi_temp && \
     mkdir -p /var/cache/nginx/uwsgi_temp && \
-    mkdir -p /var/cache/nginx/scgi_temp
+    mkdir -p /var/cache/nginx/scgi_temp && \
+    mkdir -p /var/run && \
+    chmod 755 /var/run && \
+    chmod 755 /var/cache/nginx && \
+    chmod 755 /var/log/nginx
 
 # Expor porta
 EXPOSE 80
