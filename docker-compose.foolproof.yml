@@ -10,7 +10,10 @@ services:
     command: >
       sh -c "
         apk add --no-cache git &&
-        git clone https://github.com/GCalebe/valoredash-v1-48.git . &&
+        rm -rf /app/* /app/.* 2>/dev/null || true &&
+        git clone https://github.com/GCalebe/valoredash-v1-48.git /tmp/source &&
+        cp -r /tmp/source/* /app/ &&
+        cp -r /tmp/source/.* /app/ 2>/dev/null || true &&
         npm ci &&
         npm run build &&
         echo 'Build completed successfully!' &&
