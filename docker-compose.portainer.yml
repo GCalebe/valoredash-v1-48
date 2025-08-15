@@ -3,7 +3,7 @@ version: '3.8'
 services:
   valoredash-app:
     build:
-      context: https://github.com/GCalebe/valoredash-v1-48.git#main
+      context: .
       dockerfile: Dockerfile
     ports:
       - "3000:80"

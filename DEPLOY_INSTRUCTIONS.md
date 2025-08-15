@@ -23,6 +23,7 @@ Os arquivos foram corrigidos e otimizados:
 - Health check corrigido
 - **CORRIGIDO:** Removida configuração de rede que causava conflito
 - **CORRIGIDO:** Removido container_name (não suportado no Portainer)
+- **CORRIGIDO:** Build context corrigido para `.` (diretório local)
 
 ### ✅ **nginx.conf**
 - Configuração simplificada para SPA React
@@ -105,6 +106,12 @@ Acesse: `http://31.97.26.252:3000/health`
 Deve retornar: `healthy`
 
 ## 🛠️ Troubleshooting
+
+### **Erro de Build Context (RESOLVIDO)**
+- ❌ **Problema:** `invalid reference format`
+- ❌ **Causa:** `build.context` usando URL do Git em vez de diretório local
+- ✅ **Solução:** Alterado para `context: .` (diretório local)
+- ✅ **Resultado:** Portainer pode fazer build corretamente
 
 ### **Erro de Rede (RESOLVIDO)**
 - ❌ **Problema:** `Pool overlaps with other one on this address space`
