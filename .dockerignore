@@ -175,8 +175,7 @@ storybook-static
 .travis.yml
 circle.yml
 
-# Package managers
-package-lock.json
+# Package managers (REMOVIDO: package-lock.json é necessário para npm ci)
 yarn.lock
 pnpm-lock.yaml
 
