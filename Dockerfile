@@ -9,8 +9,11 @@ RUN apk add --no-cache git
 # Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos de dependências primeiro (para cache otimizado)
-COPY package*.json ./
+# Copiar package.json primeiro
+COPY package.json ./
+
+# Copiar package-lock.json explicitamente
+COPY package-lock.json ./
 
 # Instalar dependências
 RUN npm ci

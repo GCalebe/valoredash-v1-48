@@ -1,4 +1,4 @@
-# Dependências
+# Dependências (não copiar node_modules, mas manter package-lock.json)
 node_modules
 npm-debug.log*
 yarn-debug.log*
@@ -18,6 +18,30 @@ out
 .env.test.local
 .env.production.local
 
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+README-DEPLOY.md
+DEPLOYMENT_GUIDE.md
+*.md
+
+# Docker files (não copiar outros dockerfiles)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Scripts
+deploy.sh
+*.sh
+
+# Logs
+logs
+*.log
+
 # IDE files
 .vscode
 .idea
@@ -34,103 +58,6 @@ out
 ehthumbs.db
 Thumbs.db
 
-# Git
-.git
-.gitignore
-.gitattributes
-
-# Documentation
-README.md
-README-DEPLOY.md
-DEPLOYMENT_GUIDE.md
-*.md
-
-# Docker files
-Dockerfile*
-docker-compose*.yml
-.dockerignore
-
-# Scripts
-deploy.sh
-*.sh
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# Dependency directories
-jspm_packages/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# next.js build output
-.next
-
-# nuxt.js build output
-.nuxt
-
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# Temporary folders
-tmp/
-temp/
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
 # Testing
 __tests__
 *.test.js
@@ -141,33 +68,22 @@ __tests__
 *.spec.tsx
 jest.config.*
 
-# Storybook
-.storybook
-storybook-static
+# Coverage
+coverage
+*.lcov
+.nyc_output
 
-# Backup files
-*.backup
-*.bak
-*.tmp
+# Cache
+.cache
+.parcel-cache
+.sass-cache/
+.connect.lock
+.typings/
+.tsbuildinfo
 
-# Database
-*.sqlite
-*.db
-
-# Certificates
-*.pem
-*.key
-*.crt
-
-# Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
-
-# Kubernetes
-*.yaml
-*.yml
-!docker-compose.yml
+# Temporary folders
+tmp/
+temp/
 
 # CI/CD
 .github/
@@ -175,12 +91,15 @@ storybook-static
 .travis.yml
 circle.yml
 
-# Package managers (REMOVIDO: package-lock.json é necessário para npm ci)
+# Package managers (manter apenas package-lock.json, excluir outros)
 yarn.lock
 pnpm-lock.yaml
 
 # Misc
-.sass-cache/
-.connect.lock
-.typings/
-.tsbuildinfo
+.serverless
+.fusebox/
+.dynamodb/
+.tern-port
+.vscode-test
+.storybook
+storybook-static
