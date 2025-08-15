@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  valoredash-app:
+    image: httpd:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - app_files:/usr/local/apache2/htdocs
+    command: >
+      sh -c "
+        apk add --no-cache curl git nodejs npm &&
+        cd /tmp &&
+        git clone https://github.com/GCalebe/valoredash-v1-48.git &&
+        cd valoredash-v1-48 &&
+        npm ci &&
+        npm run build &&
+        cp -r dist/* /usr/local/apache2/htdocs/ &&
+        echo 'LoadModule rewrite_module modules/mod_rewrite.so' >> /usr/local/apache2/conf/httpd.conf &&
+        echo 'RewriteEngine On' >> /usr/local/apache2/conf/httpd.conf &&
+        echo 'RewriteCond %{REQUEST_FILENAME} !-f' >> /usr/local/apache2/conf/httpd.conf &&
+        echo 'RewriteCond %{REQUEST_FILENAME} !-d' >> /usr/local/apache2/conf/httpd.conf &&
+        echo 'RewriteRule . /index.html [L]' >> /usr/local/apache2/conf/httpd.conf &&
+        httpd-foreground
+      "
+    environment:
+      - NODE_ENV=production
+      - VITE_SUPABASE_URL=https://nkyvhwmjuksumizljclc.supabase.co
+      - VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5reXZod21qdWtzdW1pemxqY2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1ODI4NzIsImV4cCI6MjA2NTE1ODg3Mn0.JYAUGHTbf9KVPCYFN9IDCm2uRT85cEj9G7llkOcrBEk
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+volumes:
+  app_files:
