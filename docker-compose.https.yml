@@ -4,25 +4,24 @@ services:
   # Aplicação principal
   valoredash-app:
     image: gabrielk1/valoredash:latest
-    container_name: valoredash-app
-    expose:
-      - "80"
     environment:
       - NODE_ENV=production
       - VITE_SUPABASE_URL=https://nkyvhwmjuksumizljclc.supabase.co
       - VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5reXZod21qdWtzdW1pemxqY2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1ODI4NzIsImV4cCI6MjA2NTE1ODg3Mn0.JYAUGHTbf9KVPCYFN9IDCm2uRT85cEj9G7llkOcrBEk
     networks:
       - valoredash-network
+    deploy:
+      restart_policy:
+        condition: on-failure
 
   # Nginx reverso proxy
   nginx-proxy:
     image: nginx:alpine
-    container_name: nginx-proxy
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx-https.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
@@ -30,11 +29,13 @@ services:
       - valoredash-app
     networks:
       - valoredash-network
+    deploy:
+      restart_policy:
+        condition: on-failure
 
   # Certbot para SSL
   certbot:
     image: certbot/certbot
-    container_name: certbot
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
@@ -43,6 +44,9 @@ services:
       - nginx-proxy
     networks:
       - valoredash-network
+    deploy:
+      restart_policy:
+        condition: on-failure
 
 volumes:
   certbot-etc:
@@ -50,4 +54,5 @@ volumes:
 
 networks:
   valoredash-network:
-    driver: bridge
+    driver: overlay
+    attachable: true
